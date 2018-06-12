@@ -1,0 +1,25 @@
+{
+  "name": "ara-filesystem",
+  "version": "1.0.0",
+  "description": "The Ara FileSystem, isolated and secure file systems backed by Ara identities.",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AraBlocks/ara-filesystem.git"
+  },
+  "keywords": [
+    "ara",
+    "filesystem",
+    "decentralized",
+    "distributed"
+  ],
+  "author": "Charles Kelly <charles@littlstar.com>",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/AraBlocks/ara-filesystem/issues"
+  },
+  "homepage": "https://github.com/AraBlocks/ara-filesystem#readme"
+}
