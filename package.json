@@ -25,6 +25,7 @@
   "homepage": "https://github.com/AraBlocks/ara-filesystem#readme",
   "devDependencies": {
     "eslint": "^4.19.1",
-    "eslint-config-littlstar": "github:littlstar/eslint-config-littlstar"
+    "eslint-config-ara": "github:arablocks/styleguide",
+    "eslint-plugin-import": "^2.12.0"
   }
 }
