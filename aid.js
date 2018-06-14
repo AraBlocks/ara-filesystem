@@ -33,7 +33,6 @@ async function archive(identity, opts) {
  */
 async function resolve(did, opts = {}) {
 
-  // ensure properly formatted DID
   const prefix = did.substring(0, kDIDPrefix.length)
   if (prefix != kDIDPrefix) {
     did = kDIDPrefix + did
@@ -64,7 +63,6 @@ async function getLocalIdentity({dir, identities, index = 0} = {}) {
     index = Math.min(index, identities.length - 1)
   }
 
-  // get local identity based on index
   const ddoPath = path.join(dir, identities[index], kDDOFilename)
   let buffer
   try {
@@ -74,7 +72,7 @@ async function getLocalIdentity({dir, identities, index = 0} = {}) {
   return buffer ? JSON.parse(buffer.toString()).id : {}
 }
 
-async function applyAuthentication(src, dst) {
+async function applyAuthentication(srcDdo, dstDdo) {
   debug('applying authentication...')
 }
 

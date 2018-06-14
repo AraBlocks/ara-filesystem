@@ -24,7 +24,6 @@ const kIdentitiesDir = path.join(kRootDir, '.ara', 'identities')
 async function create(did = '') {
 
   if (!did) {
-    // check for local identities
     try {
       await pify(fs.access)(kIdentitiesDir)
       const identities = await pify(fs.readdir)(kIdentitiesDir)
@@ -36,23 +35,19 @@ async function create(did = '') {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
-  // resolve owner ddo
-  const owner = await aid.resolve(did)
-
-  // generate AFS identity
+  const ownerDdo = await aid.resolve(did)
+  debug(ownerDdo)
   const identity = await aid.create()
 
-  // archive AFS identity
   let keystore = (await loadSecrets(kArchiverKey)).keystore
   await aid.archive(identity, { key: kArchiverKey, keystore })
 
-  // resolve AFS identity
   keystore = (await loadSecrets(kResolverKey)).keystore
   const { publicKey, secretKey } = identity
   const afsDid = publicKey.toString('hex')
-  const ddo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
+  const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
+  debug(afsDdo)
 
-  // generate AFS seed
   const seed = blake2b(secretKey)
   const kp = keyPair(seed)
   const id = toHex(kp.publicKey)
@@ -60,10 +55,10 @@ async function create(did = '') {
   let afs
   try {
     // create AFS using identity as keypair
-    afs = await createCFS({ id, key: kp.publicKey, kp.secretKey })
+    afs = await createCFS({ id, key: kp.publicKey, secretKey: kp.secretKey })
   } catch (err) { debug(err.stack || err) }
 
-  // TODO(cckelly): apply AFS owner via Authentication DDO property
+  // TODO(cckelly): apply auth
 
   // clear buffers
   kp.publicKey.fill(0)

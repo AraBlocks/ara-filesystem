@@ -4,7 +4,7 @@ const { create } = require('./create')
 
 // TODO(cckelly): remove once functional
 void async function main() {
-  await create('2b2cf2b6a46e13a5af9aae714d3755b64cf0f0f9e12e5123c2944bd9d316d397')
+  await create('9a20b1d84fd7671a2fa480d73acdade124f2c16b4f9934875cb7d6c78ff91bf0')
 }()
 
 module.exports = {

@@ -6,6 +6,7 @@
   "scripts": {
     "test": ":",
     "lint": "eslint .",
+    "lint-fix": "eslint . --fix",
     "start": "node ."
   },
   "repository": {
@@ -37,7 +38,7 @@
   },
   "devDependencies": {
     "eslint": "^4.19.1",
-    "eslint-config-ara": "github:arablocks/styleguide",
+    "eslint-config-ara": "github:arablocks/eslint-config-ara",
     "eslint-plugin-import": "^2.12.0"
   }
 }
