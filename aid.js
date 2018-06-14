@@ -7,6 +7,7 @@ const aid = require('ara-identity')
 const pify = require('pify')
 
 const kDDOFilename = 'ddo.json'
+const kDIDPrefix = 'did:ara:'
 
 /**
  * Resolve an Ara identity
@@ -14,7 +15,18 @@ const kDDOFilename = 'ddo.json'
  * @return {Promise}
  */
 async function resolve(did) {
-  return await aid.resolve(did, { cache: true })
+
+  // ensure properly formatted DID
+  const prefix = did.substring(0, kDIDPrefix.length)
+  if (prefix != kDIDPrefix) {
+    did = kDIDPrefix + did
+  }
+
+  let result
+  try {
+    result = await aid.resolve(did, { cache: true })
+  } catch (err) { debug(err.stack || err) }
+  return result
 }
 
 /**

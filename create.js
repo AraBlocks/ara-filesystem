@@ -21,9 +21,7 @@ async function create(did = '') {
       await pify(fs.access)(kIdentitiesDir)
       const identities = await pify(fs.readdir)(kIdentitiesDir)
       did = await aid.getLocalIdentity({ dir: kIdentitiesDir, identities })
-    } catch (err) {
-      debug(err.stack || err) 
-    }
+    } catch (err) { debug(err.stack || err) }
   }
 
   if ('string' != typeof did) {
@@ -31,6 +29,7 @@ async function create(did = '') {
   }
 
   const result = await aid.resolve(did)
+  debug(result)
 
 }
 
