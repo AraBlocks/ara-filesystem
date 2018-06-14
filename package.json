@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": ":",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start": "node ."
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,11 @@
     "url": "https://github.com/AraBlocks/ara-filesystem/issues"
   },
   "homepage": "https://github.com/AraBlocks/ara-filesystem#readme",
+  "dependencies": {
+    "debug": "^3.1.0",
+    "pify": "^3.0.0",
+    "ara-identity": "github:arablocks/ara-identity"
+  },
   "devDependencies": {
     "eslint": "^4.19.1",
     "eslint-config-ara": "github:arablocks/styleguide",
