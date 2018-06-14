@@ -1,12 +1,20 @@
 'use strict'
 
 const debug = require('debug')('ara-filesystem:create')
+const { blake2b, keyPair } = require('ara-crypto')
+const { createCFS } = require('cfsnet/create')
+const { toHex } = require('ara-identity/util')
+const { secrets } = require('ara-network')
 const fs = require('fs')
 const aid = require('./aid')
 const path = require('path')
 const pify = require('pify')
+const os = require('os')
 
-const kIdentitiesDir = path.join(require('os').homedir(), '.ara', 'identities')
+const kArchiverKey = 'archiver'
+const kResolverKey = 'resolver'
+const kRootDir = os.homedir()
+const kIdentitiesDir = path.join(kRootDir, '.ara', 'identities')
 
 /**
  * Creates an AFS with the given Ara identity
@@ -28,9 +36,44 @@ async function create(did = '') {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
-  const result = await aid.resolve(did)
-  debug(result)
+  // resolve owner ddo
+  const owner = await aid.resolve(did)
 
+  // generate AFS identity
+  const identity = await aid.create()
+
+  // archive AFS identity
+  let keystore = (await loadSecrets(kArchiverKey)).keystore
+  await aid.archive(identity, { key: kArchiverKey, keystore })
+
+  // resolve AFS identity
+  keystore = (await loadSecrets(kResolverKey)).keystore
+  const { publicKey, secretKey } = identity
+  const afsDid = publicKey.toString('hex')
+  const ddo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
+
+  // generate AFS seed
+  const seed = blake2b(secretKey)
+  const kp = keyPair(seed)
+  const id = toHex(kp.publicKey)
+
+  let afs
+  try {
+    // create AFS using identity as keypair
+    afs = await createCFS({ id, key: kp.publicKey, kp.secretKey })
+  } catch (err) { debug(err.stack || err) }
+
+  // TODO(cckelly): apply AFS owner via Authentication DDO property
+
+  // clear buffers
+  kp.publicKey.fill(0)
+  kp.secretKey.fill(0)
+
+}
+
+async function loadSecrets(key) {
+  const doc = await secrets.load({ key, public: true })
+  return doc.public
 }
 
 module.exports = {

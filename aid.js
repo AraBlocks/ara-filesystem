@@ -5,16 +5,33 @@ const path = require('path')
 const fs = require('fs')
 const aid = require('ara-identity')
 const pify = require('pify')
+const crypto = require('ara-crypto')
+const context = require('ara-context')()
+const { DIDDocument, Authentication } = require('did-document')
 
 const kDDOFilename = 'ddo.json'
 const kDIDPrefix = 'did:ara:'
+
+async function create() {
+  const password = crypto.randomBytes(32).toString()
+  let identity
+  try {
+    identity = await aid.create({ context, password })
+  } catch (err) { debug(err.stack || err) }
+  return identity
+}
+
+async function archive(identity, opts) {
+  try { await aid.archive(identity, opts) }
+  catch (err) { debug(err.stack || err) }
+}
 
 /**
  * Resolve an Ara identity
  * @param  {string} did
  * @return {Promise}
  */
-async function resolve(did) {
+async function resolve(did, opts = {}) {
 
   // ensure properly formatted DID
   const prefix = did.substring(0, kDIDPrefix.length)
@@ -22,10 +39,15 @@ async function resolve(did) {
     did = kDIDPrefix + did
   }
 
+  if (!opts.cache) {
+    opts = Object.assign(opts, { cache: true })
+  }
+
   let result
   try {
-    result = await aid.resolve(did, { cache: true })
+    result = await aid.resolve(did, opts)
   } catch (err) { debug(err.stack || err) }
+
   return result
 }
 
@@ -52,7 +74,13 @@ async function getLocalIdentity({dir, identities, index = 0} = {}) {
   return buffer ? JSON.parse(buffer.toString()).id : {}
 }
 
+async function applyAuthentication(src, dst) {
+  debug('applying authentication...')
+}
+
 module.exports = {
+  archive,
+  create,
   resolve,
   getLocalIdentity
 }
