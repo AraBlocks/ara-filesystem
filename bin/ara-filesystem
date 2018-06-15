@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+
+const debug = require('debug')('ara-filesystem')
+const { info, warn, error } = require('ara-console')
+const { basename } = require('path')
+const program = require('yargs')
+const afs = require('../')
+
+const $0 = basename(process.argv[1] || package.name)
+
+process.on('unhandledRejection', onfatal)
+process.on('uncaughtExeption', onfatal)
+
+const { argv } = program
+  .usage("usage: $0 [-hDV] [options] <command> [options]")
+  .option('debug', {
+    type: 'boolean',
+    alias: 'D',
+    describe: "Enable debug output"
+  })
+  .option('help', {
+    alias: 'h',
+    describe: "Show this help message"
+  })
+  .option('version', {
+    alias: 'V',
+    describe: "Show program version"
+  })
+  .command('create [did]', "Create AFS with given identity", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An ARA decentralized identity (did) URI"
+      })
+  }, oncreate)
+
+async function oncreate({did}) {
+  if (null == did) {
+    onfatal(new Error("Expecting DID URI."))
+  }
+
+  if (0 == did.indexOf('did:') && 0 != did.indexOf('did:ara:')) {
+    onfatal(new Error("Expecting a did URI with an 'ara' method."))
+  }
+
+  if (0 != did.indexOf('did:ara:')) {
+    did = 'did:ara:' + did
+  }
+
+  try {
+    await afs.create(did)
+  } catch (err) { onfatal(err) }
+}
+
+function onfatal(err) {
+  debug(err)
+  error("fatal:", err.message)
+  process.exit(1)
+}
