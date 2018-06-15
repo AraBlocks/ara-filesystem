@@ -8,6 +8,10 @@ const kDIDPrefix = 'did:ara:'
 const kKeyOwner = '#owner'
 
 async function create(publicKey) {
+  if (null == publicKey || 32 !== publicKey.length || 'string' !== typeof publicKey) {
+    throw new Error('ara-filesystem.aid: Expecting 32 char non-empty string.')
+  }
+
   const password = crypto.randomBytes(32).toString()
   let identity
   try {

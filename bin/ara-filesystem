@@ -50,6 +50,8 @@ async function oncreate({did}) {
   try {
     await afs.create(did)
   } catch (err) { onfatal(err) }
+
+  info('AFS for', did, 'created')
 }
 
 function onfatal(err) {
