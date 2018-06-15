@@ -27,7 +27,7 @@ async function create(did) {
   keystore = await loadSecrets(kResolverKey)
   const { publicKey, secretKey } = identity
   const afsDid = publicKey.toString('hex')
-  await aid.resolve(afsDid, { key: kResolverKey, keystore })
+  const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
   const seed = blake2b(secretKey)
   const kp = keyPair(seed)
@@ -43,7 +43,7 @@ async function create(did) {
   kp.publicKey.fill(0)
   kp.secretKey.fill(0)
 
-  debug('AFS created with DID', afsDid)
+  afs.ddo = afsDdo
 
   return afs
 }
