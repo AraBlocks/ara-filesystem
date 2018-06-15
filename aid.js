@@ -20,7 +20,6 @@ async function create(publicKey) {
   try {
     publicKey += kKeyOwner
     const did = { authentication: { type: kAuthType, publicKey } }
-    debug(did)
     identity = await aid.create({ context, password, did })
   } catch (err) { debug(err.stack || err) }
   return identity

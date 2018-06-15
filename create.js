@@ -36,7 +36,6 @@ async function create(did = '') {
   }
 
   const ownerDdo = await aid.resolve(did)
-  debug(ownerDdo)
   const identity = await aid.create(did)
 
   let keystore = (await loadSecrets(kArchiverKey)).keystore
@@ -46,7 +45,6 @@ async function create(did = '') {
   const { publicKey, secretKey } = identity
   const afsDid = publicKey.toString('hex')
   const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
-  debug(afsDdo)
 
   const seed = blake2b(secretKey)
   const kp = keyPair(seed)
