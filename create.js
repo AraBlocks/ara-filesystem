@@ -18,6 +18,7 @@ async function create(did) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
+// TODO (mahjiang): ensure ownership of DID
   await aid.resolve(did)
   const identity = await aid.create(did)
 
