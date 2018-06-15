@@ -1,18 +1,11 @@
-'use strict'
-
 const debug = require('debug')('ara-filesystem:aid')
-const path = require('path')
-const fs = require('fs')
 const aid = require('ara-identity')
-const pify = require('pify')
 const crypto = require('ara-crypto')
 const context = require('ara-context')()
-const { DIDDocument, Authentication } = require('did-document')
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 
-const kDDOFilename = 'ddo.json'
 const kDIDPrefix = 'did:ara:'
-const kKeyOwner = '#owner' // TODO: Support many keys
+const kKeyOwner = '#owner'
 
 async function create(publicKey) {
   const password = crypto.randomBytes(32).toString()
@@ -26,8 +19,9 @@ async function create(publicKey) {
 }
 
 async function archive(identity, opts) {
-  try { await aid.archive(identity, opts) }
-  catch (err) { debug(err.stack || err) }
+  try {
+    await aid.archive(identity, opts)
+  } catch (err) { debug(err.stack || err) }
 }
 
 /**
@@ -36,9 +30,8 @@ async function archive(identity, opts) {
  * @return {Promise}
  */
 async function resolve(did, opts = {}) {
-
   const prefix = did.substring(0, kDIDPrefix.length)
-  if (prefix != kDIDPrefix) {
+  if (prefix !== kDIDPrefix) {
     did = kDIDPrefix + did
   }
 

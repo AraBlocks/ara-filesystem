@@ -1,20 +1,12 @@
-'use strict'
-
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createCFS } = require('cfsnet/create')
 const { toHex } = require('ara-identity/util')
 const { secrets } = require('ara-network')
-const fs = require('fs')
 const aid = require('./aid')
-const path = require('path')
-const pify = require('pify')
-const os = require('os')
 
 const kArchiverKey = 'archiver'
 const kResolverKey = 'resolver'
-const kRootDir = os.homedir()
-const kIdentitiesDir = path.join(kRootDir, '.ara', 'identities')
 
 /**
  * Creates an AFS with the given Ara identity
@@ -22,21 +14,20 @@ const kIdentitiesDir = path.join(kRootDir, '.ara', 'identities')
  * @return {Promise}
  */
 async function create(did) {
-
-  if (null == did || 'string' != typeof did) {
+  if (null == did || 'string' !== typeof did) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
-  const ownerDdo = await aid.resolve(did)
+  await aid.resolve(did)
   const identity = await aid.create(did)
 
-  let keystore = (await loadSecrets(kArchiverKey)).keystore
+  let keystore = await loadSecrets(kArchiverKey)
   await aid.archive(identity, { key: kArchiverKey, keystore })
 
-  keystore = (await loadSecrets(kResolverKey)).keystore
+  keystore = await loadSecrets(kResolverKey)
   const { publicKey, secretKey } = identity
   const afsDid = publicKey.toString('hex')
-  const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
+  await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
   const seed = blake2b(secretKey)
   const kp = keyPair(seed)
@@ -55,12 +46,11 @@ async function create(did) {
   debug('AFS created with DID', afsDid)
 
   return afs
-
 }
 
 async function loadSecrets(key) {
-  const doc = await secrets.load({ key, public: true })
-  return doc.public
+  const { public: pub } = await secrets.load({ key, public: true })
+  return pub.keystore
 }
 
 module.exports = {
