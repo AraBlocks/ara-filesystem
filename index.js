@@ -1,1 +1,5 @@
-console.log('Hello AFS!')
+const { create } = require('./create')
+
+module.exports = {
+  create
+}
