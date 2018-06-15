@@ -8,10 +8,10 @@ const pify = require('pify')
 const crypto = require('ara-crypto')
 const context = require('ara-context')()
 const { DIDDocument, Authentication } = require('did-document')
+const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 
 const kDDOFilename = 'ddo.json'
 const kDIDPrefix = 'did:ara:'
-const kAuthType = 'Ed25519VerificationKey2018'
 const kKeyOwner = '#owner' // TODO: Support many keys
 
 async function create(publicKey) {
@@ -19,7 +19,7 @@ async function create(publicKey) {
   let identity
   try {
     publicKey += kKeyOwner
-    const did = { authentication: { type: kAuthType, publicKey } }
+    const did = { authentication: { type: kEd25519VerificationKey2018, publicKey } }
     identity = await aid.create({ context, password, did })
   } catch (err) { debug(err.stack || err) }
   return identity
