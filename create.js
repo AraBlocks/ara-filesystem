@@ -21,17 +21,9 @@ const kIdentitiesDir = path.join(kRootDir, '.ara', 'identities')
  * @param  {string} did
  * @return {Promise}
  */
-async function create(did = '') {
+async function create(did) {
 
-  if (!did) {
-    try {
-      await pify(fs.access)(kIdentitiesDir)
-      const identities = await pify(fs.readdir)(kIdentitiesDir)
-      did = await aid.getLocalIdentity({ dir: kIdentitiesDir, identities })
-    } catch (err) { debug(err.stack || err) }
-  }
-
-  if ('string' != typeof did) {
+  if (null == did || 'string' != typeof did) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
@@ -59,6 +51,8 @@ async function create(did = '') {
   // clear buffers
   kp.publicKey.fill(0)
   kp.secretKey.fill(0)
+
+  debug('AFS created with DID', afsDid)
 
   return afs
 
