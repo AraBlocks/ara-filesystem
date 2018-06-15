@@ -37,7 +37,7 @@ async function create(did = '') {
 
   const ownerDdo = await aid.resolve(did)
   debug(ownerDdo)
-  const identity = await aid.create()
+  const identity = await aid.create(did)
 
   let keystore = (await loadSecrets(kArchiverKey)).keystore
   await aid.archive(identity, { key: kArchiverKey, keystore })
@@ -57,8 +57,6 @@ async function create(did = '') {
     // create AFS using identity as keypair
     afs = await createCFS({ id, key: kp.publicKey, secretKey: kp.secretKey })
   } catch (err) { debug(err.stack || err) }
-
-  // TODO(cckelly): apply auth
 
   // clear buffers
   kp.publicKey.fill(0)

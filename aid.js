@@ -11,12 +11,17 @@ const { DIDDocument, Authentication } = require('did-document')
 
 const kDDOFilename = 'ddo.json'
 const kDIDPrefix = 'did:ara:'
+const kAuthType = 'Ed25519VerificationKey2018'
+const kKeyOwner = '#owner' // TODO: Support many keys
 
-async function create() {
+async function create(publicKey) {
   const password = crypto.randomBytes(32).toString()
   let identity
   try {
-    identity = await aid.create({ context, password })
+    publicKey += kKeyOwner
+    const did = { authentication: { type: kAuthType, publicKey } }
+    debug(did)
+    identity = await aid.create({ context, password, did })
   } catch (err) { debug(err.stack || err) }
   return identity
 }
@@ -70,10 +75,6 @@ async function getLocalIdentity({dir, identities, index = 0} = {}) {
   } catch (err) { debug(err.stack || err) }
 
   return buffer ? JSON.parse(buffer.toString()).id : {}
-}
-
-async function applyAuthentication(srcDdo, dstDdo) {
-  debug('applying authentication...')
 }
 
 module.exports = {
