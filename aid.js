@@ -8,14 +8,15 @@ const kDIDPrefix = 'did:ara:'
 const kKeyOwner = '#owner'
 
 async function create(publicKey) {
-  if (null == publicKey || 32 !== publicKey.length || 'string' !== typeof publicKey) {
-    throw new Error('ara-filesystem.aid: Expecting 32 char non-empty string.')
+  if (null == publicKey || 'string' !== typeof publicKey) {
+    throw new Error('ara-filesystem.aid: Expecting non-empty string.')
   }
+
+  publicKey += kKeyOwner
 
   const password = crypto.randomBytes(32).toString()
   let identity
   try {
-    publicKey += kKeyOwner
     const did = { authentication: { type: kEd25519VerificationKey2018, publicKey } }
     identity = await aid.create({ context, password, did })
   } catch (err) { debug(err.stack || err) }

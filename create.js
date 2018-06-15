@@ -43,7 +43,7 @@ async function create(did) {
   kp.publicKey.fill(0)
   kp.secretKey.fill(0)
 
-  afs[ddo] = afsDdo
+  afs.ddo = afsDdo
 
   return afs
 }
