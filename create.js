@@ -1,9 +1,9 @@
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
+const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
 const { secrets } = require('ara-network')
 const aid = require('./aid')
-const rc = require('./rc')()
 
 const kArchiverKey = 'archiver'
 const kResolverKey = 'resolver'
@@ -35,10 +35,11 @@ async function create(did) {
 
   let afs
   try {
-    // override CFSNet root directory
-    const path = rc.afs.archive.root(id)
-    const { createCFS } = require('cfsnet/create')
+    // generate AFS key path
+    const path = createAFSKeyPath(afsDid)
+    debug(path)
     // create AFS using identity as keypair
+    const { createCFS } = require('cfsnet/create')
     afs = await createCFS({
       id,
       key: kp.publicKey,

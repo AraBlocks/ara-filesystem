@@ -3,14 +3,13 @@ const rc = require('ara-runtime-configuration')
 const os = require('os')
 const { resolve } = require('path')
 
+const kAraDir = '.ara'
+const kAfsDir = 'afs'
+
 const defaults = () => ({
   afs: {
     archive: {
-      root(id) {
-        const { createCFSKeyPath } = require('cfsnet/key-path')
-        const keyPath = createCFSKeyPath({ id }).split('/').pop()
-        return resolve(os.homedir(), '.ara', 'afs', keyPath)
-      }
+      root: resolve(os.homedir(), kAraDir, kAfsDir)
     }
   }
 })
