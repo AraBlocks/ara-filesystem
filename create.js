@@ -37,7 +37,7 @@ async function create(did) {
   try {
     // generate AFS key path
     const path = createAFSKeyPath(afsDid)
-    
+
     // create AFS using identity as keypair
     const { createCFS } = require('cfsnet/create')
     afs = await createCFS({
