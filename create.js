@@ -1,6 +1,6 @@
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
-const { createCFS } = require('cfsnet/create')
+const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
 const { secrets } = require('ara-network')
 const aid = require('./aid')
@@ -36,8 +36,17 @@ async function create(did) {
 
   let afs
   try {
+    // generate AFS key path
+    const path = createAFSKeyPath(afsDid)
+    
     // create AFS using identity as keypair
-    afs = await createCFS({ id, key: kp.publicKey, secretKey: kp.secretKey })
+    const { createCFS } = require('cfsnet/create')
+    afs = await createCFS({
+      id,
+      key: kp.publicKey,
+      secretKey: kp.secretKey,
+      path
+    })
   } catch (err) { debug(err.stack || err) }
 
   // clear buffers
