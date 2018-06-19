@@ -24,7 +24,7 @@ contract Ownership {
 		Published(identity);
 	}
 
-	function getTree(bytes identity) public constant returns (bytes, bytes) {
+	function resolve(bytes identity) public constant returns (bytes, bytes) {
 		return (content[identity].root, content[identity].signature);
 	}
 }
