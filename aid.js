@@ -3,18 +3,23 @@ const aid = require('ara-identity')
 const crypto = require('ara-crypto')
 const context = require('ara-context')()
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
+const toBuffer = require('to-buffer')
 
 const kDIDPrefix = 'did:ara:'
 const kKeyOwner = '#owner'
 
-async function create(publicKey) {
+async function create(seed, publicKey) {
   if (null == publicKey || 'string' !== typeof publicKey) {
     throw new Error('ara-filesystem.aid: Expecting non-empty string.')
   }
 
+  if (null == seed || 'string' !== typeof seed) {
+    throw new Error('ara-filesystem.aid: Expecting seed of type string.')
+  }
+
   publicKey += kKeyOwner
 
-  const password = crypto.randomBytes(32).toString()
+  const password = crypto.blake2b(toBuffer(seed)).toString()
   let identity
   try {
     const did = { authentication: { type: kEd25519VerificationKey2018, publicKey } }
