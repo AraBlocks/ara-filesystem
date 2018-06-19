@@ -3,7 +3,6 @@ const aid = require('ara-identity')
 const crypto = require('ara-crypto')
 const context = require('ara-context')()
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
-const toBuffer = require('to-buffer')
 
 const kDIDPrefix = 'did:ara:'
 const kKeyOwner = '#owner'
@@ -19,7 +18,7 @@ async function create(seed, publicKey) {
 
   publicKey += kKeyOwner
 
-  const password = crypto.blake2b(toBuffer(seed)).toString()
+  const password = crypto.blake2b(Buffer.from(seed)).toString()
   let identity
   try {
     const did = { authentication: { type: kEd25519VerificationKey2018, publicKey } }

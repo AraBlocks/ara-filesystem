@@ -6,6 +6,7 @@ const { toHex } = require('ara-identity/util')
 const { secrets } = require('ara-network')
 const aid = require('./aid')
 const bip39 = require('bip39')
+const drives = require('./drives')
 
 const kArchiverKey = 'archiver'
 const kResolverKey = 'resolver'
@@ -26,49 +27,62 @@ async function create({
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
-// TODO (mahjiang): ensure ownership of DID
-  await aid.resolve(owner)
-  const mnemonic = bip39.generateMnemonic()
-  info(mnemonic)
-  const afsId = await aid.create(mnemonic, owner)
-
-  let keystore = await loadSecrets(kArchiverKey)
-  await aid.archive(afsId, { key: kArchiverKey, keystore } )
-
-  keystore = await loadSecrets(kResolverKey)
-  const { publicKey, secretKey } = afsId
-  const afsDid = did ? did : publicKey.toString('hex')
-  const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore } )
-
-  const seed = blake2b(secretKey)
-  const kp = keyPair(seed)
-  const id = toHex(kp.publicKey)
-
-  let afs
-  try {
-    // generate AFS key path
+  if (did) {
+    if (0 == did.indexOf('did:ara:')) {
+     did = did.substring(8)
+    }
+    const afsDid = did
     const path = createAFSKeyPath(afsDid)
+    if (path in drives) {
+      return drives[path]
+    }
+  } else if (owner) {
+  // TODO (mahjiang): ensure ownership of DID
+    await aid.resolve(owner)
+    const mnemonic = bip39.generateMnemonic()
+    info(mnemonic)
+    const afsId = await aid.create(mnemonic, owner)
+
+    let keystore = await loadSecrets(kArchiverKey)
+    await aid.archive(afsId, { key: kArchiverKey, keystore } )
+
+    keystore = await loadSecrets(kResolverKey)
+    const { publicKey, secretKey } = afsId
+    const afsDid = publicKey.toString('hex')
+    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore } )
+
+    const seed = blake2b(secretKey)
+    const kp = keyPair(seed)
+    const id = toHex(blake2b(Buffer.from(afsDid)))
+    let afs
+    let path
+    try {
+      // generate AFS key path
     
-    // create AFS using identity as keypair
-    const { createCFS } = require('cfsnet/create')
-    afs = await createCFS({
-      id,
-      key: kp.publicKey,
-      secretKey: kp.secretKey,
-      path
-    })
-  } catch (err) { debug(err.stack || err) }
+      path = createAFSKeyPath(afsDid)
+      info(path)
+      // create AFS using identity as keypair
+      const { createCFS } = require('cfsnet/create')
+      afs = await createCFS({
+        id,
+        key: kp.publicKey,
+        secretKey: kp.secretKey,
+        path
+      })
+    } catch (err) { debug(err.stack || err) }
 
-  // clear buffers
-  kp.publicKey.fill(0)
-  kp.secretKey.fill(0)
+    // clear buffers
+    kp.publicKey.fill(0)
+    kp.secretKey.fill(0)
 
-  afs.did = afsDid
-  afs.ddo = afsDdo
+    afs.did = afsDid
+    afs.ddo = afsDdo
+    info(afs.did)
 
-  console.log(afs)
+    drives[path] = afs
 
-  return afs
+    return afs
+  }
 }
 
 async function loadSecrets(key) {

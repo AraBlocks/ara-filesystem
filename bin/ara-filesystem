@@ -84,11 +84,12 @@ async function oncreate(argv) {
     did = 'did:ara:' + did
   }
 
+  let arafs
   try {
-    argv.owner ? await afs.create( { owner: did } ) : await afs.create( { did } ) 
+    arafs = argv.owner ? await afs.create( { owner: did } ) : await afs.create( { did } ) 
   } catch (err) { onfatal(err) }
 
-  info('AFS for', did, 'created')
+  info('AFS for', did, 'created with did', arafs.did)
 }
 
 async function onadd(argv) {

@@ -5,8 +5,7 @@
   "main": "index.js",
   "bin": {
     "ara-filesystem": "bin/ara-filesystem",
-    "afs": "bin/ara-filesystem",
-    "afs-add": "bin/afs-add"
+    "afs": "bin/ara-filesystem"
   },
   "scripts": {
     "test": ":",
@@ -53,7 +52,6 @@
     "pretty-bytes": "^4.0.2",
     "progress": "^2.0.0",
     "progress-stream": "^2.0.0",
-    "to-buffer": "^1.1.1",
     "yargs": "^11.0.0"
   },
   "devDependencies": {
