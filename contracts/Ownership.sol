@@ -21,7 +21,7 @@ contract Ownership {
 
 	function publish(bytes identity, bytes root, bytes signature) public restricted {
 		content[identity] = Tree(root, signature);
-		Published(identity);
+		emit Published(identity);
 	}
 
 	function resolve(bytes identity) public constant returns (bytes, bytes) {

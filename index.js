@@ -1,14 +1,8 @@
 const { create } = require('./create')
-const { publish } = require('./publish')
-
-// TODO(cckelly): remove me
-void async function main() {
-	await publish({
-		identity: '1234'
-	})
-}()
+const { publish, resolve } = require('./ownership')
 
 module.exports = {
   create,
-  publish
+  publish,
+  resolve
 }

@@ -1,12 +1,12 @@
 const debug = require('debug')('ara-filesystem:publish')
 const Web3 = require('web3')
+const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
 const contract = require('truffle-contract')
 const Ownership = contract(require('./build/contracts/Ownership.json'))
 
 Ownership.setProvider(web3.currentProvider)
 
-// TODO(cckelly): change name to ownership.js?
 // TODO(cckelly): ava tests
 // TODO(cckelly): truffle tests
 
@@ -30,6 +30,7 @@ async function publish({
 
 	const deployed = await Ownership.deployed()
 
+	identity = blake2b(identity)
 	const identityBuf = Buffer.from(identity)
 	const rootBuf = Buffer.from(root)
 	const sigBuf = Buffer.from(signature)
