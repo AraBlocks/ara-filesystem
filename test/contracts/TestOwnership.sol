@@ -5,9 +5,9 @@ import "truffle/DeployedAddresses.sol";
 import "../../contracts/Ownership.sol";
 
 contract TestOwnership {
-	
-	function testPublish() public pure {
-    // TODO(cckelly)
+  
+  function testPublish() public pure {
+    // TODO(cckelly): need to be able to compare bytes here
   }
 
 }
