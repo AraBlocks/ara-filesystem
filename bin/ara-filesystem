@@ -33,8 +33,44 @@ const { argv } = program
         describe: "An ARA decentralized identity (did) URI"
       })
   }, oncreate)
+  .command('publish [did]', "Publishes AFS with given DID to the Ethereum network", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "DID of the AFS to publish"
+      })
+  }, onpublish)
+  .command('resolve [did]', "Queries current tree data from Ethereum blockchain", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "DID to resolve"
+      })
+  }, onresolve)
 
 async function oncreate({did}) {
+  did = validate(did)  
+
+  try {
+    await afs.create(did)
+  } catch (err) { onfatal(err) }
+
+  info('AFS for', did, 'created')
+}
+
+async function onpublish({did}) {
+  did = validate(did)
+
+  // TODO(cckelly)
+}
+
+async function onresolve({did}) {
+  did = validate(did)
+
+  // TODO(cckelly)
+}
+
+function validate(did) {
   if (null == did) {
     onfatal(new Error("Expecting DID URI."))
   }
@@ -46,12 +82,7 @@ async function oncreate({did}) {
   if (0 != did.indexOf('did:ara:')) {
     did = 'did:ara:' + did
   }
-
-  try {
-    await afs.create(did)
-  } catch (err) { onfatal(err) }
-
-  info('AFS for', did, 'created')
+  return did
 }
 
 function onfatal(err) {

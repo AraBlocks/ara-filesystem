@@ -1,10 +1,10 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 contract Ownership {
 	address public owner;
-	mapping (bytes => Tree) content;
+	mapping (string => Tree) content;
 
-	event Published(bytes identity);
+	event Published(string _identity);
 
 	struct Tree {
 		bytes root;
@@ -19,12 +19,12 @@ contract Ownership {
  		if (msg.sender == owner) _;
  	}
 
-	function publish(bytes identity, bytes root, bytes signature) public restricted {
+	function publish(string identity, bytes root, bytes signature) public restricted {
 		content[identity] = Tree(root, signature);
 		emit Published(identity);
 	}
 
-	function resolve(bytes identity) public constant returns (bytes, bytes) {
+	function resolve(string identity) public view returns (bytes root, bytes signature) {
 		return (content[identity].root, content[identity].signature);
 	}
 }
