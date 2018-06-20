@@ -1,5 +1,5 @@
 const debug = require('debug')('ara-filesystem:create')
-const { info, warn, error, log } = require('ara-console')
+const { info } = require('ara-console')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
@@ -31,61 +31,56 @@ async function create({
   }
 
   if (did) {
-    if (0 == did.indexOf('did:ara:')) {
-     did = did.substring(8)
+    if (0 === did.indexOf('did:')) {
+      if (0 !== did.indexOf('did:ara:')) {
+        throw new TypeError('Expecting a DID URI with an "ara" method.')
+      } else {
+        did = did.substring(8)
+      }
     }
+
     const afsDid = did
     const pathPrefix = toHex(blake2b(Buffer.from(afsDid)))
     const path = createAFSKeyPath(afsDid)
-  
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
-    const drives = await pify(multidrive)(store,
-      async function create(opts, done) {
-        const id = toHex(blake2b(Buffer.from(afsDid)))
-        try {
-          const cfs = await createCFS({ id, path })        
-          return done(null, cfs)
-        } catch (err) {
-          done(err)
-        }
-      },
-
-      async function close(cfs, done) {
-        try { await cfs.close() }
-        catch (err) { return done(err) }
-        return done(null)
-      })
+    const drives = await pify(multidrive)(
+      store,
+      createArchive,
+      closeArchive
+    )
 
     const afs = await pify(drives.create)({
-      id: toHex(blake2b(Buffer.from(afsDid)))
+      id: pathPrefix,
+      path
     })
-  
     const keystore = await loadSecrets(kResolverKey)
-    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore } )
+    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     afs.did = afsDid
     afs.ddo = afsDdo
 
-    info("AFS Public Key %s", toHex(afs.key))
+    info('AFS Public Key %s', toHex(afs.key))
 
     return afs
-
   } else if (owner) {
   // TODO (mahjiang): ensure ownership of DID
-    await aid.resolve(owner)
+    const ddo = await aid.resolve(owner)
+    if (null === ddo || 'object' !== typeof ddo) {
+      throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
+    }
+
     const mnemonic = bip39.generateMnemonic()
     info(mnemonic)
     const afsId = await aid.create(mnemonic, owner)
 
     let keystore = await loadSecrets(kArchiverKey)
-    await aid.archive(afsId, { key: kArchiverKey, keystore } )
-
+    await aid.archive(afsId, { key: kArchiverKey, keystore })
     keystore = await loadSecrets(kResolverKey)
     const { publicKey, secretKey } = afsId
     const afsDid = publicKey.toString('hex')
-    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore } )
+    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     const seed = blake2b(secretKey)
     const kp = keyPair(seed)
@@ -94,7 +89,6 @@ async function create({
     let path
     try {
       // generate AFS key path
-    
       path = createAFSKeyPath(afsDid)
       info(path)
       afs = await createCFS({
@@ -112,9 +106,32 @@ async function create({
     afs.did = afsDid
     afs.ddo = afsDdo
 
-    info("AFS Public Key %s", toHex(afs.key))
+    info('AFS Public Key %s', toHex(afs.key))
 
     return afs
+  }
+
+  return null
+
+  async function createArchive(opts, done) {
+    const { id, path } = opts
+    try {
+      const afs = await createCFS({ id, path })
+      return done(null, afs)
+    } catch (err) {
+      done(err)
+    }
+
+    return null
+  }
+
+  async function closeArchive(afs, done) {
+    try {
+      await afs.close()
+    } catch (err) {
+      return done(err)
+    }
+    return done(null)
   }
 }
 
