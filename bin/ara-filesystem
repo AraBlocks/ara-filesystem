@@ -42,15 +42,11 @@ const { argv } = program
     alias: 'V',
     describe: "Show program version"
   })
-  .option('id', {
-    alias: 'i',
-    describe: "Identifier value to use",
-  })
-  .command('create <did>', "Create AFS with given identity", (program) => {
+  .command('create <owner>', "Create AFS with given identity", (program) => {
     program
-      .positional('did', {
+      .positional('owner', {
         type: 'string',
-        describe: "An ARA decentralized identity (did) URI"
+        describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
   }, oncreate)
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
@@ -61,7 +57,7 @@ const { argv } = program
       })
       .positional('did', {
         type: 'string',
-        describe: "An ARA decentralized identity (did) URI"
+        describe: "An AFS ARA decentralized identity (did) URI"
       })
   }, onadd)
   .command('remove <did> <pathspec...>', "Remove files or directories from an AFS", (program) => {
@@ -72,34 +68,34 @@ const { argv } = program
       })
       .positional('did', {
         type: 'string',
-        describe: "An ARA decentralized identity (did) URI"
+        describe: "An AFS ARA decentralized identity (did) URI"
       })
   }, onremove)
   .command('history <did>', "Retrieve the revision history of this AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
-        describe: "An ARA decentralized identity (did) URI"
+        describe: "An AFS ARA decentralized identity (did) URI"
       })
   }, onhistory)
 
 async function oncreate(argv) {
-  let did = argv.did
-  if (null == did) {
-    onfatal(new Error("Expecting DID URI."))
+  let owner = argv.owner
+  if (null == owner) {
+    onfatal(new Error("Missing AFS owner DID. See 'afs create --help'."))
   }
 
-  if (0 == did.indexOf('did:') && 0 != did.indexOf('did:ara:')) {
-    onfatal(new Error("Expecting a did URI with an 'ara' method."))
+  if (0 == owner.indexOf('did:') && 0 != owner.indexOf('did:ara:')) {
+    onfatal(new Error("Expecting a DID URI with an 'ara' method."))
   }
 
-  if (0 != did.indexOf('did:ara:')) {
-    did = 'did:ara:' + did
+  if (0 != owner.indexOf('did:ara:')) {
+    owner = 'did:ara:' + owner
   }
 
   let arafs
   try {
-    arafs = await afs.create( { owner: did } )
+    arafs = await afs.create( { owner } )
   } catch (err) { onfatal(err) }
 
   info('AFS created with did', arafs.did)
@@ -108,11 +104,11 @@ async function oncreate(argv) {
 async function onhistory(argv) {
   let did = argv.did
   if (null == did) {
-    onfatal(new Error("Expecting DID URI."))
+    onfatal(new Error("Missing AFS DID. See 'afs add --help'."))
   }
 
   if (0 == did.indexOf('did:') && 0 != did.indexOf('did:ara:')) {
-    onfatal(new Error("Expecting a did URI with an 'ara' method."))
+    onfatal(new Error("Expecting a DID URI with an 'ara' method."))
   }
 
   if (0 != did.indexOf('did:ara:')) {
@@ -161,13 +157,13 @@ async function onadd(argv) {
   let [ ...paths ] = argv.pathspec
   let did = argv.did
 
-  info("id: %s", did)
-  info("paths: ", paths)
-
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs add --help'.")) }
   if (!paths || !paths.length) {
     onfatal(new Error("Missing local file paths. See 'afs add --help'."))
   }
+
+  info("id: %s", did)
+  info("paths: ", paths)
 
   const arafs = await afs.create( { did } )
 
@@ -418,13 +414,13 @@ async function onremove(argv) {
   let [ ...paths ] = argv.pathspec
   let did = argv.did
 
+  if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
+  if (!paths || !paths.length) {
+    onfatal(new Error("Missing local file paths. See 'afs remove --help'."))
+  }
+
   info("id: %s", did)
   info("paths: ", paths)
-
-  if (!did) { onfatal(new Error("Missing AFS DID. See 'afs add --help'.")) }
-  if (!paths || !paths.length) {
-    onfatal(new Error("Missing local file paths. See 'afs add --help'."))
-  }
 
   const arafs = await afs.create( { did } )
 
