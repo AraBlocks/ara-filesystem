@@ -4,9 +4,15 @@ const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
 const { secrets } = require('ara-network')
+const { resolve } = require('path')
+const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
 const bip39 = require('bip39')
-const drives = require('./drives')
+const multidrive = require('multidrive')
+const pify = require('pify')
+const mkdirp = require('mkdirp')
+const rc = require('./rc')()
+const toilet = require('toiletdb')
 
 const kArchiverKey = 'archiver'
 const kResolverKey = 'resolver'
@@ -32,10 +38,46 @@ async function create({
      did = did.substring(8)
     }
     const afsDid = did
+    const pathPrefix = toHex(blake2b(Buffer.from(afsDid)))
     const path = createAFSKeyPath(afsDid)
-    if (path in drives) {
-      return drives[path]
-    }
+    info(path)
+    await pify(mkdirp)(rc.afs.archive.store)
+    const nodes = resolve(rc.afs.archive.store, pathPrefix)
+    const store = toilet(nodes)
+    const drives = await pify(multidrive)(store,
+      async function create(opts, done) {
+        const id = toHex(blake2b(Buffer.from(afsDid)))
+        // const key = Buffer.from(opts.key, 'hex')
+        try {
+          // const conf = Object.assign({}, opts, { id, key, shallow: true })
+          const cfs = await createCFS({ id, path })
+          // wait 1000ms to wait for resolvers swarm to boot up
+          return done(null, cfs)
+        } catch (err) {
+          done(err)
+        }
+      },
+
+      async function close(cfs, done) {
+        try { await cfs.close() }
+        catch (err) { return done(err) }
+        return done(null)
+      })
+
+    const afs = await pify(drives.create)({
+      id: toHex(blake2b(Buffer.from(afsDid)))
+    })
+  
+    const keystore = await loadSecrets(kResolverKey)
+    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore } )
+
+    afs.did = afsDid
+    afs.ddo = afsDdo
+
+    info("AFS Public Key %s", toHex(afs.key))
+
+    return afs
+
   } else if (owner) {
   // TODO (mahjiang): ensure ownership of DID
     await aid.resolve(owner)
@@ -61,8 +103,6 @@ async function create({
     
       path = createAFSKeyPath(afsDid)
       info(path)
-      // create AFS using identity as keypair
-      const { createCFS } = require('cfsnet/create')
       afs = await createCFS({
         id,
         key: kp.publicKey,
@@ -77,9 +117,8 @@ async function create({
 
     afs.did = afsDid
     afs.ddo = afsDdo
-    info(afs.did)
 
-    drives[path] = afs
+    info("AFS Public Key %s", toHex(afs.key))
 
     return afs
   }
