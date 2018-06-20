@@ -50,7 +50,6 @@ const { argv } = program
 
 async function oncreate({did}) {
   did = validate(did)  
-
   try {
     await afs.create(did)
   } catch (err) { onfatal(err) }
@@ -60,14 +59,23 @@ async function oncreate({did}) {
 
 async function onpublish({did}) {
   did = validate(did)
-
-  // TODO(cckelly)
+  try {
+    const opts = {
+      identity: did,
+      root: 'root', // TODO(cckelly): pass in actual values
+      signature: 'signature' // TODO(cckelly): pass in actual values
+    }
+    await afs.publish(opts, () => info("AFS with AID", did, "published to the network."))
+  } catch (err) { onfatal(err) }
 }
 
 async function onresolve({did}) {
   did = validate(did)
-
-  // TODO(cckelly)
+  try {
+    const result = await afs.resolve(did)
+    info("Resolved with tree root:", result.root)
+    info("Resolved with tree signature:", result.signature)
+  } catch (err) { onfatal(err) }
 }
 
 function validate(did) {
