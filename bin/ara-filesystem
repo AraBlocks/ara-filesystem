@@ -49,6 +49,7 @@ const { argv } = program
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
   }, oncreate)
+<<<<<<< HEAD
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
     program
       .positional('pathspec', {
@@ -103,6 +104,46 @@ async function oncreate(argv) {
 
 async function onhistory(argv) {
   let did = argv.did
+=======
+  .command('publish [did]', "Publishes AFS with given DID to the Ethereum network", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "DID of the AFS to publish"
+      })
+  }, onpublish)
+  .command('resolve [did]', "Queries current tree data from Ethereum blockchain", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "DID to resolve"
+      })
+  }, onresolve)
+
+async function oncreate({did}) {
+  did = validate(did)  
+
+  try {
+    await afs.create(did)
+  } catch (err) { onfatal(err) }
+
+  info('AFS for', did, 'created')
+}
+
+async function onpublish({did}) {
+  did = validate(did)
+
+  // TODO(cckelly)
+}
+
+async function onresolve({did}) {
+  did = validate(did)
+
+  // TODO(cckelly)
+}
+
+function validate(did) {
+>>>>>>> feat(): publish to Ownership contract and resolve entries
   if (null == did) {
     onfatal(new Error("Missing AFS DID. See 'afs add --help'."))
   }
@@ -114,6 +155,7 @@ async function onhistory(argv) {
   if (0 != did.indexOf('did:ara:')) {
     did = 'did:ara:' + did
   }
+<<<<<<< HEAD
 
   const tableOpts = {
     columnCount: 3,
@@ -431,6 +473,9 @@ async function onremove(argv) {
   }
 
   await arafs.close()
+=======
+  return did
+>>>>>>> feat(): publish to Ownership contract and resolve entries
 }
 
 function onfatal(err) {

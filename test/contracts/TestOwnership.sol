@@ -6,6 +6,8 @@ import "../../contracts/Ownership.sol";
 
 contract TestOwnership {
 	
-	// TODO(cckelly)
+	function testPublish() public pure {
+    // TODO(cckelly)
+  }
 
 }
