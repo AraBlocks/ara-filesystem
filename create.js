@@ -25,9 +25,6 @@ const kResolverKey = 'resolver'
 async function create({
   owner = null,
   did = null
-
-  // just owner -> create new AFS
-  // just did -> try to resolve
 }) {
   if ((null == owner || 'string' !== typeof owner) && (null == did || 'string' !== typeof did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
@@ -40,18 +37,15 @@ async function create({
     const afsDid = did
     const pathPrefix = toHex(blake2b(Buffer.from(afsDid)))
     const path = createAFSKeyPath(afsDid)
-    info(path)
+  
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
     const drives = await pify(multidrive)(store,
       async function create(opts, done) {
         const id = toHex(blake2b(Buffer.from(afsDid)))
-        // const key = Buffer.from(opts.key, 'hex')
         try {
-          // const conf = Object.assign({}, opts, { id, key, shallow: true })
-          const cfs = await createCFS({ id, path })
-          // wait 1000ms to wait for resolvers swarm to boot up
+          const cfs = await createCFS({ id, path })        
           return done(null, cfs)
         } catch (err) {
           done(err)

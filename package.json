@@ -54,6 +54,7 @@
     "pretty-bytes": "^4.0.2",
     "progress": "^2.0.0",
     "progress-stream": "^2.0.0",
+    "table": "^4.0.2",
     "toiletdb": "^1.4.1",
     "yargs": "^11.0.0"
   },

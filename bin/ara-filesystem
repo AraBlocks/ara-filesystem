@@ -13,6 +13,7 @@ const fs = require('fs')
 const ProgressStream = require('progress-stream')
 const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
+const table = require('table')
 
 const isDirectory = require('is-directory')
 const isFile = require('is-file')
@@ -45,30 +46,42 @@ const { argv } = program
     alias: 'i',
     describe: "Identifier value to use",
   })
-  .command('create [options] [--] <did>', "Create AFS with given identity", (program) => {
+  .command('create <did>', "Create AFS with given identity", (program) => {
     program
-      .option('owner', {
-        alias: 'o',
-        describe: "The AFS to be created belongs to this ARAid",
-        boolean: true
-      })
-      .option('identity', {
-        alias: 'd',
-        describe: "The AFS has this ARAid",
-        boolean: true
-      })
       .positional('did', {
         type: 'string',
         describe: "An ARA decentralized identity (did) URI"
       })
   }, oncreate)
-  .command('add <pathspec...>', "Add files or directories to an AFS", (program) => {
+  .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
     program
       .positional('pathspec', {
         type: 'string',
         describe: "The file(s) you wish to add to AFS"
       })
+      .positional('did', {
+        type: 'string',
+        describe: "An ARA decentralized identity (did) URI"
+      })
   }, onadd)
+  .command('remove <did> <pathspec...>', "Remove files or directories from an AFS", (program) => {
+    program
+      .positional('pathspec', {
+        type: 'string',
+        describe: "The file(s) you wish to add to AFS"
+      })
+      .positional('did', {
+        type: 'string',
+        describe: "An ARA decentralized identity (did) URI"
+      })
+  }, onremove)
+  .command('history <did>', "Retrieve the revision history of this AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An ARA decentralized identity (did) URI"
+      })
+  }, onhistory)
 
 async function oncreate(argv) {
   let did = argv.did
@@ -86,26 +99,77 @@ async function oncreate(argv) {
 
   let arafs
   try {
-    arafs = argv.owner ? await afs.create( { owner: did } ) : await afs.create( { did } ) 
+    arafs = await afs.create( { owner: did } )
   } catch (err) { onfatal(err) }
 
   info('AFS created with did', arafs.did)
 }
 
+async function onhistory(argv) {
+  let did = argv.did
+  if (null == did) {
+    onfatal(new Error("Expecting DID URI."))
+  }
+
+  if (0 == did.indexOf('did:') && 0 != did.indexOf('did:ara:')) {
+    onfatal(new Error("Expecting a did URI with an 'ara' method."))
+  }
+
+  if (0 != did.indexOf('did:ara:')) {
+    did = 'did:ara:' + did
+  }
+
+  const tableOpts = {
+    columnCount: 3,
+    border: table.getBorderCharacters('ramac'),
+    columnDefault: {
+      paddingLeft: 1,
+      paddingRight: 1,
+      width: parseInt(((cliWidth() || 30) - 10)/3),
+    },
+    columns: [
+      { width: 4 },
+      { width: 4 },
+      { width: 30 },
+    ]
+  }
+
+  const arafs = await afs.create( { did } )
+  const stream = table.createStream(tableOpts)
+
+  arafs.history(argv.partition || arafs.HOME)
+    .on('error', onfatal)
+    .on('end', () => process.exit(0))
+    .on('data', (log) => {
+      if (true != argv['border']) {
+        console.log('%s\t%s\t%s',
+          log.version,
+          log.type.toUpperCase(),
+          log.name
+        )
+      } else {
+        stream.write([
+          log.version,
+          log.type.toUpperCase(),
+          log.name,
+        ])
+      }
+    })
+}
+
 async function onadd(argv) {
   let [ ...paths ] = argv.pathspec
-  let id = argv.id
+  let did = argv.did
 
-  info("id: %s", id)
+  info("id: %s", did)
   info("paths: ", paths)
 
-  if (!id) { onfatal(new Error("Missing AFS identifier. See 'afs add --help'.")) }
+  if (!did) { onfatal(new Error("Missing AFS DID. See 'afs add --help'.")) }
   if (!paths || !paths.length) {
     onfatal(new Error("Missing local file paths. See 'afs add --help'."))
   }
 
-  // TODO (mahjiang): change to take in AFS DID
-  const arafs = await afs.create( { owner: id } )
+  const arafs = await afs.create( { did } )
 
   // ensure paths exists
   for (const path of paths) {
@@ -348,6 +412,29 @@ async function onadd(argv) {
       return new ProgressBar(template, progressBarSpec)
     }
   }
+}
+
+async function onremove(argv) {
+  let [ ...paths ] = argv.pathspec
+  let did = argv.did
+
+  info("id: %s", did)
+  info("paths: ", paths)
+
+  if (!did) { onfatal(new Error("Missing AFS DID. See 'afs add --help'.")) }
+  if (!paths || !paths.length) {
+    onfatal(new Error("Missing local file paths. See 'afs add --help'."))
+  }
+
+  const arafs = await afs.create( { did } )
+
+  // ensure paths exists
+  for (const path of paths) {
+    log("Removing file %s", path)
+    await pify(arafs.rimraf)(path)
+  }
+
+  await arafs.close()
 }
 
 function onfatal(err) {
