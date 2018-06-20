@@ -26,7 +26,7 @@ async function create({
   owner = null,
   did = null
 }) {
-  if ((null == owner || 'string' !== typeof owner) && (null == did || 'string' !== typeof did)) {
+  if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
@@ -40,6 +40,12 @@ async function create({
     }
 
     const afsDid = did
+    const keystore = await loadSecrets(kResolverKey)
+    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
+    if (null === afsDdo || 'object' !== typeof afsDdo) {
+      throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
+    }
+
     const pathPrefix = toHex(blake2b(Buffer.from(afsDid)))
     const path = createAFSKeyPath(afsDid)
     await pify(mkdirp)(rc.afs.archive.store)
@@ -55,8 +61,6 @@ async function create({
       id: pathPrefix,
       path
     })
-    const keystore = await loadSecrets(kResolverKey)
-    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     afs.did = afsDid
     afs.ddo = afsDdo
@@ -65,7 +69,15 @@ async function create({
 
     return afs
   } else if (owner) {
-  // TODO (mahjiang): ensure ownership of DID
+    if (0 === owner.indexOf('did:')) {
+      if (0 !== owner.indexOf('did:ara:')) {
+        throw new TypeError('Expecting a DID URI with an "ara" method.')
+      } else {
+        owner = owner.substring(8)
+      }
+    }
+
+    // TODO (mahjiang): ensure ownership of DID
     const ddo = await aid.resolve(owner)
     if (null === ddo || 'object' !== typeof ddo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
