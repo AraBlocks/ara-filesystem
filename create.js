@@ -43,7 +43,7 @@ async function create({
     const drives = await createMultidrive(pathPrefix)
 
     const path = createAFSKeyPath(did)
-    
+    console.log(path)
     const afs = await pify(drives.create)({
       id: pathPrefix,
       path
