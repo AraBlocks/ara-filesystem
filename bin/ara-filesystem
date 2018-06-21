@@ -245,9 +245,22 @@ async function onadd(argv) {
         progress.updateReader(chunk.length)
       }
     }
+
+    function ignore(filename) {
+      if (argv.force) {
+        return false
+      } else {
+        log("ignore: %s", filename)
+        return ignored.ignores(filename)
+      }
+    }
   }
 
   async function addFile(path) {
+    if (!argv.force && ignored.ignores(path)) {
+      throw new Error(`ignore: ${path} is ignored. Use '--force' to force add file.`)
+    }
+
     // paths
     const src = resolve(path)
     const dest = src.replace(process.cwd(), arafs.HOME)
