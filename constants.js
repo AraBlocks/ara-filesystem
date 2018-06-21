@@ -3,5 +3,6 @@ module.exports = {
   kResolverKey: 'resolver',
   kDidPrefix: 'did:',
   kAidPrefix: 'did:ara:',
-  kOwnerSuffix: '#owner'
+  kOwnerSuffix: '#owner',
+  kKeyLength: 64
 }
