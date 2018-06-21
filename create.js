@@ -6,7 +6,7 @@ const { secrets } = require('ara-network')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const {
-  AID_PREFIX, DID_PREFIX, ARCHIVER_KEY, RESOLVER_KEY
+  kAidPrefix, kDidPrefix, kArchiverKey, kResolverKey
 } = require('./constants')
 const aid = require('./aid')
 const bip39 = require('bip39')
@@ -32,8 +32,8 @@ async function create({
   if (did) {
     did = validateDid(did)
 
-    const keystore = await loadSecrets(RESOLVER_KEY)
-    const afsDdo = await aid.resolve(did, { key: RESOLVER_KEY, keystore })
+    const keystore = await loadSecrets(kResolverKey)
+    const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
 
     if (null === afsDdo || 'object' !== typeof afsDdo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
@@ -65,14 +65,14 @@ async function create({
     debug(mnemonic)
     const afsId = await aid.create(mnemonic, owner)
 
-    let keystore = await loadSecrets(ARCHIVER_KEY)
-    await aid.archive(afsId, { key: ARCHIVER_KEY, keystore })
+    let keystore = await loadSecrets(kArchiverKey)
+    await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
 
-    keystore = await loadSecrets(RESOLVER_KEY)
-    const afsDdo = await aid.resolve(afsDid, { key: RESOLVER_KEY, keystore })
+    keystore = await loadSecrets(kResolverKey)
+    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     const kp = keyPair(blake2b(secretKey))
     const id = toHex(blake2b(Buffer.from(afsDid)))
@@ -136,11 +136,11 @@ async function create({
 }
 
 function validateDid(did) {
-  if (0 === did.indexOf(DID_PREFIX)) {
-    if (0 !== did.indexOf(AID_PREFIX)) {
+  if (0 === did.indexOf(kDidPrefix)) {
+    if (0 !== did.indexOf(kAidPrefix)) {
       throw new TypeError('Expecting a DID URI with an "ara" method.')
     } else {
-      return did.substring(AID_PREFIX.length)
+      return did.substring(kAidPrefix.length)
     }
   }
   return did

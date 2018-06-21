@@ -1,7 +1,7 @@
 module.exports = {
-  ARCHIVER_KEY: 'archiver',
-  RESOLVER_KEY: 'resolver',
-  DID_PREFIX: 'did:',
-  AID_PREFIX: 'did:ara:',
-  KEY_OWNER_SUFFIX: '#owner'
+  kArchiverKey: 'archiver',
+  kResolverKey: 'resolver',
+  kDidPrefix: 'did:',
+  kAidPrefix: 'did:ara:',
+  kOwnerSuffix: '#owner'
 }
