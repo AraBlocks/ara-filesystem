@@ -5,7 +5,9 @@ const { toHex } = require('ara-identity/util')
 const { secrets } = require('ara-network')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
-const { AID_PREFIX, DID_PREFIX, ARCHIVER_KEY, RESOLVER_KEY } = require('./constants')
+const {
+  AID_PREFIX, DID_PREFIX, ARCHIVER_KEY, RESOLVER_KEY
+} = require('./constants')
 const aid = require('./aid')
 const bip39 = require('bip39')
 const multidrive = require('multidrive')
@@ -52,7 +54,7 @@ async function create({
       id: pathPrefix,
       path
     })
-    
+
     afs.did = did
     afs.ddo = afsDdo
 
@@ -74,18 +76,18 @@ async function create({
     await aid.archive(afsId, { key: ARCHIVER_KEY, keystore })
 
     const { publicKey, secretKey } = afsId
-    const did = toHex(publicKey)
+    const afsDid = toHex(publicKey)
 
     keystore = await loadSecrets(RESOLVER_KEY)
-    const afsDdo = await aid.resolve(did, { key: RESOLVER_KEY, keystore })
+    const afsDdo = await aid.resolve(afsDid, { key: RESOLVER_KEY, keystore })
 
     const kp = keyPair(blake2b(secretKey))
-    const id = toHex(blake2b(Buffer.from(did)))
-    
+    const id = toHex(blake2b(Buffer.from(afsDid)))
+
     let afs
     try {
       // generate AFS key path
-      const path = createAFSKeyPath(did)
+      const path = createAFSKeyPath(afsDid)
       debug(path)
       afs = await createCFS({
         id,
@@ -94,8 +96,8 @@ async function create({
         path
       })
     } catch (err) { debug(err.stack || err) }
-    
-    afs.did = did
+
+    afs.did = afsDid
     afs.ddo = afsDdo
 
     // clear buffers
@@ -110,9 +112,9 @@ async function create({
   async function createArchive(opts, done) {
     const { id, path } = opts
     try {
-      const afs = await createCFS({ 
-        id, 
-        path 
+      const afs = await createCFS({
+        id,
+        path
       })
       return done(null, afs)
     } catch (err) {
