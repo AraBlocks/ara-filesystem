@@ -19,8 +19,6 @@ const isDirectory = require('is-directory')
 const isFile = require('is-file')
 const isSymlink = require('is-symlink')
 
-const ignored = require('../lib/ignore')
-
 const toLower = (x) => String(x).toLowerCase()
 const $0 = basename(process.argv[1] || package.name)
 
@@ -49,7 +47,6 @@ const { argv } = program
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
   }, oncreate)
-<<<<<<< HEAD
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
     program
       .positional('pathspec', {
@@ -104,54 +101,6 @@ async function oncreate(argv) {
 
 async function onhistory(argv) {
   let did = argv.did
-=======
-  .command('publish [did]', "Publishes AFS with given DID to the Ethereum network", (program) => {
-    program
-      .positional('did', {
-        type: 'string',
-        describe: "DID of the AFS to publish"
-      })
-  }, onpublish)
-  .command('resolve [did]', "Queries current tree data from Ethereum blockchain", (program) => {
-    program
-      .positional('did', {
-        type: 'string',
-        describe: "DID to resolve"
-      })
-  }, onresolve)
-
-async function oncreate({did}) {
-  did = validate(did)  
-  try {
-    await afs.create(did)
-  } catch (err) { onfatal(err) }
-
-  info('AFS for', did, 'created')
-}
-
-async function onpublish({did}) {
-  did = validate(did)
-  try {
-    const opts = {
-      identity: did,
-      root: 'root', // TODO(cckelly): pass in actual values
-      signature: 'signature' // TODO(cckelly): pass in actual values
-    }
-    await afs.publish(opts, () => info("AFS with AID", did, "published to the network."))
-  } catch (err) { onfatal(err) }
-}
-
-async function onresolve({did}) {
-  did = validate(did)
-  try {
-    const result = await afs.resolve(did)
-    info("Resolved with tree root:", result.root)
-    info("Resolved with tree signature:", result.signature)
-  } catch (err) { onfatal(err) }
-}
-
-function validate(did) {
->>>>>>> feat(): publish to Ownership contract and resolve entries
   if (null == did) {
     onfatal(new Error("Missing AFS DID. See 'afs add --help'."))
   }
@@ -163,7 +112,6 @@ function validate(did) {
   if (0 != did.indexOf('did:ara:')) {
     did = 'did:ara:' + did
   }
-<<<<<<< HEAD
 
   const tableOpts = {
     columnCount: 3,
@@ -297,22 +245,9 @@ async function onadd(argv) {
         progress.updateReader(chunk.length)
       }
     }
-
-    function ignore(filename) {
-      if (argv.force) {
-        return false
-      } else {
-        log("ignore: %s", filename)
-        return ignored.ignores(filename)
-      }
-    }
   }
 
   async function addFile(path) {
-    if (!argv.force && ignored.ignores(path)) {
-      throw new Error(`ignore: ${path} is ignored. Use '--force' to force add file.`)
-    }
-
     // paths
     const src = resolve(path)
     const dest = src.replace(process.cwd(), arafs.HOME)
@@ -481,9 +416,7 @@ async function onremove(argv) {
   }
 
   await arafs.close()
-=======
   return did
->>>>>>> feat(): publish to Ownership contract and resolve entries
 }
 
 function onfatal(err) {

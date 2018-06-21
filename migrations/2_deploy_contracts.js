@@ -1,7 +1,7 @@
 /* eslint no-undef: "off" */
 
-const Ownership = artifacts.require('./Ownership.sol')
+const Storage = artifacts.require('./Storage.sol')
 
 module.exports = (deployer) => {
-  deployer.deploy(Ownership)
+  deployer.deploy(Storage)
 }

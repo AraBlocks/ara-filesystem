@@ -3,7 +3,7 @@
 const test = require('ava')
 const { blake2b } = require('ara-crypto')
 const { kTestDid } = require('./_constants')
-const { publish, resolve } = require('../ownership')
+const { write, read } = require('../storage')
 
 const opts = {
   identity: kTestDid,
@@ -32,3 +32,5 @@ test(`resolve(identity = '')`, async (t) => {
   const result = await resolve(opts.identity)
   t.true(opts.root === result.root && opts.signature === result.signature)
 })
+
+// TODO(cckelly): unlink tests
