@@ -39,15 +39,8 @@ async function create({
       throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
     }
 
-    await pify(mkdirp)(rc.afs.archive.store)
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const nodes = resolve(rc.afs.archive.store, pathPrefix)
-    const store = toilet(nodes)
-    const drives = await pify(multidrive)(
-      store,
-      createArchive,
-      closeArchive
-    )
+    const drives = await createMultidrive(pathPrefix)
 
     const path = createAFSKeyPath(did)
     const afs = await pify(drives.create)({
@@ -109,28 +102,36 @@ async function create({
 
   return null
 
-  async function createArchive(opts, done) {
-    const { id, path } = opts
-    try {
-      const afs = await createCFS({
-        id,
-        path
-      })
-      return done(null, afs)
-    } catch (err) {
-      done(err)
-    }
+  async function createMultidrive(pathPrefix) {
+    await pify(mkdirp)(rc.afs.archive.store)
+    const nodes = resolve(rc.afs.archive.store, pathPrefix)
+    const store = toilet(nodes)
+    const drives = await pify(multidrive)(
+      store,
+      async (opts, done) => {
+        const { id, path } = opts
+        try {
+          const afs = await createCFS({
+            id,
+            path
+          })
+          return done(null, afs)
+        } catch (err) {
+          done(err)
+        }
+        return null
+      },
 
-    return null
-  }
-
-  async function closeArchive(afs, done) {
-    try {
-      await afs.close()
-    } catch (err) {
-      return done(err)
-    }
-    return done(null)
+      async (afs, done) => {
+        try {
+          await afs.close()
+        } catch (err) {
+          return done(err)
+        }
+        return done(null)
+      }
+    )
+    return drives
   }
 }
 
