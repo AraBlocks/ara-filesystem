@@ -1,11 +1,27 @@
 #!/usr/bin/env node
 
 const debug = require('debug')('ara-filesystem')
-const { info, warn, error } = require('ara-console')
-const { basename } = require('path')
+const { info, warn, error, log } = require('ara-console')
+const { basename, resolve } = require('path')
+const { stat, access } = require('fs')
+const cliWidth = require('cli-width')
+const differ = require('ansi-diff-stream')
+const pify = require('pify')
 const program = require('yargs')
 const afs = require('../')
+const fs = require('fs')
+const ProgressStream = require('progress-stream')
+const ProgressBar = require('progress')
+const bytes = require('pretty-bytes')
+const table = require('table')
 
+const isDirectory = require('is-directory')
+const isFile = require('is-file')
+const isSymlink = require('is-symlink')
+
+const ignored = require('../lib/ignore')
+
+const toLower = (x) => String(x).toLowerCase()
 const $0 = basename(process.argv[1] || package.name)
 
 process.on('unhandledRejection', onfatal)
@@ -26,32 +42,395 @@ const { argv } = program
     alias: 'V',
     describe: "Show program version"
   })
-  .command('create [did]', "Create AFS with given identity", (program) => {
+  .command('create <owner>', "Create AFS with given identity", (program) => {
+    program
+      .positional('owner', {
+        type: 'string',
+        describe: "This AFS owner's ARA decentralized identity (did) URI"
+      })
+  }, oncreate)
+  .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
+    program
+      .positional('pathspec', {
+        type: 'string',
+        describe: "The file(s) you wish to add to AFS"
+      })
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+  }, onadd)
+  .command('remove <did> <pathspec...>', "Remove files or directories from an AFS", (program) => {
+    program
+      .positional('pathspec', {
+        type: 'string',
+        describe: "The file(s) you wish to add to AFS"
+      })
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+  }, onremove)
+  .command('history <did>', "Retrieve the revision history of this AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
-        describe: "An ARA decentralized identity (did) URI"
+        describe: "An AFS ARA decentralized identity (did) URI"
       })
-  }, oncreate)
+  }, onhistory)
 
-async function oncreate({did}) {
+async function oncreate(argv) {
+  let owner = argv.owner
+  if (null == owner) {
+    onfatal(new Error("Missing AFS owner DID. See 'afs create --help'."))
+  }
+
+  if (0 == owner.indexOf('did:') && 0 != owner.indexOf('did:ara:')) {
+    onfatal(new Error("Expecting a DID URI with an 'ara' method."))
+  }
+
+  if (0 != owner.indexOf('did:ara:')) {
+    owner = 'did:ara:' + owner
+  }
+
+  let arafs
+  try {
+    arafs = await afs.create( { owner } )
+  } catch (err) { onfatal(err) }
+
+  info('AFS created with did', arafs.did)
+}
+
+async function onhistory(argv) {
+  let did = argv.did
   if (null == did) {
-    onfatal(new Error("Expecting DID URI."))
+    onfatal(new Error("Missing AFS DID. See 'afs add --help'."))
   }
 
   if (0 == did.indexOf('did:') && 0 != did.indexOf('did:ara:')) {
-    onfatal(new Error("Expecting a did URI with an 'ara' method."))
+    onfatal(new Error("Expecting a DID URI with an 'ara' method."))
   }
 
   if (0 != did.indexOf('did:ara:')) {
     did = 'did:ara:' + did
   }
 
-  try {
-    await afs.create(did)
-  } catch (err) { onfatal(err) }
+  const tableOpts = {
+    columnCount: 3,
+    border: table.getBorderCharacters('ramac'),
+    columnDefault: {
+      paddingLeft: 1,
+      paddingRight: 1,
+      width: parseInt(((cliWidth() || 30) - 10)/3),
+    },
+    columns: [
+      { width: 4 },
+      { width: 4 },
+      { width: 30 },
+    ]
+  }
 
-  info('AFS for', did, 'created')
+  const arafs = await afs.create( { did } )
+  const stream = table.createStream(tableOpts)
+
+  arafs.history(argv.partition || arafs.HOME)
+    .on('error', onfatal)
+    .on('end', () => process.exit(0))
+    .on('data', (log) => {
+      if (true != argv['border']) {
+        console.log('%s\t%s\t%s',
+          log.version,
+          log.type.toUpperCase(),
+          log.name
+        )
+      } else {
+        stream.write([
+          log.version,
+          log.type.toUpperCase(),
+          log.name,
+        ])
+      }
+    })
+}
+
+async function onadd(argv) {
+  let [ ...paths ] = argv.pathspec
+  let did = argv.did
+
+  if (!did) { onfatal(new Error("Missing AFS DID. See 'afs add --help'.")) }
+  if (!paths || !paths.length) {
+    onfatal(new Error("Missing local file paths. See 'afs add --help'."))
+  }
+
+  info("id: %s", did)
+  info("paths: ", paths)
+
+  const arafs = await afs.create( { did } )
+
+  // ensure paths exists
+  for (const path of paths) {
+
+    // ensure local file path exists
+    try { await pify(access)(path) }
+    catch (err) { error("%s does not exist", path) }
+
+    // directories
+    if (await pify(isDirectory)(path)) {
+      // add local directory to AFS at path
+      try {
+        log("Adding directory %s", path)
+        await addDirectory(path)
+        continue
+      } catch (err) {
+        log("mirror: ", err.stack)
+        error("E: Failed to add path %s", path)
+      }
+    }
+
+    // files
+    if (await pify(isFile)(path)) {
+      try {
+        log("Adding file %s", path)
+        await addFile(path)
+        continue
+      } catch (err) {
+        log("addFile:", err.stack)
+        error("E: Failed to add path %s", path)
+      }
+    }
+
+    // symbolic links
+    if (await pify(isSymlink)(path)) {
+      // @TODO(werle) - implement me
+    }
+  }
+
+  async function addDirectory(path) {
+    const src = resolve(path)
+    const dest = src.replace(process.cwd(), afs.HOME)
+
+    debug("mirror: %s <> %s", src, dest)
+
+    // file stats
+    const stats = {size: 0}
+
+    // accumate deltas
+    await pify((done) => {
+      mirror({name: src}, {name: dest, fs: afs}, {ignore, dryRun: true})
+        .on('error', done)
+        .on('end', done)
+        .on('put', ({stat}) => {
+          stats.size += stat.size
+        })
+    })()
+
+    const progress = createProgressStreams({stats})
+
+    if (!argv.watch || (stats && stats.size)) {
+      await pify((done) => {
+        mirror({name: src}, {name: dest, fs: afs}, {ignore, watch: argv.watch})
+          .on('error', done)
+          .on('end', done)
+          .on('put', onput)
+          .on('put-data', ondata)
+      })()
+    }
+
+    function onput({stat}) {
+      if (stat && stat.size) {
+        progress.updateWriter(stat.size)
+      }
+    }
+
+    function ondata(chunk) {
+      if (chunk && chunk.length) {
+        progress.updateReader(chunk.length)
+      }
+    }
+
+    function ignore(filename) {
+      if (argv.force) {
+        return false
+      } else {
+        log("ignore: %s", filename)
+        return ignored.ignores(filename)
+      }
+    }
+  }
+
+  async function addFile(path) {
+    if (!argv.force && ignored.ignores(path)) {
+      throw new Error(`ignore: ${path} is ignored. Use '--force' to force add file.`)
+    }
+
+    // paths
+    const src = resolve(path)
+    const dest = src.replace(process.cwd(), arafs.HOME)
+
+    // file stats
+    const stats = await pify(stat)(src)
+
+    try {
+      const { mtime } = await pify(arafs.stat)(dest)
+      if (stats.mtime <= mtime) {
+        if (argv.force) {
+          warn("Force adding %s", path)
+        } else {
+          return
+        }
+      }
+    } catch (err) {
+      // file does not exist in AFS, it will be created later
+    }
+
+    // IO stream
+    const reader = fs.createReadStream(src, {autoClose: true})
+    const writer = arafs.createWriteStream(dest)
+
+    // used for spliting buffer chunks
+    const { highWaterMark } = writer._writableState
+
+    reader.setMaxListeners(0)
+    writer.setMaxListeners(0)
+
+    return createPipe({reader, writer, stats})
+  }
+
+  async function createPipe({reader, writer, stats}) {
+    if (!stats || 0 == stats.size) {
+      process.nextTick(() => warn("Wrote 0 bytes"))
+      return writer.end()
+    }
+
+    const progress = createProgressStreams({stats})
+
+    // work
+    await new Promise((resolve, reject) => {
+      let didReadStreamEnd = false
+
+      writer.on('finish', onfinish)
+      writer.on('error', onerror)
+
+      reader.on('error', onerror)
+      reader.on('data', ondata)
+      reader.on('end', onend)
+
+      reader.pipe(writer)
+
+      function ondata(chunk) {
+        debug("Read stream received buffer of size %s", chunk.length)
+        debug("Writing chunk %s", chunk.length)
+        progress.updateReader(chunk.length)
+        process.nextTick(() => {
+          progress.updateWriter(chunk.length)
+        })
+      }
+
+      function onfinish() {
+        debug("Write stream finished")
+        process.nextTick(resolve)
+      }
+
+      function onend() {
+        debug("Read stream ended")
+        didReadStreamEnd = true
+      }
+
+      function onerror(err) {
+        reject(err)
+      }
+    })
+  }
+
+  function createProgressStreams({stats}) {
+    const start = Date.now()
+    const current = {reader: 0, writer: 0}
+
+    const progressBarSpec = {
+      complete: '-',
+      incomplete: ' ',
+      width: Math.floor(0.78*((cliWidth() || 30) - 50)),
+      total: stats.size,
+      stream: differ().pipe(process.stderr)
+    }
+
+    const readerProgressBarTemplate = createProgressBarTemplate('Reading')
+    const writerProgressBarTemplate = createProgressBarTemplate('Writing')
+
+    const readerProgressStream = createProgressStream()
+    const writerProgressStream = createProgressStream()
+
+    // progress bar renderers
+    const readerProgressBar = createProgressBar(readerProgressBarTemplate)
+    const writerProgressBar = createProgressBar(writerProgressBarTemplate)
+
+    // progress stream info
+    readerProgressStream.on('progress', (progress) => {
+      debug("Reader progress %j", progress)
+    })
+    writerProgressStream.on('progress', (progress) => {
+      debug("Writer progress %j", progress)
+    })
+
+    if (stats.size) {
+      readerProgressBar.tick(0, {speed: toLower(bytes(0))})
+      writerProgressBar.tick(0, {speed: toLower(bytes(0))})
+    }
+
+    return {
+      updateReader(size) {
+        current.reader += size
+        const elapsed = Date.now() - start
+        const speed = toLower(bytes(Math.floor(current.reader / (elapsed/1000 || 1))))
+        readerProgressBar.tick(size, {speed})
+        readerProgressStream.write(Buffer(size))
+      },
+
+      updateWriter(size) {
+        current.writer += size
+        const elapsed = Date.now() - start
+        const speed = toLower(bytes(Math.floor(current.writer / (elapsed/1000 || 1))))
+        writerProgressBar.tick(size, {speed})
+        writerProgressStream.write(Buffer(size))
+      }
+    }
+
+    // progress stuff
+    function createProgressBarTemplate(name) {
+      return `afs: info: ${name} [:bar] :speedps :percent :etas`.trim()
+    }
+
+    function createProgressStream() {
+      return new ProgressStream({length: stats.size, time: 100})
+    }
+
+    function createProgressBar(template) {
+      return new ProgressBar(template, progressBarSpec)
+    }
+  }
+}
+
+async function onremove(argv) {
+  let [ ...paths ] = argv.pathspec
+  let did = argv.did
+
+  if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
+  if (!paths || !paths.length) {
+    onfatal(new Error("Missing local file paths. See 'afs remove --help'."))
+  }
+
+  info("id: %s", did)
+  info("paths: ", paths)
+
+  const arafs = await afs.create( { did } )
+
+  // ensure paths exists
+  for (const path of paths) {
+    log("Removing file %s", path)
+    await pify(arafs.rimraf)(path)
+  }
+
+  await arafs.close()
 }
 
 function onfatal(err) {

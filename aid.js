@@ -2,30 +2,26 @@ const debug = require('debug')('ara-filesystem:aid')
 const aid = require('ara-identity')
 const crypto = require('ara-crypto')
 const context = require('ara-context')()
+const { kAidPrefix, kOwnerSuffix, kDidPrefix, kKeyLength } = require('./constants')
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 
-const kDIDPrefix = 'did:ara:'
-const kKeyOwner = '#owner'
-const kKeyLength = 64
-
-/**
- * Creates a new AID, using publicKey as default Authentication
- * @param  {string} publicKey
- * @return {Object}
- */
-async function create(publicKey) {
+async function create(seed, publicKey) {
   if (null == publicKey || 'string' !== typeof publicKey) {
     throw new TypeError('ara-filesystem.aid: Expecting non-empty string.')
   }
 
-  if ((hasDIDMethod(publicKey) && kKeyLength !== publicKey.slice(kDIDPrefix.length).length)
+  if ((hasDIDMethod(publicKey) && kKeyLength !== publicKey.slice(kDidPrefix.length).length)
     || kKeyLength !== publicKey.length) {
     throw new TypeError('ara-filesystem.aid: Identifier must be 64 chars')
   }
 
-  publicKey += kKeyOwner
+  if (null == seed || 'string' !== typeof seed) {
+    throw new Error('ara-filesystem.aid: Expecting seed of type string.')
+  }
 
-  const password = crypto.randomBytes(32).toString()
+  publicKey += kOwnerSuffix
+
+  const password = crypto.blake2b(Buffer.from(seed)).toString()
   let identity
   try {
     const did = { authentication: { type: kEd25519VerificationKey2018, publicKey } }
@@ -52,9 +48,9 @@ async function archive(identity, opts) {
  * @return {Promise}
  */
 async function resolve(did, opts = {}) {
-  const prefix = did.substring(0, kDIDPrefix.length)
-  if (prefix !== kDIDPrefix) {
-    did = kDIDPrefix + did
+  const prefix = did.substring(0, kAidPrefix.length)
+  if (prefix !== kAidPrefix) {
+    did = kAidPrefix + did
   }
 
   if (!opts.cache) {
@@ -75,7 +71,7 @@ async function resolve(did, opts = {}) {
  * @return {Boolean}
  */
 function hasDIDMethod(key) {
-  return kDIDPrefix === key.slice(0, kDIDPrefix.length)
+  return kDidPrefix === key.slice(0, kDidPrefix.length)
 }
 
 module.exports = {

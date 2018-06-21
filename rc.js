@@ -9,7 +9,8 @@ const kAfsDir = 'afs'
 const defaults = () => ({
   afs: {
     archive: {
-      root: resolve(os.homedir(), kAraDir, kAfsDir)
+      root: resolve(os.homedir(), kAraDir, kAfsDir),
+      store: resolve(os.homedir(), kAraDir, kAfsDir, 'nodes')
     }
   }
 })
