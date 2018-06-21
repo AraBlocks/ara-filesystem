@@ -1,5 +1,6 @@
 const { create } = require('../create')
 const test = require('ava')
+const { kTestDid } = require('./_constants')
 
 test('create() valid id', async (t) => {
   const id = 'did:ara:e3a808f2deba17c1dcbaf176b2c529cac80c71b8418fe123439a054f88ae2cd2'
@@ -62,4 +63,11 @@ test('create() no id', async (t) => {
 test('create() null id', async (t) => {
   await t.throws(create({ owner: null }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
   await t.throws(create({ did: null }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+
+test("create(did)", async (t) => {
+  await t.throws(create(), TypeError, "did must be provided")
+  await t.throws(create(1234), TypeError, "did must be string")
+
+  const afs = await create(kTestDid)
+  t.true('object' === typeof afs && null !== afs.ddo)
 })

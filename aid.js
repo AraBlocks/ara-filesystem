@@ -7,7 +7,12 @@ const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 
 async function create(seed, publicKey) {
   if (null == publicKey || 'string' !== typeof publicKey) {
-    throw new Error('ara-filesystem.aid: Expecting non-empty string.')
+    throw new TypeError('ara-filesystem.aid: Expecting non-empty string.')
+  }
+
+  if ((hasDIDMethod(publicKey) && kKeyLength !== publicKey.slice(kDIDPrefix.length).length)
+    || kKeyLength !== publicKey.length) {
+    throw new TypeError('ara-filesystem.aid: Identifier must be 64 chars')
   }
 
   if (null == seed || 'string' !== typeof seed) {
@@ -25,6 +30,12 @@ async function create(seed, publicKey) {
   return identity
 }
 
+/**
+ * Archive a given AID
+ * @param  {string} identity
+ * @param  {Object} opts
+ * @return {void}
+ */
 async function archive(identity, opts) {
   try {
     await aid.archive(identity, opts)
@@ -54,8 +65,18 @@ async function resolve(did, opts = {}) {
   return result
 }
 
+/**
+ * Checks if given key has DID method prefix ('did:ara:')
+ * @param  {string}  key
+ * @return {Boolean}
+ */
+function hasDIDMethod(key) {
+  return kDIDPrefix === key.slice(0, kDIDPrefix.length)
+}
+
 module.exports = {
   archive,
   create,
-  resolve
+  resolve,
+  hasDIDMethod
 }
