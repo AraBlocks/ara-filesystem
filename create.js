@@ -91,7 +91,7 @@ async function create({
     await aid.archive(afsId, { key: kArchiverKey, keystore })
     keystore = await loadSecrets(kResolverKey)
     const { publicKey, secretKey } = afsId
-    const afsDid = publicKey.toString('hex')
+    const afsDid = toHex(publicKey)
     const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     const seed = blake2b(secretKey)
