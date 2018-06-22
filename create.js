@@ -13,7 +13,7 @@ const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
 const { info } = require('ara-console')
-const { createStorage } = require('./storage')
+const storage = require('./storage')
 
 const {
   kAidPrefix, 
@@ -93,7 +93,8 @@ async function create({
         key: kp.publicKey,
         secretKey: kp.secretKey,
         path,
-        storage: createStorage(owner)
+        storage: storage(owner),
+        shallow: true
       })
     } catch (err) { debug(err.stack || err) }
 
@@ -120,7 +121,8 @@ async function create({
         try {
           const afs = await createCFS({
             id,
-            path
+            path,
+            storage: storage(id)
           })
           return done(null, afs)
         } catch (err) {

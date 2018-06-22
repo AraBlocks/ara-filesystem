@@ -27,35 +27,32 @@ const fileIndices = {
   kMetadataSignatures: 3
 }
 
-function createStorage(identity) {
-  let homeDir = resolve(createAFSKeyPath(identity), 'home')
-  return (filename) => {
-    const path = resolve(homeDir, filename)
-    if (filename.includes('metadata/tree')) {
-      return create({path, identity})  
+module.exports = (identity) => {
+  return (filename, hyperdrive, b) => {
+    if (filename.includes('tree') || filename.includes('signatures')) {
+      return create({filename, identity})  
     } else {
-      return ram(path)
+      return ram()
     }
   }
 }
 
-function create({path, identity}) {
-  const fileIndex = _resolveBufferIndex(path)
+function create({filename, identity}) {
+  const fileIndex = _resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
 
   return ras({
     async read(req) {
       const { offset, size } = req
-      debug('read offset', offset, 'size', size)
-      debug(fileIndex)
-      deployed.events.Read((err, result) => debug(err, result))
-      const storageBuffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
-      req.callback(null, storageBuffer)
+      const buffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
+      debug('read', filename, 'hex', buffer)
+      req.callback(null, _decode(buffer))
     },
 
     async write(req) {
       const { data, offset, size } = req
       const hex = web3.utils.bytesToHex(data)
+      debug('write', filename, 'hex', hex)
       const opts = await _getTxOpts()
       await deployed.methods.write(_hashIdentity(identity), fileIndex, offset, hex).send(opts)
       req.callback(null)
@@ -78,7 +75,15 @@ function create({path, identity}) {
 
 async function _getTxOpts(index = 0) {
   const defaultAccount = await web3.eth.getAccounts()
-  return { from: defaultAccount[index] }
+  return { from: defaultAccount[index], gas: 5000000 }
+}
+
+function _decode(bytes) {
+  if ('string' == typeof bytes) {
+    bytes = bytes.replace(/^0x/, '')
+    bytes = Buffer.from(bytes, 'hex')
+  }
+  return Buffer.from(bytes, 'hex')
 }
 
 function _resolveBufferIndex(path) {
@@ -100,20 +105,4 @@ function _hashIdentity(identity) {
 
 function _hexToAscii(h) {
   return h ? web3.utils.hexToAscii(h) : ''
-}
-
-function _toHex(buf) {
-  if (Buffer.isBuffer(buf)) {
-    return buf.toString('hex')
-  } else if ('number' == typeof buf) {
-    return toHex(Buffer.from([buf]))
-  } else if ('string' == typeof buf) {
-    return toHex(Buffer.from(buf))
-  } else {
-    return toHex(Buffer.from(buf))
-  }
-}
-
-module.exports = {
-  createStorage
 }

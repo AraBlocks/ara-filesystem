@@ -1,3 +1,1 @@
-module.exports = { 
-  gas: 10000000
-}
+module.exports = { }
