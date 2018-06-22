@@ -28,9 +28,9 @@ const fileIndices = {
 }
 
 module.exports = (identity) => {
-  return (filename, hyperdrive, b) => {
+  return (filename) => {
     if (filename.includes('tree') || filename.includes('signatures')) {
-      return create({filename, identity})  
+      return create({filename, identity})
     } else {
       return ram()
     }

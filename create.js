@@ -122,7 +122,8 @@ async function create({
           const afs = await createCFS({
             id,
             path,
-            storage: storage(id)
+            storage: storage(id),
+            shallow: true
           })
           return done(null, afs)
         } catch (err) {
