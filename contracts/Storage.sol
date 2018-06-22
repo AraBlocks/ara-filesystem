@@ -8,11 +8,15 @@ contract Storage {
   // 1 - content/signatures file
   // 2 - metadata/tree file
   // 3 - metadata/signatures file
-  mapping (string => mapping(uint8 => bytes)) buffer_mappings;
+  mapping (string => mapping(uint8 => Buffers)) buffer_mappings;
+
+  struct Buffers {
+    mapping (uint => bytes) buffers;
+  }
 
   event Write(string _identity);
-  event Write(string _identity, uint8 _file);
-  event Unlink(string _identity);
+  event Read(string _identity, uint offset);
+  event Delete(string _identity);
 
   constructor() public {
     owner = msg.sender;
@@ -22,37 +26,25 @@ contract Storage {
     if (msg.sender == owner) _;
   }
 
-  function write(string identity, bytes ctBuffer, bytes csBuffer, 
-    bytes mtBuffer, bytes msBuffer) public restricted {
-    buffer_mappings[identity][0] = ctBuffer;
-    buffer_mappings[identity][1] = csBuffer;
-    buffer_mappings[identity][2] = mtBuffer;
-    buffer_mappings[identity][3] = msBuffer;
+  function write(string identity, uint8 file, uint offset, bytes buffer) public restricted {
+    buffer_mappings[identity][file].buffers[offset] = buffer;
     emit Write(identity);
   }
 
-  function write(string identity, uint8 file, bytes buffer) public restricted {
-    buffer_mappings[identity][file] = buffer;
-    emit Write(identity, file);
+  function read(string identity, uint8 file, uint offset) public view returns (bytes buffer) {
+    emit Read(identity, offset);
+    return buffer_mappings[identity][file].buffers[offset];
   }
 
-  function read(string identity) public view returns (bytes ctBuffer, bytes csBuffer,
-    bytes mtBuffer, bytes msBuffer) {
-    ctBuffer = buffer_mappings[identity][0];
-    csBuffer = buffer_mappings[identity][1];
-    mtBuffer = buffer_mappings[identity][2];
-    msBuffer = buffer_mappings[identity][3];
-    return (csBuffer, csBuffer, mtBuffer, msBuffer);
+  function stat(string identity, uint8 file) public view returns (uint length) {
+    // TODO(cckelly)
+    return 0;
   }
 
-  function read(string identity, uint8 file) public view returns (bytes buffer) {
-    return buffer_mappings[identity][file];
-  }
-
-  function unlink(string identity) public restricted {
+  function del(string identity) public restricted {
     for (uint8 i = 0; i < 4; i++) {
       delete buffer_mappings[identity][i];
     }
-    emit Unlink(identity);
+    emit Delete(identity);
   }
 }

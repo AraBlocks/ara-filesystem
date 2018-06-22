@@ -1,10 +1,9 @@
 const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
+const ram = require('random-access-memory')
 const raf = require('random-access-file')
-const hyperdrive = require('hyperdrive')
 const fs = require('fs')
 const pify = require('pify')
-const { create } = require('./create')
 const { resolve } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { blake2b } = require('ara-crypto')
@@ -28,76 +27,58 @@ const fileIndices = {
   kMetadataSignatures: 3
 }
 
-// TODO(cckelly): normalize identity,
-// combine validate methods
-async function write(identity, onwrite = noop) {
-  _validateIdentity(identity, 'write')
-
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const rootBuf = web3.utils.asciiToHex('root')
-  const sigBuf = web3.utils.asciiToHex('signature')
-
+function createStorage(identity) {
   let homeDir = resolve(createAFSKeyPath(identity), 'home')
-
-  const archive = hyperdrive((filename) => {
+  return (filename) => {
     const path = resolve(homeDir, filename)
-    debug(path)
-    if (filename.includes('tree') || filename.includes('signatures')) {
-      return _createStorage({path, identity})  
+    if (filename.includes('metadata/tree')) {
+      return create({path, identity})  
     } else {
-      return raf(path) 
+      return ram(path)
     }
-  })
-
-  // deployed.events.Write(onwrite)
+  }
 }
 
-async function read({identity, file}) {
-  _validateIdentity(identity, 'read')
-
-  const hIdentity = _hashIdentity(identity)
-
+function create({path, identity}) {
+  const fileIndex = _resolveBufferIndex(path)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const result = await deployed.methods.read(hIdentity, file).call()
 
-  return result
-}
-
-async function unlink(identity = '', onunlink = noop) {
-  _validateIdentity(identity, 'unlink')
-
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const hIdentity = _hashIdentity(identity)
-  deployed.events.Unlink(onunlink)
-
-  const opts = { from: kLocalAccountAddress }
-  await deployed.methods.unlink(hIdentity).send(opts)
-}
-
-async function _getAccounts(index = 0) {
-  return await pify(web3.eth.getAccounts)()[index]
-}
-
-function _createStorage({path, identity}) {
   return ras({
     async read(req) {
-      debug('read')
+      const { offset, size } = req
+      debug('read offset', offset, 'size', size)
+      debug(fileIndex)
+      deployed.events.Read((err, result) => debug(err, result))
+      const storageBuffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
+      req.callback(null, storageBuffer)
     },
 
     async write(req) {
-      debug(req)
-      const localBuffer = web3.utils.asciiToHex(req.data.toString())
-      const fileIndex = _resolveBufferIndex(path)
-      const storageBuffer = await read({identity, file: fileIndex})
-      // buffers are different
-      if (null === storageBuffer) {
-        const deployed = new web3.eth.Contract(abi, kStorageAddress)
-        const defaultAccount = await web3.eth.getAccounts()
-        const opts = { from: defaultAccount[0] }
-        await deployed.methods.write(_hashIdentity(identity), fileIndex, localBuffer).send(opts)
-      }
+      const { data, offset, size } = req
+      const hex = web3.utils.bytesToHex(data)
+      const opts = await _getTxOpts()
+      await deployed.methods.write(_hashIdentity(identity), fileIndex, offset, hex).send(opts)
+      req.callback(null)
+    },
+
+    async stat(req) {
+      debug('stat', identity)
+      const stats = await deployed.methods.stat(_hashIdentity(identity), fileIndex).call()
+      req.callback(null, stats)
+    },
+
+    async del(req) {
+      debug('del', identity)
+      const opts = await _getTxOpts()
+      await deployed.methods.del(_hashIdentity(identity)).send(opts)
+      req.callback(null)
     }
   })
+}
+
+async function _getTxOpts(index = 0) {
+  const defaultAccount = await web3.eth.getAccounts()
+  return { from: defaultAccount[index] }
 }
 
 function _resolveBufferIndex(path) {
@@ -113,22 +94,26 @@ function _resolveBufferIndex(path) {
   return index
 }
 
-function _validateIdentity(identity, label) {
-  if (!identity || 'string' !== typeof identity) {
-    throw new TypeError(`ara-filesystem:${label}: Identity must be non-empty string.`)
-  }
+function _hashIdentity(identity) {
+  return blake2b(Buffer.from(identity)).toString('hex')
 }
 
 function _hexToAscii(h) {
   return h ? web3.utils.hexToAscii(h) : ''
 }
 
-function _hashIdentity(identity) {
-  return blake2b(Buffer.from(identity)).toString('hex')
+function _toHex(buf) {
+  if (Buffer.isBuffer(buf)) {
+    return buf.toString('hex')
+  } else if ('number' == typeof buf) {
+    return toHex(Buffer.from([buf]))
+  } else if ('string' == typeof buf) {
+    return toHex(Buffer.from(buf))
+  } else {
+    return toHex(Buffer.from(buf))
+  }
 }
 
 module.exports = {
-  write,
-  read,
-  unlink
+  createStorage
 }

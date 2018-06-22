@@ -5,9 +5,6 @@ const { toHex } = require('ara-identity/util')
 const { secrets } = require('ara-network')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
-const {
-  kAidPrefix, kDidPrefix, kArchiverKey, kResolverKey
-} = require('./constants')
 const aid = require('./aid')
 const bip39 = require('bip39')
 const multidrive = require('multidrive')
@@ -16,6 +13,14 @@ const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
 const { info } = require('ara-console')
+const { createStorage } = require('./storage')
+
+const {
+  kAidPrefix, 
+  kDidPrefix, 
+  kArchiverKey, 
+  kResolverKey
+} = require('./constants')
 
 /**
  * Creates an AFS with the given Ara identity
@@ -30,7 +35,6 @@ async function create({
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
-  info('create')
   if (did) {
     did = validateDid(did)
 
@@ -44,9 +48,7 @@ async function create({
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
     const drives = await createMultidrive(pathPrefix)
 
-    debug('DID', did)
     const path = createAFSKeyPath(did)
-    debug(path)
 
     const afs = await pify(drives.create)({
       id: pathPrefix,
@@ -84,15 +86,14 @@ async function create({
 
     let afs
     try {
-      debug('DID', afsDid)
       // generate AFS key path
       const path = createAFSKeyPath(afsDid)
-      debug(path)
       afs = await createCFS({
         id,
         key: kp.publicKey,
         secretKey: kp.secretKey,
-        path
+        path,
+        storage: createStorage(owner)
       })
     } catch (err) { debug(err.stack || err) }
 
@@ -127,7 +128,7 @@ async function create({
         }
         return null
       },
-
+ 
       async (afs, done) => {
         try {
           await afs.close()
