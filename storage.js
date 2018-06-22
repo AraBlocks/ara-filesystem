@@ -4,13 +4,20 @@ const raf = require('random-access-file')
 const hyperdrive = require('hyperdrive')
 const fs = require('fs')
 const pify = require('pify')
+const { create } = require('./create')
 const { resolve } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 
-const kStorageAddress = '0x345ca3e014aaf5dca488057592ee47305d9b3e10'
+const { 
+  kMetadataRegister, 
+  kContentRegister,
+  kTreeFile,
+  kSignaturesFile,
+  kStorageAddress
+} = require('./constants')
 
 const noop = () => { }
 
@@ -21,31 +28,28 @@ const fileIndices = {
   kMetadataSignatures: 3
 }
 
+// TODO(cckelly): normalize identity,
+// combine validate methods
 async function write(identity, onwrite = noop) {
   _validateIdentity(identity, 'write')
 
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const hIdentity = _hashIdentity(identity)
   const rootBuf = web3.utils.asciiToHex('root')
   const sigBuf = web3.utils.asciiToHex('signature')
 
-  const path = createAFSKeyPath(identity)
-  debug(path)
+  let homeDir = resolve(createAFSKeyPath(identity), 'home')
 
-  // const archive = hyperdrive((filename) => {
-  //   debug('filename', filename)
-  //   const path = resolve(homeDir, filename)
-  //   if (filename.includes('tree') || filename.includes('signatures')) {
-  //     return _createStorage({path, identity})  
-  //   } else {
-  //     return raf(resolve(homeDir, filename))
-  //   }
-  // })  
+  const archive = hyperdrive((filename) => {
+    const path = resolve(homeDir, filename)
+    debug(path)
+    if (filename.includes('tree') || filename.includes('signatures')) {
+      return _createStorage({path, identity})  
+    } else {
+      return raf(path) 
+    }
+  })
 
   // deployed.events.Write(onwrite)
-
-  // const opts = { from: kLocalAccountAddress }
-  // await deployed.methods.write(hIdentity, rootBuf, sigBuf, price).send(opts)
 }
 
 async function read({identity, file}) {
@@ -56,11 +60,7 @@ async function read({identity, file}) {
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
   const result = await deployed.methods.read(hIdentity, file).call()
 
-  debug(result)
-  return {
-    root: _hexToAscii(result.root),
-    signature: _hexToAscii(result.signature)
-  }
+  return result
 }
 
 async function unlink(identity = '', onunlink = noop) {
@@ -79,17 +79,38 @@ async function _getAccounts(index = 0) {
 }
 
 function _createStorage({path, identity}) {
-  debug('IN HERE', path)
   return ras({
     async read(req) {
       debug('read')
     },
 
     async write(req) {
-      const localBuffer = req.data
-      debug(localBuffer)
+      debug(req)
+      const localBuffer = web3.utils.asciiToHex(req.data.toString())
+      const fileIndex = _resolveBufferIndex(path)
+      const storageBuffer = await read({identity, file: fileIndex})
+      // buffers are different
+      if (null === storageBuffer) {
+        const deployed = new web3.eth.Contract(abi, kStorageAddress)
+        const defaultAccount = await web3.eth.getAccounts()
+        const opts = { from: defaultAccount[0] }
+        await deployed.methods.write(_hashIdentity(identity), fileIndex, localBuffer).send(opts)
+      }
     }
   })
+}
+
+function _resolveBufferIndex(path) {
+  const parsedPath = path.split('/')
+  const file = parsedPath[parsedPath.length - 1]
+  const register = parsedPath[parsedPath.length - 2]
+  let index = -1
+  if (kMetadataRegister === register) {
+    index = (kTreeFile === file) ? fileIndices.kMetadataTree : fileIndices.kMetadataSignatures
+  } else if (kContentRegister === register) {
+    index = (kTreeFile === file) ? fileIndices.kContentTree : fileIndices.kContentSignatures
+  }
+  return index
 }
 
 function _validateIdentity(identity, label) {

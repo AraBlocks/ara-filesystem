@@ -15,6 +15,7 @@ const pify = require('pify')
 const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
+const { info } = require('ara-console')
 
 /**
  * Creates an AFS with the given Ara identity
@@ -29,6 +30,7 @@ async function create({
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
+  info('create')
   if (did) {
     did = validateDid(did)
 
@@ -42,8 +44,10 @@ async function create({
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
     const drives = await createMultidrive(pathPrefix)
 
+    debug('DID', did)
     const path = createAFSKeyPath(did)
-    console.log(path)
+    debug(path)
+
     const afs = await pify(drives.create)({
       id: pathPrefix,
       path
@@ -80,6 +84,7 @@ async function create({
 
     let afs
     try {
+      debug('DID', afsDid)
       // generate AFS key path
       const path = createAFSKeyPath(afsDid)
       debug(path)

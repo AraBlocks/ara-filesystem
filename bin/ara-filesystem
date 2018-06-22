@@ -19,6 +19,8 @@ const isDirectory = require('is-directory')
 const isFile = require('is-file')
 const isSymlink = require('is-symlink')
 
+const ignored = require('../lib/ignore')
+
 const toLower = (x) => String(x).toLowerCase()
 const $0 = basename(process.argv[1] || package.name)
 
