@@ -1,9 +1,7 @@
 const { create } = require('./create')
-const { read, write, unlink } = require('./storage')
+const { add } = require('./add')
 
 module.exports = {
   create,
-  write,
-  read,
-  unlink
+  add
 }

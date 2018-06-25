@@ -44,12 +44,14 @@ function create({filename, identity}) {
 
   return ras({
     async read(req) {
+      debug('read')
       const { offset, size } = req
       const buffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
       req.callback(null, _decode(buffer))
     },
 
     async write(req) {
+      debug('write')
       const { data, offset, size } = req
       const hex = web3.utils.bytesToHex(data)
       const opts = await _getTxOpts()
