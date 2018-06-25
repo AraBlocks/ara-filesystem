@@ -34,7 +34,7 @@ contract Storage {
     if (offset > buffer_mappings[identity][file].largest_key) {
       buffer_mappings[identity][file].largest_key = offset;
     }
-    emit Write(identity, buffer_mappings[identity][file].largest_key);
+    emit Write(identity);
   }
 
   function read(string identity, uint8 file, uint8 offset) public view returns (bytes buffer) {
