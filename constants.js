@@ -9,5 +9,5 @@ module.exports = {
   kContentRegister: 'content',
   kTreeFile: 'tree',
   kSignaturesFile: 'signatures',
-  kStorageAddress: '0x345ca3e014aaf5dca488057592ee47305d9b3e10'
+  kStorageAddress: '0x90a78a400c4c7455bf80e0a9a4f67d006fe1bc7a'
 }

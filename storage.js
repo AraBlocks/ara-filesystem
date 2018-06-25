@@ -28,7 +28,6 @@ const fileIndices = {
 }
 
 module.exports = (identity) => {
-  debug(identity)
   return (filename) => {
     if (filename.includes('tree') || filename.includes('signatures')) {
       return create({filename, identity})
@@ -44,15 +43,15 @@ function create({filename, identity}) {
 
   return ras({
     async read(req) {
-      debug('read')
       const { offset, size } = req
+      debug(filename, 'read at offset', offset, 'size', size)
       const buffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
       req.callback(null, _decode(buffer))
     },
 
     async write(req) {
-      debug('write')
       const { data, offset, size } = req
+      debug(filename, 'write at offset', offset, 'size', size)
       const hex = web3.utils.bytesToHex(data)
       const opts = await _getTxOpts()
       await deployed.methods.write(_hashIdentity(identity), fileIndex, offset, hex).send(opts)

@@ -35,6 +35,7 @@ async function create({
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
+  let afs
   if (did) {
     did = validateDid(did)
 
@@ -46,11 +47,11 @@ async function create({
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive(pathPrefix)
+    const drives = await createMultidrive({did, pathPrefix})
 
     const path = createAFSKeyPath(did)
 
-    const afs = await pify(drives.create)({
+    afs = await pify(drives.create)({
       id: pathPrefix,
       path
     })
@@ -58,7 +59,6 @@ async function create({
     afs.did = did
     afs.ddo = afsDdo
 
-    return afs
   } else if (owner) {
     owner = validateDid(owner)
 
@@ -84,7 +84,6 @@ async function create({
     const kp = keyPair(blake2b(secretKey))
     const id = toHex(blake2b(Buffer.from(afsDid)))
 
-    let afs
     try {
       // generate AFS key path
       const path = createAFSKeyPath(afsDid)
@@ -93,7 +92,7 @@ async function create({
         key: kp.publicKey,
         secretKey: kp.secretKey,
         path,
-        storage: storage(owner),
+        storage: storage(afsDid),
         shallow: true
       })
     } catch (err) { debug(err.stack || err) }
@@ -105,15 +104,16 @@ async function create({
     kp.publicKey.fill(0)
     kp.secretKey.fill(0)
 
-    return afs
   }
 
-  return null
+  console.log(afs.key)
+  return afs
 
-  async function createMultidrive(pathPrefix) {
+  async function createMultidrive({did, pathPrefix}) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
+    
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
@@ -122,7 +122,7 @@ async function create({
           const afs = await createCFS({
             id,
             path,
-            storage: storage(id),
+            storage: storage(did),
             shallow: true
           })
           return done(null, afs)
