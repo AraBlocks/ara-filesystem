@@ -30,17 +30,17 @@ const {
 
 const noop = () => { }
 
-module.exports = (identity) => {
+module.exports = (identity, password) => {
   return (filename, drive, path) => {
     if (filename.includes('tree') || filename.includes('signatures')) {
-      return create({filename, identity})
+      return create({filename, identity, password})
     } else {
       return raf(resolve(path, filename))
     }
   }
 }
 
-function create({filename, identity}) {
+function create({filename, identity, password}) {
   const fileIndex = _resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
 
@@ -54,11 +54,8 @@ function create({filename, identity}) {
 
     async write(req) {
       const { data, offset, size } = req
-      debug(filename, 'write at offset', offset, 'size', size)
-      const hex = web3.utils.bytesToHex(data)
-      const opts = await _getTxOpts()
-      await deployed.methods.write(_hashIdentity(identity), fileIndex, offset, hex).send(opts)
-      await append({did: identity, fileIndex, data, offset})
+      debug(filename, 'staged write at offset', offset, 'size', size)
+      await append({did: identity, fileIndex, data, offset, password})
       req.callback(null)
     },
 

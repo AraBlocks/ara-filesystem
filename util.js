@@ -6,7 +6,6 @@ const {
 
 function generateKeypair(password) {
   const passHash = blake2b(Buffer.from(password))
-
   return { publicKey, secretKey } = keyPair(passHash)
 }
 

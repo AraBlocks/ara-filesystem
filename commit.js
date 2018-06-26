@@ -5,10 +5,10 @@ const { blake2b } = require('ara-crypto')
 const { resolve } = require('path')
 const { toHex } = require('ara-identity/util')
 const { createAFSKeyPath } = require('./key-path')
-const { 
-  kFileMappings,
-  kTempPassword,
-  kStagingFile } = require('./constants')
+const { web3 } = require('ara-context')()
+const { abi } = require('./build/contracts/Storage.json')
+const { kFileMappings, kStagingFile } = require('./constants')
+
 const {
   kContentTree,
   kContentSignatures,
@@ -17,22 +17,45 @@ const {
 } = kFileMappings
 const { generateKeypair, encrypt, decrypt, randomBytes } = require('./util')
 
-async function commit(did) {
-  
+async function commit({
+  did = '',
+  password = ''
+} = {}) {
+
+  const contents = await _readStagedFile(password)
+  // TODO(cckelly): should use reused logic from here and storage.js into util.js
+  const deployed = new web3.eth.Contract(abi, kStorageAddress)
+
+  let i = 0
+  for (const key in contents) {
+    const buffers = contents[key]
+    for (const buf in buffers) {
+      const data = buffers[buf]
+      const hIdentity = blake2b(Buffer.from(did)).toString('hex')
+      const defaultAccount = await web3.eth.getAccounts()
+      await deployed.methods.write(hIdentity, i, buf, web3.utils.bytesToHex(data)).send({
+        from: defaultAccount[0],
+        gas: 500000
+      })
+      debug('committed', data)
+    }
+    i++
+  }
+
 }
 
 async function append({
-  did = '',
+  did,
   fileIndex,
   offset,
   data,
-  password = kTempPassword
+  password = ''
 } = {}) {
   const path = resolve(createAFSKeyPath(did), kStagingFile)
   await _writeStagedFile({fileIndex, offset, data, password, path})
 }
 
-async function _readStagedFile(password) {
+async function _readStagedFile(path, password) {
   let file
   try { 
     file = await pify(fs.readFile)(path, 'utf8')
@@ -49,13 +72,14 @@ async function _writeStagedFile({fileIndex, offset, data, password, path} = {}) 
     await pify(fs.writeFile)(path, '')
   }
 
-  const json = await _readStagedFile(password)
+  const json = await _readStagedFile(path, password)
   const hex = data.toString('hex')
 
   const filename = _getFilenameByIndex(fileIndex)
   if (filename) {
     if (!json[filename]) json[filename] = {}
     json[filename][offset] = hex
+    console.log(JSON.stringify(_encryptJSON(json, password)))
     await pify(fs.writeFile)(path, JSON.stringify(_encryptJSON(json, password)))
   }
 }
@@ -86,7 +110,7 @@ function _decryptJSON(keystore, password) {
   return decryptedJSON
 }
 
-async function _deleteStagedFile() {
+async function _deleteStagedFile(path) {
   await pify(fs.unlink)(path)
 }
 

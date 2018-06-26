@@ -5,6 +5,7 @@ const { info, warn, error, log } = require('ara-console')
 const { basename, resolve } = require('path')
 const { stat, access } = require('fs')
 const cliWidth = require('cli-width')
+const inquirer = require('inquirer')
 const differ = require('ansi-diff-stream')
 const pify = require('pify')
 const program = require('yargs')
@@ -78,6 +79,13 @@ const { argv } = program
         describe: "An AFS ARA decentralized identity (did) URI"
       })
   }, onhistory)
+  .command('commit <did>', "Push local staged AFS changes to the Ethereum blockchain and DCDN", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+  }, oncommit)
 
 async function oncreate(argv) {
   let owner = argv.owner
@@ -93,9 +101,11 @@ async function oncreate(argv) {
     owner = 'did:ara:' + owner
   }
 
+  const { password } = await promptForPassword()
+
   let arafs
   try {
-    arafs = await afs.create( { owner } )
+    arafs = await afs.create({ owner, password })
   } catch (err) { onfatal(err) }
 
   info('AFS created with did', arafs.did)
@@ -115,6 +125,8 @@ async function onhistory(argv) {
     did = 'did:ara:' + did
   }
 
+  const { password } = await promptForPassword()
+
   const tableOpts = {
     columnCount: 3,
     border: table.getBorderCharacters('ramac'),
@@ -130,7 +142,7 @@ async function onhistory(argv) {
     ]
   }
 
-  const arafs = await afs.create( { did } )
+  const arafs = await afs.create({ did, password })
   const stream = table.createStream(tableOpts)
 
   arafs.history(argv.partition || arafs.HOME)
@@ -165,7 +177,9 @@ async function onadd(argv) {
   info("id: %s", did)
   info("paths: ", paths)
 
-  await afs.add({ did, paths })
+  const { password } = await promptForPassword()
+
+  await afs.add({ did, paths, password })
 }
 
 async function onremove(argv) {
@@ -180,7 +194,34 @@ async function onremove(argv) {
   info("id: %s", did)
   info("paths: ", paths)
 
-  await afs.remove({ did, paths })
+  const { password } = await promptForPassword()
+
+  await afs.remove({ did, paths, password })
+}
+
+async function oncommit({did}) {
+  if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
+
+  const password = await promptForPassword()
+
+  if (!password) {
+    onfatal(new TypeError("Please provide a password to archive your identity."))
+  }
+
+  info("committing with identity: %s", did)
+
+  await afs.commit({ did, password })
+}
+
+async function promptForPassword() {
+  return await inquirer.prompt([{
+    type: 'password',
+    name: 'password',
+    message:
+    "Please provide a passphrase for your identity. This is needed to " +
+    "archive your identity.\n" +
+    "Passphrase:"
+  }]) 
 }
 
 function onfatal(err) {

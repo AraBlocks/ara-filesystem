@@ -20,8 +20,7 @@ const { generateKeypair, encrypt, decrypt } = require('./util')
 const {
   kAidPrefix, 
   kDidPrefix, 
-  kResolverKey,
-  kTempPassword
+  kResolverKey
 } = require('./constants')
 
 /**
@@ -32,7 +31,7 @@ const {
 async function create({
   owner = null,
   did = null,
-  password = kTempPassword
+  password = ''
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
@@ -50,7 +49,7 @@ async function create({
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({did, pathPrefix})
+    const drives = await createMultidrive({did, pathPrefix, password})
 
     const path = createAFSKeyPath(did)
 
@@ -99,7 +98,7 @@ async function create({
         key: kp.publicKey,
         secretKey: kp.secretKey,
         path,
-        storage: storage(afsDid),
+        storage: storage(afsDid, password),
         shallow: true
       })
     } catch (err) { debug(err.stack || err) }
@@ -113,10 +112,9 @@ async function create({
 
   }
 
-  console.log(afs.key)
   return afs
 
-  async function createMultidrive({did, pathPrefix}) {
+  async function createMultidrive({did, pathPrefix, password}) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
@@ -129,7 +127,7 @@ async function create({
           const afs = await createCFS({
             id,
             path,
-            storage: storage(did),
+            storage: storage(did, password),
             shallow: true
           })
           return done(null, afs)
