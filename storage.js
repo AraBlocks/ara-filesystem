@@ -9,6 +9,7 @@ const { createAFSKeyPath } = require('./key-path')
 const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
+const { generateKeypair, encrypt, decrypt } = require('./util')
 
 const { 
   kMetadataRegister, 

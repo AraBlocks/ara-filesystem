@@ -15,6 +15,7 @@ const rc = require('./rc')()
 const toilet = require('toiletdb')
 const { info } = require('ara-console')
 const storage = require('./storage')
+const { generateKeypair, encrypt, decrypt } = require('./util')
 
 const {
   kAidPrefix, 
@@ -64,9 +65,8 @@ async function create({
 
   } else if (owner) {
     password = 'pass'
-    const passHash = blake2b(Buffer.from(password))
-
-    const { publicKey: userPublicKey, secretKey: userSecretKey } = keyPair(passHash)
+    
+    const { publicKey: userPublicKey, secretKey: userSecretKey } = generateKeypair(password)
     const { did: didUri } = createDid(userPublicKey)
 
     if (didUri !== owner) {

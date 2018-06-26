@@ -9,6 +9,7 @@ const {
   kMetadataTree,
   kMetadataSignatures
 } = kFileMappings
+const { generateKeypair, encrypt, decrypt, randomBytes } = require('./util')
 
 const kStagedPath = resolve(__dirname, './staged.json')
 
@@ -20,7 +21,8 @@ async function append({
   did = '',
   fileIndex,
   offset,
-  data
+  data,
+  password
 } = {}) {
   await _writeStagedFile({fileIndex, offset, data})
 }
@@ -48,8 +50,28 @@ async function _writeStagedFile({fileIndex, offset, data} = {}) {
   if (filename) {
     if (!json[filename]) json[filename] = {}
     json[filename][offset] = hex
-    await pify(fs.writeFile)(kStagedPath, JSON.stringify(json))
+    await pify(fs.writeFile)(kStagedPath, JSON.stringify(_encryptJSON(json, 'pass')))
   }
+}
+
+function _encryptJSON(json, password) {
+  const { secretKey } = generateKeypair(password)
+  const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
+
+  const encryptedJSON = encrypt(JSON.stringify(json), {
+    key: encryptionKey,
+    iv: randomBytes(16)
+  })
+
+  secretKey.fill(0)
+  encryptionKey.fill(0)
+
+  return encryptedJSON
+}
+
+function _decryptJSON(keystore, password) {
+  const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
+  
 }
 
 async function _deleteStagedFile() {
