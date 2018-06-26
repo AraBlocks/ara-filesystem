@@ -1,4 +1,8 @@
-const { blake2b, keyPair, encrypt: cryptoEncrypt, decrypt: cryptoDecrypt, randomBytes: cryptoRandomBytes } = require('ara-crypto')
+const { 
+  blake2b, keyPair, 
+  encrypt: cryptoEncrypt, 
+  decrypt: cryptoDecrypt, 
+  randomBytes: cryptoRandomBytes } = require('ara-crypto')
 
 function generateKeypair(password) {
   const passHash = blake2b(Buffer.from(password))
@@ -11,7 +15,9 @@ function encrypt(value, opts) {
 }
 
 function decrypt(value, opts) {
-  return cryptoDecrypt(value, opts)
+  const keystore = JSON.parse(value.keystore)
+  
+  return cryptoDecrypt(keystore, opts)
 }
 
 function randomBytes(size) {

@@ -8,7 +8,8 @@ module.exports = {
   kContentRegister: 'content',
   kTreeFile: 'tree',
   kSignaturesFile: 'signatures',
-  kStorageAddress: '0x90a78a400c4c7455bf80e0a9a4f67d006fe1bc7a',
+  kStorageAddress: '0x32dbb108bc45d2a1f4fbcfabc01cc3d3e4670141',
+  kTempPassword: 'pass',
 
   kFileMappings: {
     kContentTree: {

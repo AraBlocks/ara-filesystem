@@ -20,7 +20,8 @@ const { generateKeypair, encrypt, decrypt } = require('./util')
 const {
   kAidPrefix, 
   kDidPrefix, 
-  kResolverKey
+  kResolverKey,
+  kTempPassword
 } = require('./constants')
 
 /**
@@ -31,13 +32,11 @@ const {
 async function create({
   owner = null,
   did = null,
-  password = ''
+  password = kTempPassword
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
-
-
 
   let afs
   if (did) {
@@ -64,8 +63,7 @@ async function create({
     afs.ddo = afsDdo
 
   } else if (owner) {
-    password = 'pass'
-    
+
     const { publicKey: userPublicKey, secretKey: userSecretKey } = generateKeypair(password)
     const { did: didUri } = createDid(userPublicKey)
 

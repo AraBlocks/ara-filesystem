@@ -2,7 +2,9 @@ const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
 const { resolve } = require('path')
-const { kFileMappings } = require('./constants')
+const { 
+  kFileMappings,
+  kTempPassword } = require('./constants')
 const {
   kContentTree,
   kContentSignatures,
@@ -22,20 +24,21 @@ async function append({
   fileIndex,
   offset,
   data,
-  password
+  password = kTempPassword
 } = {}) {
-  await _writeStagedFile({fileIndex, offset, data})
+  await _writeStagedFile({fileIndex, offset, data, password})
 }
 
-async function _readStagedFile() {
+async function _readStagedFile(password) {
   let file
   try { 
     file = await pify(fs.readFile)(kStagedPath, 'utf8')
   } catch (err) { debug(err.stack || err) }
-  return file ? JSON.parse(file) : {}
+  const decryptedFile = file ? JSON.parse(_decryptJSON(file, password)) : {}
+  return decryptedFile
 }
 
-async function _writeStagedFile({fileIndex, offset, data} = {}) {
+async function _writeStagedFile({fileIndex, offset, data, password} = {}) {
   // create file if not available
   try {
     await pify(fs.access)(kStagedPath)
@@ -43,14 +46,14 @@ async function _writeStagedFile({fileIndex, offset, data} = {}) {
     await pify(fs.writeFile)(kStagedPath, '')
   }
 
-  const json = await _readStagedFile()
+  const json = await _readStagedFile(password)
   const hex = data.toString('hex')
 
   const filename = _getFilenameByIndex(fileIndex)
   if (filename) {
     if (!json[filename]) json[filename] = {}
     json[filename][offset] = hex
-    await pify(fs.writeFile)(kStagedPath, JSON.stringify(_encryptJSON(json, 'pass')))
+    await pify(fs.writeFile)(kStagedPath, JSON.stringify(_encryptJSON(json, password)))
   }
 }
 
@@ -70,8 +73,13 @@ function _encryptJSON(json, password) {
 }
 
 function _decryptJSON(keystore, password) {
+  const { secretKey } = generateKeypair(password)
   const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
-  
+  const decryptedJSON = decrypt({keystore}, { key: encryptionKey })
+
+  encryptionKey.fill(0)
+
+  return decryptedJSON
 }
 
 async function _deleteStagedFile() {
