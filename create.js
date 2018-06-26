@@ -2,6 +2,7 @@ const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
+const { create: createDid } = require('ara-identity/did')
 const { secrets } = require('ara-network')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
@@ -28,11 +29,14 @@ const {
  */
 async function create({
   owner = null,
-  did = null
+  did = null,
+  password = ''
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
+
+
 
   let afs
   if (did) {
@@ -59,9 +63,18 @@ async function create({
     afs.ddo = afsDdo
 
   } else if (owner) {
+    password = 'pass'
+    const passHash = blake2b(Buffer.from(password))
+
+    const { publicKey: userPublicKey, secretKey: userSecretKey } = keyPair(passHash)
+    const { did: didUri } = createDid(userPublicKey)
+
+    if (didUri !== owner) {
+      throw new Error('ara-filesystem.create: incorrect password')
+    }
+
     owner = validateDid(owner)
 
-    // TODO (mahjiang): ensure ownership of DID
     const ddo = await aid.resolve(owner)
     if (null === ddo || 'object' !== typeof ddo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
