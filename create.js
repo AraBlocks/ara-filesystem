@@ -18,7 +18,6 @@ const storage = require('./storage')
 const {
   kAidPrefix, 
   kDidPrefix, 
-  kArchiverKey, 
   kResolverKey
 } = require('./constants')
 
@@ -72,14 +71,11 @@ async function create({
     debug(mnemonic)
     const afsId = await aid.create(mnemonic, owner)
 
-    let keystore = await loadSecrets(kArchiverKey)
-    await aid.archive(afsId, { key: kArchiverKey, keystore })
-
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
 
     keystore = await loadSecrets(kResolverKey)
-    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
+    const afsDdo = await aid.resolve(afsDid, { keystore })
 
     const kp = keyPair(blake2b(secretKey))
     const id = toHex(blake2b(Buffer.from(afsDid)))
@@ -92,7 +88,7 @@ async function create({
         key: kp.publicKey,
         secretKey: kp.secretKey,
         path,
-        //storage: storage(afsDid),
+        storage: storage(afsDid),
         shallow: true
       })
     } catch (err) { debug(err.stack || err) }
@@ -122,7 +118,7 @@ async function create({
           const afs = await createCFS({
             id,
             path,
-            //storage: storage(did),
+            storage: storage(did),
             shallow: true
           })
           return done(null, afs)

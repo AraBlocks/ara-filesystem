@@ -1,10 +1,10 @@
 const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
 const ram = require('random-access-memory')
-const raf = require('random-access-file')
 const fs = require('fs')
 const pify = require('pify')
 const { resolve } = require('path')
+const { append } = require('./commit')
 const { createAFSKeyPath } = require('./key-path')
 const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
@@ -15,17 +15,18 @@ const {
   kContentRegister,
   kTreeFile,
   kSignaturesFile,
-  kStorageAddress
+  kStorageAddress,
+  kFileMappings
 } = require('./constants')
 
-const noop = () => { }
+const {
+  kContentTree,
+  kContentSignatures,
+  kMetadataTree,
+  kMetadataSignatures
+} = kFileMappings
 
-const fileIndices = {
-  kContentTree: 0,
-  kContentSignatures: 1,
-  kMetadataTree: 2,
-  kMetadataSignatures: 3
-}
+const noop = () => { }
 
 module.exports = (identity) => {
   return (filename) => {
@@ -55,6 +56,7 @@ function create({filename, identity}) {
       const hex = web3.utils.bytesToHex(data)
       const opts = await _getTxOpts()
       await deployed.methods.write(_hashIdentity(identity), fileIndex, offset, hex).send(opts)
+      await append({did: identity, fileIndex, data, offset})
       req.callback(null)
     },
 
@@ -90,9 +92,9 @@ function _resolveBufferIndex(path) {
   const register = parsedPath[parsedPath.length - 2]
   let index = -1
   if (kMetadataRegister === register) {
-    index = (kTreeFile === file) ? fileIndices.kMetadataTree : fileIndices.kMetadataSignatures
+    index = (kTreeFile === file) ? kMetadataTree.index : kMetadataSignatures.index
   } else if (kContentRegister === register) {
-    index = (kTreeFile === file) ? fileIndices.kContentTree : fileIndices.kContentSignatures
+    index = (kTreeFile === file) ? kContentTree.index : kContentSignatures.index
   }
   return index
 }
