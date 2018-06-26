@@ -180,16 +180,7 @@ async function onremove(argv) {
   info("id: %s", did)
   info("paths: ", paths)
 
-  const arafs = await afs.create( { did } )
-
-  // ensure paths exists
-  for (const path of paths) {
-    log("Removing file %s", path)
-    await pify(arafs.rimraf)(path)
-  }
-
-  await arafs.close()
-  return did
+  await afs.remove({ did, paths })
 }
 
 function onfatal(err) {

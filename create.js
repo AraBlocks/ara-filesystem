@@ -92,7 +92,7 @@ async function create({
         key: kp.publicKey,
         secretKey: kp.secretKey,
         path,
-        storage: storage(afsDid),
+        //storage: storage(afsDid),
         shallow: true
       })
     } catch (err) { debug(err.stack || err) }
@@ -122,7 +122,7 @@ async function create({
           const afs = await createCFS({
             id,
             path,
-            storage: storage(did),
+            //storage: storage(did),
             shallow: true
           })
           return done(null, afs)
