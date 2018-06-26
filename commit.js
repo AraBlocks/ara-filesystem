@@ -77,6 +77,7 @@ function _decryptJSON(keystore, password) {
   const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
   const decryptedJSON = decrypt({keystore}, { key: encryptionKey })
 
+  secretKey.fill(0)
   encryptionKey.fill(0)
 
   return decryptedJSON
