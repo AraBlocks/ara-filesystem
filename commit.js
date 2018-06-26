@@ -1,10 +1,14 @@
 const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
+const { blake2b } = require('ara-crypto')
 const { resolve } = require('path')
+const { toHex } = require('ara-identity/util')
+const { createAFSKeyPath } = require('./key-path')
 const { 
   kFileMappings,
-  kTempPassword } = require('./constants')
+  kTempPassword,
+  kStagingFile } = require('./constants')
 const {
   kContentTree,
   kContentSignatures,
@@ -12,8 +16,6 @@ const {
   kMetadataSignatures
 } = kFileMappings
 const { generateKeypair, encrypt, decrypt, randomBytes } = require('./util')
-
-const kStagedPath = resolve(__dirname, './staged.json')
 
 async function commit(did) {
   
@@ -26,24 +28,25 @@ async function append({
   data,
   password = kTempPassword
 } = {}) {
-  await _writeStagedFile({fileIndex, offset, data, password})
+  const path = resolve(createAFSKeyPath(did), kStagingFile)
+  await _writeStagedFile({fileIndex, offset, data, password, path})
 }
 
 async function _readStagedFile(password) {
   let file
   try { 
-    file = await pify(fs.readFile)(kStagedPath, 'utf8')
+    file = await pify(fs.readFile)(path, 'utf8')
   } catch (err) { debug(err.stack || err) }
   const decryptedFile = file ? JSON.parse(_decryptJSON(file, password)) : {}
   return decryptedFile
 }
 
-async function _writeStagedFile({fileIndex, offset, data, password} = {}) {
+async function _writeStagedFile({fileIndex, offset, data, password, path} = {}) {
   // create file if not available
   try {
-    await pify(fs.access)(kStagedPath)
+    await pify(fs.access)(path)
   } catch (err) {
-    await pify(fs.writeFile)(kStagedPath, '')
+    await pify(fs.writeFile)(path, '')
   }
 
   const json = await _readStagedFile(password)
@@ -53,7 +56,7 @@ async function _writeStagedFile({fileIndex, offset, data, password} = {}) {
   if (filename) {
     if (!json[filename]) json[filename] = {}
     json[filename][offset] = hex
-    await pify(fs.writeFile)(kStagedPath, JSON.stringify(_encryptJSON(json, password)))
+    await pify(fs.writeFile)(path, JSON.stringify(_encryptJSON(json, password)))
   }
 }
 
@@ -84,7 +87,7 @@ function _decryptJSON(keystore, password) {
 }
 
 async function _deleteStagedFile() {
-  await pify(fs.unlink)(kStagedPath)
+  await pify(fs.unlink)(path)
 }
 
 function _getFilenameByIndex(index) {

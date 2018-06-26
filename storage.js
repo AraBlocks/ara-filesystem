@@ -1,5 +1,6 @@
 const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
+const raf = require('random-access-file')
 const ram = require('random-access-memory')
 const fs = require('fs')
 const pify = require('pify')
@@ -30,11 +31,11 @@ const {
 const noop = () => { }
 
 module.exports = (identity) => {
-  return (filename) => {
+  return (filename, drive, path) => {
     if (filename.includes('tree') || filename.includes('signatures')) {
       return create({filename, identity})
     } else {
-      return ram()
+      return raf(resolve(path, filename))
     }
   }
 }
