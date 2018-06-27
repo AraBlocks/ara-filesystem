@@ -3,7 +3,7 @@ const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
 const { create: createDid } = require('ara-identity/did')
-const { secrets } = require('ara-network')
+const { loadSecrets } = require('./util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
@@ -15,11 +15,9 @@ const rc = require('./rc')()
 const toilet = require('toiletdb')
 const { info } = require('ara-console')
 const storage = require('./storage')
-const { generateKeypair, encrypt, decrypt } = require('./util')
+const { generateKeypair, encrypt, decrypt, validateDid } = require('./util')
 
 const {
-  kAidPrefix, 
-  kDidPrefix, 
   kResolverKey
 } = require('./constants')
 
@@ -87,6 +85,10 @@ async function create({
     keystore = await loadSecrets(kResolverKey)
     const afsDdo = await aid.resolve(afsDid, { keystore })
 
+    if (null == afsDdo || 'object' !== typeof afsDdo) {
+      throw new TypeError('ara-filesystem.create: AFS not successfully archived')
+    }
+
     const kp = keyPair(blake2b(secretKey))
     const id = toHex(blake2b(Buffer.from(afsDid)))
 
@@ -148,22 +150,6 @@ async function create({
     )
     return drives
   }
-}
-
-function validateDid(did) {
-  if (0 === did.indexOf(kDidPrefix)) {
-    if (0 !== did.indexOf(kAidPrefix)) {
-      throw new TypeError('Expecting a DID URI with an "ara" method.')
-    } else {
-      return did.substring(kAidPrefix.length)
-    }
-  }
-  return did
-}
-
-async function loadSecrets(key) {
-  const { public: pub } = await secrets.load({ key, public: true })
-  return pub.keystore
 }
 
 module.exports = {
