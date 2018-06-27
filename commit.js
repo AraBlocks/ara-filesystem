@@ -51,8 +51,25 @@ async function append({
   data,
   password = ''
 } = {}) {
-  const path = resolve(createAFSKeyPath(did), kStagingFile)
+  const path = _generatePath(did)
   await _writeStagedFile({fileIndex, offset, data, password, path})
+}
+
+async function retrieve({
+  did,
+  fileIndex,
+  offset,
+  password = ''
+} = {}) {
+  const path = _generatePath(did)
+  const contents = await _readStagedFile(path, password)
+  fileIndex = _getFilenameByIndex(fileIndex)
+
+  let result
+  if (contents[fileIndex] && contents[fileIndex][offset]) {
+    result = contents[fileIndex][offset]
+  }
+  return result
 }
 
 async function _readStagedFile(path, password) {
@@ -79,7 +96,6 @@ async function _writeStagedFile({fileIndex, offset, data, password, path} = {}) 
   if (filename) {
     if (!json[filename]) json[filename] = {}
     json[filename][offset] = hex
-    console.log(JSON.stringify(_encryptJSON(json, password)))
     await pify(fs.writeFile)(path, JSON.stringify(_encryptJSON(json, password)))
   }
 }
@@ -110,6 +126,10 @@ function _decryptJSON(keystore, password) {
   return decryptedJSON
 }
 
+function _generatePath(did) {
+  return resolve(createAFSKeyPath(did), kStagingFile)
+}
+
 async function _deleteStagedFile(path) {
   await pify(fs.unlink)(path)
 }
@@ -121,5 +141,6 @@ function _getFilenameByIndex(index) {
 
 module.exports = {
   commit,
-  append
+  append,
+  retrieve
 }
