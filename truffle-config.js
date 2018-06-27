@@ -1,3 +1,1 @@
-module.exports = {
-  // truffle config
-}
+module.exports = { }

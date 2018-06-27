@@ -1,12 +1,10 @@
 const { create } = require('../create')
 const test = require('ava')
-const { kTestDid } = require('./_constants')
+const { kTestOwnerDid, kTestOwnerDidNoMethod } = require('./_constants')
 
 test('create() valid id', async (t) => {
-  const id = 'did:ara:e3a808f2deba17c1dcbaf176b2c529cac80c71b8418fe123439a054f88ae2cd2'
-
   // create AFS
-  const afs = await create({ owner: id })
+  const afs = await create({ owner: kTestOwnerDid })
   t.true('object' === typeof afs)
 
   const { did } = afs
@@ -19,10 +17,8 @@ test('create() valid id', async (t) => {
 })
 
 test('create() valid id (no method)', async (t) => {
-  const idNoMethod = 'e3a808f2deba17c1dcbaf176b2c529cac80c71b8418fe123439a054f88ae2cd2'
-
   // create AFS
-  const afs = await create({ owner: idNoMethod })
+  const afs = await create({ owner: kTestOwnerDidNoMethod })
   t.true('object' === typeof afs)
 
   const { did } = afs
@@ -35,7 +31,7 @@ test('create() valid id (no method)', async (t) => {
 })
 
 test('create() invalid id (wrong method)', async (t) => {
-  const idWrongMethod = 'did:littlstar:e3a808f2deba17c1dcbaf176b2c529cac80c71b8418fe123439a054f88ae2cd2'
+  const idWrongMethod = 'did:littlstar:' + kTestOwnerDidNoMethod
 
   await t.throws(create({ owner: idWrongMethod }), TypeError, 'Expecting a DID URI with an "ara" method.')
   await t.throws(create({ did: idWrongMethod }), TypeError, 'Expecting a DID URI with an "ara" method.')
