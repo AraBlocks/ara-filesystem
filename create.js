@@ -18,7 +18,8 @@ const storage = require('./storage')
 const { generateKeypair, encrypt, decrypt, validateDid } = require('./util')
 
 const {
-  kResolverKey
+  kResolverKey,
+  kArchiverKey
 } = require('./constants')
 
 /**
@@ -79,6 +80,9 @@ async function create({
     debug(mnemonic)
     const afsId = await aid.create(mnemonic, owner)
 
+    let keystore = await loadSecrets(kArchiverKey)
+    await aid.archive(afsId, { keystore })
+
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
 
@@ -86,7 +90,7 @@ async function create({
     const afsDdo = await aid.resolve(afsDid, { keystore })
 
     if (null == afsDdo || 'object' !== typeof afsDdo) {
-      throw new TypeError('ara-filesystem.create: AFS not successfully archived')
+      throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
     }
 
     const kp = keyPair(blake2b(secretKey))
