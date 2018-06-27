@@ -2,6 +2,7 @@ const debug = require('debug')('ara-filesystem:add')
 const { create } = require('./create')
 const { resolve } = require('path')
 const fs = require('fs')
+const aid = require('./aid')
 const { stat, access } = require('fs')
 const pify = require('pify')
 const isDirectory = require('is-directory')
@@ -11,18 +12,45 @@ const differ = require('ansi-diff-stream')
 const ProgressStream = require('progress-stream')
 const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
+const { loadSecrets, afsOwner } = require('./util')
+const { create: createDid } = require('ara-identity/did')
 
 const ignored = require('./lib/ignore')
+
+const { kResolverKey } = require('./constants')
 
 const toLower = (x) => String(x).toLowerCase()
 
 async function add({
   did,
   paths,
+  password,
   watch,
   force
 }) {
+  if (null == did || 'string' !== typeof did || !did) {
+    throw new TypeError('ara-filesystem.add: Expecting non-empty did.')
+  }
+
+  if (null == password || 'string' !== typeof password || !password) {
+    throw new TypeError('ara-filesystem.add: Password required to continue')
+  }
+
+  if (null === paths || !(paths instanceof Array)) {
+    throw new TypeError('ara-filesystem.add: Expecting one or more filepaths to add')
+  }
+
+  // const { publicKey:, secretKey } = generateKeypair(password)
+  // const { did: didUri } = createDid(publicKey)
+
+  // if (didUri !== owner) {
+  //     throw new Error('ara-filesystem.create: incorrect password')
+  // }
+
   const arafs = await create( { did } )
+
+  afsOwner(arafs)
+
   // ensure paths exists
   for (const path of paths) {
 
