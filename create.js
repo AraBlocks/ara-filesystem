@@ -81,13 +81,13 @@ async function create({
     const afsId = await aid.create(mnemonic, owner)
 
     let keystore = await loadSecrets(kArchiverKey)
-    await aid.archive(afsId, { keystore })
+    await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
 
     keystore = await loadSecrets(kResolverKey)
-    const afsDdo = await aid.resolve(afsDid, { keystore })
+    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     if (null == afsDdo || 'object' !== typeof afsDdo) {
       throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')

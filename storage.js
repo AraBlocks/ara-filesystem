@@ -50,7 +50,7 @@ function create({filename, identity, password}) {
       debug(filename, 'read at offset', offset, 'size', size)
       let buffer = await retrieve({did: identity, fileIndex, offset, password})
       // data is not staged, must retrieve from bc
-      if (!buffer || !Buffer.isBuffer(buffer)) {
+      if (!buffer) {
         buffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
       }
       req.callback(null, _decode(buffer))
