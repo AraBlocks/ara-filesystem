@@ -5,7 +5,7 @@ const ram = require('random-access-memory')
 const fs = require('fs')
 const pify = require('pify')
 const { resolve } = require('path')
-const { append } = require('./commit')
+const { append, retrieve } = require('./commit')
 const { createAFSKeyPath } = require('./key-path')
 const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
@@ -48,7 +48,11 @@ function create({filename, identity, password}) {
     async read(req) {
       const { offset, size } = req
       debug(filename, 'read at offset', offset, 'size', size)
-      const buffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
+      let buffer = await retrieve({did: identity, fileIndex, offset, password})
+      // data is not staged, must retrieve from bc
+      if (!buffer || !Buffer.isBuffer(buffer)) {
+        buffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
+      }
       req.callback(null, _decode(buffer))
     },
 
