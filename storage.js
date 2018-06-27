@@ -48,7 +48,7 @@ function create({filename, identity, password}) {
     async read(req) {
       const { offset, size } = req
       debug(filename, 'read at offset', offset, 'size', size)
-      let buffer = await retrieve({did: identity, fileIndex, offset, password})
+      let buffer = retrieve({did: identity, fileIndex, offset, password})
       // data is not staged, must retrieve from bc
       if (!buffer) {
         buffer = await deployed.methods.read(_hashIdentity(identity), fileIndex, offset).call()
@@ -56,10 +56,10 @@ function create({filename, identity, password}) {
       req.callback(null, _decode(buffer))
     },
 
-    async write(req) {
+    write(req) {
       const { data, offset, size } = req
       debug(filename, 'staged write at offset', offset, 'size', size)
-      await append({did: identity, fileIndex, data, offset, password})
+      append({did: identity, fileIndex, data, offset, password})
       req.callback(null)
     },
 

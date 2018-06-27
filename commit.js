@@ -2,7 +2,7 @@ const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
 const { blake2b } = require('ara-crypto')
-const { resolve } = require('path')
+const { resolve, dirname } = require('path')
 const { toHex } = require('ara-identity/util')
 const { createAFSKeyPath } = require('./key-path')
 const { web3 } = require('ara-context')()
@@ -22,7 +22,7 @@ async function commit({
   password = ''
 } = {}) {
 
-  const contents = await _readStagedFile(password)
+  const contents = _readStagedFile(password)
   // TODO(cckelly): should use reused logic from here and storage.js into util.js
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
 
@@ -44,7 +44,7 @@ async function commit({
 
 }
 
-async function append({
+function append({
   did,
   fileIndex,
   offset,
@@ -52,17 +52,17 @@ async function append({
   password = ''
 } = {}) {
   const path = _generatePath(did)
-  await _writeStagedFile({fileIndex, offset, data, password, path})
+  _writeStagedFile({fileIndex, offset, data, password, path})
 }
 
-async function retrieve({
+function retrieve({
   did,
   fileIndex,
   offset,
   password = ''
 } = {}) {
   const path = _generatePath(did)
-  const contents = await _readStagedFile(path, password)
+  const contents = _readStagedFile(path, password)
   fileIndex = _getFilenameByIndex(fileIndex)
 
   let result
@@ -72,31 +72,35 @@ async function retrieve({
   return result
 }
 
-async function _readStagedFile(path, password) {
-  let file
-  try { 
-    file = await pify(fs.readFile)(path, 'utf8')
-  } catch (err) { debug(err.stack || err) }
-  const decryptedFile = file ? JSON.parse(_decryptJSON(file, password)) : {}
-  return decryptedFile
+function _readStagedFile(path, password) {
+  const contents = fs.readFileSync(path, 'utf8')
+  return JSON.parse(_decryptJSON(contents, password))
 }
 
-async function _writeStagedFile({fileIndex, offset, data, password, path} = {}) {
-  // create file if not available
+function _writeStagedFile({
+  fileIndex, 
+  offset, 
+  data, 
+  password, 
+  path
+} = {}) {
+
+  let json = {}
   try {
-    await pify(fs.access)(path)
+    fs.accessSync(path)
+    json = _readStagedFile(path, password)
   } catch (err) {
-    await pify(fs.writeFile)(path, '')
+    fs.writeFileSync(path, '')
   }
 
-  const json = await _readStagedFile(path, password)
   const hex = data.toString('hex')
 
   const filename = _getFilenameByIndex(fileIndex)
   if (filename) {
     if (!json[filename]) json[filename] = {}
     json[filename][offset] = hex
-    await pify(fs.writeFile)(path, JSON.stringify(_encryptJSON(json, password)))
+    const encrypted = JSON.stringify(_encryptJSON(json, password))
+    fs.writeFileSync(path, encrypted)
   }
 }
 
@@ -127,7 +131,13 @@ function _decryptJSON(keystore, password) {
 }
 
 function _generatePath(did) {
-  return resolve(createAFSKeyPath(did), kStagingFile)
+  const path = resolve(createAFSKeyPath(did), kStagingFile)
+  try {
+    fs.accessSync(path)
+  } catch (err) {
+    fs.mkdirSync(dirname(path))
+  }
+  return path
 }
 
 async function _deleteStagedFile(path) {
