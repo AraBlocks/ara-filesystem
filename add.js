@@ -12,7 +12,7 @@ const differ = require('ansi-diff-stream')
 const ProgressStream = require('progress-stream')
 const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
-const { loadSecrets, afsOwner, generateKeypair } = require('./util')
+const { loadSecrets, afsOwner, generateKeypair, validateDid } = require('./util')
 const { create: createDid } = require('ara-identity/did')
 
 const ignored = require('./lib/ignore')
@@ -40,17 +40,17 @@ async function add({
     throw new TypeError('ara-filesystem.add: Expecting one or more filepaths to add')
   }
 
-  // TODO(cckelly): fix this
-  // const { publicKey, secretKey } = generateKeypair(password)
-  // const { did: didUri } = createDid(publicKey)
-
-  // if (didUri !== did) {
-  //   throw new Error('ara-filesystem.create: incorrect password')
-  // }
-
   const arafs = await create({ did, password })
 
-  afsOwner(arafs)
+  const owner = afsOwner(arafs)
+
+  const { publicKey, secretKey } = generateKeypair(password)
+  let { did: didUri } = createDid(publicKey)
+  didUri = validateDid(didUri)
+
+  if (didUri !== owner) {
+    throw new Error('ara-filesystem.create: incorrect password')
+  }
 
   // ensure paths exists
   for (const path of paths) {

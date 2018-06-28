@@ -6,9 +6,10 @@ const {
 } = require('ara-crypto')
 
 const {
-  kAidPrefix, 
-  kDidPrefix, 
-  kResolverKey
+  kAidPrefix,
+  kDidPrefix,
+  kResolverKey,
+  kOwnerSuffix
 } = require('./constants')
 
 const { secrets } = require('ara-network')
@@ -58,8 +59,11 @@ function afsOwner(afs) {
     throw new TypeError('Fatal Error: AFS does not have a DDO')
   }
 
-  console.dir(ddo)
-  return ddo
+  const pk = ddo.didDocument.authentication[0].publicKey
+  const suffixLength = kOwnerSuffix.length
+  const id = pk.slice(0, pk.length - suffixLength)
+
+  return id
 }
 
 module.exports = {
