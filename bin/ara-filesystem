@@ -65,7 +65,7 @@ const { argv } = program
     program
       .positional('pathspec', {
         type: 'string',
-        describe: "The file(s) you wish to add to AFS"
+        describe: "The file(s) you wish to remove from AFS"
       })
       .positional('did', {
         type: 'string',

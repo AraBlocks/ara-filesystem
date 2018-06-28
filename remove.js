@@ -4,9 +4,10 @@ const pify = require('pify')
 
 async function remove({
   paths = [],
-  did = ''
+  did = '',
+  password = ''
 } = {}) {
-  const afs = await create({ did })
+  const afs = await create({ did, password })
   for (const path of paths) {
     await pify(afs.rimraf)(path)
   }
