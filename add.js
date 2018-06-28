@@ -42,16 +42,6 @@ async function add({
 
   const arafs = await create({ did, password })
 
-  const owner = afsOwner(arafs)
-
-  const { publicKey, secretKey } = generateKeypair(password)
-  let { did: didUri } = createDid(publicKey)
-  didUri = validateDid(didUri)
-
-  if (didUri !== owner) {
-    throw new Error('ara-filesystem.create: incorrect password')
-  }
-
   // ensure paths exists
   for (const path of paths) {
 

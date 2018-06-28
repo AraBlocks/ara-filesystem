@@ -19,7 +19,8 @@ const { generateKeypair, encrypt, decrypt, validateDid } = require('./util')
 
 const {
   kResolverKey,
-  kArchiverKey
+  kArchiverKey,
+  kOwnerSuffix
 } = require('./constants')
 
 /**
@@ -45,6 +46,18 @@ async function create({
 
     if (null === afsDdo || 'object' !== typeof afsDdo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
+    }
+
+    const { publicKey, secretKey } = generateKeypair(password)
+    let { did: didUri } = createDid(publicKey)
+    didUri = validateDid(didUri)
+
+    const pk = afsDdo.didDocument.authentication[0].publicKey
+    const suffixLength = kOwnerSuffix.length
+    const ownerDid = pk.slice(0, pk.length - suffixLength)
+
+    if (didUri !== ownerDid) {
+      throw new Error('ara-filesystem.create: incorrect password')
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
