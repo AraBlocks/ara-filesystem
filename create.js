@@ -3,6 +3,7 @@ const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
 const { create: createDid } = require('ara-identity/did')
+const { writeIdentity } = require('ara-identity/util')
 const { loadSecrets } = require('./util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
@@ -79,6 +80,8 @@ async function create({
     const mnemonic = bip39.generateMnemonic()
     debug(mnemonic)
     const afsId = await aid.create(mnemonic, owner)
+
+    await writeIdentity(afsId)
 
     let keystore = await loadSecrets(kArchiverKey)
     await aid.archive(afsId, { key: kArchiverKey, keystore })
