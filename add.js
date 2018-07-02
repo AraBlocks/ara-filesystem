@@ -40,7 +40,7 @@ async function add({
     throw new TypeError('ara-filesystem.add: Expecting one or more filepaths to add')
   }
 
-  const arafs = await create({ did, password })
+  const { afs } = await create({ did, password })
 
   // ensure paths exists
   for (const path of paths) {
@@ -135,13 +135,13 @@ async function add({
 
     // paths
     const src = resolve(path)
-    const dest = src.replace(process.cwd(), arafs.HOME)
+    const dest = src.replace(process.cwd(), afs.HOME)
 
     // file stats
     const stats = await pify(stat)(src)
 
     try {
-      const { mtime } = await pify(arafs.stat)(dest)
+      const { mtime } = await pify(afs.stat)(dest)
       if (stats.mtime <= mtime) {
         if (force) {
           warn("Force adding %s", path)
@@ -155,7 +155,7 @@ async function add({
 
     // IO stream
     const reader = fs.createReadStream(src, {autoClose: true})
-    const writer = arafs.createWriteStream(dest)
+    const writer = afs.createWriteStream(dest)
 
     // used for spliting buffer chunks
     const { highWaterMark } = writer._writableState

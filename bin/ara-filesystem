@@ -146,7 +146,7 @@ async function onhistory(argv) {
   const arafs = await afs.create({ did, password })
   const stream = table.createStream(tableOpts)
 
-  arafs.history(argv.partition || arafs.HOME)
+  arafs.afs.history(argv.partition || arafs.afs.HOME)
     .on('error', onfatal)
     .on('end', () => process.exit(0))
     .on('data', (log) => {
