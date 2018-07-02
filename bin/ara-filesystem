@@ -214,9 +214,12 @@ async function oncommit({did}) {
 
   info("committing with identity: %s", did)
 
-  await afs.commit({ did, password })
-
-  info("file(s) successfully committed")
+  const result = await afs.commit({ did, password })
+  if (result instanceof Error) {
+    error(result)
+  } else {
+    info("file(s) successfully committed")
+  }
 }
 
 async function promptForPassword() {
