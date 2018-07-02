@@ -4,7 +4,7 @@ const raf = require('random-access-file')
 const ram = require('random-access-memory')
 const fs = require('fs')
 const pify = require('pify')
-const { resolve } = require('path')
+const { resolve, basename } = require('path')
 const { append, retrieve } = require('./commit')
 const { createAFSKeyPath } = require('./key-path')
 const { blake2b } = require('ara-crypto')
@@ -28,11 +28,11 @@ const {
   kMetadataSignatures
 } = kFileMappings
 
-const noop = () => { }
-
+// TODO(cckelly): wrap function in object of exports instead
 module.exports = (identity, password) => {
   return (filename, drive, path) => {
-    if (filename.includes('tree') || filename.includes('signatures')) {
+    if ('home' === basename(path) && (filename.includes('tree') 
+      || filename.includes('signatures'))) {
       return create({filename, identity, password})
     } else {
       return raf(resolve(path, filename))

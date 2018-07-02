@@ -135,9 +135,15 @@ function _generatePath(did) {
   try {
     fs.accessSync(path)
   } catch (err) {
-    fs.mkdirSync(dirname(path))
+    _makeStagedFile(path)
   }
   return path
+}
+
+function _makeStagedFile(path) {
+  try {
+    fs.mkdirSync(dirname(path))
+  } catch(err) { }
 }
 
 async function _deleteStagedFile(path) {
