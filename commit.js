@@ -42,15 +42,14 @@ async function commit({
   let i = 0
   for (const key in contents) {
     const buffers = contents[key]
-    for (const buf in buffers) {
-      const data = buffers[buf]
+    for (const offset in buffers) {
+      const data = '0x' + buffers[offset]
       const hIdentity = blake2b(Buffer.from(did)).toString('hex')
       const defaultAccount = await web3.eth.getAccounts()
-      await deployed.methods.write(hIdentity, i, buf, web3.utils.bytesToHex(data)).send({
+      await deployed.methods.write(hIdentity, i, offset, data).send({
         from: defaultAccount[0],
         gas: 500000
       })
-      debug('committed', key, 'at offset', buf)
     }
     i++
   }
