@@ -7,7 +7,12 @@ const { toHex } = require('ara-identity/util')
 const { createAFSKeyPath } = require('./key-path')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
-const { kFileMappings, kStagingFile } = require('./constants')
+
+const { 
+  kFileMappings, 
+  kStagingFile, 
+  kStorageAddress 
+} = require('./constants')
 
 const {
   kContentTree,
@@ -22,7 +27,15 @@ async function commit({
   password = ''
 } = {}) {
 
-  const contents = _readStagedFile(password)
+  const path = _generatePath(did)
+  try {
+    await pify(fs.access)(path)
+  } catch (err) {
+    return new Error("No staged commits ready to be pushed")
+  }
+
+  const contents = _readStagedFile(path, password)
+
   // TODO(cckelly): should use reused logic from here and storage.js into util.js
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
 
@@ -37,11 +50,12 @@ async function commit({
         from: defaultAccount[0],
         gas: 500000
       })
-      debug('committed', data)
+      debug('committed', key, 'at offset', buf)
     }
     i++
   }
 
+  await pify(fs.unlink)(path)
 }
 
 function append({
