@@ -14,7 +14,8 @@ async function remove({
         await afs.unlink(path)
       }
     } catch(err) {
-      console.log("Could not remove file either because it does not exist or because of inadequate permissions")
+      await afs.close()
+      return new Error("Could not remove file either because it does not exist or because of inadequate permissions")
     }
   }
   await afs.close()

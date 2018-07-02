@@ -212,6 +212,7 @@ async function add({
     })
   }
 
+  // TODO(cckelly): any CLI output should be moved to bin/ara-filesystem
   function createProgressStreams({stats}) {
     const start = Date.now()
     const current = {reader: 0, writer: 0}

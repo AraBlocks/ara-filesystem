@@ -180,6 +180,8 @@ async function onadd(argv) {
   const { password } = await promptForPassword()
 
   await afs.add({ did, paths, password })
+
+  info("file(s) successfully added")
 }
 
 async function onremove(argv) {
@@ -196,21 +198,24 @@ async function onremove(argv) {
 
   const { password } = await promptForPassword()
 
-  await afs.remove({ did, paths, password })
+  const result = await afs.remove({ did, paths, password })
+  if (result instanceof Error) {
+    error(result)
+  } else {
+    info("file(s) successfully removed")
+  }
 }
 
 async function oncommit({did}) {
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
 
-  const password = await promptForPassword()
-
-  if (!password) {
-    onfatal(new TypeError("Please provide a password to archive your identity."))
-  }
+  const { password } = await promptForPassword()
 
   info("committing with identity: %s", did)
 
   await afs.commit({ did, password })
+
+  info("file(s) successfully committed")
 }
 
 async function promptForPassword() {
@@ -219,7 +224,7 @@ async function promptForPassword() {
     name: 'password',
     message:
     "Please provide a passphrase for your identity. This is needed to " +
-    "archive your identity.\n" +
+    "complete this action.\n" +
     "Passphrase:"
   }]) 
 }
