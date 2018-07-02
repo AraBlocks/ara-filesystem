@@ -108,7 +108,8 @@ async function oncreate(argv) {
     arafs = await afs.create({ owner, password })
   } catch (err) { onfatal(err) }
 
-  info('AFS created with did', arafs.did)
+  info('AFS created with did', arafs.afs.did)
+  info('Please safely store the following 12 word mnemonic phrase for this AFS. This phrase will be required to make any changes to the AFS, and it will never be shown again: \n\n\t\t%s', arafs.mnemonic)
 }
 
 async function onhistory(argv) {

@@ -39,6 +39,7 @@ async function create({
   }
 
   let afs
+  let mnemonic
   if (did) {
     did = validateDid(did)
 
@@ -89,8 +90,7 @@ async function create({
       throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
     }
 
-    const mnemonic = bip39.generateMnemonic()
-    debug(mnemonic)
+    mnemonic = bip39.generateMnemonic()
     const afsId = await aid.create(mnemonic, owner)
 
     await writeIdentity(afsId)
@@ -133,7 +133,10 @@ async function create({
 
   }
 
-  return afs
+  return {
+    afs,
+    mnemonic
+  }
 
   async function createMultidrive({did, pathPrefix, password}) {
     await pify(mkdirp)(rc.afs.archive.store)
