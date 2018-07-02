@@ -108,7 +108,8 @@ async function oncreate(argv) {
     arafs = await afs.create({ owner, password })
   } catch (err) { onfatal(err) }
 
-  info('AFS created with did', arafs.did)
+  info('AFS created with did', arafs.afs.did)
+  info('Please safely store the following 12 word mnemonic phrase for this AFS. This phrase will be required to make any changes to the AFS, and it will never be shown again: \n\n\t\t%s', arafs.mnemonic)
 }
 
 async function onhistory(argv) {
@@ -145,7 +146,7 @@ async function onhistory(argv) {
   const arafs = await afs.create({ did, password })
   const stream = table.createStream(tableOpts)
 
-  arafs.history(argv.partition || arafs.HOME)
+  arafs.afs.history(argv.partition || arafs.afs.HOME)
     .on('error', onfatal)
     .on('end', () => process.exit(0))
     .on('data', (log) => {

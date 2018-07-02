@@ -7,7 +7,7 @@ async function remove({
   did = '',
   password = ''
 } = {}) {
-  const afs = await create({ did, password })
+  const { afs } = await create({ did, password })
   for (const path of paths) {
     try {
       if (await afs.access(path)) {
