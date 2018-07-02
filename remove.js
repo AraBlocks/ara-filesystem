@@ -9,7 +9,13 @@ async function remove({
 } = {}) {
   const afs = await create({ did, password })
   for (const path of paths) {
-    await pify(afs.rimraf)(path)
+    try {
+      if (await afs.access(path)) {
+        await afs.unlink(path)
+      }
+    } catch(err) {
+      console.log("Could not remove file either because it does not exist or because of inadequate permissions")
+    }
   }
   await afs.close()
 }
