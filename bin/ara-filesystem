@@ -87,6 +87,12 @@ const { argv } = program
       })
   }, oncommit)
 
+void async function main() {
+  if (argv.debug) {
+    require('debug').enable('ara-filesystem*')
+  }
+}()
+
 async function oncreate(argv) {
   let owner = argv.owner
   if (null == owner) {
@@ -108,8 +114,10 @@ async function oncreate(argv) {
     arafs = await afs.create({ owner, password })
   } catch (err) { onfatal(err) }
 
-  info('AFS created with did', arafs.afs.did)
-  info('Please safely store the following 12 word mnemonic phrase for this AFS. This phrase will be required to make any changes to the AFS, and it will never be shown again: \n\n\t\t%s', arafs.mnemonic)
+  info('New AFS created with DID: \n\n\t\t\t<%s>\n', arafs.afs.did)
+  info('Please safely store the following 12 word mnemonic phrase for this AFS.' + 
+    ' This phrase will be required to make any changes to the AFS.'+ 
+    ' It will never be shown again: \n\n\t\t\t<%s>\n', arafs.mnemonic)
 }
 
 async function onhistory(argv) {
