@@ -279,6 +279,8 @@ async function add({
       return new ProgressBar(template, progressBarSpec)
     }
   }
+
+  await afs.close()
 }
 
 module.exports = {
