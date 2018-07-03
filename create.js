@@ -38,6 +38,10 @@ async function create({
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
+  if ('string' !== typeof password || !password) {
+    throw new TypeError('ara-filesystem.create: Expecting non-empty password')
+  }
+
   let afs
   let mnemonic
   if (did) {
@@ -55,10 +59,11 @@ async function create({
 
     const pk = afsDdo.authentication[0].authenticationKey
     const suffixLength = kOwnerSuffix.length
-    const ownerDid = pk.slice(0, pk.length - suffixLength)
+    let ownerDid = pk.slice(0, pk.length - suffixLength)
+    ownerDid = validateDid(ownerDid)
 
     if (didUri !== ownerDid) {
-      throw new Error('ara-filesystem.create: incorrect password')
+      throw new Error('ara-filesystem.create: incorrect password', didUri, ownerDid)
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
@@ -77,17 +82,18 @@ async function create({
   } else if (owner) {
 
     const { publicKey: userPublicKey, secretKey: userSecretKey } = generateKeypair(password)
-    const { did: didUri } = createDid(userPublicKey)
+    let { did: didUri } = createDid(userPublicKey)
 
-    if (didUri !== owner) {
-      throw new Error('ara-filesystem.create: incorrect password')
-    }
-
+    didUri = validateDid(didUri)
     owner = validateDid(owner)
 
     const ddo = await aid.resolve(owner)
     if (null === ddo || 'object' !== typeof ddo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
+    }
+
+    if (didUri !== owner) {
+      throw new Error('ara-filesystem.create: incorrect password')
     }
 
     mnemonic = bip39.generateMnemonic()
