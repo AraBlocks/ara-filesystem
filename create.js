@@ -15,7 +15,7 @@ const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
 const { info } = require('ara-console')
-const storage = require('./storage')
+const { defaultStorage } = require('./storage')
 const { generateKeypair, encrypt, decrypt, validateDid } = require('./util')
 
 const {
@@ -119,7 +119,7 @@ async function create({
         key: kp.publicKey,
         secretKey: kp.secretKey,
         path,
-        storage: storage(afsDid, password),
+        storage: defaultStorage(afsDid, password),
         shallow: true
       })
     } catch (err) { debug(err.stack || err) }
@@ -151,7 +151,7 @@ async function create({
           const afs = await createCFS({
             id,
             path,
-            storage: storage(did, password),
+            storage: defaultStorage(did, password),
             shallow: true
           })
           return done(null, afs)

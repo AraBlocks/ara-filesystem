@@ -28,8 +28,7 @@ const {
   kMetadataSignatures
 } = kFileMappings
 
-// TODO(cckelly): wrap function in object of exports instead
-module.exports = (identity, password) => {
+function defaultStorage(identity, password) {
   return (filename, drive, path) => {
     if ('home' === basename(path) && (filename.includes('tree') 
       || filename.includes('signatures'))) {
@@ -41,7 +40,7 @@ module.exports = (identity, password) => {
 }
 
 function create({filename, identity, password}) {
-  const fileIndex = _resolveBufferIndex(filename)
+  const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
 
   return ras({
@@ -89,7 +88,7 @@ function _decode(bytes) {
   return Buffer.from(bytes, 'hex')
 }
 
-function _resolveBufferIndex(path) {
+function resolveBufferIndex(path) {
   const parsedPath = path.split('/')
   const file = parsedPath[parsedPath.length - 1]
   const register = parsedPath[parsedPath.length - 2]
@@ -108,4 +107,9 @@ function _hashIdentity(identity) {
 
 function _hexToAscii(h) {
   return h ? web3.utils.hexToAscii(h) : ''
+}
+
+module.exports = {
+  resolveBufferIndex,
+  defaultStorage
 }
