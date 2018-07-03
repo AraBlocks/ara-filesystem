@@ -12,7 +12,7 @@ const differ = require('ansi-diff-stream')
 const ProgressStream = require('progress-stream')
 const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
-const { loadSecrets, afsOwner, generateKeypair, validateDid } = require('./util')
+const { loadSecrets, generateKeypair, validateDid } = require('./util')
 const { create: createDid } = require('ara-identity/did')
 
 const ignored = require('./lib/ignore')

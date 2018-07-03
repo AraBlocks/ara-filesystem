@@ -25,7 +25,6 @@ function encrypt(value, opts) {
 
 function decrypt(value, opts) {
   const keystore = JSON.parse(value.keystore)
-  
   return cryptoDecrypt(keystore, opts)
 }
 
@@ -49,11 +48,11 @@ function validateDid(did) {
   return did
 }
 
-function afsOwner(afs) {
+function getAfsOwner(afs) {
   if (null == afs || 'object' !== typeof afs) {
     throw new TypeError('Expecting an afs')
   }
-  const ddo = afs.ddo
+  const { ddo } = afs
 
   if (null == ddo || 'object' != typeof ddo) {
     throw new TypeError('Fatal Error: AFS does not have a DDO')
@@ -73,5 +72,5 @@ module.exports = {
   randomBytes,
   loadSecrets,
   validateDid,
-  afsOwner
+  getAfsOwner
 }

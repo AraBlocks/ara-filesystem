@@ -8,6 +8,8 @@ const { kTestDid } = require('./_constants')
 const { resolve } = require('path')
 const { createAFSKeyPath } = require('../key-path')
 
+// TODO(cckelly): refactor me
+
 test("createAFSKeypath(id)", async (t) => {
   t.throws(() => createAFSKeyPath(), TypeError, "id cannot be blank")
   t.throws(() => createAFSKeyPath({ id: 1234 }, TypeError, "id must be a string"))

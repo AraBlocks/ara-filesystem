@@ -70,6 +70,7 @@ async function resolve(did, opts = {}) {
  * @param  {string}  key
  * @return {Boolean}
  */
+// TODO(cckelly): move all validation for DID to util.js
 function hasDIDMethod(key) {
   return kDidPrefix === key.slice(0, kDidPrefix.length)
 }

@@ -11,6 +11,45 @@ const opts = {
   signature: 'signature'
 }
 
+// path is empty
+// path doesn't contain '/'
+// path is not string
+test("resolveBufferIndex() invalid path", (t) => {
+
+})
+
+// make sure key/value pairs match
+test("resolveBufferIndex() valid params", (t) => {
+
+})
+
+// pass in path with home and metadata/tree and make sure create returns RAS instance
+// pass in path without home and metadata/tree and make sure result is RAF instance
+test("defaultStorage() validate return values", (t) => {
+
+})
+
+// write and make sure that staged commit is added to staged.json and everything matches
+test("defaultStorage().write()", (t) => {
+
+})
+
+// test buffer returned from commit.retrieve is correct
+// make sure buffer returned from contract matches what was written
+test("defaultStorage().read()", (t) => {
+
+})
+
+test("defaultStorage().stat()", (t) => {
+
+})
+
+test("defaultStorage().del()", (t) => {
+
+})
+
+// TODO(cckelly): old
+
 test(`publish({
   identity = '',
   root = '',
