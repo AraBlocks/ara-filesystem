@@ -39,19 +39,20 @@ async function commit({
   // TODO(cckelly): should use reused logic from here and storage.js into util.js
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
 
-  let i = 0
+  const { resolveBufferIndex } = require('./storage')
+
   for (const key in contents) {
     const buffers = contents[key]
+    const index = resolveBufferIndex(key)
     for (const offset in buffers) {
       const data = '0x' + buffers[offset]
       const hIdentity = blake2b(Buffer.from(did)).toString('hex')
       const defaultAccount = await web3.eth.getAccounts()
-      await deployed.methods.write(hIdentity, i, offset, data).send({
+      await deployed.methods.write(hIdentity, index, offset, data).send({
         from: defaultAccount[0],
         gas: 500000
       })
     }
-    i++
   }
 
   await pify(fs.unlink)(path)
