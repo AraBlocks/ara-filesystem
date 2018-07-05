@@ -14,9 +14,12 @@ const pify = require('pify')
 const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
-const { info } = require('ara-console')
 const { defaultStorage } = require('./storage')
-const { generateKeypair, encrypt, decrypt, validateDid } = require('./util')
+
+const {
+  generateKeypair,
+  validateDid
+} = require('./util')
 
 const {
   kResolverKey,
@@ -67,7 +70,7 @@ async function create({
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({did, pathPrefix, password})
+    const drives = await createMultidrive({ did, pathPrefix, password })
 
     const path = createAFSKeyPath(did)
 
@@ -78,9 +81,7 @@ async function create({
 
     afs.did = did
     afs.ddo = afsDdo
-
   } else if (owner) {
-
     const { publicKey: userPublicKey, secretKey: userSecretKey } = generateKeypair(password)
     let { did: didUri } = createDid(userPublicKey)
 
@@ -136,7 +137,6 @@ async function create({
     // clear buffers
     kp.publicKey.fill(0)
     kp.secretKey.fill(0)
-
   }
 
   return {
@@ -144,7 +144,7 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({did, pathPrefix, password}) {
+  async function createMultidrive({ did, pathPrefix, password }) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)

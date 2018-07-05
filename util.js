@@ -1,14 +1,13 @@
-const { 
-  blake2b, keyPair, 
-  encrypt: cryptoEncrypt, 
-  decrypt: cryptoDecrypt, 
-  randomBytes: cryptoRandomBytes 
+const {
+  blake2b, keyPair,
+  encrypt: cryptoEncrypt,
+  decrypt: cryptoDecrypt,
+  randomBytes: cryptoRandomBytes
 } = require('ara-crypto')
 
 const {
   kAidPrefix,
   kDidPrefix,
-  kResolverKey,
   kOwnerSuffix
 } = require('./constants')
 
@@ -16,7 +15,8 @@ const { secrets } = require('ara-network')
 
 function generateKeypair(password) {
   const passHash = blake2b(Buffer.from(password))
-  return { publicKey, secretKey } = keyPair(passHash)
+  const { publicKey, secretKey } = keyPair(passHash)
+  return { publicKey, secretKey }
 }
 
 function encrypt(value, opts) {
@@ -54,7 +54,7 @@ function getAfsOwner(afs) {
   }
   const { ddo } = afs
 
-  if (null == ddo || 'object' != typeof ddo) {
+  if (null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Fatal Error: AFS does not have a DDO')
   }
 

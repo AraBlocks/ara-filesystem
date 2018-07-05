@@ -1,13 +1,12 @@
-const debug = require('debug')('ara-filesystem:remove')
+/* eslint quotes: "off" */
+
 const { create } = require('./create')
-const pify = require('pify')
 
 async function remove({
   paths = [],
   did = '',
   password = ''
 } = {}) {
-
   if (0 === paths.length) {
     throw new Error("No path(s) provided.")
   }
@@ -21,12 +20,13 @@ async function remove({
       if (await afs.access(path)) {
         await afs.unlink(path)
       }
-    } catch(err) {
+    } catch (err) {
       await afs.close()
       return new Error("Could not remove file either because it does not exist or because of inadequate permissions")
     }
   }
   await afs.close()
+  return null
 }
 
 module.exports = {
