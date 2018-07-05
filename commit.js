@@ -20,13 +20,16 @@ const {
   generateKeypair,
   encrypt,
   decrypt,
-  randomBytes
+  randomBytes,
+  validateDid
 } = require('./util')
 
+// TODO(cckelly): validate password before allowing commit
 async function commit({
   did = '',
   password = ''
 } = {}) {
+  did = validateDid(did)
   const path = _generatePath(did)
   try {
     await pify(fs.access)(path)

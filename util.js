@@ -42,7 +42,10 @@ function validateDid(did) {
     if (0 !== did.indexOf(kAidPrefix)) {
       throw new TypeError('Expecting a DID URI with an "ara" method.')
     } else {
-      return did.substring(kAidPrefix.length)
+      did = did.substring(kAidPrefix.length)
+      if (64 !== did.length) {
+        throw new Error('DID is not 64 characters')
+      }
     }
   }
   return did

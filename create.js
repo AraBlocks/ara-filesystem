@@ -6,7 +6,6 @@ const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
 const { create: createDid } = require('ara-identity/did')
 const { writeIdentity } = require('ara-identity/util')
-const { loadSecrets } = require('./util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
@@ -20,7 +19,8 @@ const { defaultStorage } = require('./storage')
 
 const {
   generateKeypair,
-  validateDid
+  validateDid,
+  loadSecrets
 } = require('./util')
 
 const {
