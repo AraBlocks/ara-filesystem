@@ -22,6 +22,11 @@ $ npm install --save ara-filesystem
 ```
 
 ## Usage
+
+The follow section lists the prerequisites for running the project as well as the available commands. 
+
+>**Important**: Each CLI command requires the password of the owner identity (the one created with `aid create`). Do not forget this password, as it's the only way to interact with your AFS.
+
 ### Prerequisites
 
 - Clone the repositories listed above
@@ -79,23 +84,61 @@ Since the address of `Storage.sol` is currently hardcoded, the address that `mig
 
 ### Creating an ARA Identity
 
-TODO
+Run the create command found in ARA identity.
+
+```sh
+$ aid create
+```
+
+This will return the DID of the identity created, this will be used to create an AFS.
 
 ### Creating an AFS
 
-TODO
+To create an AFS, you can run the create command along with providing a valid owner identity.
+
+```sh
+$ afs create did:ara:df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
+```
+
+Upon successful creation, a new identity will be outputted for this AFS. Don't lose this, it will be required for all subsequent commands to this AFS.
+
+> **Note**: The `did:ara:` prefix is optional for all commands.
 
 ### Adding to an AFS
 
-TODO
+Adding files and/or directories can be done with the `add` command.
+
+```sh
+$ afs add <did> <pathspec...>
+```
+
+Example:
+
+```sh
+$ afs add cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f my_video.mp4
+```
 
 ### Removing from an AFS
 
-TODO
+Removing files and/or directories if very siilar to adding them.
+
+```sh
+$ afs remove <did> <pathspec...>
+```
+
+Example:
+
+```sh
+$ afs remove cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f my_video.mp4
+```
 
 ### Committing an AFS
 
-TODO
+Every change you make is saved to a local file on disc, you can think of these as staged commits. Before your changes are published to the ARA network and become discoverable, you have to commit them. You can commit with the `commit` command.
+
+```sh
+$ afs commit cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f
+```
 
 ## API
 
