@@ -1,37 +1,37 @@
+// (cckelly): disabling as writes need to happen serially
+/* eslint-disable no-await-in-loop */
+
 const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
 const { blake2b } = require('ara-crypto')
 const { resolve, dirname } = require('path')
-const { toHex } = require('ara-identity/util')
 const { createAFSKeyPath } = require('./key-path')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 
-const { 
-  kFileMappings, 
-  kStagingFile, 
-  kStorageAddress 
+const {
+  kFileMappings,
+  kStagingFile,
+  kStorageAddress
 } = require('./constants')
 
 const {
-  kContentTree,
-  kContentSignatures,
-  kMetadataTree,
-  kMetadataSignatures
-} = kFileMappings
-const { generateKeypair, encrypt, decrypt, randomBytes } = require('./util')
+  generateKeypair,
+  encrypt,
+  decrypt,
+  randomBytes
+} = require('./util')
 
 async function commit({
   did = '',
   password = ''
 } = {}) {
-
   const path = _generatePath(did)
   try {
     await pify(fs.access)(path)
   } catch (err) {
-    return new Error("No staged commits ready to be pushed")
+    return new Error('No staged commits ready to be pushed')
   }
 
   const contents = _readStagedFile(path, password)
@@ -45,7 +45,7 @@ async function commit({
     const buffers = contents[key]
     const index = resolveBufferIndex(key)
     for (const offset in buffers) {
-      const data = '0x' + buffers[offset]
+      const data = `0x${buffers[offset]}`
       const hIdentity = blake2b(Buffer.from(did)).toString('hex')
       const defaultAccount = await web3.eth.getAccounts()
       await deployed.methods.write(hIdentity, index, offset, data).send({
@@ -55,7 +55,8 @@ async function commit({
     }
   }
 
-  await pify(fs.unlink)(path)
+  await _deleteStagedFile(path)
+  return null
 }
 
 function append({
@@ -66,7 +67,13 @@ function append({
   password = ''
 } = {}) {
   const path = _generatePath(did)
-  _writeStagedFile({fileIndex, offset, data, password, path})
+  _writeStagedFile({
+    fileIndex,
+    offset,
+    data,
+    password,
+    path
+  })
 }
 
 function retrieve({
@@ -92,13 +99,12 @@ function _readStagedFile(path, password) {
 }
 
 function _writeStagedFile({
-  fileIndex, 
-  offset, 
-  data, 
-  password, 
+  fileIndex,
+  offset,
+  data,
+  password,
   path
 } = {}) {
-
   let json = {}
   try {
     fs.accessSync(path)
@@ -136,7 +142,7 @@ function _encryptJSON(json, password) {
 function _decryptJSON(keystore, password) {
   const { secretKey } = generateKeypair(password)
   const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
-  const decryptedJSON = decrypt({keystore}, { key: encryptionKey })
+  const decryptedJSON = decrypt({ keystore }, { key: encryptionKey })
 
   secretKey.fill(0)
   encryptionKey.fill(0)
@@ -157,7 +163,9 @@ function _generatePath(did) {
 function _makeStagedFile(path) {
   try {
     fs.mkdirSync(dirname(path))
-  } catch(err) { }
+  } catch (err) {
+    debug('could not make dir at', path)
+  }
 }
 
 async function _deleteStagedFile(path) {

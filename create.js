@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
@@ -56,7 +58,7 @@ async function create({
     if (null === afsDdo || 'object' !== typeof afsDdo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
     }
-    const { publicKey, secretKey } = generateKeypair(password)
+    const { publicKey } = generateKeypair(password)
     let { did: didUri } = createDid(publicKey)
     didUri = validateDid(didUri)
 
@@ -70,7 +72,7 @@ async function create({
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({ did, pathPrefix, password })
+    const drives = await createMultidrive({ identity: did, pathPrefix, storagePassword: password })
 
     const path = createAFSKeyPath(did)
 
@@ -82,7 +84,7 @@ async function create({
     afs.did = did
     afs.ddo = afsDdo
   } else if (owner) {
-    const { publicKey: userPublicKey, secretKey: userSecretKey } = generateKeypair(password)
+    const { publicKey: userPublicKey } = generateKeypair(password)
     let { did: didUri } = createDid(userPublicKey)
 
     didUri = validateDid(didUri)
@@ -148,7 +150,7 @@ async function create({
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
-    
+
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
@@ -166,7 +168,7 @@ async function create({
         }
         return null
       },
- 
+
       async (afs, done) => {
         try {
           await afs.close()

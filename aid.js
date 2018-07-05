@@ -2,8 +2,14 @@ const debug = require('debug')('ara-filesystem:aid')
 const aid = require('ara-identity')
 const crypto = require('ara-crypto')
 const context = require('ara-context')()
-const { kAidPrefix, kOwnerSuffix, kDidPrefix, kKeyLength } = require('./constants')
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
+
+const {
+  kAidPrefix,
+  kOwnerSuffix,
+  kDidPrefix,
+  kKeyLength
+} = require('./constants')
 
 async function create(seed, publicKey) {
   if (null == publicKey || 'string' !== typeof publicKey) {

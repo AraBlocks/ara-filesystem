@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+
 const debug = require('debug')('ara-filesystem:add')
 const { create } = require('./create')
 const { resolve } = require('path')
@@ -11,6 +13,7 @@ const differ = require('ansi-diff-stream')
 const ProgressStream = require('progress-stream')
 const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
+const mirror = require('mirror-folder')
 const ignored = require('./lib/ignore')
 
 const toLower = x => String(x).toLowerCase()
@@ -41,7 +44,7 @@ async function add({
     // ensure local file path exists
     try {
       await pify(access)(path)
-    } catch (err) { 
+    } catch (err) {
       debug('%s does not exist', path)
     }
 
@@ -85,8 +88,8 @@ async function add({
       mirror({ name: src }, { name: dest, fs: afs }, { ignore, dryRun: true })
         .on('debug', done)
         .on('end', done)
-        .on('put', ({ stat }) => {
-          stats.size += stat.size
+        .on('put', ({ stat: putStat }) => {
+          stats.size += putStat.size
         })
     })()
 
@@ -94,7 +97,7 @@ async function add({
 
     if (!watch || (stats && stats.size)) {
       await pify((done) => {
-        mirror({ name: src }, { name: dest, fs: afs }, { ignore, watch: watch })
+        mirror({ name: src }, { name: dest, fs: afs }, { ignore, watch })
           .on('debug', done)
           .on('end', done)
           .on('put', onput)
@@ -102,9 +105,9 @@ async function add({
       })()
     }
 
-    function onput({ stat }) {
-      if (stat && stat.size) {
-        progress.updateWriter(stat.size)
+    function onput({ stat: putStat }) {
+      if (putStat && putStat.size) {
+        progress.updateWriter(putStat.size)
       }
     }
 
@@ -125,7 +128,7 @@ async function add({
 
   async function addFile(path) {
     if (!force && ignored.ignores(path)) {
-      throw new debug(`ignore: ${path} is ignored. Use '--force' to force add file.`)
+      throw new Error(`ignore: ${path} is ignored. Use '--force' to force add file.`)
     }
 
     // paths
@@ -160,14 +163,14 @@ async function add({
 
   async function createPipe({ reader, writer, stats }) {
     if (!stats || 0 === stats.size) {
-      process.nextTick(() => debuf('Wrote 0 bytes'))
+      process.nextTick(() => debug('Wrote 0 bytes'))
       return writer.end()
     }
 
     const progress = createProgressStreams({ stats })
 
-    // work
-    await new Promise((resolve, reject) => {
+    // eslint-disable-next-line no-shadow
+    const result = await new Promise((resolve, reject) => {
       writer.on('finish', onfinish)
       writer.on('debug', ondebug)
 
@@ -199,6 +202,7 @@ async function add({
         reject(err)
       }
     })
+    return result
   }
 
   // TODO(cckelly): any CLI output should be moved to bin/ara-filesystem
@@ -209,7 +213,7 @@ async function add({
     const progressBarSpec = {
       complete: '-',
       incomplete: ' ',
-      width: Math.floor(0.78*((cliWidth() || 30) - 50)),
+      width: Math.floor(0.78 * ((cliWidth() || 30) - 50)),
       total: stats.size,
       stream: differ().pipe(process.stderr)
     }
@@ -261,7 +265,7 @@ async function add({
     }
 
     function createProgressStream() {
-      return new ProgressStream({length: stats.size, time: 100})
+      return new ProgressStream({ length: stats.size, time: 100 })
     }
 
     function createProgressBar(template) {
