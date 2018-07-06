@@ -17,7 +17,7 @@ test("generateKeypair() validate keypair", (t) => {
 })
 
 test("encrypt() invalid params", (t) => {
-  t.throws(() => util.encrypt(), TypeError, "invalid params")  
+  t.throws(() => util.encrypt(), TypeError, "invalid params")
   t.throws(() => util.encrypt('password'), TypeError, "need opts object")
 })
 
@@ -66,7 +66,7 @@ test("loadSecrets() invalid key", async (t) => {
 test("loadSecrets() validate returned secrets", async (t) => {
   const { crypto } = await util.loadSecrets(kResolverKey)
   const { ciphertext } = crypto
-  t.true(null !== crypto && null !== ciphertext) 
+  t.true(null !== crypto && null !== ciphertext)
 })
 
 test("validateDid() validate DID cases", (t) => {

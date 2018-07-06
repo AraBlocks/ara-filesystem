@@ -13,10 +13,7 @@ const {
   kResolverKey
 } = require('../constants')
 
-const {
-  kTestDid,
-  kPassword
-} = require('./_constants')
+const { kTestDid } = require('./_constants')
 
 test.before((t) => {
   const mnemonic = bip39.generateMnemonic()
@@ -60,7 +57,7 @@ test("archive() valid params", async (t) => {
   const { context } = t
   const afsId = await aid.create(context.mnemonic, kTestDid)
 
-  let keystore = await loadSecrets(kArchiverKey)
+  const keystore = await loadSecrets(kArchiverKey)
   await t.notThrows(aid.archive(afsId, { key: kArchiverKey, keystore }))
 })
 
@@ -79,11 +76,11 @@ test("resolve() invalid opts", async (t) => {
 test("resolve() valid params", async (t) => {
   const { context } = t
   const afsId = await aid.create(context.mnemonic, kTestDid)
-  
+
   let keystore = await loadSecrets(kArchiverKey)
   await aid.archive(afsId, { key: kArchiverKey, keystore })
 
-  let { publicKey } = afsId
+  const { publicKey } = afsId
   const did = toHex(publicKey)
 
   keystore = await loadSecrets(kResolverKey)

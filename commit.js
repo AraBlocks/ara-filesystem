@@ -29,6 +29,11 @@ async function commit({
   did = '',
   password = ''
 } = {}) {
+
+  if (!password || 'string' !== typeof password) {
+    throw new TypeError('ara-filesystem.commit: Expecting password to be non-empty string')
+  }
+
   did = validateDid(did)
   const path = _generatePath(did)
   try {

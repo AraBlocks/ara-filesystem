@@ -1,6 +1,11 @@
-const { create } = require('../create')
 const test = require('ava')
-const { kTestOwnerDid, kTestOwnerDidNoMethod, kPassword } = require('./_constants')
+const { create } = require('../create')
+
+const {
+  kTestOwnerDid,
+  kTestOwnerDidNoMethod,
+  kPassword
+} = require('./_constants')
 
 test('create() valid id', async (t) => {
   // create AFS
@@ -24,14 +29,14 @@ test('create() valid id (no method)', async (t) => {
   const { did } = afs
 
   // resolve AFS
-  const { afs: resolvedAfs } = await create({ did, password: kPassword})
+  const { afs: resolvedAfs } = await create({ did, password: kPassword })
   t.true('object' === typeof resolvedAfs)
 
   t.true(afs === resolvedAfs)
 })
 
 test('create() invalid id (wrong method)', async (t) => {
-  const idWrongMethod = 'did:littlstar:' + kTestOwnerDidNoMethod
+  const idWrongMethod = `did:littlstar:${kTestOwnerDidNoMethod}`
 
   await t.throws(create({ owner: idWrongMethod, password: kPassword }), TypeError, 'Expecting a DID URI with an "ara" method.')
   await t.throws(create({ did: idWrongMethod, password: kPassword }), TypeError, 'Expecting a DID URI with an "ara" method.')
