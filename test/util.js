@@ -22,16 +22,34 @@ test("encrypt() invalid params", (t) => {
 })
 
 test("encrypt() validate encryption", (t) => {
-  // TODO(cckelly)
+  const { secretKey } = util.generateKeypair('password')
+  const key = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
+
+  const obj = { property: 1 }
+  const json = JSON.stringify(obj)
+
+  const { crypto } = util.encrypt(json, { key, iv: util.randomBytes(16) })
+  const { ciphertext } = crypto
+
+  t.true(null !== crypto && null !== ciphertext)
 })
 
 test("decrypt() invalid params", (t) => {
   t.throws(() => util.decrypt(), TypeError, "invalid params")
 })
 
-
 test("decrypt() validate decryption", (t) => {
-  // TODO(cckelly)
+  const { secretKey } = util.generateKeypair('password')
+  const key = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
+
+  const obj1 = { property: 1 }
+  const json = JSON.stringify(obj1)
+
+  const encrypted = util.encrypt(json, { key, iv: util.randomBytes(16) })
+  const decrypted = util.decrypt({ keystore: JSON.stringify(encrypted) }, { key })
+  const obj2 = JSON.parse(decrypted.toString())
+
+  t.deepEqual(obj1, obj2)
 })
 
 test("randomBytes() validate random bytes", (t) => {

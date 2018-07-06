@@ -24,7 +24,7 @@ async function add({
   password,
   watch,
   force
-}) {
+} = {}) {
   if (null == did || 'string' !== typeof did || !did) {
     throw new TypeError('ara-filesystem.add: Expecting non-empty did.')
   }

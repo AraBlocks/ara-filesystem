@@ -45,7 +45,7 @@ async function create(seed, publicKey) {
 async function archive(identity, opts) {
   try {
     await aid.archive(identity, opts)
-  } catch (err) { debug(err.stack || err) }
+  } catch (err) { throw new Error(err) }
 }
 
 /**
@@ -54,6 +54,11 @@ async function archive(identity, opts) {
  * @return {Promise}
  */
 async function resolve(did, opts = {}) {
+
+  if (!did || null === did || 'string' !== typeof did) {
+    throw new TypeError('ara-filesystem.aid: DID to resolve must be non-empty string')
+  }
+
   const prefix = did.substring(0, kAidPrefix.length)
   if (prefix !== kAidPrefix) {
     did = kAidPrefix + did
