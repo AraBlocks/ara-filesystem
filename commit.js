@@ -21,7 +21,8 @@ const {
   encrypt,
   decrypt,
   randomBytes,
-  validateDid
+  validateDid,
+  isCorrectPassword
 } = require('./util')
 
 // TODO(cckelly): validate password before allowing commit
@@ -29,12 +30,16 @@ async function commit({
   did = '',
   password = ''
 } = {}) {
-
   if (!password || 'string' !== typeof password) {
     throw new TypeError('ara-filesystem.commit: Expecting password to be non-empty string')
   }
 
   did = validateDid(did)
+
+  if (!(await isCorrectPassword({ did, password }))) {
+    throw new Error('ara-filesystem.create: incorrect password')
+  }
+
   const path = _generatePath(did)
   try {
     await pify(fs.access)(path)

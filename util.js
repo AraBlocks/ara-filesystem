@@ -73,7 +73,7 @@ async function isCorrectPassword({
   owner,
   password
 } = {}) {
-
+  
   if (!password || 'string' !== typeof password) {
     throw new TypeError('Password must be non-empty string.')
   }
