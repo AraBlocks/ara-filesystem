@@ -63,7 +63,7 @@ async function create({
     ownerDid = validateDid(ownerDid)
 
     if (didUri !== ownerDid) {
-      throw new Error('ara-filesystem.create: incorrect password', didUri, ownerDid)
+      throw new Error('ara-filesystem.create: incorrect password')
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))

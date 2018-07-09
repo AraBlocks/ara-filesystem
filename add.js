@@ -40,11 +40,12 @@ async function add({
     throw new TypeError('ara-filesystem.add: Expecting one or more filepaths to add')
   }
 
-  const { afs } = await create({ did, password })
+  let afs
+  try { ({ afs } = await create({ did, password })) } 
+  catch (err) { throw err }
 
   // ensure paths exists
   for (const path of paths) {
-
     // ensure local file path exists
     try { await pify(access)(path) }
     catch (err) { debug("%s does not exist", path) }
