@@ -1,3 +1,8 @@
+const debug = require('debug')('ara-filesystem:util')
+const { secrets } = require('ara-network')
+const { create } = require('ara-identity/did')
+const { resolve } = require('./aid')
+
 const {
   blake2b, keyPair,
   encrypt: cryptoEncrypt,
@@ -8,10 +13,9 @@ const {
 const {
   kAidPrefix,
   kDidPrefix,
-  kOwnerSuffix
+  kOwnerSuffix,
+  kResolverKey
 } = require('./constants')
-
-const { secrets } = require('ara-network')
 
 function generateKeypair(password) {
   const passHash = blake2b(Buffer.from(password))
@@ -51,21 +55,47 @@ function validateDid(did) {
   return did
 }
 
-function getAfsOwner(afs) {
-  if (null == afs || 'object' !== typeof afs) {
-    throw new TypeError('Expecting an afs')
-  }
-  const { ddo } = afs
-
-  if (null == ddo || 'object' !== typeof ddo) {
-    throw new TypeError('Fatal Error: AFS does not have a DDO')
+function getDocumentOwner(ddo, validate = true) {
+  if (!ddo || null == ddo || 'object' !== typeof ddo) {
+    throw new TypeError('Expecting DDO')
   }
 
-  const pk = ddo.didDocument.authentication[0].publicKey
+  const pk = ddo.authentication[0].authenticationKey
   const suffixLength = kOwnerSuffix.length
   const id = pk.slice(0, pk.length - suffixLength)
 
-  return id
+  return validate ? validateDid(id) : id
+}
+
+async function isCorrectPassword({
+  did,
+  ddo,
+  owner,
+  password
+} = {}) {
+
+  if (!password || 'string' !== typeof password) {
+    throw new TypeError('Password must be non-empty string.')
+  }
+
+  const { publicKey } = generateKeypair(password)
+  let { did: didUri } = create(publicKey)
+  didUri = validateDid(didUri)
+
+  let result = true
+  if (owner) {
+    owner = validateDid(owner)
+    result = didUri === owner
+  } else {
+    ddo = ddo || null
+    if (!ddo) {
+      const keystore = await loadSecrets(kResolverKey)
+      ddo = await resolve(did, { key: kResolverKey, keystore })
+    }
+    const ddoOwner = getDocumentOwner(ddo)
+    result = didUri === ddoOwner
+  }
+  return result
 }
 
 module.exports = {
@@ -75,5 +105,6 @@ module.exports = {
   randomBytes,
   loadSecrets,
   validateDid,
-  getAfsOwner
+  getDocumentOwner,
+  isCorrectPassword
 }

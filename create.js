@@ -20,7 +20,8 @@ const { defaultStorage } = require('./storage')
 const {
   generateKeypair,
   validateDid,
-  loadSecrets
+  loadSecrets,
+  isCorrectPassword
 } = require('./util')
 
 const {
@@ -54,25 +55,13 @@ async function create({
 
     const keystore = await loadSecrets(kResolverKey)
     const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
-
-    if (null === afsDdo || 'object' !== typeof afsDdo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
-    }
-    const { publicKey } = generateKeypair(password)
-    let { did: didUri } = createDid(publicKey)
-    didUri = validateDid(didUri)
-
-    const pk = afsDdo.authentication[0].authenticationKey
-    const suffixLength = kOwnerSuffix.length
-    let ownerDid = pk.slice(0, pk.length - suffixLength)
-    ownerDid = validateDid(ownerDid)
-
-    if (didUri !== ownerDid) {
-      throw new Error('ara-filesystem.create: incorrect password', didUri, ownerDid)
+    
+    if (!(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
+      throw new Error('ara-filesystem.create: incorrect password')
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({ identity: did, pathPrefix, storagePassword: password })
+    const drives = await createMultidrive({ did, pathPrefix, password })
 
     const path = createAFSKeyPath(did)
 
@@ -84,20 +73,12 @@ async function create({
     afs.did = did
     afs.ddo = afsDdo
   } else if (owner) {
-    const { publicKey: userPublicKey } = generateKeypair(password)
-    let { did: didUri } = createDid(userPublicKey)
 
-    didUri = validateDid(didUri)
-    owner = validateDid(owner)
-
-    const ddo = await aid.resolve(owner)
-    if (null === ddo || 'object' !== typeof ddo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
-    }
-
-    if (didUri !== owner) {
+    if (!(await isCorrectPassword({ owner, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }
+
+    owner = validateDid(owner)
 
     mnemonic = bip39.generateMnemonic()
     const afsId = await aid.create(mnemonic, owner)
