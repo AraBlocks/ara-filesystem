@@ -1,6 +1,9 @@
 const { create } = require('../create')
 const test = require('ava')
-const { kTestOwnerDid, kTestOwnerDidNoMethod, kPassword } = require('./_constants')
+const { 
+  kTestOwnerDid, 
+  kTestOwnerDidNoMethod, 
+  kPassword } = require('./_constants')
 
 test('create() valid id', async (t) => {
   // create AFS
@@ -68,6 +71,7 @@ test('create() no password', async (t) => {
 
 test('create() incorrect password', async (t) => {
   const wrongPass = 'abcd'
+  
   await t.throws(create({ owner: kTestOwnerDid, password: wrongPass }), Error, 'ara-filesystem.create: incorrect password.')
   await t.throws(create({ did: kTestOwnerDid, password: wrongPass }), Error, 'ara-filesystem.create: incorrect password.')
 })
