@@ -4,7 +4,6 @@ const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
-const { create: createDid } = require('ara-identity/did')
 const { writeIdentity } = require('ara-identity/util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
@@ -18,7 +17,6 @@ const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
 
 const {
-  generateKeypair,
   validateDid,
   loadSecrets,
   isCorrectPassword
@@ -26,8 +24,7 @@ const {
 
 const {
   kResolverKey,
-  kArchiverKey,
-  kOwnerSuffix
+  kArchiverKey
 } = require('./constants')
 
 /**
@@ -55,7 +52,7 @@ async function create({
 
     const keystore = await loadSecrets(kResolverKey)
     const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
-    
+
     if (!(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }
@@ -73,7 +70,6 @@ async function create({
     afs.did = did
     afs.ddo = afsDdo
   } else if (owner) {
-
     if (!(await isCorrectPassword({ owner, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }

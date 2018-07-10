@@ -1,4 +1,3 @@
-const debug = require('debug')('ara-filesystem:util')
 const { secrets } = require('ara-network')
 const { create } = require('ara-identity/did')
 const { resolve } = require('./aid')
@@ -73,7 +72,6 @@ async function isCorrectPassword({
   owner,
   password
 } = {}) {
-  
   if (!password || 'string' !== typeof password) {
     throw new TypeError('Password must be non-empty string.')
   }
@@ -97,7 +95,6 @@ async function isCorrectPassword({
   }
   return result
 }
-
 
 function encryptJSON(json, password) {
   const { secretKey } = generateKeypair(password)

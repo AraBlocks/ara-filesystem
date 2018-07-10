@@ -1,16 +1,13 @@
 /* eslint quotes: off */
 
 const test = require('ava')
-const { blake2b } = require('ara-crypto')
 const RandomAccessStorage = require('random-access-storage')
 const RandomAccessFile = require('random-access-file')
 const { createAFSKeyPath } = require('../key-path')
-const { create } = require('../create')
 
-const { 
+const {
   kTestDid,
-  kPassword: password,
-  kTestOwnerDid
+  kPassword: password
 } = require('./_constants')
 
 const {
@@ -22,7 +19,7 @@ const {
 // if logic changes significantly, write tests here for read, write, stat, del
 
 test("resolveBufferIndex() invalid path", (t) => {
-  t.throws(() => resolveBufferIndex(), TypeError, "Path must be non-empty string")
+  t.throws(() => resolveBufferIndex(), TypeError, `Path must be non-empty string`)
   t.throws(() => resolveBufferIndex(111), TypeError, "Path must be non-empty string")
   t.throws(() => resolveBufferIndex('metadataTree'), Error, "Path is not formatted properly")
 })
@@ -45,15 +42,15 @@ test("defaultStorage() validate return values", (t) => {
   const storage = defaultStorage(kTestDid, password)
   const path = createAFSKeyPath(kTestDid)
 
-  let result = storage('content/tree', null, path + '/home')
-  t.true(result.constructor == RandomAccessStorage)
+  let result = storage('content/tree', null, `${path}/home`)
+  t.true(result.constructor === RandomAccessStorage)
 
-  result = storage('content/signatures', null, path + '/home')
-  t.true(result.constructor == RandomAccessStorage)  
+  result = storage('content/signatures', null, `${path}/home`)
+  t.true(result.constructor === RandomAccessStorage)
 
   result = storage('metadata/tree', null, path)
-  t.true(result.constructor == RandomAccessFile)
+  t.true(result.constructor === RandomAccessFile)
 
   result = storage('metadata/signatures', null, path)
-  t.true(result.constructor == RandomAccessFile)
+  t.true(result.constructor === RandomAccessFile)
 })

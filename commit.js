@@ -1,4 +1,3 @@
-// (cckelly): disabling as writes need to happen serially
 /* eslint-disable no-await-in-loop */
 
 const debug = require('debug')('ara-filesystem:commit')
@@ -17,10 +16,8 @@ const {
 } = require('./constants')
 
 const {
-  generateKeypair,
   encryptJSON,
   decryptJSON,
-  randomBytes,
   validateDid,
   isCorrectPassword
 } = require('./util')
@@ -56,7 +53,6 @@ async function commit({
 
   const contentsLength = Object.keys(contents).length
   for (let i = 0; i < contentsLength; i++) {
-
     const key = Object.keys(contents)[i]
     const buffers = contents[key]
     const index = resolveBufferIndex(key)

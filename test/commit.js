@@ -1,6 +1,5 @@
 /* eslint quotes: "off" */
 
-const debug = require('debug')('test')
 const test = require('ava')
 const fs = require('fs')
 const { resolve } = require('path')
@@ -18,7 +17,7 @@ const {
   kTestOwnerDid
 } = require('./_constants')
 
-const { 
+const {
   commit,
   append,
   retrieve,
@@ -66,7 +65,7 @@ test("commit() invalid password", async (t) => {
 
 test("commit() incorrect password", async (t) => {
   const did = getDid(t)
-  await t.throws(commit({ did, password: 'wrong_password'}), Error, "Incorrect password")
+  await t.throws(commit({ did, password: 'wrong_password' }), Error, "Incorrect password")
 })
 
 test("commit() no changes to commit", async (t) => {
@@ -90,10 +89,10 @@ test("commit() previously cached buffers match blockchain buffers", async (t) =>
   const { did } = afs
   await add({ did, paths: [file], password })
   const path = generateStagedPath(did)
-  
+
   let contents = fs.readFileSync(path, 'utf8')
   contents = JSON.parse(decryptJSON(contents, password))
-  
+
   const mTree = contents['metadata/tree']
   const cSig = contents['content/signatures']
 
@@ -111,7 +110,12 @@ test("commit() previously cached buffers match blockchain buffers", async (t) =>
 
 test("retrieve() offset doesn't exist", (t) => {
   const did = getDid(t)
-  const result = retrieve({ did, fileIndex: 0, offset: 10000000, password })
+  const result = retrieve({
+    did,
+    fileIndex: 0,
+    offset: 10000000,
+    password
+  })
   t.is(result, undefined)
 })
 
@@ -129,7 +133,7 @@ test("retrieve() valid params", (t) => {
   // validate metadata/tree
   const mtHeader = retrieve({ did, fileIndex: 2, password })
   t.true(isHex(mtHeader) && 64 === mtHeader.length)
-  
+
   // validate metadata/signatures
   const msHeader = retrieve({ did, fileIndex: 3, password })
   t.true(isHex(msHeader) && 64 === msHeader.length)
@@ -138,7 +142,19 @@ test("retrieve() valid params", (t) => {
 test("append() valid params", (t) => {
   const did = getDid(t)
   const data = Buffer.from('0x0101')
-  append({ did, fileIndex: 0, offset: 96, data, password })
-  const result = retrieve({ did, fileIndex: 0, offset: 96, password })
+  append({
+    did,
+    fileIndex: 0,
+    offset: 96,
+    data,
+    password
+  })
+
+  const result = retrieve({
+    did,
+    fileIndex: 0,
+    offset: 96,
+    password
+  })
   t.is(data.toString('hex'), result.toString('hex'))
 })

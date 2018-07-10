@@ -54,7 +54,6 @@ async function archive(identity, opts) {
  * @return {Promise}
  */
 async function resolve(did, opts = {}) {
-
   if (!did || null === did || 'string' !== typeof did) {
     throw new TypeError('ara-filesystem.aid: DID to resolve must be non-empty string')
   }
