@@ -170,7 +170,7 @@ async function add({
     const progress = createProgressStreams({ stats })
 
     // eslint-disable-next-line no-shadow
-    const result = await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       writer.on('finish', onfinish)
       writer.on('debug', ondebug)
 
@@ -202,7 +202,6 @@ async function add({
         reject(err)
       }
     })
-    return result
   }
 
   // TODO(cckelly): any CLI output should be moved to bin/ara-filesystem
@@ -247,7 +246,7 @@ async function add({
         const elapsed = Date.now() - start
         const speed = toLower(bytes(Math.floor(current.reader / (elapsed / 1000 || 1))))
         readerProgressBar.tick(size, { speed })
-        readerProgressStream.write(Buffer.from(size))
+        readerProgressStream.write(Buffer(size))
       },
 
       updateWriter(size) {
@@ -255,7 +254,7 @@ async function add({
         const elapsed = Date.now() - start
         const speed = toLower(bytes(Math.floor(current.writer / (elapsed / 1000 || 1))))
         writerProgressBar.tick(size, { speed })
-        writerProgressStream.write(Buffer.from(size))
+        writerProgressStream.write(Buffer(size))
       }
     }
 
