@@ -94,6 +94,14 @@ function _decode(bytes) {
 }
 
 function resolveBufferIndex(path) {
+  if (!path || 'string' !== typeof path) {
+    throw new TypeError('Path must be non-empty string')
+  }
+
+  if (-1 === path.indexOf('/')) {
+    throw new Error('Path is not properly formatted')
+  }
+
   const parsedPath = path.split('/')
   const file = parsedPath[parsedPath.length - 1]
   const register = parsedPath[parsedPath.length - 2]

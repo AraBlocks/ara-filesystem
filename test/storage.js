@@ -2,74 +2,58 @@
 
 const test = require('ava')
 const { blake2b } = require('ara-crypto')
-const { kTestDid } = require('./_constants')
-const { write, read } = require('../storage')
+const RandomAccessStorage = require('random-access-storage')
+const RandomAccessFile = require('random-access-file')
+const { createAFSKeyPath } = require('../key-path')
+const { create } = require('../create')
 
-const opts = {
-  identity: kTestDid,
-  root: 'root',
-  signature: 'signature'
-}
+const { 
+  kTestDid,
+  kPassword: password,
+  kTestOwnerDid
+} = require('./_constants')
 
-// path is empty
-// path doesn't contain '/'
-// path is not string
+const {
+  resolveBufferIndex,
+  defaultStorage
+} = require('../storage')
+
+// TODO(cckelly): commit.js tests for the most part cover read, write functionality
+// if logic changes significantly, write tests here for read, write, stat, del
+
 test("resolveBufferIndex() invalid path", (t) => {
-
+  t.throws(() => resolveBufferIndex(), TypeError, "Path must be non-empty string")
+  t.throws(() => resolveBufferIndex(111), TypeError, "Path must be non-empty string")
+  t.throws(() => resolveBufferIndex('metadataTree'), Error, "Path is not formatted properly")
 })
 
-// make sure key/value pairs match
 test("resolveBufferIndex() valid params", (t) => {
+  let result = resolveBufferIndex('content/tree')
+  t.is(result, 0)
 
+  result = resolveBufferIndex('content/signatures')
+  t.is(result, 1)
+
+  result = resolveBufferIndex('metadata/tree')
+  t.is(result, 2)
+
+  result = resolveBufferIndex('metadata/signatures')
+  t.is(result, 3)
 })
 
-// pass in path with home and metadata/tree and make sure create returns RAS instance
-// pass in path without home and metadata/tree and make sure result is RAF instance
 test("defaultStorage() validate return values", (t) => {
+  const storage = defaultStorage(kTestDid, password)
+  const path = createAFSKeyPath(kTestDid)
 
+  let result = storage('content/tree', null, path + '/home')
+  t.true(result.constructor == RandomAccessStorage)
+
+  result = storage('content/signatures', null, path + '/home')
+  t.true(result.constructor == RandomAccessStorage)  
+
+  result = storage('metadata/tree', null, path)
+  t.true(result.constructor == RandomAccessFile)
+
+  result = storage('metadata/signatures', null, path)
+  t.true(result.constructor == RandomAccessFile)
 })
-
-// write and make sure that staged commit is added to staged.json and everything matches
-test("defaultStorage().write()", (t) => {
-
-})
-
-// test buffer returned from commit.retrieve is correct
-// make sure buffer returned from contract matches what was written
-test("defaultStorage().read()", (t) => {
-
-})
-
-test("defaultStorage().stat()", (t) => {
-
-})
-
-test("defaultStorage().del()", (t) => {
-
-})
-
-// TODO(cckelly): old
-
-test(`publish({
-  identity = '',
-  root = '',
-  signature = ''
-}= {})`, async (t) => {
-  await t.throws(publish({ identity: null }), TypeError, "identity cannot be blank")
-  await t.throws(publish({ identity: 1234 }), TypeError, "identity must be a string")
-
-  const hIdentity = blake2b(Buffer.from(opts.identity)).toString('hex')
-  await publish(opts, (err, { returnValues }) => {
-    t.true(null == err && hIdentity == returnValues.identity)
-  })
-})
-
-test(`resolve(identity = '')`, async (t) => {
-  await t.throws(publish(), TypeError, "identity cannot be blank")
-  await t.throws(publish(1234), TypeError, "identity must be a string")
-
-  const result = await resolve(opts.identity)
-  t.true(opts.root === result.root && opts.signature === result.signature)
-})
-
-// TODO(cckelly): unlink tests
