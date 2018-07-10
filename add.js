@@ -158,7 +158,10 @@ async function add({
     reader.setMaxListeners(0)
     writer.setMaxListeners(0)
 
-    createPipe({ reader, writer, stats })
+    // used for spliting buffer chunks
+    const { highWaterMark } = writer._writableState
+
+    return createPipe({ reader, writer, stats })
   }
 
   async function createPipe({ reader, writer, stats }) {
