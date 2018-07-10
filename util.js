@@ -98,10 +98,39 @@ async function isCorrectPassword({
   return result
 }
 
+
+function encryptJSON(json, password) {
+  const { secretKey } = generateKeypair(password)
+  const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
+
+  const encryptedJSON = encrypt(JSON.stringify(json), {
+    key: encryptionKey,
+    iv: randomBytes(16)
+  })
+
+  secretKey.fill(0)
+  encryptionKey.fill(0)
+
+  return encryptedJSON
+}
+
+function decryptJSON(keystore, password) {
+  const { secretKey } = generateKeypair(password)
+  const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
+  const decryptedJSON = decrypt({ keystore }, { key: encryptionKey })
+
+  secretKey.fill(0)
+  encryptionKey.fill(0)
+
+  return decryptedJSON
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
   decrypt,
+  encryptJSON,
+  decryptJSON,
   randomBytes,
   loadSecrets,
   validateDid,

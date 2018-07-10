@@ -78,3 +78,14 @@ test("validateDid() validate DID cases", (t) => {
 
   t.notThrows(() => util.validateDid(kTestOwnerDid), Error, "DID is not valid")
 })
+
+test("encryptJSON() decryptJSON() valid params", (t) => {
+  const json = { number: 1 }
+  const encrypted = util.encryptJSON(json, 'password')
+
+  const keystore = JSON.stringify(encrypted)
+  const decrypted = util.decryptJSON(keystore, 'password')
+
+  t.deepEqual(json, JSON.parse(decrypted.toString()))
+})
+
