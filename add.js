@@ -15,6 +15,7 @@ const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
 const mirror = require('mirror-folder')
 const ignored = require('./lib/ignore')
+const mirror = require('mirror-folder')
 
 const toLower = x => String(x).toLowerCase()
 
