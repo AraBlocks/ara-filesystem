@@ -14,6 +14,7 @@ const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
 const { loadSecrets, afsOwner, generateKeypair, validateDid } = require('./util')
 const { create: createDid } = require('ara-identity/did')
+const mirror = require('mirror-folder')
 
 const ignored = require('./lib/ignore')
 
