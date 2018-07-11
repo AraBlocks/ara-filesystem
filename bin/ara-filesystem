@@ -86,6 +86,28 @@ const { argv } = program
         describe: "An AFS ARA decentralized identity (did) URI"
       })
   }, oncommit)
+  .command('set-price <did> [price]', "Publish price for the given AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .positional('price', {
+        type: 'number',
+        describe: "Cost associated with an AFS (in ARA)"
+      })
+  }, onsetprice)
+  .command('get-price <did> [price]', "Return the price for a given AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .positional('price', {
+        type: 'number',
+        describe: "Cost associated with an AFS (in ARA)"
+      })
+  }, ongetprice)
 
 void async function main() {
   if (argv.debug) {
@@ -230,6 +252,33 @@ async function oncommit({did}) {
   } else {
     info("file(s) successfully committed")
   }
+}
+
+async function onsetprice({did, price}) {
+  info("setting price of AFS identity %s to %d", did, price)
+  const { password } = await promptForPassword()
+
+  try {
+    await afs.setPrice({ did, password, price })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("price has been set to", price)
+}
+
+async function ongetprice({did}) {
+  info("getting price of AFS identity %s", did)
+  const { password } = await promptForPassword()
+
+  let price 
+  try {
+    price = await afs.getPrice({ did, password })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("price of", did, "is", price)
 }
 
 async function promptForPassword() {

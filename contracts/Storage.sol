@@ -39,6 +39,10 @@ contract Storage {
     }
   }
 
+  function exists(string identity) public view returns (bool doesExist) {
+    return buffer_mappings[identity][0].keys.length > 0;
+  }
+
   function read(string identity, uint8 file, uint8 offset) public view returns (bytes buffer) {
     return buffer_mappings[identity][file].buffers[offset];
   }
