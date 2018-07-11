@@ -87,10 +87,10 @@ Since the address of `Storage.sol` is currently hardcoded, the address that `mig
 Run the create command found in ARA identity.
 
 ```sh
-$ aid create
+$ aid create --archive -k archiver
 ```
 
-This will return the DID of the identity created, this will be used to create an AFS.
+The `archive` flag will automatically archive the identity after creation. This command will return the DID of the identity created, this will be used to create an AFS.
 
 > **Important**: Do not lose your password as your account cannot be recovered.
 
