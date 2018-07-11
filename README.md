@@ -147,9 +147,9 @@ $ afs commit cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f
 TODO
 
 ## Contributing
-- [Commit message format](https://github.com/AraBlocks/docs/blob/master/.github/COMMIT_FORMAT.md)
-- [commit message examples](https://github.com/AraBlocks/docs/blob/master/.github/COMMIT_FORMAT_EXAMPLES.md)
-- [How to contribute](https://github.com/AraBlocks/docs/blob/master/.github/CONTRIBUTING.md)
+- [Commit message format](/.github/COMMIT_FORMAT.md)
+- [Commit message examples](/.github/COMMIT_FORMAT_EXAMPLES.md)
+- [How to contribute](/.github/CONTRIBUTING.md)
 
 Releases follow [Semantic Versioning](https://semver.org/)
 
