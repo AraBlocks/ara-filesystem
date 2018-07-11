@@ -119,7 +119,7 @@ async function oncreate(argv) {
     ' This phrase will be required to make any changes to the AFS.'+ 
     ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
 
-  await arafs.afs.close()
+  arafs.afs.close()
 }
 
 async function onhistory(argv) {
@@ -190,9 +190,10 @@ async function onadd(argv) {
 
   const { password } = await promptForPassword()
 
-  await afs.add({ did, paths, password })
-
-  info("file(s) successfully added")
+  try {
+    await afs.add({ did, paths, password })
+    info("file(s) successfully added")
+  } catch (err) { error(err.message) }
 }
 
 async function onremove(argv) {
