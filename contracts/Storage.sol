@@ -25,7 +25,8 @@ contract Storage {
   }
  
   modifier restricted() {
-    if (msg.sender == owner) _;
+    require (msg.sender == owner);
+    _;
   }
 
   function write(string identity, uint8 file, uint8 offset, bytes buffer, bool last_write) public restricted {
