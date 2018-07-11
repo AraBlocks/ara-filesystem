@@ -6,6 +6,7 @@ const { append, retrieve } = require('./commit')
 const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
+const { hashIdentity } = require('./util')
 
 const {
   kMetadataRegister,
@@ -35,7 +36,7 @@ function defaultStorage(identity, password) {
 function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const hIdentity = _hashIdentity(identity)
+  const hIdentity = hashIdentity(identity)
 
   return ras({
     async read(req) {
@@ -112,10 +113,6 @@ function resolveBufferIndex(path) {
     index = (kTreeFile === file) ? kContentTree.index : kContentSignatures.index
   }
   return index
-}
-
-function _hashIdentity(identity) {
-  return blake2b(Buffer.from(identity)).toString('hex')
 }
 
 module.exports = {

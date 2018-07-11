@@ -255,6 +255,7 @@ async function oncommit({did}) {
 }
 
 async function onsetprice({did, price}) {
+  price = price || 0
   info("setting price of AFS identity %s to %d", did, price)
   const { password } = await promptForPassword()
 
