@@ -13,33 +13,30 @@ const {
   isCorrectPassword
 } = require('./util')
 
-// TODO(cckelly): validate password
-
 async function setPrice({
   did = '',
   password = '',
   price = 0,
 } = {}) {
-  if (!did || 'string' !== typeof did) {
-    throw new TypeError('Expecting valid DID')
-  }
+  await validate(did, password)
 
-  if (!password || 'string' !== typeof password) {
-    throw new TypeError('Expecting non-empty string for password')
+  if ('number' !== typeof price) {
+    throw new TypeError('Price should be 0 or positive whole number')
   }
 
   const accounts = await web3.eth.getAccounts()
   const hIdentity = hashIdentity(did)
   const deployed = new web3.eth.Contract(abi, kPriceAddress)
 
-  await deployed.methods.setPrice(hIdentity, price, kStorageAddress).send({
-    from: accounts[0],
-    gas: 500000
-  })
-  .on('error', (err) => {
+  try {
+    await deployed.methods.setPrice(hIdentity, price, kStorageAddress).send({
+      from: accounts[0],
+      gas: 500000
+    })
+  } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
-  })
+  }
 
   debug('price for', did, 'set to', price, 'ARA')
 }
@@ -48,15 +45,27 @@ async function getPrice({
   did = '',
   password = ''
 } = {}) {
-  if (!did || 'string' !== typeof did) {
-    throw new Error('Expecting valid DID')
-  }
+  await validate(did, password)
 
   const hIdentity = hashIdentity(did)
   const deployed = new web3.eth.Contract(abi, kPriceAddress)
   const result = await deployed.methods.getPrice(hIdentity).call()
   debug('price for %s: %d', hIdentity, result)
   return result
+}
+
+async function validate(did, password) {
+  if (!did || 'string' !== typeof did) {
+    throw new TypeError('Expecting valid DID')
+  }
+
+  if (!password || 'string' !== typeof password) {
+    throw new TypeError('Expecting non-empty string for password')
+  }
+
+  if (!(await isCorrectPassword({ did, password }))) {
+    throw new Error('Incorrect password')
+  }
 }
 
 module.exports = {

@@ -122,6 +122,10 @@ function decryptJSON(keystore, password) {
   return decryptedJSON
 }
 
+function hashIdentity(did) {
+  return blake2b(Buffer.from(did)).toString('hex')
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
@@ -132,5 +136,6 @@ module.exports = {
   loadSecrets,
   validateDid,
   getDocumentOwner,
-  isCorrectPassword
+  isCorrectPassword,
+  hashIdentity
 }
