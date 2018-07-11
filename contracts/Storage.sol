@@ -17,7 +17,7 @@ contract Storage {
     uint[] keys;
   }
 
-  event Write(string _identity);
+  event Commit(string _identity);
   event Delete(string _identity);
 
   constructor() public {
@@ -28,13 +28,15 @@ contract Storage {
     if (msg.sender == owner) _;
   }
 
-  function write(string identity, uint8 file, uint8 offset, bytes buffer) public restricted {
+  function write(string identity, uint8 file, uint8 offset, bytes buffer, bool last_write) public restricted {
     buffer_mappings[identity][file].buffers[offset] = buffer;
     buffer_mappings[identity][file].keys.push(offset);
     if (offset > buffer_mappings[identity][file].largest_key) {
       buffer_mappings[identity][file].largest_key = offset;
     }
-    emit Write(identity);
+    if (last_write) {
+      emit Commit(identity);
+    }
   }
 
   function read(string identity, uint8 file, uint8 offset) public view returns (bytes buffer) {

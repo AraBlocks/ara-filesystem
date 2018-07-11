@@ -65,7 +65,7 @@ const { argv } = program
     program
       .positional('pathspec', {
         type: 'string',
-        describe: "The file(s) you wish to add to AFS"
+        describe: "The file(s) you wish to remove from AFS"
       })
       .positional('did', {
         type: 'string',
@@ -86,6 +86,12 @@ const { argv } = program
         describe: "An AFS ARA decentralized identity (did) URI"
       })
   }, oncommit)
+
+void async function main() {
+  if (argv.debug) {
+    require('debug').enable('ara-filesystem*')
+  }
+}()
 
 async function oncreate(argv) {
   let owner = argv.owner
@@ -108,7 +114,12 @@ async function oncreate(argv) {
     arafs = await afs.create({ owner, password })
   } catch (err) { onfatal(err) }
 
-  info('AFS created with did', arafs.did)
+  info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
+  info('Please safely store the following 12 word mnemonic phrase for this AFS.' + 
+    ' This phrase will be required to make any changes to the AFS.'+ 
+    ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
+
+  await arafs.afs.close()
 }
 
 async function onhistory(argv) {
@@ -145,7 +156,7 @@ async function onhistory(argv) {
   const arafs = await afs.create({ did, password })
   const stream = table.createStream(tableOpts)
 
-  arafs.history(argv.partition || arafs.HOME)
+  arafs.afs.history(argv.partition || arafs.afs.HOME)
     .on('error', onfatal)
     .on('end', () => process.exit(0))
     .on('data', (log) => {
@@ -180,6 +191,8 @@ async function onadd(argv) {
   const { password } = await promptForPassword()
 
   await afs.add({ did, paths, password })
+
+  info("file(s) successfully added")
 }
 
 async function onremove(argv) {
@@ -196,21 +209,27 @@ async function onremove(argv) {
 
   const { password } = await promptForPassword()
 
-  await afs.remove({ did, paths, password })
+  const result = await afs.remove({ did, paths, password })
+  if (result instanceof Error) {
+    error(result)
+  } else {
+    info("file(s) successfully removed")
+  }
 }
 
 async function oncommit({did}) {
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
 
-  const password = await promptForPassword()
-
-  if (!password) {
-    onfatal(new TypeError("Please provide a password to archive your identity."))
-  }
+  const { password } = await promptForPassword()
 
   info("committing with identity: %s", did)
 
-  await afs.commit({ did, password })
+  const result = await afs.commit({ did, password })
+  if (result instanceof Error) {
+    error(result)
+  } else {
+    info("file(s) successfully committed")
+  }
 }
 
 async function promptForPassword() {
@@ -219,7 +238,7 @@ async function promptForPassword() {
     name: 'password',
     message:
     "Please provide a passphrase for your identity. This is needed to " +
-    "archive your identity.\n" +
+    "complete this action.\n" +
     "Passphrase:"
   }]) 
 }

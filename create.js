@@ -1,9 +1,10 @@
+/* eslint-disable no-shadow */
+
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
-const { create: createDid } = require('ara-identity/did')
-const { loadSecrets } = require('./util')
+const { writeIdentity } = require('ara-identity/util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
@@ -13,9 +14,13 @@ const pify = require('pify')
 const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
-const { info } = require('ara-console')
-const storage = require('./storage')
-const { generateKeypair, encrypt, decrypt, validateDid } = require('./util')
+const { defaultStorage } = require('./storage')
+
+const {
+  validateDid,
+  loadSecrets,
+  isCorrectPassword
+} = require('./util')
 
 const {
   kResolverKey,
@@ -36,19 +41,24 @@ async function create({
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
+  if ('string' !== typeof password || !password) {
+    throw new TypeError('ara-filesystem.create: Expecting non-empty password')
+  }
+
   let afs
+  let mnemonic
   if (did) {
     did = validateDid(did)
 
     const keystore = await loadSecrets(kResolverKey)
     const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
 
-    if (null === afsDdo || 'object' !== typeof afsDdo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
+    if (!(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
+      throw new Error('ara-filesystem.create: incorrect password')
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({did, pathPrefix, password})
+    const drives = await createMultidrive({ did, pathPrefix, password })
 
     const path = createAFSKeyPath(did)
 
@@ -59,26 +69,17 @@ async function create({
 
     afs.did = did
     afs.ddo = afsDdo
-
   } else if (owner) {
-
-    const { publicKey: userPublicKey, secretKey: userSecretKey } = generateKeypair(password)
-    const { did: didUri } = createDid(userPublicKey)
-
-    if (didUri !== owner) {
+    if (!(await isCorrectPassword({ owner, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }
 
     owner = validateDid(owner)
 
-    const ddo = await aid.resolve(owner)
-    if (null === ddo || 'object' !== typeof ddo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
-    }
-
-    const mnemonic = bip39.generateMnemonic()
-    debug(mnemonic)
+    mnemonic = bip39.generateMnemonic()
     const afsId = await aid.create(mnemonic, owner)
+
+    await writeIdentity(afsId)
 
     let keystore = await loadSecrets(kArchiverKey)
     await aid.archive(afsId, { key: kArchiverKey, keystore })
@@ -104,7 +105,7 @@ async function create({
         key: kp.publicKey,
         secretKey: kp.secretKey,
         path,
-        storage: storage(afsDid, password),
+        storage: defaultStorage(afsDid, password),
         shallow: true
       })
     } catch (err) { debug(err.stack || err) }
@@ -115,16 +116,18 @@ async function create({
     // clear buffers
     kp.publicKey.fill(0)
     kp.secretKey.fill(0)
-
   }
 
-  return afs
+  return {
+    afs,
+    mnemonic
+  }
 
-  async function createMultidrive({did, pathPrefix, password}) {
+  async function createMultidrive({ did, pathPrefix, password }) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
-    
+
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
@@ -133,7 +136,7 @@ async function create({
           const afs = await createCFS({
             id,
             path,
-            storage: storage(did, password),
+            storage: defaultStorage(did, password),
             shallow: true
           })
           return done(null, afs)
@@ -142,7 +145,7 @@ async function create({
         }
         return null
       },
- 
+
       async (afs, done) => {
         try {
           await afs.close()
