@@ -92,6 +92,8 @@ $ aid create
 
 This will return the DID of the identity created, this will be used to create an AFS.
 
+> **Important**: Do not lose your password as your account cannot be recovered.
+
 ### Creating an AFS
 
 To create an AFS, you can run the create command along with providing a valid owner identity.
@@ -100,7 +102,7 @@ To create an AFS, you can run the create command along with providing a valid ow
 $ afs create did:ara:df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 ```
 
-Upon successful creation, a new identity will be outputted for this AFS. Don't lose this, it will be required for all subsequent commands to this AFS.
+Upon successful creation, a new identity will be outputted for this AFS. Store the mnemonic phrase in a safe place as it is the only recovery mechanism for your AFS.
 
 > **Note**: The `did:ara:` prefix is optional for all commands.
 

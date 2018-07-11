@@ -62,3 +62,6 @@ typings/
 
 # generated CFSs
 .cfs/*
+
+# truffle compiled contracts
+build/
