@@ -8,10 +8,8 @@ contract Storage {
 
   address public owner;
 
-  // 0 - content/tree file
-  // 1 - content/signatures file
-  // 2 - metadata/tree file
-  // 3 - metadata/signatures file
+  // 0 - metadata/tree file
+  // 1 - metadata/signatures file
   // DID => file index => offset => buffer
   mapping (string => mapping(uint8 => Buffers)) buffer_mappings;
 

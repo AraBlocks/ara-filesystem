@@ -18,17 +18,19 @@ const {
 } = require('./constants')
 
 const {
-  kContentTree,
-  kContentSignatures,
   kMetadataTree,
   kMetadataSignatures
 } = kFileMappings
 
+const { name: mTreeName } = kMetadataTree
+const { name: mSigName } = kMetadataSignatures
+
 function defaultStorage(identity, password) {
   return (filename, drive, path) => {
-    if ('home' === basename(path) && (filename.includes('tree')
-      || filename.includes('signatures'))) {
-      return create({ filename, identity, password })
+    filename = unixify(filename)
+    if ('home' === basename(path) && (filename.includes(mTreeName))
+      || (filename.includes(mSigName))) {
+      return create({ filename, identity, password }) 
     }
     return raf(resolve(path, filename))
   }
@@ -106,14 +108,11 @@ function resolveBufferIndex(path) {
     throw new Error('Path is not properly formatted')
   }
 
-  const parsedPath = path.split('/')
-  const file = parsedPath[parsedPath.length - 1]
-  const register = parsedPath[parsedPath.length - 2]
   let index = -1
-  if (kMetadataRegister === register) {
-    index = (kTreeFile === file) ? kMetadataTree.index : kMetadataSignatures.index
-  } else if (kContentRegister === register) {
-    index = (kTreeFile === file) ? kContentTree.index : kContentSignatures.index
+  if (mTreeName === path) {
+    index = kMetadataTree.index
+  } else if (mSigName === path) {
+    index = kMetadataSignatures.index
   }
   return index
 }
