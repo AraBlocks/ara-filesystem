@@ -12,9 +12,9 @@ contract Storage {
   mapping (string => mapping(uint8 => Buffers)) buffer_mappings;
 
   struct Buffers {
-    mapping (uint => bytes) buffers;
-    uint largest_key;
-    uint[] keys;
+    mapping (uint256 => bytes) buffers;
+    uint256 largest_key;
+    uint256[] keys;
   }
 
   event Commit(string _identity);
@@ -43,8 +43,8 @@ contract Storage {
     return buffer_mappings[identity][file].buffers[offset];
   }
 
-  function stat(string identity, uint8 file) public view returns (uint length) {
-    uint largest_key = buffer_mappings[identity][file].largest_key;
+  function stat(string identity, uint8 file) public view returns (uint256 length) {
+    uint256 largest_key = buffer_mappings[identity][file].largest_key;
     if (largest_key == 0) {
       return 0;
     } else {
@@ -54,8 +54,8 @@ contract Storage {
 
   function del(string identity) public restricted {
     for (uint8 i = 0; i < 3; i++) {
-      uint[] storage keys = buffer_mappings[identity][i].keys;
-      for (uint j = 0; j < keys.length; j++) {
+      uint256[] storage keys = buffer_mappings[identity][i].keys;
+      for (uint256 j = 0; j < keys.length; j++) {
         delete buffer_mappings[identity][i].buffers[keys[j]];
       }
       delete buffer_mappings[identity][i];
