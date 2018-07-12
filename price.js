@@ -10,7 +10,8 @@ const {
 
 const {
   hashIdentity,
-  isCorrectPassword
+  isCorrectPassword,
+  validate
 } = require('./util')
 
 async function setPrice({
@@ -18,7 +19,7 @@ async function setPrice({
   password = '',
   price = 0,
 } = {}) {
-  await validate(did, password)
+  await validate(did, password, 'price')
 
   if ('number' !== typeof price) {
     throw new TypeError('Price should be 0 or positive whole number')
@@ -52,20 +53,6 @@ async function getPrice({
   const result = await deployed.methods.getPrice(hIdentity).call()
   debug('price for %s: %d', hIdentity, result)
   return result
-}
-
-async function validate(did, password) {
-  if (!did || 'string' !== typeof did) {
-    throw new TypeError('Expecting valid DID')
-  }
-
-  if (!password || 'string' !== typeof password) {
-    throw new TypeError('Expecting non-empty string for password')
-  }
-
-  if (!(await isCorrectPassword({ did, password }))) {
-    throw new Error('Incorrect password')
-  }
 }
 
 module.exports = {
