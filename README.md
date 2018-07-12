@@ -29,7 +29,7 @@ The follow section lists the prerequisites for running the project as well as th
 
 ### Prerequisites
 
-- Clone the repositories listed above
+- Clone the following repositories
 - Be sure to `npm install` and `npm link` for each
 - Test the CLI by running the following commands,
 ```sh
@@ -117,7 +117,7 @@ $ afs add <did> <pathspec...>
 Example:
 
 ```sh
-$ afs add cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f my_video.mp4
+$ afs add df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my_video.mp4
 ```
 
 ### Removing from an AFS
@@ -131,7 +131,7 @@ $ afs remove <did> <pathspec...>
 Example:
 
 ```sh
-$ afs remove cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f my_video.mp4
+$ afs remove df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my_video.mp4
 ```
 
 ### Committing an AFS
@@ -139,7 +139,7 @@ $ afs remove cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f my
 Every change you make is saved to a local file on disc, you can think of these as staged commits. Before your changes are published to the ARA network and become discoverable, you have to commit them. You can commit with the `commit` command.
 
 ```sh
-$ afs commit cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f
+$ afs commit df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 ```
 
 ## API
