@@ -1,6 +1,10 @@
 pragma solidity ^0.4.24;
 
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+
 contract Storage {
+
+  using SafeMath for uint256;
 
   address public owner;
 
@@ -52,7 +56,7 @@ contract Storage {
     if (largest_key == 0) {
       return 0;
     } else {
-      return largest_key + buffer_mappings[identity][file].buffers[largest_key].length;
+      return largest_key.add(buffer_mappings[identity][file].buffers[largest_key].length);
     }
   }
 
