@@ -1,6 +1,7 @@
 const debug = require('debug')('ara-filesystem:remove')
 const { create } = require('./create')
 const pify = require('pify')
+const { resolve, join } = require('path')
 
 async function remove({
   paths = [],
@@ -8,17 +9,41 @@ async function remove({
   password = ''
 } = {}) {
   const { afs } = await create({ did, password })
-  for (const path of paths) {
-    try {
-      if (await afs.access(path)) {
-        await afs.unlink(path)
+  
+  await removeAll(paths)
+
+  async function removeAll(paths) {
+
+    for (const path of paths) {
+      try {
+        await afs.access(path)
+      } catch (err) {
+        debug('%s does not exist', path)
+        continue
       }
-    } catch(err) {
-      await afs.close()
-      return new Error("Could not remove file either because it does not exist or because of inadequate permissions")
+
+      try {
+        const files = await afs.readdir(path)
+        debug('%s removed from afs', path)
+        await afs.unlink(path)
+
+        if (files.length > 0) {
+          const src = resolve(path)
+          for (let i = 0; i < files.length; i++) {
+            let file = files[i]
+            files[i] = join(src, file)
+            files[i] = files[i].replace(process.cwd(), '.')
+          } 
+
+          await removeAll(files)
+        }
+      } catch (err) {
+        continue
+      }
     }
   }
-  await afs.close()
+
+  afs.close()
 }
 
 module.exports = {
