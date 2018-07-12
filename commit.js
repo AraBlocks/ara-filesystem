@@ -6,6 +6,7 @@ const pify = require('pify')
 const { blake2b } = require('ara-crypto')
 const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
+const { setPrice } = require('./price')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 
@@ -24,7 +25,8 @@ const {
 
 async function commit({
   did = '',
-  password = ''
+  password = '',
+  price = -1
 } = {}) {
   if (!password || 'string' !== typeof password) {
     throw new TypeError('ara-filesystem.commit: Expecting password to be non-empty string')
@@ -71,6 +73,11 @@ async function commit({
   }
 
   await _deleteStagedFile(path)
+
+  if (0 <= price) {
+    await setPrice({ did, password, price })
+  }
+
   return null
 }
 

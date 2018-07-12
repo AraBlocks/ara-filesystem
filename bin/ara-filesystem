@@ -85,6 +85,11 @@ const { argv } = program
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
       })
+      .option('price', {
+        alias: 'P',
+        type: 'number',
+        describe: "Price (in ARA) to set the cost of the AFS"
+      })
   }, oncommit)
   .command('set-price <did> [price]', "Publish price for the given AFS", (program) => {
     program
@@ -97,7 +102,7 @@ const { argv } = program
         describe: "Cost associated with an AFS (in ARA)"
       })
   }, onsetprice)
-  .command('get-price <did> [price]', "Return the price for a given AFS", (program) => {
+  .command('get-price <did>', "Return the price for a given AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
@@ -239,14 +244,14 @@ async function onremove(argv) {
   }
 }
 
-async function oncommit({did}) {
+async function oncommit({ did, price }) {
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
 
   const { password } = await promptForPassword()
 
   info("committing with identity: %s", did)
 
-  const result = await afs.commit({ did, password })
+  const result = await afs.commit({ did, password, price })
   if (result instanceof Error) {
     error(result)
   } else {
