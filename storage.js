@@ -1,6 +1,7 @@
 const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
 const raf = require('random-access-file')
+const unixify = require('unixify')
 const { resolve, basename } = require('path')
 const { append, retrieve } = require('./commit')
 const { blake2b } = require('ara-crypto')
@@ -98,6 +99,8 @@ function resolveBufferIndex(path) {
   if (!path || 'string' !== typeof path) {
     throw new TypeError('Path must be non-empty string')
   }
+
+  path = unixify(path)
 
   if (-1 === path.indexOf('/')) {
     throw new Error('Path is not properly formatted')
