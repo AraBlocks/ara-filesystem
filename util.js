@@ -126,6 +126,23 @@ function hashIdentity(did) {
   return blake2b(Buffer.from(did)).toString('hex')
 }
 
+async function validate(did, password, label = '') {
+  if (label) {
+    label = `.${label}`
+  }
+  if (!did || 'string' !== typeof did) {
+    throw new TypeError(`ara-filesystem${label}: Expecting valid DID`)
+  }
+
+  if (!password || 'string' !== typeof password) {
+    throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
+  }
+
+  if (!(await isCorrectPassword({ did, password }))) {
+    throw new Error(`ara-filesystem${label}: Incorrect password`)
+  }
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
@@ -137,5 +154,6 @@ module.exports = {
   validateDid,
   getDocumentOwner,
   isCorrectPassword,
-  hashIdentity
+  hashIdentity,
+  validate
 }

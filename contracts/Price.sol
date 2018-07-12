@@ -10,7 +10,7 @@ contract Price {
 
   event PriceSet(string _identity);
 
-  mapping (string => uint8) price_mappings;
+  mapping (string => uint16) price_mappings;
   Storage s;
 
   modifier onlyBy(address _account) {
@@ -18,14 +18,14 @@ contract Price {
     _;
   }
 
-  function setPrice(string identity, uint8 price, address storageAddr) public onlyBy(msg.sender) {
+  function setPrice(string identity, uint16 price, address storageAddr) public onlyBy(msg.sender) {
     s = Storage(storageAddr);
     require(s.exists(identity));
     price_mappings[identity] = price;  
     emit PriceSet(identity);
   }
 
-  function getPrice(string identity) public view returns (uint8 price) {
+  function getPrice(string identity) public view returns (uint16 price) {
     return price_mappings[identity];
   }
 
