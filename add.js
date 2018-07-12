@@ -50,8 +50,12 @@ async function add({
     // ensure paths exists
     for (const path of paths) {
       // ensure local file path exists
-      try { await pify(access)(path) }
-      catch (err) { debug("%s does not exist", path) }
+      try { 
+        await pify(access)(path)
+      } catch (err) {
+        debug("%s does not exist", path)
+        continue
+      }
 
       // directories
       if (await pify(isDirectory)(path)) {
@@ -95,7 +99,6 @@ async function add({
     if (!force && ignored.ignores(path)) {
       throw new debug(`ignore: ${path} is ignored. Use '--force' to force add file.`)
     }
-
     // paths
     const src = resolve(path)
     const dest = src.replace(process.cwd(), afs.HOME)
@@ -125,7 +128,6 @@ async function add({
 
     reader.setMaxListeners(0)
     writer.setMaxListeners(0)
-
     return createPipe({reader, writer, stats})
   }
 

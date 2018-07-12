@@ -83,10 +83,7 @@ test('add() valid did, valid password, valid directory (1, not nested)', async (
     password: kPassword 
   })
   
-  const files = fs.readdirSync(paths[0])
-  const buf = await afs.readdir(paths[0])
-  t.is(files.length, buf.length)
-  t.true(arraysAreEqual(files, buf))
+  t.true(await directoriesAreEqual(afs, paths[0]))
 })
 
 test('add() valid did, valid password, valid directory (1, nested)', async (t) => {
@@ -103,7 +100,7 @@ test('add() valid did, valid password, valid directory (1, nested)', async (t) =
     paths, 
     password: kPassword 
   })
-  t.true(await arraysAreEqual(afs, paths[0]))
+  t.true(await directoriesAreEqual(afs, paths[0]))
 })
 
 test('add() valid did, valid password, valid directory (2, nested)', async (t) => {
@@ -120,8 +117,44 @@ test('add() valid did, valid password, valid directory (2, nested)', async (t) =
     paths, 
     password: kPassword 
   })
-  t.true(await arraysAreEqual(afs, paths[0]))
-  t.true(await arraysAreEqual(afs, paths[1]))
+  t.true(await directoriesAreEqual(afs, paths[0]))
+  t.true(await directoriesAreEqual(afs, paths[1]))
+})
+
+test('add() valid did, valid password, invalid directory (1)', async (t) => {
+  const { afs } = await create({ 
+    owner: kTestOwnerDid, 
+    password: kPassword 
+  })
+  const { did } = afs
+
+  const paths = ['./doesnotexist']
+
+  await add({ 
+    did, 
+    paths, 
+    password: kPassword 
+  })
+  await t.throws(afs.readdir(paths[0]), Error, '')
+})
+
+test('add() valid did, valid password, invalid directory (1), valid directory (1)', async (t) => {
+  const { afs } = await create({ 
+    owner: kTestOwnerDid, 
+    password: kPassword 
+  })
+  const { did } = afs
+
+  const paths = ['./doesnotexist', './bin']
+
+  await add({ 
+    did, 
+    paths, 
+    password: kPassword 
+  })
+  
+  await t.throws(afs.readdir(paths[0]), Error, '')
+  t.true(await directoriesAreEqual(afs, paths[1]))
 })
 
 test('add() valid did, valid password, invalid path (1)', async (t) => {
@@ -260,14 +293,20 @@ test('add() invalid did, invalid password, valid path (1), invalid path(1)', asy
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-async function arraysAreEqual (afs, path) {
+async function directoriesAreEqual (afs, path) {
   const src = resolve(path)
   const fsFiles = fs.readdirSync(path)
   const afsFiles = await afs.readdir(path)
 
-  if ('object' !== typeof fsFiles || 'object' !== typeof afsFiles) return false
+  if ('object' !== typeof fsFiles || 'object' !== typeof afsFiles) {
+    console.log("not objects")
+    return false
+  }
 
-  if (fsFiles.length !== afsFiles.length) return false
+  if (fsFiles.length !== afsFiles.length) {
+    console.log("lengths not equal", fsFiles, afsFiles)
+    return false
+  }
 
   for (let i = 0; i < fsFiles.length; i++) {
     if (fsFiles[i] !== afsFiles[i]) return false
@@ -279,7 +318,7 @@ async function arraysAreEqual (afs, path) {
       const files = fs.readdirSync(fsFilePath)
       const buf = await afs.readdir(afsFilePath)
       const nestedPath = afsFilePath.replace(afs.HOME, '.')
-      if (await arraysAreEqual(afs, nestedPath)) {
+      if (await directoriesAreEqual(afs, nestedPath)) {
         continue
       } else {
         return false
