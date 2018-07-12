@@ -237,7 +237,7 @@ async function promptForPassword() {
     type: 'password',
     name: 'password',
     message:
-    "Please provide a passphrase for your identity. This is needed to " +
+    "Please provide the passphrase for your identity. This is needed to " +
     "complete this action.\n" +
     "Passphrase:"
   }]) 
