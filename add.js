@@ -22,9 +22,9 @@ const { kResolverKey } = require('./constants')
 const toLower = (x) => String(x).toLowerCase()
 
 async function add({
-  did,
-  paths,
-  password,
+  did = '',
+  paths = [],
+  password = '',
   watch,
   force
 }) {
@@ -36,13 +36,16 @@ async function add({
     throw new TypeError('ara-filesystem.add: Password required to continue')
   }
 
-  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths)) {
+  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths) || paths.length == 0) {
     throw new TypeError('ara-filesystem.add: Expecting one or more filepaths to add')
   }
 
   let afs
-  try { ({ afs } = await create({ did, password })) } 
-  catch (err) { throw err }
+  try {
+    ({ afs } = await create({ did, password }))
+  } catch (err) {
+    throw err
+  }
 
   await addAll(paths)
 

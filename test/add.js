@@ -41,7 +41,6 @@ test('add() valid did, valid password, valid path (1)', async (t) => {
   })
 
   const buf = await afs.readFile(paths[0])
-  afs.close()
   t.is(Buffer.compare(buf, fs.readFileSync(paths[0])), 0)
 })
 
@@ -65,7 +64,6 @@ test('add() valid did, valid password, valid path (3)', async (t) => {
     buf = await afs.readFile(path)
     t.is(Buffer.compare(buf, fs.readFileSync(path)), 0)
   }
-  afs.close()
 })
 
 test('add() valid did, valid password, valid directory (1, not nested)', async (t) => {
@@ -152,7 +150,7 @@ test('add() valid did, valid password, invalid directory (1), valid directory (1
     paths, 
     password: kPassword 
   })
-  
+
   await t.throws(afs.readdir(paths[0]), Error, '')
   t.true(await directoriesAreEqual(afs, paths[1]))
 })
@@ -163,15 +161,16 @@ test('add() valid did, valid password, invalid path (1)', async (t) => {
     password: kPassword 
   })
   const { did } = afs
-  afs.close()
 
   const paths = ['./doesnotexist.js']
 
-  await t.throws(add({ 
+  await add({ 
     did, 
     paths, 
     password: kPassword 
-  }), Error, 'ara-filesystem.add: File does not exit.')
+  })
+
+  await t.throws(afs.readFile(paths[0]), Error, '')
 })
 
 test('add() valid did, valid password, invalid path (1), valid path (1)', async (t) => {
@@ -180,15 +179,18 @@ test('add() valid did, valid password, invalid path (1), valid path (1)', async 
     password: kPassword 
   })
   const { did } = afs
-  afs.close()
 
   const paths = ['./doesnotexist.js', './index.js']
 
-  await t.throws(add({ 
+  await add({ 
     did, 
     paths, 
     password: kPassword 
-  }), Error, 'ara-filesystem.add: File does not exit.')
+  })
+
+  await t.throws(afs.readFile(paths[0]), Error, '')
+  const buf = await afs.readFile(paths[1])
+  t.is(Buffer.compare(buf, fs.readFileSync(paths[1])), 0)
 })
 
 test('add() valid did, invalid password, no paths', async (t) => {
@@ -197,7 +199,6 @@ test('add() valid did, invalid password, no paths', async (t) => {
     password: kPassword 
   })
   const { did } = afs
-  afs.close()
 
   await t.throws(add({ 
     did, 
@@ -211,7 +212,6 @@ test('add() valid did, invalid password, valid path (1)', async (t) => {
     password: kPassword 
   })
   const { did } = afs
-  afs.close()
 
   const paths = ['./index.js']
 
@@ -228,7 +228,6 @@ test('add() valid did, invalid password, valid path (2)', async (t) => {
     password: kPassword 
   })
   const { did } = afs
-  afs.close()
 
   const paths = ['./index.js', './add.js']
 
@@ -298,15 +297,9 @@ async function directoriesAreEqual (afs, path) {
   const fsFiles = fs.readdirSync(path)
   const afsFiles = await afs.readdir(path)
 
-  if ('object' !== typeof fsFiles || 'object' !== typeof afsFiles) {
-    console.log("not objects")
-    return false
-  }
+  if ('object' !== typeof fsFiles || 'object' !== typeof afsFiles) return false
 
-  if (fsFiles.length !== afsFiles.length) {
-    console.log("lengths not equal", fsFiles, afsFiles)
-    return false
-  }
+  if (fsFiles.length !== afsFiles.length) return false
 
   for (let i = 0; i < fsFiles.length; i++) {
     if (fsFiles[i] !== afsFiles[i]) return false
