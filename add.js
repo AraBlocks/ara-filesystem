@@ -1,8 +1,9 @@
+/* eslint-disable no-await-in-loop */
+
 const debug = require('debug')('ara-filesystem:add')
 const { create } = require('./create')
 const { resolve, join } = require('path')
 const fs = require('fs')
-const aid = require('./aid')
 const { stat, access } = require('fs')
 const pify = require('pify')
 const isDirectory = require('is-directory')
@@ -17,9 +18,7 @@ const { create: createDid } = require('ara-identity/did')
 
 const ignored = require('./lib/ignore')
 
-const { kResolverKey } = require('./constants')
-
-const toLower = (x) => String(x).toLowerCase()
+const toLower = x => String(x).toLowerCase()
 
 async function add({
   did = '',
@@ -27,7 +26,7 @@ async function add({
   password = '',
   watch,
   force
-}) {
+} = {}) {
   if (null == did || 'string' !== typeof did || !did) {
     throw new TypeError('ara-filesystem.add: Expecting non-empty did.')
   }
@@ -56,7 +55,7 @@ async function add({
       try { 
         await pify(access)(path)
       } catch (err) {
-        debug("%s does not exist", path)
+        debug('%s does not exist', path)
         continue
       }
 
@@ -64,22 +63,22 @@ async function add({
       if (await pify(isDirectory)(path)) {
         // add local directory to AFS at path
         try {
-          debug("Adding directory %s", path)
+          debug('Adding directory %s', path)
           await createDirectory(path)
         } catch (err) {
-          debug("createDirectory: ", err.stack)
-          debug("E: Failed to add path %s", path)
+          debug('createDirectory: ', err.stack)
+          debug('E: Failed to add path %s', path)
         }
       }
 
       // files
       if (await pify(isFile)(path)) {
         try {
-          debug("Adding file %s", path)
+          debug('Adding file %s', path)
           await addFile(path)
         } catch (err) {
-          debug("addFile:", err.stack)
-          debug("E: Failed to add path %s", path)
+          debug('addFile:', err.stack)
+          debug('E: Failed to add path %s', path)
         }
       }
     }
@@ -100,7 +99,7 @@ async function add({
 
   async function addFile(path) {
     if (!force && ignored.ignores(path)) {
-      throw new debug(`ignore: ${path} is ignored. Use '--force' to force add file.`)
+      throw new Error(`ignore: ${path} is ignored. Use '--force' to force add file.`)
     }
     // paths
     const src = resolve(path)
@@ -113,7 +112,7 @@ async function add({
       const { mtime } = await pify(afs.stat)(dest)
       if (stats.mtime <= mtime) {
         if (force) {
-          warn("Force adding %s", path)
+          debug('Force adding %s', path)
         } else {
           return
         }
@@ -126,24 +125,21 @@ async function add({
     const reader = fs.createReadStream(src, {autoClose: true})
     const writer = afs.createWriteStream(dest)
 
-    // used for spliting buffer chunks
-    const { highWaterMark } = writer._writableState
-
     reader.setMaxListeners(0)
     writer.setMaxListeners(0)
-    return createPipe({reader, writer, stats})
+    await createPipe({reader, writer, stats})
   }
 
   async function createPipe({reader, writer, stats}) {
     if (!stats || 0 == stats.size) {
-      process.nextTick(() => warn("Wrote 0 bytes"))
+      process.nextTick(() => warn('Wrote 0 bytes'))
       return writer.end()
     }
 
     // const progress = createProgressStreams({stats})
 
     // work
-    await new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       let didReadStreamEnd = false
 
       writer.on('finish', onfinish)
@@ -156,17 +152,17 @@ async function add({
       reader.pipe(writer)
 
       function ondata(chunk) {
-        debug("Read stream received buffer of size %s", chunk.length)
-        debug("Writing chunk %s", chunk.length)
+        debug('Read stream received buffer of size %s', chunk.length)
+        debug('Writing chunk %s', chunk.length)
       }
 
       function onfinish() {
-        debug("Write stream finished")
+        debug('Write stream finished')
         process.nextTick(resolve)
       }
 
       function onend() {
-        debug("Read stream ended")
+        debug('Read stream ended')
         didReadStreamEnd = true
       }
 
@@ -174,9 +170,8 @@ async function add({
         reject(err)
       }
     })
+    return result
   }
-
-  afs.close()
 }
 
 module.exports = {

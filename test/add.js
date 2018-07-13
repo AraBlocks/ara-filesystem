@@ -11,13 +11,12 @@ const isFile = require('is-file')
 const pify = require('pify')
 const { resolve, join } = require('path')
 
-test('add() valid did, valid password, no paths', async (t) => {
+test.serial('add() valid did, valid password, no paths', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
   })
   const { did } = afs
-  afs.close()
 
   await t.throws(add({ 
     did, 
@@ -25,7 +24,7 @@ test('add() valid did, valid password, no paths', async (t) => {
   }), TypeError, 'ara-filesystem.add: Expecting one or more filepaths to add')
 })
 
-test('add() valid did, valid password, valid path (1)', async (t) => {
+test.serial('add() valid did, valid password, valid path (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -44,7 +43,7 @@ test('add() valid did, valid password, valid path (1)', async (t) => {
   t.is(Buffer.compare(buf, fs.readFileSync(paths[0])), 0)
 })
 
-test('add() valid did, valid password, valid path (3)', async (t) => {
+test.serial('add() valid did, valid password, valid path (3)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -66,7 +65,7 @@ test('add() valid did, valid password, valid path (3)', async (t) => {
   }
 })
 
-test('add() valid did, valid password, valid directory (1, not nested)', async (t) => {
+test.serial('add() valid did, valid password, valid directory (1, not nested)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -84,7 +83,7 @@ test('add() valid did, valid password, valid directory (1, not nested)', async (
   t.true(await directoriesAreEqual(afs, paths[0]))
 })
 
-test('add() valid did, valid password, valid directory (1, nested)', async (t) => {
+test.serial('add() valid did, valid password, valid directory (1, nested)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -101,7 +100,7 @@ test('add() valid did, valid password, valid directory (1, nested)', async (t) =
   t.true(await directoriesAreEqual(afs, paths[0]))
 })
 
-test('add() valid did, valid password, valid directory (2, nested)', async (t) => {
+test.serial('add() valid did, valid password, valid directory (2, nested)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -119,7 +118,7 @@ test('add() valid did, valid password, valid directory (2, nested)', async (t) =
   t.true(await directoriesAreEqual(afs, paths[1]))
 })
 
-test('add() valid did, valid password, invalid directory (1)', async (t) => {
+test.serial('add() valid did, valid password, invalid directory (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -136,7 +135,7 @@ test('add() valid did, valid password, invalid directory (1)', async (t) => {
   await t.throws(afs.readdir(paths[0]), Error, '')
 })
 
-test('add() valid did, valid password, invalid directory (1), valid directory (1)', async (t) => {
+test.serial('add() valid did, valid password, invalid directory (1), valid directory (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -155,7 +154,7 @@ test('add() valid did, valid password, invalid directory (1), valid directory (1
   t.true(await directoriesAreEqual(afs, paths[1]))
 })
 
-test('add() valid did, valid password, invalid path (1)', async (t) => {
+test.serial('add() valid did, valid password, invalid path (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -173,7 +172,7 @@ test('add() valid did, valid password, invalid path (1)', async (t) => {
   await t.throws(afs.readFile(paths[0]), Error, '')
 })
 
-test('add() valid did, valid password, invalid path (1), valid path (1)', async (t) => {
+test.serial('add() valid did, valid password, invalid path (1), valid path (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -193,7 +192,7 @@ test('add() valid did, valid password, invalid path (1), valid path (1)', async 
   t.is(Buffer.compare(buf, fs.readFileSync(paths[1])), 0)
 })
 
-test('add() valid did, invalid password, no paths', async (t) => {
+test.serial('add() valid did, invalid password, no paths', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -206,7 +205,7 @@ test('add() valid did, invalid password, no paths', async (t) => {
   }), TypeError, 'ara-filesystem.add: Expecting one or more filepaths to add')
 })
 
-test('add() valid did, invalid password, valid path (1)', async (t) => {
+test.serial('add() valid did, invalid password, valid path (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -222,7 +221,7 @@ test('add() valid did, invalid password, valid path (1)', async (t) => {
   }), Error, 'ara-filesystem.create: incorrect password')
 })
 
-test('add() valid did, invalid password, valid path (2)', async (t) => {
+test.serial('add() valid did, invalid password, valid path (2)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -238,14 +237,14 @@ test('add() valid did, invalid password, valid path (2)', async (t) => {
   }), Error, 'ara-filesystem.create: incorrect password')
 })
 
-test('add() invalid did, valid password, no paths', async (t) => {
+test.serial('add() invalid did, valid password, no paths', async (t) => {
   await t.throws(add({ 
     did: 'invaliddid', 
     password: kPassword 
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-test('add() invalid did, valid password, valid path (1)', async (t) => {
+test.serial('add() invalid did, valid password, valid path (1)', async (t) => {
   const paths = ['./index.js']
 
   await t.throws(add({ 
@@ -255,7 +254,7 @@ test('add() invalid did, valid password, valid path (1)', async (t) => {
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-test('add() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
+test.serial('add() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
   const paths = ['./index.js', './doesnotexist.js']
 
   await t.throws(add({ 
@@ -265,14 +264,14 @@ test('add() invalid did, valid password, valid path (1), invalid path (1)', asyn
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-test('add() invalid did, invalid password, no paths', async (t) => {
+test.serial('add() invalid did, invalid password, no paths', async (t) => {
   await t.throws(add({ 
     did: 'invaliddid', 
     password: 'wrongpass' 
   }), TypeError, 'ara-filesystem.add: Expecting one or more filepaths to add')
 })
 
-test('add() invalid did, invalid password, valid path (1)', async (t) => {
+test.serial('add() invalid did, invalid password, valid path (1)', async (t) => {
   const paths = ['./index.js']
 
   await t.throws(add({ 
@@ -282,7 +281,7 @@ test('add() invalid did, invalid password, valid path (1)', async (t) => {
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-test('add() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
+test.serial('add() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
   const paths = ['./index.js', './doesnotexist.js']
 
   await t.throws(add({ 

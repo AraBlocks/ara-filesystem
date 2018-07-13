@@ -12,13 +12,12 @@ const isFile = require('is-file')
 const pify = require('pify')
 const { resolve, join } = require('path')
 
-test('remove() valid did, valid password, no paths', async (t) => {
+test.serial('remove() valid did, valid password, no paths', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
   })
   const { did } = afs
-  afs.close()
 
   await t.throws(remove({ 
     did, 
@@ -26,7 +25,7 @@ test('remove() valid did, valid password, no paths', async (t) => {
   }), TypeError, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
 })
 
-test('remove() valid did, valid password, valid path (1)', async (t) => {
+test.serial('remove() valid did, valid password, valid path (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -48,10 +47,9 @@ test('remove() valid did, valid password, valid path (1)', async (t) => {
   })
 
   await t.throws(afs.access(paths[0]), Error, '')
-  afs.close()
 })
 
-test('remove() valid did, valid password, valid path (3)', async (t) => {
+test.serial('remove() valid did, valid password, valid path (3)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -75,10 +73,9 @@ test('remove() valid did, valid password, valid path (3)', async (t) => {
   for (const path of paths) {
     await t.throws(afs.access(path), Error, '')
   }
-  afs.close()
 })
 
-test('remove() valid did, valid password, valid directory (1, not nested)', async (t) => {
+test.serial('remove() valid did, valid password, valid directory (1, not nested)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -102,7 +99,7 @@ test('remove() valid did, valid password, valid directory (1, not nested)', asyn
   t.true(await allFilesUnlinked(afs, paths[0]))
 })
 
-test('remove() valid did, valid password, valid directory (1, nested)', async (t) => {
+test.serial('remove() valid did, valid password, valid directory (1, nested)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -126,7 +123,7 @@ test('remove() valid did, valid password, valid directory (1, nested)', async (t
   t.true(await allFilesUnlinked(afs, paths[0]))
 })
 
-test('remove() valid did, valid password, valid directory (2, nested)', async (t) => {
+test.serial('remove() valid did, valid password, valid directory (2, nested)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -151,7 +148,7 @@ test('remove() valid did, valid password, valid directory (2, nested)', async (t
   t.true(await allFilesUnlinked(afs, paths[1]))
 })
 
-test('remove() valid did, valid password, invalid directory (1)', async (t) => {
+test.serial('remove() valid did, valid password, invalid directory (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -167,7 +164,7 @@ test('remove() valid did, valid password, invalid directory (1)', async (t) => {
   }))
 })
 
-test('remove() valid did, valid password, invalid directory (1), valid directory (1)', async (t) => {
+test.serial('remove() valid did, valid password, invalid directory (1), valid directory (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -191,7 +188,7 @@ test('remove() valid did, valid password, invalid directory (1), valid directory
   t.true(await allFilesUnlinked(afs, paths[1]))
 })
 
-test('remove() valid did, valid password, invalid path (1)', async (t) => {
+test.serial('remove() valid did, valid password, invalid path (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -209,7 +206,7 @@ test('remove() valid did, valid password, invalid path (1)', async (t) => {
   await t.throws(afs.access(paths[0]), Error, '')
 })
 
-test('remove() valid did, valid password, invalid path (1), valid path (1)', async (t) => {
+test.serial('remove() valid did, valid password, invalid path (1), valid path (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -235,7 +232,7 @@ test('remove() valid did, valid password, invalid path (1), valid path (1)', asy
   }
 })
 
-test('remove() valid did, invalid password, no paths', async (t) => {
+test.serial('remove() valid did, invalid password, no paths', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -248,7 +245,7 @@ test('remove() valid did, invalid password, no paths', async (t) => {
   }), TypeError, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
 })
 
-test('remove() valid did, invalid password, valid path (1)', async (t) => {
+test.serial('remove() valid did, invalid password, valid path (1)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -264,7 +261,7 @@ test('remove() valid did, invalid password, valid path (1)', async (t) => {
   }), Error, 'ara-filesystem.create: incorrect password')
 })
 
-test('remove() valid did, invalid password, valid path (2)', async (t) => {
+test.serial('remove() valid did, invalid password, valid path (2)', async (t) => {
   const { afs } = await create({ 
     owner: kTestOwnerDid, 
     password: kPassword 
@@ -280,14 +277,14 @@ test('remove() valid did, invalid password, valid path (2)', async (t) => {
   }), Error, 'ara-filesystem.create: incorrect password')
 })
 
-test('remove() invalid did, valid password, no paths', async (t) => {
+test.serial('remove() invalid did, valid password, no paths', async (t) => {
   await t.throws(remove({ 
     did: 'invaliddid', 
     password: kPassword 
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-test('remove() invalid did, valid password, valid path (1)', async (t) => {
+test.serial('remove() invalid did, valid password, valid path (1)', async (t) => {
   const paths = ['./index.js']
 
   await t.throws(remove({ 
@@ -297,14 +294,14 @@ test('remove() invalid did, valid password, valid path (1)', async (t) => {
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-test('remove() invalid did, invalid password, no paths', async (t) => {
+test.serial('remove() invalid did, invalid password, no paths', async (t) => {
   await t.throws(remove({ 
     did: 'invaliddid', 
     password: 'wrongpass' 
   }), TypeError, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
 })
 
-test('remove() invalid did, invalid password, valid path (1)', async (t) => {
+test.serial('remove() invalid did, invalid password, valid path (1)', async (t) => {
   const paths = ['./index.js']
 
   await t.throws(remove({ 
@@ -314,7 +311,7 @@ test('remove() invalid did, invalid password, valid path (1)', async (t) => {
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-test('remove() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
+test.serial('remove() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
   const paths = ['./index.js', './doesnotexist.js']
 
   await t.throws(remove({ 
@@ -324,7 +321,7 @@ test('remove() invalid did, invalid password, valid path (1), invalid path(1)', 
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
-test('remove() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
+test.serial('remove() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
   const paths = ['./index.js', './doesnotexist.js']
 
   await t.throws(remove({ 

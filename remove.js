@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+
 const debug = require('debug')('ara-filesystem:remove')
 const { create } = require('./create')
 const pify = require('pify')

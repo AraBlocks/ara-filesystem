@@ -1,22 +1,30 @@
 /* eslint quotes: "off" */
 
 const test = require('ava')
-const rimraf = require('rimraf')
 const pify = require('pify')
+const rimraf = require('rimraf')
 const fs = require('fs')
 const { kTestDid } = require('./_constants')
-const { resolve } = require('path')
 const { createAFSKeyPath } = require('../key-path')
 
-test("createAFSKeypath(id)", async (t) => {
-  t.throws(() => createAFSKeyPath(), TypeError, "id cannot be blank")
-  t.throws(() => createAFSKeyPath({ id: 1234 }, TypeError, "id must be a string"))
-
-  const keyPath = createAFSKeyPath(kTestDid)
-  t.notThrows(async () => fs.mkdir(keyPath))
+test.before(async () => {
+  try {
+    await pify(rimraf)(createAFSKeyPath(kTestDid))
+  } catch (err) {
+    console.error(err)
+  }
 })
 
-test.after("cleanup", async () => {
-  const path = resolve(require('os').homedir(), '.ara', 'afs', '*')
-  await pify(rimraf)(path)
+test("createAFSKeyPath() invalid id", (t) => {
+  t.throws(() => createAFSKeyPath(), TypeError, "Expecting non-empty string")
+  t.throws(() => createAFSKeyPath(111), TypeError, "Expecting non-empty string")
+})
+
+test("createAFSKeyPath() valid id", async (t) => {
+  const path = createAFSKeyPath(kTestDid)
+  await t.notThrows(pify(fs.mkdir)(path))
+})
+
+test.after(async () => {
+  await pify(rimraf)(createAFSKeyPath(kTestDid))
 })

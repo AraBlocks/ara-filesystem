@@ -1,37 +1,48 @@
+/* eslint-disable no-await-in-loop */
+
 const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
 const { blake2b } = require('ara-crypto')
 const { resolve, dirname } = require('path')
-const { toHex } = require('ara-identity/util')
 const { createAFSKeyPath } = require('./key-path')
+const { setPrice } = require('./price')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 
-const { 
-  kFileMappings, 
-  kStagingFile, 
-  kStorageAddress 
+const {
+  kFileMappings,
+  kStagingFile,
+  kStorageAddress
 } = require('./constants')
 
 const {
-  kContentTree,
-  kContentSignatures,
-  kMetadataTree,
-  kMetadataSignatures
-} = kFileMappings
-const { generateKeypair, encrypt, decrypt, randomBytes } = require('./util')
+  encryptJSON,
+  decryptJSON,
+  validateDid,
+  isCorrectPassword
+} = require('./util')
 
 async function commit({
   did = '',
-  password = ''
+  password = '',
+  price = -1
 } = {}) {
+  if (!password || 'string' !== typeof password) {
+    throw new TypeError('ara-filesystem.commit: Expecting password to be non-empty string')
+  }
 
-  const path = _generatePath(did)
+  did = validateDid(did)
+
+  if (!(await isCorrectPassword({ did, password }))) {
+    throw new Error('ara-filesystem.create: incorrect password')
+  }
+
+  const path = generateStagedPath(did)
   try {
     await pify(fs.access)(path)
   } catch (err) {
-    return new Error("No staged commits ready to be pushed")
+    throw new Error('No staged commits ready to be pushed')
   }
 
   const contents = _readStagedFile(path, password)
@@ -44,7 +55,6 @@ async function commit({
 
   const contentsLength = Object.keys(contents).length
   for (let i = 0; i < contentsLength; i++) {
-
     const key = Object.keys(contents)[i]
     const buffers = contents[key]
     const index = resolveBufferIndex(key)
@@ -62,7 +72,13 @@ async function commit({
     }
   }
 
-  await pify(fs.unlink)(path)
+  await _deleteStagedFile(path)
+
+  if (0 <= price) {
+    await setPrice({ did, password, price })
+  }
+
+  return null
 }
 
 function append({
@@ -72,17 +88,23 @@ function append({
   data,
   password = ''
 } = {}) {
-  const path = _generatePath(did)
-  _writeStagedFile({fileIndex, offset, data, password, path})
+  const path = generateStagedPath(did)
+  _writeStagedFile({
+    fileIndex,
+    offset,
+    data,
+    password,
+    path
+  })
 }
 
 function retrieve({
   did,
   fileIndex,
-  offset,
+  offset = 0,
   password = ''
 } = {}) {
-  const path = _generatePath(did)
+  const path = generateStagedPath(did)
   const contents = _readStagedFile(path, password)
   fileIndex = _getFilenameByIndex(fileIndex)
 
@@ -93,19 +115,28 @@ function retrieve({
   return result
 }
 
+function generateStagedPath(did) {
+  const path = resolve(createAFSKeyPath(did), kStagingFile)
+  try {
+    fs.accessSync(path)
+  } catch (err) {
+    _makeStagedFile(path)
+  }
+  return path
+}
+
 function _readStagedFile(path, password) {
   const contents = fs.readFileSync(path, 'utf8')
-  return JSON.parse(_decryptJSON(contents, password))
+  return JSON.parse(decryptJSON(contents, password))
 }
 
 function _writeStagedFile({
-  fileIndex, 
-  offset, 
-  data, 
-  password, 
+  fileIndex,
+  offset,
+  data,
+  password,
   path
 } = {}) {
-
   let json = {}
   try {
     fs.accessSync(path)
@@ -120,45 +151,17 @@ function _writeStagedFile({
   if (filename) {
     if (!json[filename]) json[filename] = {}
     json[filename][offset] = hex
-    const encrypted = JSON.stringify(_encryptJSON(json, password))
+    const encrypted = JSON.stringify(encryptJSON(json, password))
     fs.writeFileSync(path, encrypted)
   }
 }
 
-function _encryptJSON(json, password) {
-  const { secretKey } = generateKeypair(password)
-  const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
-
-  const encryptedJSON = encrypt(JSON.stringify(json), {
-    key: encryptionKey,
-    iv: randomBytes(16)
-  })
-
-  secretKey.fill(0)
-  encryptionKey.fill(0)
-
-  return encryptedJSON
-}
-
-function _decryptJSON(keystore, password) {
-  const { secretKey } = generateKeypair(password)
-  const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
-  const decryptedJSON = decrypt({keystore}, { key: encryptionKey })
-
-  secretKey.fill(0)
-  encryptionKey.fill(0)
-
-  return decryptedJSON
-}
-
-function _generatePath(did) {
-  const path = resolve(createAFSKeyPath(did), kStagingFile)
+function _makeStagedFile(path) {
   try {
-    fs.accessSync(path)
+    fs.mkdirSync(dirname(path))
   } catch (err) {
-    _makeStagedFile(path)
+    debug('could not make dir at', path)
   }
-  return path
 }
 
 function _makeStagedFile(path) {
@@ -168,7 +171,11 @@ function _makeStagedFile(path) {
 }
 
 async function _deleteStagedFile(path) {
-  await pify(fs.unlink)(path)
+  try {
+    await pify(fs.unlink)(path)
+  } catch (err) {
+    debug('could not unlink', path)
+  }
 }
 
 function _getFilenameByIndex(index) {
@@ -179,5 +186,6 @@ function _getFilenameByIndex(index) {
 module.exports = {
   commit,
   append,
-  retrieve
+  retrieve,
+  generateStagedPath
 }

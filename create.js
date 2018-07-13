@@ -1,10 +1,10 @@
+/* eslint-disable no-shadow */
+
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
-const { create: createDid } = require('ara-identity/did')
 const { writeIdentity } = require('ara-identity/util')
-const { loadSecrets } = require('./util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
@@ -14,14 +14,17 @@ const pify = require('pify')
 const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
-const { info } = require('ara-console')
 const { defaultStorage } = require('./storage')
-const { generateKeypair, encrypt, decrypt, validateDid } = require('./util')
+
+const {
+  validateDid,
+  loadSecrets,
+  isCorrectPassword
+} = require('./util')
 
 const {
   kResolverKey,
-  kArchiverKey,
-  kOwnerSuffix
+  kArchiverKey
 } = require('./constants')
 
 /**
@@ -49,25 +52,16 @@ async function create({
 
     const keystore = await loadSecrets(kResolverKey)
     const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
-
     if (null === afsDdo || 'object' !== typeof afsDdo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
     }
-    const { publicKey, secretKey } = generateKeypair(password)
-    let { did: didUri } = createDid(publicKey)
-    didUri = validateDid(didUri)
 
-    const pk = afsDdo.authentication[0].authenticationKey
-    const suffixLength = kOwnerSuffix.length
-    let ownerDid = pk.slice(0, pk.length - suffixLength)
-    ownerDid = validateDid(ownerDid)
-
-    if (didUri !== ownerDid) {
+    if (!(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({did, pathPrefix, password})
+    const drives = await createMultidrive({ did, pathPrefix, password })
 
     const path = createAFSKeyPath(did)
 
@@ -78,24 +72,17 @@ async function create({
 
     afs.did = did
     afs.ddo = afsDdo
-
   } else if (owner) {
-
-    const { publicKey: userPublicKey, secretKey: userSecretKey } = generateKeypair(password)
-    let { did: didUri } = createDid(userPublicKey)
-
-    didUri = validateDid(didUri)
     owner = validateDid(owner)
-
     const ddo = await aid.resolve(owner)
     if (null === ddo || 'object' !== typeof ddo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
     }
-
-    if (didUri !== owner) {
+    
+    if (!(await isCorrectPassword({ owner, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }
-
+    
     mnemonic = bip39.generateMnemonic()
     const afsId = await aid.create(mnemonic, owner)
 
@@ -136,7 +123,6 @@ async function create({
     // clear buffers
     kp.publicKey.fill(0)
     kp.secretKey.fill(0)
-
   }
 
   return {
@@ -144,11 +130,11 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({did, pathPrefix, password}) {
+  async function createMultidrive({ did, pathPrefix, password }) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
-    
+
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
@@ -166,7 +152,7 @@ async function create({
         }
         return null
       },
- 
+
       async (afs, done) => {
         try {
           await afs.close()
