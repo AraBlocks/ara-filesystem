@@ -4,11 +4,28 @@ const pify = require('pify')
 const { resolve, join } = require('path')
 
 async function remove({
-  paths = [],
   did = '',
+  paths = [],
   password = ''
 } = {}) {
-  const { afs } = await create({ did, password })
+  if (null == did || 'string' !== typeof did || !did) {
+    throw new TypeError('ara-filesystem.remove: Expecting non-empty did.')
+  }
+
+  if (null == password || 'string' !== typeof password || !password) {
+    throw new TypeError('ara-filesystem.remove: Password required to continue')
+  }
+
+  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths) || paths.length == 0) {
+    throw new TypeError('ara-filesystem.remove: Expecting one or more filepaths to remove')
+  }
+
+  let afs
+  try {
+    ({ afs } = await create({ did, password }))
+  } catch (err) {
+    throw err
+  }
   
   await removeAll(paths)
 
