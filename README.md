@@ -58,7 +58,9 @@ The follow section lists the prerequisites for running the project as well as th
 - The contracts will have to be compiled and deployed to this local blockchain as well by running, once the `truffle` console has been opened run:
   - ` $ migrate`
     - **Note**: If `migrate` fails, try deleting the `build/contracts` directory and try again.
-- Since the address of `Storage.sol` is currently hardcoded, the address that `migrate` deploys to will need to be copied and pasted into `kStorageAddress` in `constants.js`.
+- Since the addresses of contracts are currently hardcoded, the address that `migrate` deploys to will need to be copied and pasted into their corresponding variables in `constants.js`.
+  - `kStorageAddress` = storage address
+  - `kPriceAddress` = price address
 
 
 ### Creating an ARA Identity
