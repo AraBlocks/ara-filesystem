@@ -21,7 +21,8 @@ const {
   commit,
   append,
   retrieve,
-  generateStagedPath
+  generateStagedPath,
+  estimateCommitGasCost
 } = require('../commit')
 
 const getDid = (t) => {
@@ -94,18 +95,39 @@ test("commit() previously cached buffers match blockchain buffers", async (t) =>
   contents = JSON.parse(decryptJSON(contents, password))
 
   const mTree = contents['metadata/tree']
-  const cSig = contents['content/signatures']
+  const mSig = contents['metadata/signatures']
 
   await commit({ did, password })
 
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
   const hIdentity = blake2b(Buffer.from(did)).toString('hex')
 
-  let buffer = await deployed.methods.read(hIdentity, 2, 0).call()
+  let buffer = await deployed.methods.read(hIdentity, 0, 0).call()
   t.is(mTree['0'], buffer.slice(2))
 
+  buffer = await deployed.methods.read(hIdentity, 0, 32).call()
+  t.is(mTree['32'], buffer.slice(2))
+
+  buffer = await deployed.methods.read(hIdentity, 0, 72).call()
+  t.is(mTree['72'], buffer.slice(2))
+
+  buffer = await deployed.methods.read(hIdentity, 1, 0).call()
+  t.is(mSig['0'], buffer.slice(2))
+
   buffer = await deployed.methods.read(hIdentity, 1, 32).call()
-  t.is(cSig['32'], buffer.slice(2))
+  t.is(mSig['32'], buffer.slice(2))
+
+  buffer = await deployed.methods.read(hIdentity, 1, 96).call()
+  t.is(mSig['96'], buffer.slice(2))
+
+  buffer = await deployed.methods.read(hIdentity, 1, 160).call()
+  t.is(mSig['160'], buffer.slice(2))
+
+  buffer = await deployed.methods.read(hIdentity, 1, 224).call()
+  t.is(mSig['224'], buffer.slice(2))
+
+  buffer = await deployed.methods.read(hIdentity, 1, 288).call()
+  t.is(mSig['288'], buffer.slice(2))
 })
 
 test("retrieve() offset doesn't exist", (t) => {
@@ -122,20 +144,12 @@ test("retrieve() offset doesn't exist", (t) => {
 test("retrieve() valid params", (t) => {
   const did = getDid(t)
 
-  // validate content/tree
-  const ctHeader = retrieve({ did, fileIndex: 0, password })
-  t.true(isHex(ctHeader) && 64 === ctHeader.length)
-
-  // validate content/signatures
-  const csHeader = retrieve({ did, fileIndex: 1, password })
-  t.true(isHex(csHeader) && 64 === csHeader.length)
-
   // validate metadata/tree
-  const mtHeader = retrieve({ did, fileIndex: 2, password })
+  const mtHeader = retrieve({ did, fileIndex: 0, password })
   t.true(isHex(mtHeader) && 64 === mtHeader.length)
 
   // validate metadata/signatures
-  const msHeader = retrieve({ did, fileIndex: 3, password })
+  const msHeader = retrieve({ did, fileIndex: 1, password })
   t.true(isHex(msHeader) && 64 === msHeader.length)
 })
 
@@ -157,4 +171,26 @@ test("append() valid params", (t) => {
     password
   })
   t.is(data.toString('hex'), result.toString('hex'))
+})
+
+test("estimateCommitGasCost() invalid did", async (t) => {
+  await t.throws(estimateCommitGasCost(), TypeError, "Expecting non-empty string for DID URI")
+  await t.throws(estimateCommitGasCost({ did: 123 }), TypeError, "Expecting non-empty string for DID URI")
+})
+
+test("estimateCommitGasCost() invalid password", async (t) => {
+  const did = getDid(t)
+  await t.throws(estimateCommitGasCost({ did }), TypeError, "Expecting non-empty string for password")
+  await t.throws(estimateCommitGasCost({ did, password: 123 }), TypeError, "Expecting non-empty string for password")
+})
+
+test("estimateCommitGasCost() incorrect password", async (t) => {
+  const did = getDid(t)
+  await t.throws(estimateCommitGasCost({ did, password: 'wrongPassword' }), Error, "Incorrect password")
+})
+
+test("estimateCommitGasCost() valid params", async (t) => {
+  const did = getDid(t)
+  const cost = await estimateCommitGasCost({ did, password})
+  t.true('number' === typeof cost && 0 <= cost)
 })

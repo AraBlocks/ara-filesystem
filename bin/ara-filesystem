@@ -249,28 +249,50 @@ async function oncommit({ did, price }) {
 
   const { password } = await promptForPassword()
 
-  info("committing with identity: %s", did)
-
-  const result = await afs.commit({ did, password, price })
-  if (result instanceof Error) {
-    error(result)
-  } else {
-    info("file(s) successfully committed")
-  }
-}
-
-async function onsetprice({did, price}) {
-  price = price || 0
-  info("setting price of AFS identity %s to %d", did, price)
-  const { password } = await promptForPassword()
-
+  let result
   try {
-    await afs.setPrice({ did, password, price })
+    const cost = await afs.estimateCommitGasCost({ did, password, price })
+    const { answer } = await promptCostConfirmation(cost)
+    result = answer
   } catch (err) {
     onfatal(err)
   }
 
-  info("price has been set to", price)
+  if (result) {
+    info("committing with identity: %s", did)
+    const result = await afs.commit({ did, password, price })
+    if (result instanceof Error) {
+      error(result)
+    } else {
+      info("file(s) successfully committed")
+    }
+  } else {
+    onfatal() // exit
+  }
+}
+
+async function onsetprice({ did, price }) {
+  price = price || 0
+  info("setting price of AFS identity %s to %d", did, price)
+  const { password } = await promptForPassword()
+
+  let result
+  try {
+    const cost = await afs.estimateSetPriceGasCost({ did, password, price })
+    const { answer } = await promptCostConfirmation(cost)
+    result = answer
+    if (answer) {
+      await afs.setPrice({ did, password, price })
+    }
+  } catch (err) {
+    onfatal(err)
+  }
+
+  if (result) {
+    info("price has been set to", price)
+  } else {
+    onfatal() // exit
+  }
 }
 
 async function ongetprice({did}) {
@@ -287,6 +309,16 @@ async function ongetprice({did}) {
   info("price of", did, "is", price)
 }
 
+async function promptCostConfirmation(cost) {
+  return await inquirer.prompt({
+    type: 'confirm',
+    name: 'answer',
+    message: 
+    `This operation will cost ${cost} gas. Are you sure you
+    want to proceed?`
+  })
+}
+
 async function promptForPassword() {
   return await inquirer.prompt([{
     type: 'password',
@@ -299,7 +331,9 @@ async function promptForPassword() {
 }
 
 function onfatal(err) {
-  debug(err)
-  error("fatal:", err.message)
+  if (err) {
+    debug(err)
+    error("fatal:", err.message)
+  }
   process.exit(1)
 }

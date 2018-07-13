@@ -1,8 +1,17 @@
 const { create } = require('./create')
 const { add } = require('./add')
 const { remove } = require('./remove')
-const { commit } = require('./commit')
-const { setPrice, getPrice } = require('./price')
+
+const {
+  commit,
+  estimateCommitGasCost
+} = require('./commit')
+
+const {
+  setPrice,
+  getPrice,
+  estimateSetPriceGasCost
+} = require('./price')
 
 module.exports = {
   create,
@@ -10,5 +19,7 @@ module.exports = {
   remove,
   commit,
   setPrice,
-  getPrice
+  getPrice,
+  estimateSetPriceGasCost,
+  estimateCommitGasCost
 }
