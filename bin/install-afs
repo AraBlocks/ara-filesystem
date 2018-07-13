@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for repo in ara-crypto ara-network ara-network-node-identity-archiver ara-network-node-identity-resolver; do
+for repo in ara-crypto ara-identity ara-network ara-network-node-identity-archiver ara-network-node-identity-resolver; do
 	echo -ne "Cloning ${repo}...\033[0K\r"
 	git clone git@github.com:AraBlocks/${repo}.git --quiet  > "/dev/null" 2>&1
 	cd ${repo}
