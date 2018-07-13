@@ -28,8 +28,8 @@ const { name: mSigName } = kMetadataSignatures
 function defaultStorage(identity, password) {
   return (filename, drive, path) => {
     filename = unixify(filename)
-    if ('home' === basename(path) && (filename.includes(mTreeName))
-      || (filename.includes(mSigName))) {
+    if ('home' === basename(path) && (filename.includes(mTreeName)
+      || filename.includes(mSigName))) {
       return create({ filename, identity, password }) 
     }
     return raf(resolve(path, filename))

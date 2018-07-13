@@ -11,8 +11,32 @@ const {
 const {
   hashIdentity,
   isCorrectPassword,
-  validate
+  validate,
+  getDeployedContract
 } = require('./util')
+
+async function estimateSetPriceGasCost({
+  did = '',
+  password = '',
+  price = 0
+} = {}) {
+  await validate(did, password, 'price')
+
+  if (0 > price || 'number' !== typeof price) {
+    throw new TypeError('Price should be 0 or positive whole number')
+  }
+
+  let cost
+  try {
+    const hIdentity = hashIdentity(did)
+    const deployed = getDeployedContract(abi, kPriceAddress)
+    cost = await deployed.methods.setPrice(hIdentity, price, kStorageAddress).estimateGas({ gas: 500000 })
+  } catch (err) {
+    throw new Error(`This AFS has not been committed to the network, 
+      please commit before trying to set a price.`)
+  }
+  return cost
+}
 
 async function setPrice({
   did = '',
@@ -21,13 +45,13 @@ async function setPrice({
 } = {}) {
   await validate(did, password, 'price')
 
-  if ('number' !== typeof price) {
+  if (0 > price || 'number' !== typeof price) {
     throw new TypeError('Price should be 0 or positive whole number')
   }
 
   const accounts = await web3.eth.getAccounts()
   const hIdentity = hashIdentity(did)
-  const deployed = new web3.eth.Contract(abi, kPriceAddress)
+  const deployed = getDeployedContract(abi, kPriceAddress)
 
   try {
     await deployed.methods.setPrice(hIdentity, price, kStorageAddress).send({
@@ -56,6 +80,7 @@ async function getPrice({
 }
 
 module.exports = {
+  estimateSetPriceGasCost,
   setPrice,
   getPrice
 }
