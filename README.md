@@ -29,58 +29,37 @@ The follow section lists the prerequisites for running the project as well as th
 
 ### Prerequisites
 
+- **Note:** There is an `install-afs` script in `/bin`, move it to the parent folder of this folder (`$ cd ..`) and run it. You shouldn't have to do any installation, linking or secret generation.
 - Clone the following repositories
+  - `ara-identity`
+  - `ara-network`
+  - `ara-network-node-identity-archiver`
+  - `ara-network-node-identity-resolver`
 - Be sure to `npm install` and `npm link` for each
 - Test the CLI by running the following commands,
-```sh
-$ aid --help
-$ ann --help
-$ ans --help
-```
-- The above commands should display the help options for each of the CLIs
+  - `$ aid --help`
+  - `$ ann --help`
+  - `$ ans --help`
 
-Generate secrets for both the Archiver & Resolver nodes
+- Generate secrets for both the Archiver & Resolver nodes
+  - `$ ans -k archiver  // Generating secrets for the archiver node`
+  - `$ ans -k resolver  // Generating secrets for the resolver node`
 
-- `$ ans -k ${network_key_string}`
-
-- Example:
-```sh
-$ ans -k archiver // Generating secrets for the archiver node
-$ ans -k resolver // Generating secrets for the resolver node
-```
-
-Once the secrets are generated, the Archiver & Resolver Network nodes can be started.
-
-  - Clone the [archiver](https://github.com/AraBlocks/ara-network-node-identity-archiver) and [resolver](https://github.com/AraBlocks/ara-network-node-identity-resolver) repositories
-  - Do `npm install` in each of the repositories
+- Once the secrets are generated, the Archiver & Resolver Network nodes can be started.
+  - Be sure to have cloned the [archiver](https://github.com/AraBlocks/ara-network-node-identity-archiver) and [resolver](https://github.com/AraBlocks/ara-network-node-identity-resolver) repositories
+  - Ensure you have ran `npm install` in each of the repositories
   - Open the repository folder in 2 separate windows and run the below command,
-    - `$ ann -t . -k ${network_key_string}`
-
-    - Example:
       ```sh
-      $ ann -t . -k archiver // starting the archiver network node
-      $ ann -t . -k resolver // starting the resolver network node
+      $ ann -t . -k archiver  // in 'ara-network-node-identity-archiver'
+      $ ann -t . -k resolver  // in 'ara-network-node-identity-resolver'
       ```
+- To communicate with the Ethereum blockchain and commit your AFS changes, you must be running a local blockchain. Run:
+  - `$ truffle develop`
+- The contracts will have to be compiled and deployed to this local blockchain as well by running, once the `truffle` console has been opened run:
+  - ` $ migrate`
+    - **Note**: If `migrate` fails, try deleting the `build/contracts` directory and try again.
+- Since the address of `Storage.sol` is currently hardcoded, the address that `migrate` deploys to will need to be copied and pasted into `kStorageAddress` in `constants.js`.
 
-Note : Make sure to use different `network_key_string` for the Archiver & Resolver Network Nodes
-
-To communicate with the Ethereum blockchain and commit your AFS changes, you must be running a local blockchain. You can do so by running the following,
-
-```sh
-  $ truffle develop
-```
-
-The contracts will have to be compiled and deployed to this local blockchain as well by running,
-
-```sh
-  $ migrate
-```
-
-once the `truffle` console has been opened.
-
-Since the address of `Storage.sol` is currently hardcoded, the address that `migrate` deploys to will need to be copied and pasted into `kStorageAddress` in `constants.js`.
-
-> **Note**: If `migrate` fails, try deleting the `build/contracts` directory and try again.
 
 ### Creating an ARA Identity
 
