@@ -43,6 +43,11 @@ const { argv } = program
     alias: 'V',
     describe: "Show program version"
   })
+  .option('force', {
+    alias: 'f',
+    type: 'boolean',
+    describe: 'Force operation',
+  })
   .command('create <owner> [path]', "Create AFS with given identity", (program) => {
     program
       .positional('owner', {
@@ -94,6 +99,11 @@ const { argv } = program
         type: 'number',
         describe: "Price (in ARA) to set the cost of the AFS"
       })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force commit operation',
+      })
   }, oncommit)
   .command('set-price <did> [price]', "Publish price for the given AFS", (program) => {
     program
@@ -105,6 +115,11 @@ const { argv } = program
         type: 'number',
         describe: "Cost associated with an AFS (in ARA)"
       })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force set price operation',
+      })
   }, onsetprice)
   .command('get-price <did>', "Return the price for a given AFS", (program) => {
     program
@@ -112,17 +127,7 @@ const { argv } = program
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
       })
-      .positional('price', {
-        type: 'number',
-        describe: "Cost associated with an AFS (in ARA)"
-      })
   }, ongetprice)
-
-void async function main() {
-  if (argv.debug) {
-    require('debug').enable('ara-filesystem*')
-  }
-}()
 
 void async function main() {
   if (argv.debug) {
@@ -217,7 +222,7 @@ async function onhistory(argv) {
         }
       })
   } catch (err) {
-    error(err.message)
+    onfatal(err)
   }
 }
 
@@ -242,7 +247,7 @@ async function onadd(argv) {
       password })
     info("file(s) successfully added")
   } catch (err) {
-    error(err.message)
+    onfatal(err)
   }
 }
 
@@ -267,7 +272,7 @@ async function onremove(argv) {
       password })
     info("file(s) successfully removed")
   } catch (err) {
-    error(err.message)
+    onfatal(err)
   }
 }
 
@@ -276,20 +281,22 @@ async function oncommit({ did, price }) {
 
   const { password } = await promptForPassword()
 
-  let result
-  try {
-    const cost = await afs.estimateCommitGasCost({ did, password, price })
-    const { answer } = await promptCostConfirmation(cost)
-    result = answer
-  } catch (err) {
-    onfatal(err)
+  let result = argv.force
+  if (!result) {
+    try {
+      const cost = await afs.estimateCommitGasCost({ did, password, price })
+      const { answer } = await promptCostConfirmation(cost)
+      result = answer
+    } catch (err) {
+      onfatal(err)
+    }
   }
 
   if (result) {
     info("committing with identity: %s", did)
     const result = await afs.commit({ did, password, price })
     if (result instanceof Error) {
-      error(result)
+      onfatal(result)
     } else {
       info("file(s) successfully committed")
     }
@@ -303,16 +310,18 @@ async function onsetprice({ did, price }) {
   info("setting price of AFS identity %s to %d", did, price)
   const { password } = await promptForPassword()
 
-  let result
-  try {
-    const cost = await afs.estimateSetPriceGasCost({ did, password, price })
-    const { answer } = await promptCostConfirmation(cost)
-    result = answer
-    if (answer) {
-      await afs.setPrice({ did, password, price })
+  let result = argv.force
+  if (!result) {
+    try {
+      const cost = await afs.estimateSetPriceGasCost({ did, password, price })
+      const { answer } = await promptCostConfirmation(cost)
+      result = answer
+      if (answer) {
+        await afs.setPrice({ did, password, price })
+      }
+    } catch (err) {
+      onfatal(err)
     }
-  } catch (err) {
-    onfatal(err)
   }
 
   if (result) {
