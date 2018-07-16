@@ -113,6 +113,13 @@ const { argv } = program
         describe: "Cost associated with an AFS (in ARA)"
       })
   }, ongetprice)
+  .command('destroy <did>', "Destroy AFS locally and remotely", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+  }, ondestroy)
 
 void async function main() {
   if (argv.debug) {
@@ -285,6 +292,20 @@ async function ongetprice({did}) {
   }
 
   info("price of", did, "is", price)
+}
+
+async function ondestroy({did}) {
+
+  info("destroying AFS %s", did)
+  const { password } = await promptForPassword()
+
+  try {
+    await afs.destroy({ did, password })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("destroyed AFS %s", did)
 }
 
 async function promptForPassword() {
