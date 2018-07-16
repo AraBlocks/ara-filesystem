@@ -33,9 +33,9 @@ const {
  * @return {Promise}
  */
 async function create({
+  password = '',
   owner = null,
   did = null,
-  password = ''
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
@@ -52,6 +52,9 @@ async function create({
 
     const keystore = await loadSecrets(kResolverKey)
     const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
+    if (null === afsDdo || 'object' !== typeof afsDdo) {
+      throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
+    }
 
     if (!(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
@@ -70,11 +73,15 @@ async function create({
     afs.did = did
     afs.ddo = afsDdo
   } else if (owner) {
+    owner = validateDid(owner)
+    const ddo = await aid.resolve(owner)
+    if (null === ddo || 'object' !== typeof ddo) {
+      throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
+    }
+
     if (!(await isCorrectPassword({ owner, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }
-
-    owner = validateDid(owner)
 
     mnemonic = bip39.generateMnemonic()
     const afsId = await aid.create(mnemonic, owner)

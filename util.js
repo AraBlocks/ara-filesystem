@@ -1,6 +1,7 @@
 const { secrets } = require('ara-network')
 const { create } = require('ara-identity/did')
 const { resolve } = require('./aid')
+const { web3 } = require('ara-context')()
 
 const {
   blake2b, keyPair,
@@ -54,7 +55,7 @@ function validateDid(did) {
   return did
 }
 
-function getDocumentOwner(ddo, validate = true) {
+function getDocumentOwner(ddo, shouldValidate = true) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
   }
@@ -63,7 +64,7 @@ function getDocumentOwner(ddo, validate = true) {
   const suffixLength = kOwnerSuffix.length
   const id = pk.slice(0, pk.length - suffixLength)
 
-  return validate ? validateDid(id) : id
+  return shouldValidate ? validateDid(id) : id
 }
 
 async function isCorrectPassword({
@@ -122,6 +123,31 @@ function decryptJSON(keystore, password) {
   return decryptedJSON
 }
 
+function hashIdentity(did) {
+  return blake2b(Buffer.from(did)).toString('hex')
+}
+
+async function validate(did, password, label = '') {
+  if (label) {
+    label = `.${label}`
+  }
+  if (!did || 'string' !== typeof did) {
+    throw new TypeError(`ara-filesystem${label}: Expecting valid DID`)
+  }
+
+  if (!password || 'string' !== typeof password) {
+    throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
+  }
+
+  if (!(await isCorrectPassword({ did, password }))) {
+    throw new Error(`ara-filesystem${label}: Incorrect password`)
+  }
+}
+
+function getDeployedContract(abi, address) {
+  return new web3.eth.Contract(abi, address)
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
@@ -132,5 +158,8 @@ module.exports = {
   loadSecrets,
   validateDid,
   getDocumentOwner,
-  isCorrectPassword
+  isCorrectPassword,
+  hashIdentity,
+  validate,
+  getDeployedContract
 }

@@ -1,31 +1,31 @@
 const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
 const raf = require('random-access-file')
+const unixify = require('unixify')
 const { resolve, basename } = require('path')
 const { append, retrieve } = require('./commit')
-const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
+const { hashIdentity } = require('./util')
 
 const {
-  kMetadataRegister,
-  kContentRegister,
-  kTreeFile,
   kStorageAddress,
   kFileMappings
 } = require('./constants')
 
 const {
-  kContentTree,
-  kContentSignatures,
   kMetadataTree,
   kMetadataSignatures
 } = kFileMappings
 
+const { name: mTreeName } = kMetadataTree
+const { name: mSigName } = kMetadataSignatures
+
 function defaultStorage(identity, password) {
   return (filename, drive, path) => {
-    if ('home' === basename(path) && (filename.includes('tree')
-      || filename.includes('signatures'))) {
+    filename = unixify(filename)
+    if ('home' === basename(path) && (filename.includes(mTreeName)
+      || filename.includes(mSigName))) {
       return create({ filename, identity, password })
     }
     return raf(resolve(path, filename))
@@ -35,7 +35,7 @@ function defaultStorage(identity, password) {
 function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const hIdentity = _hashIdentity(identity)
+  const hIdentity = hashIdentity(identity)
 
   return ras({
     async read(req) {
@@ -98,24 +98,26 @@ function resolveBufferIndex(path) {
     throw new TypeError('Path must be non-empty string')
   }
 
+  path = unixify(path)
+
   if (-1 === path.indexOf('/')) {
     throw new Error('Path is not properly formatted')
   }
 
-  const parsedPath = path.split('/')
-  const file = parsedPath[parsedPath.length - 1]
-  const register = parsedPath[parsedPath.length - 2]
   let index = -1
-  if (kMetadataRegister === register) {
-    index = (kTreeFile === file) ? kMetadataTree.index : kMetadataSignatures.index
-  } else if (kContentRegister === register) {
-    index = (kTreeFile === file) ? kContentTree.index : kContentSignatures.index
+  if (mTreeName === path) {
+    const { index: i } = kMetadataTree
+    index = i
+  } else if (mSigName === path) {
+    const { index: i } = kMetadataSignatures
+    index = i
   }
   return index
 }
 
-function _hashIdentity(identity) {
-  return blake2b(Buffer.from(identity)).toString('hex')
+module.exports = {
+  resolveBufferIndex,
+  defaultStorage
 }
 
 module.exports = {

@@ -1,33 +1,58 @@
 /* eslint-disable no-await-in-loop */
 
+const debug = require('debug')('ara-filesystem:remove')
 const { create } = require('./create')
+const { resolve, join } = require('path')
 
 async function remove({
-  paths = [],
   did = '',
+  paths = [],
   password = ''
 } = {}) {
-  if (0 === paths.length) {
-    throw new Error('No path(s) provided.')
+  if (null == did || 'string' !== typeof did || !did) {
+    throw new TypeError('ara-filesystem.remove: Expecting non-empty did.')
   }
 
-  const { afs } = await create({ did, password })
-  for (const path of paths) {
-    if ('string' !== typeof path) {
-      throw new Error('Path found that is not of type string', path)
-    }
-    try {
-      if (await afs.access(path)) {
+  if (null == password || 'string' !== typeof password || !password) {
+    throw new TypeError('ara-filesystem.remove: Password required to continue')
+  }
+
+  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths) || paths.length == 0) {
+    throw new TypeError('ara-filesystem.remove: Expecting one or more filepaths to remove')
+  }
+
+  let afs
+  try {
+    ({ afs } = await create({ did, password }))
+  } catch (err) {
+    throw err
+  }
+  await removeAll(paths)
+
+  async function removeAll(files) {
+    for (const path of files) {
+      try {
+        await afs.access(path)
+        const nestedFiles = await afs.readdir(path)
+        debug('%s removed from afs', path)
         await afs.unlink(path)
+
+        if (nestedFiles.length > 0) {
+          const src = resolve(path)
+          for (let i = 0; i < nestedFiles.length; i++) {
+            const file = nestedFiles[i]
+            nestedFiles[i] = join(src, file)
+            nestedFiles[i] = nestedFiles[i].replace(process.cwd(), '.')
+          }
+
+          await removeAll(nestedFiles)
+        }
+      } catch (err) {
+        debug('%s does not exist', path)
       }
-    } catch (err) {
-      await afs.close()
-      return new Error(`Could not remove file either because it does not 
-        exist or because of inadequate permissions`)
     }
   }
-  await afs.close()
-  return null
+  afs.close()
 }
 
 module.exports = {
