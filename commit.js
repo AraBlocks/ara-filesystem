@@ -3,11 +3,10 @@
 const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
-const { blake2b } = require('ara-crypto')
+const { web3 } = require('ara-context')()
 const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
-const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 
 const {
@@ -49,10 +48,9 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
-
+  const accounts = await web3.eth.getAccounts()
   const deployed = getDeployedContract(abi, kStorageAddress)
   const { resolveBufferIndex } = require('./storage')
-  const accounts = await web3.eth.getAccounts()
   const hIdentity = hashIdentity(did)
 
   const contentsLength = Object.keys(contents).length
@@ -67,14 +65,10 @@ async function commit({
       const data = `0x${buffers[offset]}`
 
       const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
-      console.log('writing index', index, 'at offset', offset, 'data', data.slice(2, 6))
       await deployed.methods.write(hIdentity, index, offset, data, lastWrite).send({
         from: accounts[0],
         gas: 500000
       })
-
-      const result = await deployed.methods.read(hIdentity, index, offset).call()
-      console.log('read buffer', index, 'at offset', offset, 'buffer', result.slice(2, 6))
     }
   }
 
@@ -131,6 +125,7 @@ function generateStagedPath(did) {
   return path
 }
 
+// TODO(cckelly): cleanup
 async function estimateCommitGasCost({
   did = '',
   password = ''
@@ -141,12 +136,11 @@ async function estimateCommitGasCost({
   try {
     const hIdentity = hashIdentity(did)
     const { resolveBufferIndex } = require('./storage')
-    const accounts = await web3.eth.getAccounts()
     const deployed = getDeployedContract(abi, kStorageAddress)
-    
+
     const path = generateStagedPath(did)
     const contents = _readStagedFile(path, password)
-    // TODO(cckelly): cleanup
+
     const contentsLength = Object.keys(contents).length
     for (let i = 0; i < contentsLength; i++) {
       const key = Object.keys(contents)[i]
@@ -162,7 +156,6 @@ async function estimateCommitGasCost({
         cost += await deployed.methods.write(hIdentity, index, offset, data, lastWrite).estimateGas({ gas: 500000 })
       }
     }
-
   } catch (err) {
     throw new Error(err)
   }

@@ -10,7 +10,7 @@ const {
   estimateSetPriceGasCost
 } = require('../price')
 
-const { 
+const {
   kTestOwnerDid,
   kPassword: password
 } = require('./_constants')
@@ -39,10 +39,17 @@ test("setPrice() invalid password", async (t) => {
 
 test("setPrice() invalid price", async (t) => {
   const did = getDid(t)
-  await t.throws(setPrice({ did, password, price: '10' }), TypeError, 
-    "Price should be 0 or positive whole number")
-  await t.throws(setPrice({ did, password, price: -1 }), TypeError,
-    "Price should be 0 or positive whole number")
+  await t.throws(setPrice({
+    did,
+    password,
+    price: '10'
+  }), TypeError, "Price should be 0 or positive whole number")
+
+  await t.throws(setPrice({
+    did,
+    password,
+    price: -1
+  }), TypeError, "Price should be 0 or positive whole number")
 })
 
 test("setPrice() incorrect password", async (t) => {
@@ -52,9 +59,13 @@ test("setPrice() incorrect password", async (t) => {
 
 test("setPrice() not committed yet", async (t) => {
   const did = getDid(t)
-  await t.throws(setPrice({ did, password, price: 111 }), Error, 
-    `AFS has not been committed yet so the transaction has been reverted. Please commit
-      the AFS prior to setting price.`)
+  await t.throws(setPrice({
+    did,
+    password,
+    price: 111
+  }), Error, `AFS has not been committed yet so the 
+    transaction has been reverted. Please commit
+    the AFS prior to setting price.`)
 })
 
 test("getPrice() invalid DID", async (t) => {
