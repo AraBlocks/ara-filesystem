@@ -13,11 +13,21 @@ const isDirectory = require('is-directory')
 const pify = require('pify')
 const { resolve, join } = require('path')
 
-test.serial('remove() valid did, valid password, no paths', async (t) => {
+const getAFS = ({ context }) => {
+  const { afs } = context
+  return afs
+}
+
+test.beforeEach(async (t) => {
   const { afs } = await create({
     owner: kTestOwnerDid,
     password: kPassword
   })
+  t.context = { afs }
+})
+
+test.serial('remove() valid did, valid password, no paths', async (t) => {
+  const afs = getAFS(t)
   const { did } = afs
 
   await t.throws(remove({
@@ -27,10 +37,7 @@ test.serial('remove() valid did, valid password, no paths', async (t) => {
 })
 
 test.serial('remove() valid did, valid password, valid path (1)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./index.js']
@@ -51,10 +58,7 @@ test.serial('remove() valid did, valid password, valid path (1)', async (t) => {
 })
 
 test.serial('remove() valid did, valid password, valid path (3)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./index.js', './add.js', './aid.js']
@@ -77,10 +81,7 @@ test.serial('remove() valid did, valid password, valid path (3)', async (t) => {
 })
 
 test.serial('remove() valid did, valid password, valid directory (1, not nested)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./bin']
@@ -101,10 +102,7 @@ test.serial('remove() valid did, valid password, valid directory (1, not nested)
 })
 
 test.serial('remove() valid did, valid password, valid directory (1, nested)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./test']
@@ -125,10 +123,7 @@ test.serial('remove() valid did, valid password, valid directory (1, nested)', a
 })
 
 test.serial('remove() valid did, valid password, valid directory (2, nested)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./test', './build']
@@ -150,10 +145,7 @@ test.serial('remove() valid did, valid password, valid directory (2, nested)', a
 })
 
 test.serial('remove() valid did, valid password, invalid directory (1)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./doesnotexist']
@@ -166,10 +158,7 @@ test.serial('remove() valid did, valid password, invalid directory (1)', async (
 })
 
 test.serial('remove() valid did, valid password, invalid directory (1), valid directory (1)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./doesnotexist', './bin']
@@ -190,10 +179,7 @@ test.serial('remove() valid did, valid password, invalid directory (1), valid di
 })
 
 test.serial('remove() valid did, valid password, invalid path (1)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./doesnotexist.js']
@@ -208,10 +194,7 @@ test.serial('remove() valid did, valid password, invalid path (1)', async (t) =>
 })
 
 test.serial('remove() valid did, valid password, invalid path (1), valid path (1)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./doesnotexist.js', './index.js']
@@ -234,10 +217,7 @@ test.serial('remove() valid did, valid password, invalid path (1), valid path (1
 })
 
 test.serial('remove() valid did, invalid password, no paths', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   await t.throws(remove({
@@ -247,10 +227,7 @@ test.serial('remove() valid did, invalid password, no paths', async (t) => {
 })
 
 test.serial('remove() valid did, invalid password, valid path (1)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./index.js']
@@ -263,10 +240,7 @@ test.serial('remove() valid did, invalid password, valid path (1)', async (t) =>
 })
 
 test.serial('remove() valid did, invalid password, valid path (2)', async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const afs = getAFS(t)
   const { did } = afs
 
   const paths = ['./index.js', './add.js']
