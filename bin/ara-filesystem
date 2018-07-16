@@ -43,11 +43,15 @@ const { argv } = program
     alias: 'V',
     describe: "Show program version"
   })
-  .command('create <owner>', "Create AFS with given identity", (program) => {
+  .command('create <owner> [path]', "Create AFS with given identity", (program) => {
     program
       .positional('owner', {
         type: 'string',
         describe: "This AFS owner's ARA decentralized identity (did) URI"
+      })
+      .positional('path', {
+        type: 'string',
+        describe: 'Where locally the AFS will be stored'
       })
   }, oncreate)
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
@@ -128,6 +132,8 @@ void async function main() {
 
 async function oncreate(argv) {
   let owner = argv.owner
+  let rootPath = argv.path
+
   if (null == owner) {
     onfatal(new Error("Missing AFS owner DID. See 'afs create --help'."))
   }
@@ -144,7 +150,7 @@ async function oncreate(argv) {
 
   let arafs
   try {
-    arafs = await afs.create({ owner, password })
+    arafs = await afs.create({ owner, password, rootPath })
   } catch (err) { onfatal(err) }
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
