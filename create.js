@@ -34,7 +34,6 @@ const {
  */
 async function create({
   password = '',
-  rootPath = null,
   owner = null,
   did = null,
 }) {
@@ -107,7 +106,7 @@ async function create({
 
     try {
       // generate AFS key path
-      const path = rootPath || createAFSKeyPath(afsDid)
+      const path = createAFSKeyPath(afsDid)
       afs = await createCFS({
         id,
         key: kp.publicKey,
