@@ -5,7 +5,7 @@ const { create } = require('../create')
 const { commit } = require('../commit')
 const { setPrice, getPrice } = require('../price')
 
-const { 
+const {
   kTestOwnerDid,
   kPassword: password
 } = require('./_constants')

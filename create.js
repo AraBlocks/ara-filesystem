@@ -78,11 +78,11 @@ async function create({
     if (null === ddo || 'object' !== typeof ddo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
     }
-    
+
     if (!(await isCorrectPassword({ owner, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }
-    
+
     mnemonic = bip39.generateMnemonic()
     const afsId = await aid.create(mnemonic, owner)
 

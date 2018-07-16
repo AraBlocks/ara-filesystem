@@ -8,34 +8,24 @@ const { stat, access } = require('fs')
 const pify = require('pify')
 const isDirectory = require('is-directory')
 const isFile = require('is-file')
-const cliWidth = require('cli-width')
-const differ = require('ansi-diff-stream')
-const ProgressStream = require('progress-stream')
-const ProgressBar = require('progress')
-const bytes = require('pretty-bytes')
-const { loadSecrets, afsOwner, generateKeypair, validateDid } = require('./util')
-const { create: createDid } = require('ara-identity/did')
 
 const ignored = require('./lib/ignore')
-
-const toLower = x => String(x).toLowerCase()
 
 async function add({
   did = '',
   paths = [],
   password = '',
-  watch,
   force
 } = {}) {
-  if (null == did || 'string' !== typeof did || !did) {
+  if (null === did || 'string' !== typeof did || !did) {
     throw new TypeError('ara-filesystem.add: Expecting non-empty did.')
   }
 
-  if (null == password || 'string' !== typeof password || !password) {
+  if (null === password || 'string' !== typeof password || !password) {
     throw new TypeError('ara-filesystem.add: Password required to continue')
   }
 
-  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths) || paths.length == 0) {
+  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths) || paths.length === 0) {
     throw new TypeError('ara-filesystem.add: Expecting one or more filepaths to add')
   }
 
@@ -48,38 +38,36 @@ async function add({
 
   await addAll(paths)
 
-  async function addAll(paths) {
+  async function addAll(files) {
     // ensure paths exists
-    for (const path of paths) {
+    for (const path of files) {
       // ensure local file path exists
-      try { 
+      try {
         await pify(access)(path)
+        // directories
+        if (await pify(isDirectory)(path)) {
+          // add local directory to AFS at path
+          try {
+            debug('Adding directory %s', path)
+            await createDirectory(path)
+          } catch (err) {
+            debug('createDirectory: ', err.stack)
+            debug('E: Failed to add path %s', path)
+          }
+        }
+
+        // files
+        if (await pify(isFile)(path)) {
+          try {
+            debug('Adding file %s', path)
+            await addFile(path)
+          } catch (err) {
+            debug('addFile:', err.stack)
+            debug('E: Failed to add path %s', path)
+          }
+        }
       } catch (err) {
         debug('%s does not exist', path)
-        continue
-      }
-
-      // directories
-      if (await pify(isDirectory)(path)) {
-        // add local directory to AFS at path
-        try {
-          debug('Adding directory %s', path)
-          await createDirectory(path)
-        } catch (err) {
-          debug('createDirectory: ', err.stack)
-          debug('E: Failed to add path %s', path)
-        }
-      }
-
-      // files
-      if (await pify(isFile)(path)) {
-        try {
-          debug('Adding file %s', path)
-          await addFile(path)
-        } catch (err) {
-          debug('addFile:', err.stack)
-          debug('E: Failed to add path %s', path)
-        }
       }
     }
   }
@@ -88,12 +76,12 @@ async function add({
     const src = resolve(path)
     const dest = src.replace(process.cwd(), afs.HOME)
     await afs.mkdirp(dest)
-    
+
     const files = await fs.readdirSync(path)
     for (let i = 0; i < files.length; i++) {
-      let file = files[i]
+      const file = files[i]
       files[i] = join(src, file)
-    } 
+    }
     await addAll(files)
   }
 
@@ -122,26 +110,24 @@ async function add({
     }
 
     // IO stream
-    const reader = fs.createReadStream(src, {autoClose: true})
+    const reader = fs.createReadStream(src, { autoClose: true })
     const writer = afs.createWriteStream(dest)
 
     reader.setMaxListeners(0)
     writer.setMaxListeners(0)
-    await createPipe({reader, writer, stats})
+    await createPipe({ reader, writer, stats })
   }
 
-  async function createPipe({reader, writer, stats}) {
-    if (!stats || 0 == stats.size) {
-      process.nextTick(() => warn('Wrote 0 bytes'))
+  async function createPipe({ reader, writer, stats }) {
+    if (!stats || 0 === stats.size) {
       return writer.end()
     }
 
     // const progress = createProgressStreams({stats})
 
     // work
+    // eslint-disable-next-line no-shadow
     const result = await new Promise((resolve, reject) => {
-      let didReadStreamEnd = false
-
       writer.on('finish', onfinish)
       writer.on('debug', ondebug)
 
@@ -163,7 +149,6 @@ async function add({
 
       function onend() {
         debug('Read stream ended')
-        didReadStreamEnd = true
       }
 
       function ondebug(err) {

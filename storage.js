@@ -4,15 +4,11 @@ const raf = require('random-access-file')
 const unixify = require('unixify')
 const { resolve, basename } = require('path')
 const { append, retrieve } = require('./commit')
-const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 const { hashIdentity } = require('./util')
 
 const {
-  kMetadataRegister,
-  kContentRegister,
-  kTreeFile,
   kStorageAddress,
   kFileMappings
 } = require('./constants')
@@ -28,9 +24,9 @@ const { name: mSigName } = kMetadataSignatures
 function defaultStorage(identity, password) {
   return (filename, drive, path) => {
     filename = unixify(filename)
-    if ('home' === basename(path) && (filename.includes(mTreeName))
-      || (filename.includes(mSigName))) {
-      return create({ filename, identity, password }) 
+    if ('home' === basename(path) && (filename.includes(mTreeName)
+      || filename.includes(mSigName))) {
+      return create({ filename, identity, password })
     }
     return raf(resolve(path, filename))
   }

@@ -1,5 +1,4 @@
 const debug = require('debug')('ara-filesystem:price')
-const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Price.json')
 
@@ -10,7 +9,6 @@ const {
 
 const {
   hashIdentity,
-  isCorrectPassword,
   validate
 } = require('./util')
 

@@ -30,7 +30,13 @@ async function create(seed, publicKey) {
   const password = crypto.blake2b(Buffer.from(seed)).toString()
   let identity
   try {
-    const did = { authentication: { authenticationType: kEd25519VerificationKey2018, authenticationKey: publicKey } }
+    const did = {
+      authentication:
+      {
+        authenticationType: kEd25519VerificationKey2018,
+        authenticationKey: publicKey
+      }
+    }
     identity = await aid.create({ context, password, did })
   } catch (err) { debug(err.stack || err) }
   return identity

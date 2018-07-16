@@ -164,12 +164,6 @@ function _makeStagedFile(path) {
   }
 }
 
-function _makeStagedFile(path) {
-  try {
-    fs.mkdirSync(dirname(path))
-  } catch(err) { }
-}
-
 async function _deleteStagedFile(path) {
   try {
     await pify(fs.unlink)(path)
