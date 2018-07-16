@@ -191,6 +191,6 @@ test("estimateCommitGasCost() incorrect password", async (t) => {
 
 test("estimateCommitGasCost() valid params", async (t) => {
   const did = getDid(t)
-  const cost = await estimateCommitGasCost({ did, password})
+  const cost = await estimateCommitGasCost({ did, password })
   t.true('number' === typeof cost && 0 <= cost)
 })
