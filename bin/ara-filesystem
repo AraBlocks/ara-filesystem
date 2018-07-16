@@ -298,9 +298,12 @@ async function ondestroy({did}) {
 
   info("destroying AFS %s", did)
   const { password } = await promptForPassword()
+  info("got password %s", password)
+  const { mnemonic } = await promptForMnemonic()
+  info("got mnemonic %s", mnemonic)
 
   try {
-    await afs.destroy({ did, password })
+    await afs.destroy({ did, mnemonic, password })
   } catch (err) {
     onfatal(err)
   }
@@ -317,6 +320,13 @@ async function promptForPassword() {
     "complete this action.\n" +
     "Passphrase:"
   }]) 
+}
+
+async function promptForMnemonic() {
+  return await inquirer.prompt([{
+    name: 'mnemonic',
+    message: "Fuck you. Give me your mnemonic."
+  }])
 }
 
 function onfatal(err) {
