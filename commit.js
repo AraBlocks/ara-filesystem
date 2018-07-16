@@ -3,11 +3,10 @@
 const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
-const { blake2b } = require('ara-crypto')
+const { web3 } = require('ara-context')()
 const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
-const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 
 const {
@@ -20,7 +19,10 @@ const {
   encryptJSON,
   decryptJSON,
   validateDid,
-  isCorrectPassword
+  isCorrectPassword,
+  getDeployedContract,
+  validate,
+  hashIdentity
 } = require('./util')
 
 async function commit({
@@ -46,12 +48,10 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
-
-  // TODO(cckelly): should use reused logic from here and storage.js into util.js
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const { resolveBufferIndex } = require('./storage')
   const accounts = await web3.eth.getAccounts()
-  const hIdentity = blake2b(Buffer.from(did)).toString('hex')
+  const deployed = getDeployedContract(abi, kStorageAddress)
+  const { resolveBufferIndex } = require('./storage')
+  const hIdentity = hashIdentity(did)
 
   const contentsLength = Object.keys(contents).length
   for (let i = 0; i < contentsLength; i++) {
@@ -125,6 +125,44 @@ function generateStagedPath(did) {
   return path
 }
 
+// TODO(cckelly): cleanup
+async function estimateCommitGasCost({
+  did = '',
+  password = ''
+} = {}) {
+  await validate(did, password, 'commit')
+
+  let cost = 0
+  try {
+    const hIdentity = hashIdentity(did)
+    const { resolveBufferIndex } = require('./storage')
+    const deployed = getDeployedContract(abi, kStorageAddress)
+
+    const path = generateStagedPath(did)
+    const contents = _readStagedFile(path, password)
+
+    const contentsLength = Object.keys(contents).length
+    for (let i = 0; i < contentsLength; i++) {
+      const key = Object.keys(contents)[i]
+      const buffers = contents[key]
+      const index = resolveBufferIndex(key)
+      const buffersLength = Object.keys(buffers).length
+
+      for (let j = 0; j < buffersLength; j++) {
+        const offset = Object.keys(buffers)[j]
+        const data = `0x${buffers[offset]}`
+
+        const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
+        cost += await deployed.methods.write(hIdentity, index, offset, data, lastWrite).estimateGas({ gas: 500000 })
+      }
+    }
+  } catch (err) {
+    throw new Error(err)
+  }
+
+  return cost
+}
+
 function _readStagedFile(path, password) {
   const contents = fs.readFileSync(path, 'utf8')
   return JSON.parse(decryptJSON(contents, password))
@@ -181,5 +219,6 @@ module.exports = {
   commit,
   append,
   retrieve,
-  generateStagedPath
+  generateStagedPath,
+  estimateCommitGasCost
 }

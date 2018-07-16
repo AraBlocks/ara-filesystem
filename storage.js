@@ -106,9 +106,11 @@ function resolveBufferIndex(path) {
 
   let index = -1
   if (mTreeName === path) {
-    index = kMetadataTree.index
+    const { index: i } = kMetadataTree
+    index = i
   } else if (mSigName === path) {
-    index = kMetadataSignatures.index
+    const { index: i } = kMetadataSignatures
+    index = i
   }
   return index
 }

@@ -1,6 +1,7 @@
 const { secrets } = require('ara-network')
 const { create } = require('ara-identity/did')
 const { resolve } = require('./aid')
+const { web3 } = require('ara-context')()
 
 const {
   blake2b, keyPair,
@@ -143,6 +144,10 @@ async function validate(did, password, label = '') {
   }
 }
 
+function getDeployedContract(abi, address) {
+  return new web3.eth.Contract(abi, address)
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
@@ -155,5 +160,6 @@ module.exports = {
   getDocumentOwner,
   isCorrectPassword,
   hashIdentity,
-  validate
+  validate,
+  getDeployedContract
 }
