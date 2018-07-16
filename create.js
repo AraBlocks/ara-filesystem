@@ -33,9 +33,10 @@ const {
  * @return {Promise}
  */
 async function create({
+  password = '',
+  rootPath = null,
   owner = null,
   did = null,
-  password = ''
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
@@ -99,7 +100,7 @@ async function create({
 
     try {
       // generate AFS key path
-      const path = createAFSKeyPath(afsDid)
+      const path = rootPath || createAFSKeyPath(afsDid)
       afs = await createCFS({
         id,
         key: kp.publicKey,
