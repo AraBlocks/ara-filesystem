@@ -120,6 +120,12 @@ void async function main() {
   }
 }()
 
+void async function main() {
+  if (argv.debug) {
+    require('debug').enable('ara-filesystem*')
+  }
+}()
+
 async function oncreate(argv) {
   let owner = argv.owner
   if (null == owner) {
@@ -146,7 +152,7 @@ async function oncreate(argv) {
     ' This phrase will be required to make any changes to the AFS.'+ 
     ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
 
-  await arafs.afs.close()
+  arafs.afs.close()
 }
 
 async function onhistory(argv) {
@@ -180,27 +186,33 @@ async function onhistory(argv) {
     ]
   }
 
-  const arafs = await afs.create({ did, password })
-  const stream = table.createStream(tableOpts)
+  try {
+    const arafs = await afs.create({ 
+      did, 
+      password })
+    const stream = table.createStream(tableOpts)
 
-  arafs.afs.history(argv.partition || arafs.afs.HOME)
-    .on('error', onfatal)
-    .on('end', () => process.exit(0))
-    .on('data', (log) => {
-      if (true != argv['border']) {
-        console.log('%s\t%s\t%s',
-          log.version,
-          log.type.toUpperCase(),
-          log.name
-        )
-      } else {
-        stream.write([
-          log.version,
-          log.type.toUpperCase(),
-          log.name,
-        ])
-      }
-    })
+    arafs.afs.history(argv.partition || arafs.afs.HOME)
+      .on('error', onfatal)
+      .on('end', () => process.exit(0))
+      .on('data', (log) => {
+        if (true != argv['border']) {
+          console.log('%s\t%s\t%s',
+            log.version,
+            log.type.toUpperCase(),
+            log.name
+          )
+        } else {
+          stream.write([
+            log.version,
+            log.type.toUpperCase(),
+            log.name,
+          ])
+        }
+      })
+  } catch (err) {
+    error(err.message)
+  }
 }
 
 async function onadd(argv) {
@@ -217,9 +229,15 @@ async function onadd(argv) {
 
   const { password } = await promptForPassword()
 
-  await afs.add({ did, paths, password })
-
-  info("file(s) successfully added")
+  try {
+    await afs.add({
+      did,
+      paths,
+      password })
+    info("file(s) successfully added")
+  } catch (err) {
+    error(err.message)
+  }
 }
 
 async function onremove(argv) {
@@ -236,11 +254,14 @@ async function onremove(argv) {
 
   const { password } = await promptForPassword()
 
-  const result = await afs.remove({ did, paths, password })
-  if (result instanceof Error) {
-    error(result)
-  } else {
+  try {
+    await afs.remove({
+      did,
+      paths,
+      password })
     info("file(s) successfully removed")
+  } catch (err) {
+    error(err.message)
   }
 }
 

@@ -2,135 +2,93 @@
 
 const debug = require('debug')('ara-filesystem:add')
 const { create } = require('./create')
-const { resolve } = require('path')
+const { resolve, join } = require('path')
 const fs = require('fs')
 const { stat, access } = require('fs')
 const pify = require('pify')
 const isDirectory = require('is-directory')
 const isFile = require('is-file')
-const cliWidth = require('cli-width')
-const differ = require('ansi-diff-stream')
-const ProgressStream = require('progress-stream')
-const ProgressBar = require('progress')
-const bytes = require('pretty-bytes')
-const mirror = require('mirror-folder')
+
 const ignored = require('./lib/ignore')
 
-const toLower = x => String(x).toLowerCase()
-
 async function add({
-  did,
-  paths,
-  password,
-  watch,
+  did = '',
+  paths = [],
+  password = '',
   force
 } = {}) {
-  if (null == did || 'string' !== typeof did || !did) {
+  if (null === did || 'string' !== typeof did || !did) {
     throw new TypeError('ara-filesystem.add: Expecting non-empty did.')
   }
 
-  if (null == password || 'string' !== typeof password || !password) {
+  if (null === password || 'string' !== typeof password || !password) {
     throw new TypeError('ara-filesystem.add: Password required to continue')
   }
 
-  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths)) {
+  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths) || paths.length === 0) {
     throw new TypeError('ara-filesystem.add: Expecting one or more filepaths to add')
   }
 
-  const { afs } = await create({ did, password })
+  let afs
+  try {
+    ({ afs } = await create({ did, password }))
+  } catch (err) {
+    throw err
+  }
 
-  // ensure paths exists
-  for (const path of paths) {
-    // ensure local file path exists
-    try {
-      await pify(access)(path)
-    } catch (err) {
-      debug('%s does not exist', path)
-    }
+  await addAll(paths)
 
-    // directories
-    if (await pify(isDirectory)(path)) {
-      // add local directory to AFS at path
+  async function addAll(files) {
+    // ensure paths exists
+    for (const path of files) {
+      // ensure local file path exists
       try {
-        debug('Adding directory %s', path)
-        await addDirectory(path)
-        continue
-      } catch (err) {
-        debug('mirror: ', err.stack)
-        debug('E: Failed to add path %s', path)
-      }
-    }
+        await pify(access)(path)
+        // directories
+        if (await pify(isDirectory)(path)) {
+          // add local directory to AFS at path
+          try {
+            debug('Adding directory %s', path)
+            await createDirectory(path)
+          } catch (err) {
+            debug('createDirectory: ', err.stack)
+            debug('E: Failed to add path %s', path)
+          }
+        }
 
-    // files
-    if (await pify(isFile)(path)) {
-      try {
-        debug('Adding file %s', path)
-        await addFile(path)
-        continue
+        // files
+        if (await pify(isFile)(path)) {
+          try {
+            debug('Adding file %s', path)
+            await addFile(path)
+          } catch (err) {
+            debug('addFile:', err.stack)
+            debug('E: Failed to add path %s', path)
+          }
+        }
       } catch (err) {
-        debug('addFile:', err.stack)
-        debug('E: Failed to add path %s', path)
+        debug('%s does not exist', path)
       }
     }
   }
 
-  async function addDirectory(path) {
+  async function createDirectory(path) {
     const src = resolve(path)
     const dest = src.replace(process.cwd(), afs.HOME)
+    await afs.mkdirp(dest)
 
-    debug('mirror: %s <> %s', src, dest)
-
-    // file stats
-    const stats = { size: 0 }
-
-    // accumate deltas
-    await pify((done) => {
-      mirror({ name: src }, { name: dest, fs: afs }, { ignore, dryRun: true })
-        .on('debug', done)
-        .on('end', done)
-        .on('put', ({ stat: putStat }) => {
-          stats.size += putStat.size
-        })
-    })()
-
-    const progress = createProgressStreams({ stats })
-
-    if (!watch || (stats && stats.size)) {
-      await pify((done) => {
-        mirror({ name: src }, { name: dest, fs: afs }, { ignore, watch })
-          .on('debug', done)
-          .on('end', done)
-          .on('put', onput)
-          .on('put-data', ondata)
-      })()
+    const files = await fs.readdirSync(path)
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      files[i] = join(src, file)
     }
-
-    function onput({ stat: putStat }) {
-      if (putStat && putStat.size) {
-        progress.updateWriter(putStat.size)
-      }
-    }
-
-    function ondata(chunk) {
-      if (chunk && chunk.length) {
-        progress.updateReader(chunk.length)
-      }
-    }
-
-    function ignore(filename) {
-      if (force) {
-        return false
-      }
-      debug('ignore: %s', filename)
-      return ignored.ignores(filename)
-    }
+    await addAll(files)
   }
 
   async function addFile(path) {
     if (!force && ignored.ignores(path)) {
       throw new Error(`ignore: ${path} is ignored. Use '--force' to force add file.`)
     }
-
     // paths
     const src = resolve(path)
     const dest = src.replace(process.cwd(), afs.HOME)
@@ -157,18 +115,16 @@ async function add({
 
     reader.setMaxListeners(0)
     writer.setMaxListeners(0)
-
     await createPipe({ reader, writer, stats })
+    debug("Successfully added file", path)
   }
 
   async function createPipe({ reader, writer, stats }) {
     if (!stats || 0 === stats.size) {
-      process.nextTick(() => debug('Wrote 0 bytes'))
       return writer.end()
     }
 
-    const progress = createProgressStreams({ stats })
-
+    // work
     // eslint-disable-next-line no-shadow
     const result = await new Promise((resolve, reject) => {
       writer.on('finish', onfinish)
@@ -183,10 +139,6 @@ async function add({
       function ondata(chunk) {
         debug('Read stream received buffer of size %s', chunk.length)
         debug('Writing chunk %s', chunk.length)
-        progress.updateReader(chunk.length)
-        process.nextTick(() => {
-          progress.updateWriter(chunk.length)
-        })
       }
 
       function onfinish() {
@@ -204,76 +156,6 @@ async function add({
     })
     return result
   }
-
-  // TODO(cckelly): any CLI output should be moved to bin/ara-filesystem
-  function createProgressStreams({ stats }) {
-    const start = Date.now()
-    const current = { reader: 0, writer: 0 }
-
-    const progressBarSpec = {
-      complete: '-',
-      incomplete: ' ',
-      width: Math.floor(0.78 * ((cliWidth() || 30) - 50)),
-      total: stats.size,
-      stream: differ().pipe(process.stderr)
-    }
-
-    const readerProgressBarTemplate = createProgressBarTemplate('Reading')
-    const writerProgressBarTemplate = createProgressBarTemplate('Writing')
-
-    const readerProgressStream = createProgressStream()
-    const writerProgressStream = createProgressStream()
-
-    // progress bar renderers
-    const readerProgressBar = createProgressBar(readerProgressBarTemplate)
-    const writerProgressBar = createProgressBar(writerProgressBarTemplate)
-
-    // progress stream info
-    readerProgressStream.on('progress', (progress) => {
-      debug('Reader progress %j', progress)
-    })
-    writerProgressStream.on('progress', (progress) => {
-      debug('Writer progress %j', progress)
-    })
-
-    if (stats.size) {
-      readerProgressBar.tick(0, { speed: toLower(bytes(0)) })
-      writerProgressBar.tick(0, { speed: toLower(bytes(0)) })
-    }
-
-    return {
-      updateReader(size) {
-        current.reader += size
-        const elapsed = Date.now() - start
-        const speed = toLower(bytes(Math.floor(current.reader / (elapsed / 1000 || 1))))
-        readerProgressBar.tick(size, { speed })
-        readerProgressStream.write(Buffer.alloc(size))
-      },
-
-      updateWriter(size) {
-        current.writer += size
-        const elapsed = Date.now() - start
-        const speed = toLower(bytes(Math.floor(current.writer / (elapsed / 1000 || 1))))
-        writerProgressBar.tick(size, { speed })
-        writerProgressStream.write(Buffer.alloc(size))
-      }
-    }
-
-    // progress stuff
-    function createProgressBarTemplate(name) {
-      return `afs: info: ${name} [:bar] :speedps :percent :etas`.trim()
-    }
-
-    function createProgressStream() {
-      return new ProgressStream({ length: stats.size, time: 100 })
-    }
-
-    function createProgressBar(template) {
-      return new ProgressBar(template, progressBarSpec)
-    }
-  }
-
-  await afs.close()
 }
 
 module.exports = {

@@ -119,3 +119,8 @@ module.exports = {
   resolveBufferIndex,
   defaultStorage
 }
+
+module.exports = {
+  resolveBufferIndex,
+  defaultStorage
+}
