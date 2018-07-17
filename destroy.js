@@ -1,17 +1,11 @@
 const debug = require('debug')('ara-filesystem:destroy')
-const aid = require('./aid')
-const { destroyCFS } = require('cfsnet/destroy')
 const { access } = require('fs')
 const rc = require('./rc')()
 const rimraf = require('rimraf')
 const pify = require('pify')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
-
-const {
-  kResolverKey,
-  kStorageAddress
-} = require('./constants')
+const { kStorageAddress } = require('./constants')
 
 const {
   createAFSKeyPath,
@@ -20,9 +14,8 @@ const {
 
 const {
   validate,
-  getDocumentOwner,
-  loadSecrets,
-  hashIdentity
+  hashIdentity,
+  getAfsId
 } = require('./util')
 
 const {
@@ -57,6 +50,7 @@ async function destroy({
     await pify(access)(path)
     await pify(rimraf)(path)
   } catch (err) {
+    console.log('err', err)
     throw new Error('Mnemonic is incorrect')
   }
 
@@ -81,14 +75,6 @@ async function destroy({
   } catch (err) {
     throw new Error(err)
   }
-
-}
-
-async function getAfsId(did, mnemonic) {
-  const keystore = await loadSecrets(kResolverKey)
-  const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
-  const owner = getDocumentOwner(afsDdo)
-  return await aid.create(mnemonic, owner)
 }
 
 module.exports = {

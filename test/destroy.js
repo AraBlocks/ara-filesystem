@@ -1,3 +1,5 @@
+/* eslint quotes: "off" */
+
 const test = require('ava')
 const { create } = require('../create')
 const { commit } = require('../commit')
@@ -44,10 +46,15 @@ test("destroy() invalid password", async (t) => {
 
 test("destroy() invalid mnemonic", async (t) => {
   const did = getDid(t)
-  await t.throws(destroy({ did, password }), TypeError, 
-    "Expecting non-empty string for mnemonic")
-  await t.throws(destroy({ did, password, mnemonic: 1234 }), TypeError, 
-    "Expecting non-empty string for mnemonic")
+  await t.throws(destroy({
+    did,
+    password
+  }), TypeError, "Expecting non-empty string for mnemonic")
+  await t.throws(destroy({
+    did,
+    password,
+    mnemonic: 1234
+  }), TypeError, "Expecting non-empty string for mnemonic")
 })
 
 test("destroy() incorrect password", async (t) => {
@@ -63,7 +70,7 @@ test("destroy() incorrect mnemonic", async (t) => {
 
 test("destroy() valid params without commit", async (t) => {
   const did = getDid(t)
-  const mnemonic = t.context.mnemonic
+  const { mnemonic } = t.context
 
   const afsId = await getAfsId(did, mnemonic)
 
@@ -72,7 +79,7 @@ test("destroy() valid params without commit", async (t) => {
   await t.notThrows(pify(access)(identityPath))
   const afsPath = createAFSKeyPath(did)
   await t.notThrows(pify(access)(afsPath))
-  
+
   // destroy operation
   await t.notThrows(destroy({ did, password, mnemonic }))
 
