@@ -175,6 +175,6 @@ module.exports = {
   isCorrectPassword,
   hashIdentity,
   validate,
-  getDeployedContract
+  getDeployedContract,
   getAfsId
 }
