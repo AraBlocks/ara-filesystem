@@ -1,6 +1,5 @@
 const test = require('ava')
 const { create } = require('../create')
-
 const {
   kTestOwnerDid,
   kTestOwnerDidNoMethod,
@@ -45,8 +44,8 @@ test('create() invalid id (wrong method)', async (t) => {
 test('create() invalid id (correct method, invalid id)', async (t) => {
   const idCorrectMethod = 'did:ara:abcd'
 
-  await t.throws(create({ owner: idCorrectMethod, password: kPassword }), TypeError, 'ara-filesystem.create: Unable to resolve owner DID')
-  await t.throws(create({ did: idCorrectMethod, password: kPassword }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  await t.throws(create({ owner: idCorrectMethod, password: kPassword }), Error, 'ara-filesystem.create: Unable to resolve owner DID')
+  await t.throws(create({ did: idCorrectMethod, password: kPassword }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test('create() invalid id (no method, invalid id)', async (t) => {
@@ -73,7 +72,6 @@ test('create() no password', async (t) => {
 
 test('create() incorrect password', async (t) => {
   const wrongPass = 'abcd'
-
   await t.throws(create({ owner: kTestOwnerDid, password: wrongPass }), Error, 'ara-filesystem.create: incorrect password.')
   await t.throws(create({ did: kTestOwnerDid, password: wrongPass }), Error, 'ara-filesystem.create: incorrect password.')
 })

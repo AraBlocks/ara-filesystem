@@ -27,10 +27,11 @@ contract Storage {
   }
  
   modifier restricted() {
-    if (msg.sender == owner) _;
+    require (msg.sender == owner);
+    _;
   }
 
-  function write(string identity, uint8 file, uint8 offset, bytes buffer, bool last_write) public restricted {
+  function write(string identity, uint8 file, uint256 offset, bytes buffer, bool last_write) public restricted {
     buffer_mappings[identity][file].buffers[offset] = buffer;
     buffer_mappings[identity][file].keys.push(offset);
     if (offset > buffer_mappings[identity][file].largest_key) {
@@ -45,7 +46,7 @@ contract Storage {
     return buffer_mappings[identity][0].keys.length > 0;
   }
 
-  function read(string identity, uint8 file, uint8 offset) public view returns (bytes buffer) {
+  function read(string identity, uint8 file, uint256 offset) public view returns (bytes buffer) {
     return buffer_mappings[identity][file].buffers[offset];
   }
 

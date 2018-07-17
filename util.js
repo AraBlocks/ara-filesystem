@@ -1,6 +1,7 @@
 const { secrets } = require('ara-network')
 const { create } = require('ara-identity/did')
 const { resolve } = require('./aid')
+const { web3 } = require('ara-context')()
 
 const {
   blake2b, keyPair,
@@ -54,7 +55,7 @@ function validateDid(did) {
   return did
 }
 
-function getDocumentOwner(ddo, validate = true) {
+function getDocumentOwner(ddo, shouldValidate = true) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
   }
@@ -63,7 +64,7 @@ function getDocumentOwner(ddo, validate = true) {
   const suffixLength = kOwnerSuffix.length
   const id = pk.slice(0, pk.length - suffixLength)
 
-  return validate ? validateDid(id) : id
+  return shouldValidate ? validateDid(id) : id
 }
 
 async function isCorrectPassword({
@@ -143,6 +144,10 @@ async function validate(did, password, label = '') {
   }
 }
 
+function getDeployedContract(abi, address) {
+  return new web3.eth.Contract(abi, address)
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
@@ -155,5 +160,6 @@ module.exports = {
   getDocumentOwner,
   isCorrectPassword,
   hashIdentity,
-  validate
+  validate,
+  getDeployedContract
 }

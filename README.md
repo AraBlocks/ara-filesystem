@@ -29,58 +29,39 @@ The follow section lists the prerequisites for running the project as well as th
 
 ### Prerequisites
 
-- Clone the repositories listed above
+- **Note:** There is an `install-afs` script in `/bin`, move it to the parent folder of this folder (`$ cd ..`) and run it. You shouldn't have to do any installation, linking or secret generation.
+- Clone the following repositories
+  - `ara-identity`
+  - `ara-network`
+  - `ara-network-node-identity-archiver`
+  - `ara-network-node-identity-resolver`
 - Be sure to `npm install` and `npm link` for each
 - Test the CLI by running the following commands,
-```sh
-$ aid --help
-$ ann --help
-$ ans --help
-```
-- The above commands should display the help options for each of the CLIs
+  - `$ aid --help`
+  - `$ ann --help`
+  - `$ ans --help`
 
-Generate secrets for both the Archiver & Resolver nodes
+- Generate secrets for both the Archiver & Resolver nodes
+  - `$ ans -k archiver  // Generating secrets for the archiver node`
+  - `$ ans -k resolver  // Generating secrets for the resolver node`
 
-- `$ ans -k ${network_key_string}`
-
-- Example:
-```sh
-$ ans -k archiver // Generating secrets for the archiver node
-$ ans -k resolver // Generating secrets for the resolver node
-```
-
-Once the secrets are generated, the Archiver & Resolver Network nodes can be started.
-
-  - Clone the [archiver](https://github.com/AraBlocks/ara-network-node-identity-archiver) and [resolver](https://github.com/AraBlocks/ara-network-node-identity-resolver) repositories
-  - Do `npm install` in each of the repositories
+- Once the secrets are generated, the Archiver & Resolver Network nodes can be started.
+  - Be sure to have cloned the [archiver](https://github.com/AraBlocks/ara-network-node-identity-archiver) and [resolver](https://github.com/AraBlocks/ara-network-node-identity-resolver) repositories
+  - Ensure you have ran `npm install` in each of the repositories
   - Open the repository folder in 2 separate windows and run the below command,
-    - `$ ann -t . -k ${network_key_string}`
-
-    - Example:
       ```sh
-      $ ann -t . -k archiver // starting the archiver network node
-      $ ann -t . -k resolver // starting the resolver network node
+      $ ann -t . -k archiver  // in 'ara-network-node-identity-archiver'
+      $ ann -t . -k resolver  // in 'ara-network-node-identity-resolver'
       ```
+- To communicate with the Ethereum blockchain and commit your AFS changes, you must be running a local blockchain. Run:
+  - `$ truffle develop`
+- The contracts will have to be compiled and deployed to this local blockchain as well by running, once the `truffle` console has been opened run:
+  - ` $ migrate`
+    - **Note**: If `migrate` fails, try deleting the `build/contracts` directory and try again.
+- Since the addresses of contracts are currently hardcoded, the address that `migrate` deploys to will need to be copied and pasted into their corresponding variables in `constants.js`.
+  - `kStorageAddress` = storage address
+  - `kPriceAddress` = price address
 
-Note : Make sure to use different `network_key_string` for the Archiver & Resolver Network Nodes
-
-To communicate with the Ethereum blockchain and commit your AFS changes, you must be running a local blockchain. You can do so by running the following,
-
-```sh
-  $ truffle develop
-```
-
-The contracts will have to be compiled and deployed to this local blockchain as well by running,
-
-```sh
-  $ migrate
-```
-
-once the `truffle` console has been opened.
-
-Since the address of `Storage.sol` is currently hardcoded, the address that `migrate` deploys to will need to be copied and pasted into `kStorageAddress` in `constants.js`.
-
-> **Note**: If `migrate` fails, try deleting the `build/contracts` directory and try again.
 
 ### Creating an ARA Identity
 
@@ -117,7 +98,7 @@ $ afs add <did> <pathspec...>
 Example:
 
 ```sh
-$ afs add cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f my_video.mp4
+$ afs add df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my_video.mp4
 ```
 
 ### Removing from an AFS
@@ -131,7 +112,7 @@ $ afs remove <did> <pathspec...>
 Example:
 
 ```sh
-$ afs remove cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f my_video.mp4
+$ afs remove df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my_video.mp4
 ```
 
 ### Committing an AFS
@@ -139,7 +120,7 @@ $ afs remove cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f my
 Every change you make is saved to a local file on disc, you can think of these as staged commits. Before your changes are published to the ARA network and become discoverable, you have to commit them. You can commit with the `commit` command.
 
 ```sh
-$ afs commit cca123f1e86da73a394f1211fc21148d3962ffca8782ea09668c98898041b88f
+$ afs commit df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 ```
 
 ## API

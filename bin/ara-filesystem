@@ -43,6 +43,11 @@ const { argv } = program
     alias: 'V',
     describe: "Show program version"
   })
+  .option('force', {
+    alias: 'f',
+    type: 'boolean',
+    describe: 'Force operation',
+  })
   .command('create <owner>', "Create AFS with given identity", (program) => {
     program
       .positional('owner', {
@@ -85,6 +90,16 @@ const { argv } = program
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
       })
+      .option('price', {
+        alias: 'P',
+        type: 'number',
+        describe: "Price (in ARA) to set the cost of the AFS"
+      })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force commit operation',
+      })
   }, oncommit)
   .command('set-price <did> [price]', "Publish price for the given AFS", (program) => {
     program
@@ -96,16 +111,17 @@ const { argv } = program
         type: 'number',
         describe: "Cost associated with an AFS (in ARA)"
       })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force set price operation',
+      })
   }, onsetprice)
-  .command('get-price <did> [price]', "Return the price for a given AFS", (program) => {
+  .command('get-price <did>', "Return the price for a given AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
-      })
-      .positional('price', {
-        type: 'number',
-        describe: "Cost associated with an AFS (in ARA)"
       })
   }, ongetprice)
 
@@ -117,6 +133,7 @@ void async function main() {
 
 async function oncreate(argv) {
   let owner = argv.owner
+
   if (null == owner) {
     onfatal(new Error("Missing AFS owner DID. See 'afs create --help'."))
   }
@@ -141,7 +158,7 @@ async function oncreate(argv) {
     ' This phrase will be required to make any changes to the AFS.'+ 
     ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
 
-  await arafs.afs.close()
+  arafs.afs.close()
 }
 
 async function onhistory(argv) {
@@ -175,27 +192,33 @@ async function onhistory(argv) {
     ]
   }
 
-  const arafs = await afs.create({ did, password })
-  const stream = table.createStream(tableOpts)
+  try {
+    const arafs = await afs.create({ 
+      did, 
+      password })
+    const stream = table.createStream(tableOpts)
 
-  arafs.afs.history(argv.partition || arafs.afs.HOME)
-    .on('error', onfatal)
-    .on('end', () => process.exit(0))
-    .on('data', (log) => {
-      if (true != argv['border']) {
-        console.log('%s\t%s\t%s',
-          log.version,
-          log.type.toUpperCase(),
-          log.name
-        )
-      } else {
-        stream.write([
-          log.version,
-          log.type.toUpperCase(),
-          log.name,
-        ])
-      }
-    })
+    arafs.afs.history(argv.partition || arafs.afs.HOME)
+      .on('error', onfatal)
+      .on('end', () => process.exit(0))
+      .on('data', (log) => {
+        if (true != argv['border']) {
+          console.log('%s\t%s\t%s',
+            log.version,
+            log.type.toUpperCase(),
+            log.name
+          )
+        } else {
+          stream.write([
+            log.version,
+            log.type.toUpperCase(),
+            log.name,
+          ])
+        }
+      })
+  } catch (err) {
+    onfatal(err)
+  }
 }
 
 async function onadd(argv) {
@@ -212,9 +235,15 @@ async function onadd(argv) {
 
   const { password } = await promptForPassword()
 
-  await afs.add({ did, paths, password })
-
-  info("file(s) successfully added")
+  try {
+    await afs.add({
+      did,
+      paths,
+      password })
+    info("file(s) successfully added")
+  } catch (err) {
+    onfatal(err)
+  }
 }
 
 async function onremove(argv) {
@@ -231,41 +260,70 @@ async function onremove(argv) {
 
   const { password } = await promptForPassword()
 
-  const result = await afs.remove({ did, paths, password })
-  if (result instanceof Error) {
-    error(result)
-  } else {
+  try {
+    await afs.remove({
+      did,
+      paths,
+      password })
     info("file(s) successfully removed")
+  } catch (err) {
+    onfatal(err)
   }
 }
 
-async function oncommit({did}) {
+async function oncommit({ did, price }) {
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
 
   const { password } = await promptForPassword()
 
-  info("committing with identity: %s", did)
+  let result = argv.force
+  if (!result) {
+    try {
+      const cost = await afs.estimateCommitGasCost({ did, password, price })
+      const { answer } = await promptCostConfirmation(cost)
+      result = answer
+    } catch (err) {
+      onfatal(err)
+    }
+  }
 
-  const result = await afs.commit({ did, password })
-  if (result instanceof Error) {
-    error(result)
+  if (result) {
+    info("committing with identity: %s", did)
+    const result = await afs.commit({ did, password, price })
+    if (result instanceof Error) {
+      onfatal(result)
+    } else {
+      info("file(s) successfully committed")
+    }
   } else {
-    info("file(s) successfully committed")
+    onfatal() // exit
   }
 }
 
-async function onsetprice({did, price}) {
+async function onsetprice({ did, price }) {
   price = price || 0
   info("setting price of AFS identity %s to %d", did, price)
   const { password } = await promptForPassword()
 
-  try {
-    await afs.setPrice({ did, password, price })
-  } catch (err) {
-    onfatal(err)
+  let result = argv.force
+  if (!result) {
+    try {
+      const cost = await afs.estimateSetPriceGasCost({ did, password, price })
+      const { answer } = await promptCostConfirmation(cost)
+      result = answer
+      if (answer) {
+        await afs.setPrice({ did, password, price })
+      }
+    } catch (err) {
+      onfatal(err)
+    }
   }
 
-  info("price has been set to", price)
+  if (result) {
+    info("price has been set to", price)
+  } else {
+    onfatal() // exit
+  }
 }
 
 async function ongetprice({did}) {
@@ -282,6 +340,16 @@ async function ongetprice({did}) {
   info("price of", did, "is", price)
 }
 
+async function promptCostConfirmation(cost) {
+  return await inquirer.prompt({
+    type: 'confirm',
+    name: 'answer',
+    message: 
+    `This operation will cost ${cost} gas. Are you sure you
+    want to proceed?`
+  })
+}
+
 async function promptForPassword() {
   return await inquirer.prompt([{
     type: 'password',
@@ -294,7 +362,9 @@ async function promptForPassword() {
 }
 
 function onfatal(err) {
-  debug(err)
-  error("fatal:", err.message)
+  if (err) {
+    debug(err)
+    error("fatal:", err.message)
+  }
   process.exit(1)
 }
