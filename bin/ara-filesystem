@@ -48,7 +48,7 @@ const { argv } = program
     type: 'boolean',
     describe: 'Force operation',
   })
-  .command('create <owner> <path>', "Create AFS with given identity", (program) => {
+  .command('create <owner> [path]', "Create AFS with given identity", (program) => {
     program
       .positional('owner', {
         type: 'string',
@@ -89,11 +89,15 @@ const { argv } = program
         describe: "Where the AFS is located"
       })
   }, onremove)
-  .command('history <did>', "Retrieve the revision history of this AFS", (program) => {
+  .command('history <did> [ -p <path> ]', "Retrieve the revision history of this AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .option('path', {
+        alias: 'p',
+        describe: "Where the AFS is located"
       })
   }, onhistory)
   .command('commit <did>', "Push local staged AFS changes to the Ethereum blockchain and DCDN", (program) => {
@@ -188,6 +192,8 @@ async function oncreate(argv) {
 
 async function onhistory(argv) {
   let did = argv.did
+  const rootPath = argv.path
+
   if (null == did) {
     onfatal(new Error("Missing AFS DID. See 'afs add --help'."))
   }
@@ -220,7 +226,9 @@ async function onhistory(argv) {
   try {
     const arafs = await afs.create({ 
       did, 
-      password })
+      password,
+      rootPath,
+    })
     const stream = table.createStream(tableOpts)
 
     arafs.afs.history(argv.partition || arafs.afs.HOME)

@@ -59,7 +59,7 @@ async function create({
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({ did, pathPrefix, password })
+    const drives = await createMultidrive({ rootPath, did, pathPrefix, password })
 
     const path = createAFSKeyPath(did)
 
@@ -124,9 +124,9 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({ did, pathPrefix, password }) {
-    await pify(mkdirp)(rc.afs.archive.store)
-    const nodes = resolve(rc.afs.archive.store, pathPrefix)
+  async function createMultidrive({ rootPath, did, pathPrefix, password }) {
+    await pify(mkdirp)(rootPath || rc.afs.archive.store)
+    const nodes = resolve(rootPath || rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
 
     const drives = await pify(multidrive)(
