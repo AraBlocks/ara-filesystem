@@ -150,7 +150,7 @@ async function oncreate(argv) {
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
   info('Please safely store the following 12 word mnemonic phrase for this AFS.' + 
-    ' This phrase will be required to make any changes to the AFS.'+ 
+    ' This phrase will be required to restore and delete this AFS.'+ 
     ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
 
   await arafs.afs.close()
