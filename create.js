@@ -32,6 +32,7 @@ const {
  */
 async function create({
   password = '',
+  rootPath,
   owner = null,
   did = null,
 }) {
@@ -62,7 +63,7 @@ async function create({
 
     afs = await pify(drives.create)({
       id: pathPrefix,
-      path
+      path: rootPath || path,
     })
 
     afs.did = did
@@ -102,7 +103,7 @@ async function create({
         id,
         key: kp.publicKey,
         secretKey: kp.secretKey,
-        path,
+        path: rootPath || path,
         storage: defaultStorage(afsDid, password),
         shallow: true
       })

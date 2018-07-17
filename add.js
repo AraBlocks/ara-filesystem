@@ -15,7 +15,8 @@ async function add({
   did = '',
   paths = [],
   password = '',
-  force
+  force,
+  rootPath,
 } = {}) {
   if (null === did || 'string' !== typeof did || !did) {
     throw new TypeError('ara-filesystem.add: Expecting non-empty did.')
@@ -31,7 +32,7 @@ async function add({
 
   let afs
   try {
-    ({ afs } = await create({ did, password }))
+    ({ afs } = await create({ rootPath, did, password }))
   } catch (err) {
     throw err
   }
