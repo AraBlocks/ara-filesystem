@@ -130,6 +130,11 @@ const { argv } = program
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
       })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force destroy operation',
+      })
   }, ondestroy)
 
 void async function main() {
@@ -318,15 +323,13 @@ async function onsetprice({ did, price }) {
       const cost = await afs.estimateSetPriceGasCost({ did, password, price })
       const { answer } = await promptCostConfirmation(cost)
       result = answer
-      if (answer) {
-        await afs.setPrice({ did, password, price })
-      }
     } catch (err) {
       onfatal(err)
     }
   }
 
   if (result) {
+    await afs.setPrice({ did, password, price })
     info("price has been set to", price)
   } else {
     onfatal() // exit
@@ -357,18 +360,22 @@ async function promptCostConfirmation(cost) {
   })
 }
 
-async function ondestroy({did}) {
+async function ondestroy({ did, force }) {
 
   info("attempting destroying AFS %s", did)
 
   const { password } = await promptForPassword()
   const { mnemonic } = await promptForMnemonic()
 
-  const { answer } = await displayConfirmationPrompt({ 
-    message: `Destroy will remove this AFS from the entire ARA network. Continue?` 
-  })
+  let result = force
+  if (!result) {
+    const { answer } = await displayConfirmationPrompt({ 
+      message: `Destroy will remove this AFS from the entire ARA network. Continue?` 
+    })
+    result = answer
+  }
 
-  if (answer) {
+  if (result) {
     try {
       await afs.destroy({ did, mnemonic, password })
     } catch (err) {
