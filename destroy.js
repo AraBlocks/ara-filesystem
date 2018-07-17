@@ -3,16 +3,28 @@ const aid = require('./aid')
 const { blake2b } = require('ara-crypto')
 const { toHex } = require('ara-identity/util')
 const { destroyCFS } = require('cfsnet/destroy')
-const { createAFSKeyPath } = require('./key-path')
 const { access } = require('fs')
-const { kResolverKey } = require('./constants')
+const rc = require('./rc')()
 const rimraf = require('rimraf')
 const pify = require('pify')
+const { web3 } = require('ara-context')()
+const { abi } = require('./build/contracts/Storage.json')
+
+const {
+  kResolverKey,
+  kStorageAddress
+} = require('./constants')
+
+const {
+  createAFSKeyPath,
+  createIdentityKeyPath
+} = require('./key-path')
 
 const {
   validate,
   getDocumentOwner,
-  loadSecrets
+  loadSecrets,
+  hashIdentity
 } = require('./util')
 
 const {
@@ -25,34 +37,53 @@ async function destroy({
   mnemonic = '',
   password = ''
 } = {}) {
-  //await validate(did, password, 'destroy')
-  let path = createAFSKeyPath(did)
-  console.log('path1', path)
-  const hash = basename(path)
+  await validate(did, password, 'destroy')
+
+  if (!mnemonic || 'string' !== typeof mnemonic) {
+    throw new TypeError('Expecting non-empty string for mnemonic')
+  }
+
+  mnemonic = mnemonic.trim()
+
+  let path
 
   try {
-    // delete AFS on disk
-    //await pify(access)(path)
-    //await pify(rimraf)(path)
-
     // destroy AFS identity
     const afsIdentity = await getAfsId(did, mnemonic)
-    path = generateIdentityPath(afsIdentity)
-    console.log('path2', path)
+    path = createIdentityKeyPath(afsIdentity)
+    await pify(access)(path)
+    await pify(rimraf)(path)
+
+    // delete AFS on disk
+    path = createAFSKeyPath(did)
+    await pify(access)(path)
+    await pify(rimraf)(path)
+  } catch (err) {
+    throw new Error('Mnemonic is incorrect')
+  }
+
+  const { store } = rc.afs.archive
+  path = resolvePath(store, basename(path))
+
+  // delete AFS toilet db file
+  try {
+    await pify(access)(path)
+    await pify(rimraf)(path)
+  } catch (err) {
+    debug('db file at %s does not exist', path)
+  }
+
+  const deployed = new web3.eth.Contract(abi, kStorageAddress)
+  const accounts = await web3.eth.getAccounts()
+  const hIdentity = hashIdentity(did)
+
+  try {
+    // mark blockchain buffers invalid
+    await deployed.methods.del(hIdentity).send({ from: accounts[0], gas: 500000 })
   } catch (err) {
     throw new Error(err)
   }
 
-  // path = resolvePath(path.replace(hash, ''), kNodesDir, hash)
-  // console.log('path3', path)
-
-  // delete AFS toilet db file
-  try {
-    //await pify(access)(path)
-    //await pify(rimraf)(path)
-  } catch (err) {
-    debug('db file at %s does not exist', path)
-  }
 }
 
 async function getAfsId(did, mnemonic) {
@@ -60,10 +91,6 @@ async function getAfsId(did, mnemonic) {
   const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
   const owner = getDocumentOwner(afsDdo)
   return await aid.create(mnemonic, owner)
-}
-
-function generateIdentityPath({ publicKey }) {
-  return toHex(blake2b(publicKey))
 }
 
 module.exports = {

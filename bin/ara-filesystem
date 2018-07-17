@@ -332,7 +332,7 @@ async function promptForPassword() {
 async function promptForMnemonic() {
   return await inquirer.prompt([{
     name: 'mnemonic',
-    message: "Fuck you. Give me your mnemonic."
+    message: "Please provide the mnemonic associated with your AFS identity."
   }])
 }
 

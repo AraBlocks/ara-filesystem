@@ -21,19 +21,19 @@ function createAFSKeyPath(did) {
   return resolve(root, toHex(hash))
 }
 
-function createIdentityPath(identity) {
+function createIdentityKeyPath(ddo) {
   const { root } = rc.araId.archive
 
-  if (null == id || 'string' !== typeof id) {
-    throw new TypeError('ara-filesystem.key-path: Expecting non-empty string for id')
+  if (null == ddo || 'object' !== typeof ddo) {
+    throw new TypeError('ara-filesystem.key-path: Expecting object for identity')
   }
 
-  const { publicKey } = identity
+  const { publicKey } = ddo
   const hash = toHex(blake2b(publicKey))
   return resolve(root, hash)
 }
 
 module.exports = {
   createAFSKeyPath,
-  createIdentityPath
+  createIdentityKeyPath
 }
