@@ -13,6 +13,8 @@ const isDirectory = require('is-directory')
 const pify = require('pify')
 const { resolve, join } = require('path')
 
+const kNonDefaultPath = './test-afs'
+
 const getAFS = ({ context }) => {
   const { afs } = context
   return afs
@@ -23,7 +25,14 @@ test.beforeEach(async (t) => {
     owner: kTestOwnerDid,
     password: kPassword
   })
-  t.context = { afs }
+
+  const { afs: nonDefaultAFS } = await create({
+    owner: kTestOwnerDid,
+    rootPath: kNonDefaultPath,
+    password: kPassword
+  })
+
+  t.context = { afs, nonDefaultAFS }
 })
 
 test.serial('remove() valid did, valid password, no paths', async (t) => {
@@ -51,6 +60,29 @@ test.serial('remove() valid did, valid password, valid path (1)', async (t) => {
   await remove({
     did,
     paths,
+    password: kPassword
+  })
+
+  await t.throws(afs.access(paths[0]), Error, '')
+})
+
+test.serial('remove() valid did, valid password, valid path, valid rootPath', async (t) => {
+  const afs = t.context.nonDefaultAFS
+  const { did } = afs
+
+  const paths = [ './index.js' ]
+
+  await add({
+    did,
+    rootPath: kNonDefaultPath,
+    paths,
+    password: kPassword
+  })
+
+  await remove({
+    did,
+    paths,
+    rootPath: kNonDefaultPath,
     password: kPassword
   })
 
