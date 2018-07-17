@@ -359,19 +359,25 @@ async function promptCostConfirmation(cost) {
 
 async function ondestroy({did}) {
 
-  info("destroying AFS %s", did)
-  const { password } = await promptForPassword()
-  info("got password %s", password)
-  const { mnemonic } = await promptForMnemonic()
-  info("got mnemonic %s", mnemonic)
+  info("attempting destroying AFS %s", did)
 
-  try {
-    await afs.destroy({ did, mnemonic, password })
-  } catch (err) {
-    onfatal(err)
+  const { password } = await promptForPassword()
+  const { mnemonic } = await promptForMnemonic()
+
+  const { answer } = await displayConfirmationPrompt({ 
+    message: `Destroy will remove this AFS from the entire ARA network. Continue?` 
+  })
+
+  if (answer) {
+    try {
+      await afs.destroy({ did, mnemonic, password })
+    } catch (err) {
+      onfatal(err)
+    }
+    info("destroyed AFS %s", did)
   }
 
-  info("destroyed AFS %s", did)
+  process.exit(1)
 }
 
 async function promptForPassword() {
@@ -389,6 +395,17 @@ async function promptForMnemonic() {
   return await inquirer.prompt([{
     name: 'mnemonic',
     message: "Fuck you. Give me your mnemonic."
+  }])
+}
+
+async function displayConfirmationPrompt({
+  name = 'answer',
+  message = 'Are you sure you want to continue?'
+} = {}) {
+  return await inquirer.prompt([{
+    name,
+    type: 'confirm',
+    message
   }])
 }
 
