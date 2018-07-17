@@ -59,7 +59,13 @@ function getDocumentOwner(ddo, validate = true) {
     throw new TypeError('Expecting DDO')
   }
 
-  const pk = ddo.authentication[0].authenticationKey
+  let pk
+  if (ddo.authentication) {
+    pk = ddo.authentication[0].authenticationKey
+  } else if (ddo.didDocument) {
+    pk = ddo.didDocument.authentication[0].authenticationKey
+  }
+  
   const suffixLength = kOwnerSuffix.length
   const id = pk.slice(0, pk.length - suffixLength)
 
