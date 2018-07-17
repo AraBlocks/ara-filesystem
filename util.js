@@ -1,6 +1,6 @@
 const { secrets } = require('ara-network')
 const { create } = require('ara-identity/did')
-const { resolve } = require('./aid')
+const aid = require('./aid')
 
 const {
   blake2b, keyPair,
@@ -54,7 +54,7 @@ function validateDid(did) {
   return did
 }
 
-function getDocumentOwner(ddo, validate = true) {
+function getDocumentOwner(ddo, shouldValidate = true) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
   }
@@ -65,11 +65,11 @@ function getDocumentOwner(ddo, validate = true) {
   } else if (ddo.didDocument) {
     pk = ddo.didDocument.authentication[0].authenticationKey
   }
-  
+
   const suffixLength = kOwnerSuffix.length
   const id = pk.slice(0, pk.length - suffixLength)
 
-  return validate ? validateDid(id) : id
+  return shouldValidate ? validateDid(id) : id
 }
 
 async function isCorrectPassword({
@@ -94,7 +94,7 @@ async function isCorrectPassword({
     ddo = ddo || null
     if (!ddo) {
       const keystore = await loadSecrets(kResolverKey)
-      ddo = await resolve(did, { key: kResolverKey, keystore })
+      ddo = await aid.resolve(did, { key: kResolverKey, keystore })
     }
     const ddoOwner = getDocumentOwner(ddo)
     result = didUri === ddoOwner
@@ -149,6 +149,13 @@ async function validate(did, password, label = '') {
   }
 }
 
+async function getAfsId(did, mnemonic) {
+  const keystore = await loadSecrets(kResolverKey)
+  const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
+  const owner = getDocumentOwner(afsDdo)
+  return await aid.create(mnemonic, owner)
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
@@ -161,5 +168,6 @@ module.exports = {
   getDocumentOwner,
   isCorrectPassword,
   hashIdentity,
-  validate
+  validate,
+  getAfsId
 }

@@ -302,6 +302,8 @@ async function ondestroy({did}) {
   const { password } = await promptForPassword()
   const { mnemonic } = await promptForMnemonic()
 
+  console.log('mnemonic', mnemonic)
+
   const { answer } = await displayConfirmationPrompt({ 
     message: `Destroy will remove this AFS from the entire ARA network. Continue?` 
   })
