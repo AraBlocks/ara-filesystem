@@ -36,12 +36,13 @@ function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
   const hIdentity = hashIdentity(identity)
+  const readOnly = !password || 0 === password.length
 
   return ras({
     async read(req) {
       const { offset, size } = req
       debug(filename, 'read at offset', offset, 'size', size)
-      let buffer = retrieve({
+      let buffer = (readOnly) ? null : retrieve({
         did: identity,
         fileIndex,
         offset,
@@ -55,15 +56,17 @@ function create({ filename, identity, password }) {
     },
 
     write(req) {
-      const { data, offset, size } = req
-      debug(filename, 'staged write at offset', offset, 'size', size)
-      append({
-        did: identity,
-        fileIndex,
-        data,
-        offset,
-        password
-      })
+      if (!readOnly) {
+        const { data, offset, size } = req
+        debug(filename, 'staged write at offset', offset, 'size', size)
+        append({
+          did: identity,
+          fileIndex,
+          data,
+          offset,
+          password
+        })
+      }
       req.callback(null)
     },
 
@@ -73,8 +76,10 @@ function create({ filename, identity, password }) {
     },
 
     async del(req) {
-      const opts = await _getTxOpts()
-      await deployed.methods.del(hIdentity).send(opts)
+      if (!readOnly){
+        const opts = await _getTxOpts()
+        await deployed.methods.del(hIdentity).send(opts)
+      }
       req.callback(null)
     }
   })
