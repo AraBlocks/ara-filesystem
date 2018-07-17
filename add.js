@@ -1,22 +1,21 @@
 /* eslint-disable no-await-in-loop */
 
-const debug = require('debug')('ara-filesystem:add')
-const { create } = require('./create')
 const { resolve, join } = require('path')
-const fs = require('fs')
 const { stat, access } = require('fs')
-const pify = require('pify')
 const isDirectory = require('is-directory')
-const isFile = require('is-file')
-
+const { create } = require('./create')
 const ignored = require('./lib/ignore')
+const isFile = require('is-file')
+const debug = require('debug')('ara-filesystem:add')
+const pify = require('pify')
+const fs = require('fs')
 
 async function add({
-  did = '',
-  paths = [],
   password = '',
-  force,
   rootPath,
+  paths = [],
+  force,
+  did = '',
 } = {}) {
   if (null === did || 'string' !== typeof did || !did) {
     throw new TypeError('ara-filesystem.add: Expecting non-empty did.')

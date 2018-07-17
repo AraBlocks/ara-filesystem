@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 
-const debug = require('debug')('ara-filesystem:remove')
-const { create } = require('./create')
 const { resolve, join } = require('path')
+const { create } = require('./create')
+const debug = require('debug')('ara-filesystem:remove')
 
 async function remove({
   did = '',

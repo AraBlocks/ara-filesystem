@@ -1,19 +1,21 @@
 /* eslint-disable no-shadow */
 
-const debug = require('debug')('ara-filesystem:create')
+const { toHex, writeIdentity } = require('ara-identity/util')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
-const { toHex, writeIdentity } = require('ara-identity/util')
-const { resolve } = require('path')
-const { createCFS } = require('cfsnet/create')
-const aid = require('./aid')
-const bip39 = require('bip39')
-const multidrive = require('multidrive')
-const pify = require('pify')
-const mkdirp = require('mkdirp')
-const rc = require('./rc')()
-const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
+const { createCFS } = require('cfsnet/create')
+const { resolve } = require('path')
+const { resolve } = require('path')
+const multidrive = require('multidrive')
+const { toHex } = require('ara-identity/util')
+const mkdirp = require('mkdirp')
+const toilet = require('toiletdb')
+const bip39 = require('bip39')
+const debug = require('debug')('ara-filesystem:create')
+const pify = require('pify')
+const aid = require('./aid')
+const rc = require('./rc')()
 
 const {
   validate,
