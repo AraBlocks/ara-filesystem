@@ -27,6 +27,94 @@ const {
   kArchiverKey
 } = require('./constants')
 
+async function load({did}){
+  let afs
+  if (did) {
+    did = validateDid(did)
+
+    const keystore = await loadSecrets(kResolverKey)
+    const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
+    const pathPrefix = toHex(blake2b(Buffer.from(did)))
+
+    const path = createAFSKeyPath(did)
+
+    console.log(`LOADING AFS: ${path}`)
+
+    afs = await createCFS({
+      id: pathPrefix,
+      path: path,
+    })
+
+    afs.did = did
+    afs.ddo = afsDdo
+    console.log(`LOADED AFS: ${afs.did}`)
+  }
+    
+  return afs
+}
+
+async function createShallow({did}){
+  let afs
+  if (did) {
+    did = validateDid(did)
+
+    const keystore = await loadSecrets(kResolverKey)
+    const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
+
+    const pathPrefix = toHex(blake2b(Buffer.from(did)))
+    const drives = await createMultidrive({ did, pathPrefix })
+
+    const path = createAFSKeyPath(did)
+
+    afs = await pify(drives.create)({
+      id: pathPrefix,
+      path: path,
+      key: afsDdo.publicKey[0].publicKeyHex
+    })
+
+    afs.did = did
+    afs.ddo = afsDdo
+  } 
+
+  return afs,
+
+  async function createMultidrive({ did, pathPrefix }) {
+    await pify(mkdirp)(rc.afs.archive.store)
+    const nodes = resolve(rc.afs.archive.store, pathPrefix)
+    const store = toilet(nodes)
+
+    const drives = await pify(multidrive)(
+      store,
+      async (opts, done) => {
+        const { id, path } = opts
+        try {
+          const afs = await createCFS({
+            id,
+            path,
+            shallow: true
+          })
+          return done(null, afs)
+        } catch (err) {
+          done(err)
+        }
+        return null
+      },
+
+      async (afs, done) => {
+        try {
+          await afs.close()
+        } catch (err) {
+          return done(err)
+        }
+        return done(null)
+      }
+    )
+    return drives
+  }
+}
+
+
+
 /**
  * Creates an AFS with the given Ara identity
  * @param  {string} did
@@ -160,5 +248,7 @@ async function create({
 }
 
 module.exports = {
-  create
+  create,
+  createShallow,
+  load
 }
