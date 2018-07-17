@@ -124,6 +124,13 @@ const { argv } = program
         describe: "An AFS ARA decentralized identity (did) URI"
       })
   }, ongetprice)
+  .command('destroy <did>', "Destroy AFS locally and remotely", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+  }, ondestroy)
 
 void async function main() {
   if (argv.debug) {
@@ -155,7 +162,7 @@ async function oncreate(argv) {
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
   info('Please safely store the following 12 word mnemonic phrase for this AFS.' + 
-    ' This phrase will be required to make any changes to the AFS.'+ 
+    ' This phrase will be required to restore and delete this AFS.'+ 
     ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
 
   arafs.afs.close()
@@ -350,6 +357,29 @@ async function promptCostConfirmation(cost) {
   })
 }
 
+async function ondestroy({did}) {
+
+  info("attempting destroying AFS %s", did)
+
+  const { password } = await promptForPassword()
+  const { mnemonic } = await promptForMnemonic()
+
+  const { answer } = await displayConfirmationPrompt({ 
+    message: `Destroy will remove this AFS from the entire ARA network. Continue?` 
+  })
+
+  if (answer) {
+    try {
+      await afs.destroy({ did, mnemonic, password })
+    } catch (err) {
+      onfatal(err)
+    }
+    info("destroyed AFS %s", did)
+  }
+
+  process.exit(1)
+}
+
 async function promptForPassword() {
   return await inquirer.prompt([{
     type: 'password',
@@ -359,6 +389,24 @@ async function promptForPassword() {
     "complete this action.\n" +
     "Passphrase:"
   }]) 
+}
+
+async function promptForMnemonic() {
+  return await inquirer.prompt([{
+    name: 'mnemonic',
+    message: "Please provide the mnemonic associated with your AFS identity."
+  }])
+}
+
+async function displayConfirmationPrompt({
+  name = 'answer',
+  message = 'Are you sure you want to continue?'
+} = {}) {
+  return await inquirer.prompt([{
+    name,
+    type: 'confirm',
+    message
+  }])
 }
 
 function onfatal(err) {
