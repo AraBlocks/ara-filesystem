@@ -1,7 +1,5 @@
 const debug = require('debug')('ara-filesystem:destroy')
 const aid = require('./aid')
-const { blake2b } = require('ara-crypto')
-const { toHex } = require('ara-identity/util')
 const { destroyCFS } = require('cfsnet/destroy')
 const { access } = require('fs')
 const rc = require('./rc')()
@@ -94,5 +92,6 @@ async function getAfsId(did, mnemonic) {
 }
 
 module.exports = {
-  destroy
+  destroy,
+  getAfsId
 }
