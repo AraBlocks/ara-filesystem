@@ -2,6 +2,7 @@ const { secrets } = require('ara-network')
 const { create } = require('ara-identity/did')
 const { resolve } = require('./aid')
 const { web3 } = require('ara-context')()
+const aid = require('./aid')
 
 const {
   blake2b, keyPair,
@@ -60,7 +61,13 @@ function getDocumentOwner(ddo, shouldValidate = true) {
     throw new TypeError('Expecting DDO')
   }
 
-  const pk = ddo.authentication[0].authenticationKey
+  let pk
+  if (ddo.authentication) {
+    pk = ddo.authentication[0].authenticationKey
+  } else if (ddo.didDocument) {
+    pk = ddo.didDocument.authentication[0].authenticationKey
+  }
+
   const suffixLength = kOwnerSuffix.length
   const id = pk.slice(0, pk.length - suffixLength)
 
@@ -89,7 +96,7 @@ async function isCorrectPassword({
     ddo = ddo || null
     if (!ddo) {
       const keystore = await loadSecrets(kResolverKey)
-      ddo = await resolve(did, { key: kResolverKey, keystore })
+      ddo = await aid.resolve(did, { key: kResolverKey, keystore })
     }
     const ddoOwner = getDocumentOwner(ddo)
     result = didUri === ddoOwner
@@ -148,6 +155,13 @@ function getDeployedContract(abi, address) {
   return new web3.eth.Contract(abi, address)
 }
 
+async function getAfsId(did, mnemonic) {
+  const keystore = await loadSecrets(kResolverKey)
+  const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
+  const owner = getDocumentOwner(afsDdo)
+  return await aid.create(mnemonic, owner)
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
@@ -161,5 +175,6 @@ module.exports = {
   isCorrectPassword,
   hashIdentity,
   validate,
-  getDeployedContract
+  getDeployedContract,
+  getAfsId
 }

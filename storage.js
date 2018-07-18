@@ -70,11 +70,6 @@ function create({ filename, identity, password }) {
       req.callback(null)
     },
 
-    async stat(req) {
-      const stats = await deployed.methods.stat(hIdentity, fileIndex).call()
-      req.callback(null, stats)
-    },
-
     async del(req) {
       if (!readOnly){
         const opts = await _getTxOpts()

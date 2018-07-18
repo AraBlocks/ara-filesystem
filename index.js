@@ -1,4 +1,5 @@
-const { create, createShallow, load } = require('./create')
+const { create } = require('./create')
+const { destroy } = require('./destroy')
 const { add } = require('./add')
 const { remove } = require('./remove')
 
@@ -15,8 +16,7 @@ const {
 
 module.exports = {
   create,
-  createShallow,
-  load,
+  destroy,
   add,
   remove,
   commit,
