@@ -70,7 +70,7 @@ async function resolve(did, opts = {}) {
   }
 
   if (!opts.cache) {
-    opts = Object.assign(opts, { cache: true })
+    opts = Object.assign(opts, { cache: false })
   }
 
   let result
