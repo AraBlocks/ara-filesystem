@@ -28,7 +28,9 @@ async function estimateSetPriceGasCost({
   try {
     const hIdentity = hashIdentity(did)
     const deployed = getDeployedContract(abi, kPriceAddress)
-    cost = await deployed.methods.setPrice(hIdentity, price, kStorageAddress).estimateGas({ gas: 500000 })
+    cost = await deployed.methods
+      .setPrice(hIdentity, price, kStorageAddress)
+      .estimateGas({ gas: 500000 })
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
