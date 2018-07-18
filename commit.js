@@ -153,7 +153,9 @@ async function estimateCommitGasCost({
         const data = `0x${buffers[offset]}`
 
         const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
-        cost += await deployed.methods.write(hIdentity, index, offset, data, lastWrite).estimateGas({ gas: 500000 })
+        cost += await deployed.methods
+          .write(hIdentity, index, offset, data, lastWrite)
+          .estimateGas({ gas: 500000 })
       }
     }
   } catch (err) {

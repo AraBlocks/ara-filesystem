@@ -1,6 +1,5 @@
 const debug = require('debug')('ara-filesystem:aid')
 const aid = require('ara-identity')
-const crypto = require('ara-crypto')
 const context = require('ara-context')()
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 
@@ -27,7 +26,6 @@ async function create(seed, publicKey) {
 
   publicKey += kOwnerSuffix
 
-  const password = crypto.blake2b(Buffer.from(seed)).toString()
   let identity
   try {
     const did = {
@@ -37,7 +35,7 @@ async function create(seed, publicKey) {
         authenticationKey: publicKey
       }
     }
-    identity = await aid.create({ context, password, did })
+    identity = await aid.create({ context, password: seed, did })
   } catch (err) { debug(err.stack || err) }
   return identity
 }
