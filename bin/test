@@ -7,8 +7,6 @@ sleep 5
 truffle compile
 MIGRATE_OUTPUT="$(truffle migrate --reset --network local)"
 
-cd ..
-
 # set storage address
 NEW_STORAGE_ADDR="$(echo "$MIGRATE_OUTPUT" | cut -d ':' -f 2 | sed -n 13p)"
 NEW_STORAGE_ADDR="$(echo -e "${NEW_STORAGE_ADDR}" | tr -d '[:space:]')"
