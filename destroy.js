@@ -28,10 +28,8 @@ async function destroy({
   mnemonic = '',
   password = ''
 } = {}) {
-  let result
   try {
-     result = await validate({ did, password, label: 'destroy' })
-     did = result.did
+    ({ did } = await validate({ did, password, label: 'destroy' }))
   } catch (err) {
     throw err
   }

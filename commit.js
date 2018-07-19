@@ -18,7 +18,6 @@ const {
 const {
   encryptJSON,
   decryptJSON,
-  isCorrectPassword,
   getDeployedContract,
   validate,
   hashIdentity
@@ -29,10 +28,8 @@ async function commit({
   password = '',
   price = -1
 } = {}) {
-  let result
   try {
-    result = await validate({ did, password, label: 'commit' })
-    did = result.did
+    ({ did } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }
@@ -127,10 +124,8 @@ async function estimateCommitGasCost({
   did = '',
   password = ''
 } = {}) {
-  let result
   try {
-    result = await validate({ did, password, label: 'commit' })
-    did = result.did
+    ({ did } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }

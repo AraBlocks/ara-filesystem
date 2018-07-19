@@ -3,8 +3,7 @@
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
-const { toHex } = require('ara-identity/util')
-const { writeIdentity } = require('ara-identity/util')
+const { toHex, writeIdentity } = require('ara-identity/util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
@@ -18,8 +17,7 @@ const { defaultStorage } = require('./storage')
 
 const {
   validate,
-  loadSecrets,
-  isCorrectPassword
+  loadSecrets
 } = require('./util')
 
 const {
@@ -50,8 +48,9 @@ async function create({
   if (did) {
     let result
     try {
-      result = await validate({ did, password, label: 'create' })
-      did = result.did
+      // semicolon because interpreter doesn't like `)(`
+      result = await validate({ did, password, label: 'create' });
+      ({ did } = result)
     } catch (err) {
       throw err
     }
@@ -69,10 +68,8 @@ async function create({
     afs.did = did
     afs.ddo = result.ddo
   } else if (owner) {
-    let result
     try {
-      result = await validate({ owner, password, label: 'create' })
-      owner = result.did
+      ({ owner: did } = await validate({ owner, password, label: 'create' }))
     } catch (err) {
       throw err
     }
@@ -82,7 +79,7 @@ async function create({
 
     await writeIdentity(afsId)
 
-    keystore = await loadSecrets(kArchiverKey)
+    let keystore = await loadSecrets(kArchiverKey)
     await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId

@@ -147,8 +147,9 @@ async function validate({
     throw new Error(`ara-filesystem${label}: Expecting an AFS DID or an owner DID, but not both`)
   }
 
-  if (owner)
+  if (owner) {
     did = owner
+  }
 
   if (!did || 'string' !== typeof did) {
     throw new TypeError(`ara-filesystem${label}: Expecting non-empty DID`)
@@ -170,7 +171,9 @@ async function validate({
     throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
   }
 
-  const passwordCorrect = owner ? await isCorrectPassword({ owner, ddo, password }) : await isCorrectPassword({ did, ddo, password })
+  const passwordCorrect = owner
+    ? await isCorrectPassword({ owner, ddo, password })
+    : await isCorrectPassword({ did, ddo, password })
   if (!passwordCorrect) {
     throw new Error(`ara-filesystem${label}: Incorrect password`)
   }

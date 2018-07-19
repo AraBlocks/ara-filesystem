@@ -18,10 +18,8 @@ async function estimateSetPriceGasCost({
   password = '',
   price = 0
 } = {}) {
-  let result
   try {
-    result = await validate({ did, password, label: 'commit' })
-    did = result.did
+    ({ did } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }
@@ -49,10 +47,8 @@ async function setPrice({
   password = '',
   price = 0,
 } = {}) {
-  let result
   try {
-    result = await validate({ did, password, label: 'commit' })
-    did = result.did
+    ({ did } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }
@@ -82,10 +78,8 @@ async function getPrice({
   did = '',
   password = ''
 } = {}) {
-  let res
   try {
-    res = await validate({ did, password, label: 'commit' })
-    did = res.did
+    ({ did } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }
