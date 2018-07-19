@@ -6,7 +6,6 @@ const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const {
   kAidPrefix,
   kOwnerSuffix,
-  kDidPrefix,
   kKeyLength
 } = require('./constants')
 
@@ -39,6 +38,7 @@ async function create(seed, publicKey) {
     }
     identity = await aid.create({ context, password: seed, did })
   } catch (err) { debug(err.stack || err) }
+
   return identity
 }
 
