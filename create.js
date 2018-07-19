@@ -97,9 +97,9 @@ async function create({
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
-    
+
     keystore = await loadSecrets(kResolverKey)
-    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore: rKeystore })
+    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     if (null == afsDdo || 'object' !== typeof afsDdo) {
       throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
