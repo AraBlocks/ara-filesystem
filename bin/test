@@ -25,4 +25,6 @@ kill -9 $(lsof -t -i:8545)
 
 # lint and ava
 npm run lint
+
+# disabled testing for now until all setup can be added to travis-install
 # npm run test
