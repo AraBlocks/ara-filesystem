@@ -6,7 +6,7 @@ const test = require('ava')
 const aid = require('../aid')
 const bip39 = require('bip39')
 const { loadSecrets } = require('../util')
-const { toHex } = require('ara-identity/util')
+const { toHex, writeIdentity } = require('ara-identity/util')
 
 const {
   kArchiverKey,
@@ -77,6 +77,8 @@ test("resolve() valid params", async (t) => {
   const { context } = t
   const afsId = await aid.create(context.mnemonic, kTestDid)
 
+  await writeIdentity(afsId)
+
   let keystore = await loadSecrets(kArchiverKey)
   await aid.archive(afsId, { key: kArchiverKey, keystore })
 
@@ -84,7 +86,7 @@ test("resolve() valid params", async (t) => {
   const did = toHex(publicKey)
 
   keystore = await loadSecrets(kResolverKey)
-  const { ddo } = await aid.resolve(did, { key: kResolverKey, keystore })
+  const res = await aid.resolve(did, { key: kResolverKey, keystore })
 
-  t.is(ddo, afsId.did)
+  t.is(JSON.stringify(res), JSON.stringify(afsId.ddo))
 })
