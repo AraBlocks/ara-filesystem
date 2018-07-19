@@ -44,7 +44,7 @@ async function create({
   let afs
   let mnemonic
   if (did) {
-    const readOnly = !password || 0 === password.length
+    const writable = Boolean(password)
 
     did = validateDid(did)
 
@@ -54,7 +54,7 @@ async function create({
       throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
     }
 
-    if (!readOnly && !(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
+    if (writable && !(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
       throw new Error('ara-filesystem.create: incorrect password')
     }
 

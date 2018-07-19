@@ -36,18 +36,18 @@ function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
   const hIdentity = hashIdentity(identity)
-  const readOnly = !password || 0 === password.length
+  const writable = Boolean(password)
 
   return ras({
     async read(req) {
       const { offset, size } = req
       debug(filename, 'read at offset', offset, 'size', size)
-      let buffer = (readOnly) ? null : retrieve({
+      let buffer = (writable) ? retrieve({
         did: identity,
         fileIndex,
         offset,
         password
-      })
+      }) : null
       // data is not staged, must retrieve from bc
       if (!buffer) {
         buffer = await deployed.methods.read(hIdentity, fileIndex, offset).call()
@@ -56,7 +56,7 @@ function create({ filename, identity, password }) {
     },
 
     write(req) {
-      if (!readOnly) {
+      if (writable) {
         const { data, offset, size } = req
         debug(filename, 'staged write at offset', offset, 'size', size)
         append({
@@ -71,7 +71,7 @@ function create({ filename, identity, password }) {
     },
 
     async del(req) {
-      if (!readOnly){
+      if (writable){
         const opts = await _getTxOpts()
         await deployed.methods.del(hIdentity).send(opts)
       }

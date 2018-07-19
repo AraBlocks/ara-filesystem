@@ -3,6 +3,7 @@ const { create } = require('../create')
 const {
   kTestOwnerDid,
   kTestOwnerDidNoMethod,
+  kTestDid,
   kPassword
 } = require('./_constants')
 
@@ -32,6 +33,20 @@ test('create() valid id (no method)', async (t) => {
   t.true('object' === typeof resolvedAfs)
 
   t.true(afs === resolvedAfs)
+})
+
+test('create() valid id (readonly)', async (t) => {
+  // create AFS
+  const { afs } = await create({ owner: kTestOwnerDid, password: kPassword })
+  t.true('object' === typeof afs)
+  const { did } = afs
+
+  // create AFS readonly
+  const afsRO = await create({ did })
+  t.true('object' === typeof afsRO.afs)
+
+  const didRO = afsRO.did
+  t.true(did === didRO)
 })
 
 test('create() invalid id (wrong method)', async (t) => {

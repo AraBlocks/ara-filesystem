@@ -67,10 +67,6 @@ async function resolve(did, opts = {}) {
     did = kAidPrefix + did
   }
 
-  if (!opts.cache) {
-    opts = Object.assign(opts, { cache: false })
-  }
-
   let result
   try {
     result = await aid.resolve(did, opts)
