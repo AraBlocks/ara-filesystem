@@ -18,7 +18,6 @@ const {
 const {
   encryptJSON,
   decryptJSON,
-  validateDid,
   isCorrectPassword,
   getDeployedContract,
   validate,
@@ -30,14 +29,12 @@ async function commit({
   password = '',
   price = -1
 } = {}) {
-  if (!password || 'string' !== typeof password) {
-    throw new TypeError('ara-filesystem.commit: Expecting password to be non-empty string')
-  }
-
-  did = validateDid(did)
-
-  if (!(await isCorrectPassword({ did, password }))) {
-    throw new Error('ara-filesystem.create: incorrect password')
+  let result
+  try {
+    result = await validate({ did, password, label: 'commit' })
+    did = result.did
+  } catch (err) {
+    throw err
   }
 
   const path = generateStagedPath(did)
@@ -130,7 +127,13 @@ async function estimateCommitGasCost({
   did = '',
   password = ''
 } = {}) {
-  await validate(did, password, 'commit')
+  let result
+  try {
+    result = await validate({ did, password, label: 'commit' })
+    did = result.did
+  } catch (err) {
+    throw err
+  }
 
   let cost = 0
   try {

@@ -69,14 +69,14 @@ test("loadSecrets() validate returned secrets", async (t) => {
   t.true(null !== crypto && null !== ciphertext)
 })
 
-test("validateDid() validate DID cases", (t) => {
+test("normalize() normalize DID cases", (t) => {
   const shortDid = 'did:ara:1234567890'
-  t.throws(() => util.validateDid(shortDid), Error, "DID must be 64 characters")
+  t.throws(() => util.normalize(shortDid), Error, "DID must be 64 characters")
 
   const didWithoutPrefix = 'did:1234567890'
-  t.throws(() => util.validateDid(didWithoutPrefix), TypeError, "DID is missing ara prefix")
+  t.throws(() => util.normalize(didWithoutPrefix), TypeError, "DID is missing ara prefix")
 
-  t.notThrows(() => util.validateDid(kTestOwnerDid), Error, "DID is not valid")
+  t.notThrows(() => util.normalize(kTestOwnerDid), Error, "DID is not valid")
 })
 
 test("encryptJSON() decryptJSON() valid params", (t) => {
@@ -87,5 +87,10 @@ test("encryptJSON() decryptJSON() valid params", (t) => {
   const decrypted = util.decryptJSON(keystore, 'password')
 
   t.deepEqual(json, JSON.parse(decrypted.toString()))
+})
+
+test("hasDIDMethod(key)", (t) => {
+  t.false(util.hasDIDMethod('1234'))
+  t.true(util.hasDIDMethod('did:ara:1234'))
 })
 

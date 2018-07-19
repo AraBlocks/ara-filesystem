@@ -88,9 +88,3 @@ test("resolve() valid params", async (t) => {
 
   t.is(ddo, afsId.did)
 })
-
-test("hasDIDMethod(key)", (t) => {
-  t.false(aid.hasDIDMethod('1234'))
-  t.true(aid.hasDIDMethod('did:ara:1234'))
-})
-

@@ -28,7 +28,13 @@ async function destroy({
   mnemonic = '',
   password = ''
 } = {}) {
-  await validate(did, password, 'destroy')
+  let result
+  try {
+     result = await validate({ did, password, label: 'destroy' })
+     did = result.did
+  } catch (err) {
+    throw err
+  }
 
   if (!mnemonic || 'string' !== typeof mnemonic) {
     throw new TypeError('Expecting non-empty string for mnemonic')
