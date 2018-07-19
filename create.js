@@ -76,9 +76,9 @@ async function create({
     }
 
     owner = validateDid(owner)
-    const rKeystore = await loadSecrets(kResolverKey)
+    let keystore = await loadSecrets(kResolverKey)
+    const ddo = await aid.resolve(owner, { key: kResolverKey, keystore })
 
-    const ddo = await aid.resolve(owner, { key: kResolverKey, keystore: rKeystore })
     if (null === ddo || 'object' !== typeof ddo) {
       throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
     }
@@ -92,12 +92,13 @@ async function create({
 
     await writeIdentity(afsId)
 
-    const aKeystore = await loadSecrets(kArchiverKey)
-    await aid.archive(afsId, { key: kArchiverKey, keystore: aKeystore })
+    keystore = await loadSecrets(kArchiverKey)
+    await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
-
+    
+    keystore = await loadSecrets(kResolverKey)
     const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore: rKeystore })
 
     if (null == afsDdo || 'object' !== typeof afsDdo) {

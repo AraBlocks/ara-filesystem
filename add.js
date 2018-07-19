@@ -116,7 +116,7 @@ async function add({
     reader.setMaxListeners(0)
     writer.setMaxListeners(0)
     await createPipe({ reader, writer, stats })
-    debug("Successfully added file", path)
+    debug('Successfully added file', path)
   }
 
   async function createPipe({ reader, writer, stats }) {

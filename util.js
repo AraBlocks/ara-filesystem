@@ -1,6 +1,5 @@
 const { secrets } = require('ara-network')
 const { create } = require('ara-identity/did')
-const { resolve } = require('./aid')
 const { web3 } = require('ara-context')()
 const aid = require('./aid')
 
@@ -159,7 +158,7 @@ async function getAfsId(did, mnemonic) {
   const keystore = await loadSecrets(kResolverKey)
   const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
   const owner = getDocumentOwner(afsDdo)
-  return await aid.create(mnemonic, owner)
+  return aid.create(mnemonic, owner)
 }
 
 module.exports = {
