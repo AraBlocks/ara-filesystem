@@ -17,7 +17,7 @@ const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
 
 const {
-  validateDid,
+  validate,
   loadSecrets,
   isCorrectPassword
 } = require('./util')
@@ -48,16 +48,12 @@ async function create({
   let afs
   let mnemonic
   if (did) {
-    did = validateDid(did)
-
-    const keystore = await loadSecrets(kResolverKey)
-    const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
-    if (null === afsDdo || 'object' !== typeof afsDdo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
-    }
-
-    if (!(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
-      throw new Error('ara-filesystem.create: incorrect password')
+    let result
+    try {
+      result = await validate({ did, password, label: 'create' })
+      did = result.did
+    } catch (err) {
+      throw err
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
@@ -71,18 +67,14 @@ async function create({
     })
 
     afs.did = did
-    afs.ddo = afsDdo
+    afs.ddo = result.ddo
   } else if (owner) {
-    owner = validateDid(owner)
-    let keystore = await loadSecrets(kResolverKey)
-    const ddo = await aid.resolve(owner, { key: kResolverKey, keystore })
-
-    if (null === ddo || 'object' !== typeof ddo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
-    }
-
-    if (!(await isCorrectPassword({ owner, password }))) {
-      throw new Error('ara-filesystem.create: incorrect password')
+    let result
+    try {
+      result = await validate({ owner, password, label: 'create' })
+      owner = result.did
+    } catch (err) {
+      throw err
     }
 
     mnemonic = bip39.generateMnemonic()
