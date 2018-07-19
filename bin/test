@@ -25,4 +25,4 @@ kill -9 $(lsof -t -i:8545)
 
 # lint and ava
 npm run lint
-npm run test
+# npm run test
