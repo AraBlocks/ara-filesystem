@@ -15,6 +15,10 @@ const { resolve, join } = require('path')
 
 const kNonDefaultPath = './test-afs'
 
+test.after(async () => {
+  await pify(rimraf)(kNonDefaultPath)
+})
+
 const getAFS = ({ context }) => {
   const { afs } = context
   return afs

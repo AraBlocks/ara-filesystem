@@ -5,6 +5,14 @@ const {
   kTestOwnerDidNoMethod,
   kPassword
 } = require('./_constants')
+const rimraf = require('rimraf')
+const pify = require('pify')
+
+const kNonDefaultPath = './test-afs'
+
+test.after(async () => {
+  await pify(rimraf)(kNonDefaultPath)
+})
 
 test('create() valid id', async (t) => {
   // create AFS
@@ -15,6 +23,20 @@ test('create() valid id', async (t) => {
 
   // resolve AFS
   const { afs: resolvedAfs } = await create({ did, password: kPassword })
+  t.true('object' === typeof resolvedAfs)
+
+  t.true(afs === resolvedAfs)
+})
+
+test('create() valid id, rootPath', async (t) => {
+  // create AFS
+  const { afs } = await create({ owner: kTestOwnerDid, password: kPassword, rootPath: kNonDefaultPath })
+  t.true('object' === typeof afs)
+
+  const { did } = afs
+
+  // resolve AFS
+  const { afs: resolvedAfs } = await create({ did, password: kPassword, rootPath: kNonDefaultPath })
   t.true('object' === typeof resolvedAfs)
 
   t.true(afs === resolvedAfs)
