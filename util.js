@@ -182,7 +182,7 @@ async function validate({
     throw new TypeError(`ara-filesystem${label}: Unable to resolve owner DID`)
   }
 
-  const writable = Boolean(password)
+  const writable = Boolean(password) | Boolean(owner)
   if (writable) {
     if ('string' !== typeof password) {
       throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
