@@ -36,6 +36,7 @@ async function create({
   password = '',
   owner = null,
   did = null,
+  key = null,
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
@@ -58,8 +59,8 @@ async function create({
       throw new Error('ara-filesystem.create: incorrect password')
     }
 
-    const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({ did, pathPrefix, password })
+    const pathPrefix = toHex(blake2b(Buffer.from(did, 'hex')))
+    const drives = await createMultidrive({ did, pathPrefix, password, key })
 
     const path = createAFSKeyPath(did)
 
@@ -106,7 +107,7 @@ async function create({
     }
 
     const kp = keyPair(blake2b(secretKey))
-    const id = toHex(blake2b(Buffer.from(afsDid)))
+    const id = toHex(blake2b(Buffer.from(afsDid, 'hex')))
 
     try {
       // generate AFS key path
@@ -134,7 +135,7 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({ did, pathPrefix, password }) {
+  async function createMultidrive({ did, pathPrefix, password, key }) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
@@ -146,6 +147,7 @@ async function create({
         try {
           const afs = await createCFS({
             id,
+            key,
             path,
             storage: defaultStorage(did, password),
             shallow: true
