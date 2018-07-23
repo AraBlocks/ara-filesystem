@@ -18,7 +18,11 @@ async function estimateSetPriceGasCost({
   password = '',
   price = 0
 } = {}) {
-  await validate(did, password, 'price')
+  try {
+    ({ did } = await validate({ did, password, label: 'commit' }))
+  } catch (err) {
+    throw err
+  }
 
   if (0 > price || 'number' !== typeof price) {
     throw new TypeError('Price should be 0 or positive whole number')
@@ -43,7 +47,11 @@ async function setPrice({
   password = '',
   price = 0,
 } = {}) {
-  await validate(did, password, 'price')
+  try {
+    ({ did } = await validate({ did, password, label: 'commit' }))
+  } catch (err) {
+    throw err
+  }
 
   if (0 > price || 'number' !== typeof price) {
     throw new TypeError('Price should be 0 or positive whole number')
@@ -70,7 +78,11 @@ async function getPrice({
   did = '',
   password = ''
 } = {}) {
-  await validate(did, password)
+  try {
+    ({ did } = await validate({ did, password, label: 'commit' }))
+  } catch (err) {
+    throw err
+  }
 
   const hIdentity = hashIdentity(did)
   const deployed = new web3.eth.Contract(abi, kPriceAddress)

@@ -3,8 +3,7 @@
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
-const { toHex } = require('ara-identity/util')
-const { writeIdentity } = require('ara-identity/util')
+const { toHex, writeIdentity } = require('ara-identity/util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
@@ -17,9 +16,8 @@ const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
 
 const {
-  validateDid,
-  loadSecrets,
-  isCorrectPassword
+  validate,
+  loadSecrets
 } = require('./util')
 
 const {
@@ -48,16 +46,13 @@ async function create({
   let afs
   let mnemonic
   if (did) {
-    did = validateDid(did)
-
-    const keystore = await loadSecrets(kResolverKey)
-    const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
-    if (null === afsDdo || 'object' !== typeof afsDdo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
-    }
-
-    if (!(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
-      throw new Error('ara-filesystem.create: incorrect password')
+    let result
+    try {
+      // semicolon because interpreter doesn't like `)(`
+      result = await validate({ did, password, label: 'create' });
+      ({ did } = result)
+    } catch (err) {
+      throw err
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
@@ -71,18 +66,12 @@ async function create({
     })
 
     afs.did = did
-    afs.ddo = afsDdo
+    afs.ddo = result.ddo
   } else if (owner) {
-    owner = validateDid(owner)
-    let keystore = await loadSecrets(kResolverKey)
-    const ddo = await aid.resolve(owner, { key: kResolverKey, keystore })
-
-    if (null === ddo || 'object' !== typeof ddo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
-    }
-
-    if (!(await isCorrectPassword({ owner, password }))) {
-      throw new Error('ara-filesystem.create: incorrect password')
+    try {
+      ({ owner: did } = await validate({ owner, password, label: 'create' }))
+    } catch (err) {
+      throw err
     }
 
     mnemonic = bip39.generateMnemonic()
@@ -90,7 +79,7 @@ async function create({
 
     await writeIdentity(afsId)
 
-    keystore = await loadSecrets(kArchiverKey)
+    let keystore = await loadSecrets(kArchiverKey)
     await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId

@@ -41,20 +41,6 @@ async function loadSecrets(key) {
   return pub.keystore
 }
 
-function validateDid(did) {
-  if (0 === did.indexOf(kDidPrefix)) {
-    if (0 !== did.indexOf(kAidPrefix)) {
-      throw new TypeError('Expecting a DID URI with an "ara" method.')
-    } else {
-      did = did.substring(kAidPrefix.length)
-      if (64 !== did.length) {
-        throw new Error('DID is not 64 characters')
-      }
-    }
-  }
-  return did
-}
-
 function getDocumentOwner(ddo, shouldValidate = true) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
@@ -70,7 +56,7 @@ function getDocumentOwner(ddo, shouldValidate = true) {
   const suffixLength = kOwnerSuffix.length
   const id = pk.slice(0, pk.length - suffixLength)
 
-  return shouldValidate ? validateDid(id) : id
+  return shouldValidate ? normalize(id) : id
 }
 
 async function isCorrectPassword({
@@ -85,11 +71,11 @@ async function isCorrectPassword({
 
   const { publicKey } = generateKeypair(password)
   let { did: didUri } = create(publicKey)
-  didUri = validateDid(didUri)
+  didUri = normalize(didUri)
 
   let result = true
   if (owner) {
-    owner = validateDid(owner)
+    owner = normalize(owner)
     result = didUri === owner
   } else {
     ddo = ddo || null
@@ -133,21 +119,75 @@ function hashIdentity(did) {
   return blake2b(Buffer.from(did)).toString('hex')
 }
 
-async function validate(did, password, label = '') {
+function normalize(did) {
+  if (hasDIDMethod(did)) {
+    if (0 !== did.indexOf(kAidPrefix)) {
+      throw new TypeError('Expecting a DID URI with an "ara" method.')
+    } else {
+      did = did.substring(kAidPrefix.length)
+      if (64 !== did.length) {
+        throw new Error('DID is not 64 characters')
+      }
+    }
+  }
+  return did
+}
+
+async function validate({
+  password,
+  label = '',
+  did,
+  owner
+} = {}) {
   if (label) {
     label = `.${label}`
   }
+
+  if (did && owner) {
+    throw new Error(`ara-filesystem${label}: Expecting an AFS DID or an owner DID, but not both`)
+  }
+
+  if (owner) {
+    did = owner
+  }
+
   if (!did || 'string' !== typeof did) {
-    throw new TypeError(`ara-filesystem${label}: Expecting valid DID`)
+    throw new TypeError(`ara-filesystem${label}: Expecting non-empty DID`)
+  }
+
+  try {
+    did = normalize(did)
+  } catch (err) {
+    throw err
+  }
+
+  const ddo = await resolve(did)
+
+  if (null === ddo || 'object' !== typeof ddo) {
+    throw new TypeError(`ara-filesystem${label}: Unable to resolve owner DID`)
   }
 
   if (!password || 'string' !== typeof password) {
     throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
   }
 
-  if (!(await isCorrectPassword({ did, password }))) {
+  const passwordCorrect = owner
+    ? await isCorrectPassword({ owner, ddo, password })
+    : await isCorrectPassword({ did, ddo, password })
+  if (!passwordCorrect) {
     throw new Error(`ara-filesystem${label}: Incorrect password`)
   }
+
+  return {
+    did,
+    ddo
+  }
+}
+
+async function resolve(did) {
+  const keystore = await loadSecrets(kResolverKey)
+  const ddo = await aid.resolve(did, { key: kResolverKey, keystore })
+  return ddo
 }
 
 function getDeployedContract(abi, address) {
@@ -161,6 +201,10 @@ async function getAfsId(did, mnemonic) {
   return aid.create(mnemonic, owner)
 }
 
+function hasDIDMethod(did) {
+  return 0 === did.indexOf(kDidPrefix)
+}
+
 module.exports = {
   generateKeypair,
   encrypt,
@@ -169,11 +213,12 @@ module.exports = {
   decryptJSON,
   randomBytes,
   loadSecrets,
-  validateDid,
+  normalize,
   getDocumentOwner,
   isCorrectPassword,
   hashIdentity,
   validate,
   getDeployedContract,
-  getAfsId
+  getAfsId,
+  hasDIDMethod
 }

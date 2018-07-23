@@ -6,7 +6,6 @@ const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const {
   kAidPrefix,
   kOwnerSuffix,
-  kDidPrefix,
   kKeyLength
 } = require('./constants')
 
@@ -15,8 +14,10 @@ async function create(seed, publicKey) {
     throw new TypeError('ara-filesystem.aid: Expecting non-empty string.')
   }
 
-  if ((hasDIDMethod(publicKey) && kKeyLength !== publicKey.slice(kDidPrefix.length).length)
-    || kKeyLength !== publicKey.length) {
+  const { hasDIDMethod } = require('./util')
+
+  if ((hasDIDMethod(publicKey) && kKeyLength !== publicKey.slice(kAidPrefix.length).length)
+    || (!hasDIDMethod(publicKey) && kKeyLength !== publicKey.length)) {
     throw new TypeError('ara-filesystem.aid: Identifier must be 64 chars')
   }
 
@@ -37,6 +38,7 @@ async function create(seed, publicKey) {
     }
     identity = await aid.create({ context, password: seed, did })
   } catch (err) { debug(err.stack || err) }
+
   return identity
 }
 
@@ -62,10 +64,10 @@ async function resolve(did, opts = {}) {
     throw new TypeError('ara-filesystem.aid: DID to resolve must be non-empty string')
   }
 
-  const prefix = did.substring(0, kAidPrefix.length)
-  if (prefix !== kAidPrefix) {
-    did = kAidPrefix + did
-  }
+  const { normalize } = require('./util')
+
+  did = normalize(did)
+  did = kAidPrefix + did
 
   if (!opts.cache) {
     opts = Object.assign(opts, { cache: true })
@@ -79,19 +81,8 @@ async function resolve(did, opts = {}) {
   return result
 }
 
-/**
- * Checks if given key has DID method prefix ('did:ara:')
- * @param  {string}  key
- * @return {Boolean}
- */
-// TODO(cckelly): move all validation for DID to util.js
-function hasDIDMethod(key) {
-  return kDidPrefix === key.slice(0, kDidPrefix.length)
-}
-
 module.exports = {
   archive,
   create,
-  resolve,
-  hasDIDMethod
+  resolve
 }
