@@ -19,7 +19,6 @@ const {
   getDocumentKeyHex,
   loadSecrets,
   validate,
-  loadSecrets
 } = require('./util')
 
 const {
@@ -69,7 +68,7 @@ async function create({
     let result
     try {
       result = await validate({ owner, password, label: 'create' })
-      did = result.did
+      owner = result.did
     } catch (err) {
       throw err
     }
