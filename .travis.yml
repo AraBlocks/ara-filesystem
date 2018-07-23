@@ -2,9 +2,9 @@ language: node_js
 node_js:
   - "8.9.4"
 install:
-  - bash ./bin/travis-install
+  - bash ./scripts/travis-install
 script:
-  - bash ./bin/test
+  - bash ./scripts/test
 cache:
   directories:
     - "node_modules"
