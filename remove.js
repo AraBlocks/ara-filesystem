@@ -17,7 +17,8 @@ async function remove({
     throw new TypeError('ara-filesystem.remove: Password required to continue')
   }
 
-  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths) || paths.length == 0) {
+  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths)
+    || 0 === paths.length) {
     throw new TypeError('ara-filesystem.remove: Expecting one or more filepaths to remove')
   }
 

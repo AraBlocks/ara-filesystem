@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# truffle
+rm -rf build/*
+ganache-cli --gasLimit 500000 2> /dev/null 1> /dev/null &
+sleep 5
+truffle compile
+MIGRATE_OUTPUT="$(truffle migrate --reset --network local)"
+
+# set storage address
+NEW_STORAGE_ADDR="$(echo "$MIGRATE_OUTPUT" | cut -d ':' -f 2 | sed -n 13p)"
+NEW_STORAGE_ADDR="$(echo -e "${NEW_STORAGE_ADDR}" | tr -d '[:space:]')"
+OLD_STORAGE_ADDR="$(cat constants.js | cut -d ':' -f 2 | sed -n 13p | tr -cd '[[:alnum:]]._-')"
+cat constants.js | sed "s/$OLD_STORAGE_ADDR/$NEW_STORAGE_ADDR/g" constants.js | tee constants.js
+
+# set price address
+NEW_PRICE_ADDR="$(echo "$MIGRATE_OUTPUT" | cut -d ':' -f 2 | sed -n 16p)"
+NEW_PRICE_ADDR="$(echo -e "${NEW_PRICE_ADDR}" | tr -d '[:space:]')"
+OLD_PRICE_ADDR="$(cat constants.js | cut -d ':' -f 2 | sed -n 14p | tr -cd '[[:alnum:]]._-')"
+cat constants.js | sed "s/$OLD_PRICE_ADDR/$NEW_PRICE_ADDR/g" constants.js | tee constants.js
+
+kill -9 $(lsof -t -i:8545)
+
+# lint and ava
+npm run lint
+
+# disabled testing for now until all setup can be added to travis-install
+# npm run test
