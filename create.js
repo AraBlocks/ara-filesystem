@@ -3,8 +3,7 @@
 const debug = require('debug')('ara-filesystem:create')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
-const { toHex } = require('ara-identity/util')
-const { writeIdentity } = require('ara-identity/util')
+const { toHex, writeIdentity } = require('ara-identity/util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
@@ -17,10 +16,10 @@ const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
 
 const {
-  validateDid,
   getDocumentKeyHex,
   loadSecrets,
-  isCorrectPassword
+  validate,
+  loadSecrets
 } = require('./util')
 
 const {
@@ -45,21 +44,15 @@ async function create({
   let afs
   let mnemonic
   if (did) {
-    const writable = Boolean(password)
-
-    did = validateDid(did)
-
-    const keystore = await loadSecrets(kResolverKey)
-    const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
-    if (null === afsDdo || 'object' !== typeof afsDdo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve AFS DID')
+    let result
+    try {
+      result = await validate({ did, password, label: 'create' })
+      did = result.did
+    } catch (err) {
+      throw err
     }
 
-    if (writable && !(await isCorrectPassword({ did, ddo: afsDdo, password }))) {
-      throw new Error('ara-filesystem.create: incorrect password')
-    }
-
-    const id = getDocumentKeyHex(afsDdo)
+    const id = getDocumentKeyHex(result.ddo)
     const drives = await createMultidrive({ did: id, password })
     const key = Buffer.from(id, 'hex')
     const path = createAFSKeyPath(id)
@@ -71,22 +64,14 @@ async function create({
     })
 
     afs.did = did
-    afs.ddo = afsDdo
+    afs.ddo = result.ddo
   } else if (owner) {
-    if ('string' !== typeof password || !password) {
-      throw new TypeError('ara-filesystem.create: Expecting non-empty password')
-    }
-
-    owner = validateDid(owner)
-    let keystore = await loadSecrets(kResolverKey)
-    const ddo = await aid.resolve(owner, { key: kResolverKey, keystore })
-
-    if (null === ddo || 'object' !== typeof ddo) {
-      throw new TypeError('ara-filesystem.create: Unable to resolve owner DID')
-    }
-
-    if (!(await isCorrectPassword({ owner, password }))) {
-      throw new Error('ara-filesystem.create: incorrect password')
+    let result
+    try {
+      result = await validate({ owner, password, label: 'create' })
+      did = result.did
+    } catch (err) {
+      throw err
     }
 
     mnemonic = bip39.generateMnemonic()
@@ -94,7 +79,7 @@ async function create({
 
     await writeIdentity(afsId)
 
-    keystore = await loadSecrets(kArchiverKey)
+    let keystore = await loadSecrets(kArchiverKey)
     await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId

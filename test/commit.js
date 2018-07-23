@@ -122,12 +122,6 @@ test("commit() previously cached buffers match blockchain buffers", async (t) =>
 
   buffer = await deployed.methods.read(hIdentity, 1, 160).call()
   t.is(mSig['160'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 224).call()
-  t.is(mSig['224'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 288).call()
-  t.is(mSig['288'], buffer.slice(2))
 })
 
 test("retrieve() offset doesn't exist", (t) => {
