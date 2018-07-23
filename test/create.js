@@ -3,7 +3,6 @@ const { create } = require('../create')
 const {
   kTestOwnerDid,
   kTestOwnerDidNoMethod,
-  kTestDid,
   kPassword
 } = require('./_constants')
 

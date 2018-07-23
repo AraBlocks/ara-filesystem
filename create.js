@@ -1,7 +1,6 @@
 /* eslint-disable no-shadow */
 
 const debug = require('debug')('ara-filesystem:create')
-const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex, writeIdentity } = require('ara-identity/util')
 const { resolve } = require('path')
@@ -43,15 +42,14 @@ async function create({
   let afs
   let mnemonic
   if (did) {
-    let result
+    let ddo
     try {
-      result = await validate({ did, password, label: 'create' })
-      did = result.did
+      ({ did, ddo } = await validate({ did, password, label: 'create' }))
     } catch (err) {
       throw err
     }
 
-    const id = getDocumentKeyHex(result.ddo)
+    const id = getDocumentKeyHex(ddo)
     const drives = await createMultidrive({ did: id, password })
     const key = Buffer.from(id, 'hex')
     const path = createAFSKeyPath(id)
@@ -63,12 +61,10 @@ async function create({
     })
 
     afs.did = did
-    afs.ddo = result.ddo
+    afs.ddo = ddo
   } else if (owner) {
-    let result
     try {
-      result = await validate({ owner, password, label: 'create' })
-      owner = result.did
+      ({ owner: did } = await validate({ owner, password, label: 'create' }))
     } catch (err) {
       throw err
     }
@@ -97,7 +93,7 @@ async function create({
       afs = await createCFS({
         id: afsDid,
         key: publicKey,
-        secretKey: secretKey,
+        secretKey,
         path,
         storage: defaultStorage(afsDid, password),
         shallow: true

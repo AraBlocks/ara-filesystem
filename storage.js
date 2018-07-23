@@ -71,7 +71,7 @@ function create({ filename, identity, password }) {
     },
 
     async del(req) {
-      if (writable){
+      if (writable) {
         const opts = await _getTxOpts()
         await deployed.methods.del(hIdentity).send(opts)
       }

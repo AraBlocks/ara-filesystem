@@ -59,7 +59,7 @@ function getDocumentOwner(ddo, shouldValidate = true) {
   return shouldValidate ? normalize(id) : id
 }
 
-function getDocumentKeyHex(ddo){
+function getDocumentKeyHex(ddo) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
   }
@@ -182,12 +182,12 @@ async function validate({
     throw new TypeError(`ara-filesystem${label}: Unable to resolve owner DID`)
   }
 
-  const writable = Boolean(password) | Boolean(owner)
+  const writable = Boolean(password) || Boolean(owner)
   if (writable) {
     if ('string' !== typeof password) {
       throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
     }
-  
+
     const passwordCorrect = owner
       ? await isCorrectPassword({ owner, ddo, password })
       : await isCorrectPassword({ did, ddo, password })
