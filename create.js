@@ -18,6 +18,7 @@ const { defaultStorage } = require('./storage')
 
 const {
   validateDid,
+  getDocumentKeyHex,
   loadSecrets,
   isCorrectPassword
 } = require('./util')
@@ -36,7 +37,6 @@ async function create({
   password = '',
   owner = null,
   did = null,
-  key = null,
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
@@ -59,13 +59,14 @@ async function create({
       throw new Error('ara-filesystem.create: incorrect password')
     }
 
-    const pathPrefix = toHex(blake2b(Buffer.from(did, 'hex')))
-    const drives = await createMultidrive({ did, pathPrefix, password, key })
-
-    const path = createAFSKeyPath(did)
+    const id = getDocumentKeyHex(afsDdo)
+    const drives = await createMultidrive({ did: id, password })
+    const key = Buffer.from(id, 'hex')
+    const path = createAFSKeyPath(id)
 
     afs = await pify(drives.create)({
-      id: pathPrefix,
+      id,
+      key,
       path
     })
 
@@ -106,16 +107,13 @@ async function create({
       throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
     }
 
-    const kp = keyPair(blake2b(secretKey))
-    const id = toHex(blake2b(Buffer.from(afsDid, 'hex')))
-
     try {
       // generate AFS key path
       const path = createAFSKeyPath(afsDid)
       afs = await createCFS({
-        id,
-        key: kp.publicKey,
-        secretKey: kp.secretKey,
+        id: afsDid,
+        key: publicKey,
+        secretKey: secretKey,
         path,
         storage: defaultStorage(afsDid, password),
         shallow: true
@@ -126,8 +124,8 @@ async function create({
     afs.ddo = afsDdo
 
     // clear buffers
-    kp.publicKey.fill(0)
-    kp.secretKey.fill(0)
+    publicKey.fill(0)
+    secretKey.fill(0)
   }
 
   return {
@@ -135,21 +133,21 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({ did, pathPrefix, password, key }) {
+  async function createMultidrive({ did, password }) {
     await pify(mkdirp)(rc.afs.archive.store)
-    const nodes = resolve(rc.afs.archive.store, pathPrefix)
+    const nodes = resolve(rc.afs.archive.store, did)
     const store = toilet(nodes)
 
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
-        const { id, path } = opts
+        const { id, key, path } = opts
         try {
           const afs = await createCFS({
             id,
             key,
             path,
-            storage: defaultStorage(did, password),
+            storage: defaultStorage(id, password),
             shallow: true
           })
           return done(null, afs)

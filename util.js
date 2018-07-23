@@ -73,6 +73,21 @@ function getDocumentOwner(ddo, shouldValidate = true) {
   return shouldValidate ? validateDid(id) : id
 }
 
+function getDocumentKeyHex(ddo){
+  if (!ddo || null == ddo || 'object' !== typeof ddo) {
+    throw new TypeError('Expecting DDO')
+  }
+
+  let pk
+  if (ddo.publicKey) {
+    pk = ddo.publicKey[0].publicKeyHex
+  } else if (ddo.didDocument) {
+    pk = ddo.didDocument.publicKey[0].publicKeyHex
+  }
+
+  return pk
+}
+
 async function isCorrectPassword({
   did,
   ddo,
@@ -171,6 +186,7 @@ module.exports = {
   loadSecrets,
   validateDid,
   getDocumentOwner,
+  getDocumentKeyHex,
   isCorrectPassword,
   hashIdentity,
   validate,
