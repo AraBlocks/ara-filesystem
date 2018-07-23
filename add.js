@@ -1,21 +1,21 @@
 /* eslint-disable no-await-in-loop */
 
-const debug = require('debug')('ara-filesystem:add')
-const { create } = require('./create')
 const { resolve, join } = require('path')
-const fs = require('fs')
 const { stat, access } = require('fs')
-const pify = require('pify')
 const isDirectory = require('is-directory')
-const isFile = require('is-file')
-
+const { create } = require('./create')
 const ignored = require('./lib/ignore')
+const isFile = require('is-file')
+const debug = require('debug')('ara-filesystem:add')
+const pify = require('pify')
+const fs = require('fs')
 
 async function add({
-  did = '',
-  paths = [],
   password = '',
-  force
+  rootPath,
+  paths = [],
+  force,
+  did = '',
 } = {}) {
   if (null === did || 'string' !== typeof did || !did) {
     throw new TypeError('ara-filesystem.add: Expecting non-empty did.')
@@ -32,7 +32,7 @@ async function add({
 
   let afs
   try {
-    ({ afs } = await create({ did, password }))
+    ({ afs } = await create({ rootPath, did, password }))
   } catch (err) {
     throw err
   }
@@ -50,7 +50,7 @@ async function add({
           // add local directory to AFS at path
           try {
             debug('Adding directory %s', path)
-            await createDirectory(path)
+            await createDirectory(path, rootPath)
           } catch (err) {
             debug('createDirectory: ', err.stack)
             debug('E: Failed to add path %s', path)
@@ -61,7 +61,7 @@ async function add({
         if (await pify(isFile)(path)) {
           try {
             debug('Adding file %s', path)
-            await addFile(path)
+            await addFile(path, rootPath)
           } catch (err) {
             debug('addFile:', err.stack)
             debug('E: Failed to add path %s', path)
@@ -73,9 +73,9 @@ async function add({
     }
   }
 
-  async function createDirectory(path) {
+  async function createDirectory(path, dest) {
     const src = resolve(path)
-    const dest = src.replace(process.cwd(), afs.HOME)
+    dest = dest || src.replace(process.cwd(), afs.HOME)
     await afs.mkdirp(dest)
 
     const files = await fs.readdirSync(path)
@@ -86,13 +86,13 @@ async function add({
     await addAll(files)
   }
 
-  async function addFile(path) {
+  async function addFile(path, dest) {
     if (!force && ignored.ignores(path)) {
       throw new Error(`ignore: ${path} is ignored. Use '--force' to force add file.`)
     }
     // paths
     const src = resolve(path)
-    const dest = src.replace(process.cwd(), afs.HOME)
+    dest = src.replace(process.cwd(), afs.HOME)
 
     // file stats
     const stats = await pify(stat)(src)
@@ -127,7 +127,7 @@ async function add({
 
     // work
     // eslint-disable-next-line no-shadow
-    const result = await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       writer.on('finish', onfinish)
       writer.on('debug', ondebug)
 
@@ -155,7 +155,6 @@ async function add({
         reject(err)
       }
     })
-    return result
   }
 }
 

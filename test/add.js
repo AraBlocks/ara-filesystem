@@ -12,6 +12,12 @@ const isDirectory = require('is-directory')
 const pify = require('pify')
 const { resolve, join } = require('path')
 
+const kNonDefaultPath = './test-afs'
+
+test.after(async () => {
+  await pify(rimraf)(kNonDefaultPath)
+})
+
 const getAFS = ({ context }) => {
   const { afs } = context
   return afs
@@ -22,7 +28,14 @@ test.beforeEach(async (t) => {
     owner: kTestOwnerDid,
     password: kPassword
   })
-  t.context = { afs }
+
+  const { afs: nonDefaultAFS } = await create({
+    owner: kTestOwnerDid,
+    rootPath: kNonDefaultPath,
+    password: kPassword
+  })
+
+  t.context = { afs, nonDefaultAFS }
 })
 
 test.serial('add() valid did, valid password, no paths', async (t) => {
@@ -42,6 +55,23 @@ test.serial('add() valid did, valid password, valid path (1)', async (t) => {
   await add({
     did,
     paths,
+    password: kPassword
+  })
+
+  const buf = await afs.readFile(paths[0])
+  t.is(Buffer.compare(buf, fs.readFileSync(paths[0])), 0)
+})
+
+test.serial('add() valid did, valid password, valid path, valid rootPath', async (t) => {
+  const afs = t.context.nonDefaultAFS
+  const { did } = afs
+
+  const paths = [ './index.js' ]
+
+  await add({
+    did,
+    paths,
+    rootPath: kNonDefaultPath,
     password: kPassword
   })
 

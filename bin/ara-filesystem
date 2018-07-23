@@ -48,14 +48,18 @@ const { argv } = program
     type: 'boolean',
     describe: 'Force operation',
   })
-  .command('create <owner>', "Create AFS with given identity", (program) => {
+  .command('create <owner> [path]', "Create AFS with given identity", (program) => {
     program
       .positional('owner', {
         type: 'string',
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
+      .positional('path', {
+        type: 'string',
+        describe: "Where the AFS files should be located"
+      })
   }, oncreate)
-  .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
+  .command('add [ -p <path> ] <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
     program
       .positional('pathspec', {
         type: 'string',
@@ -65,8 +69,12 @@ const { argv } = program
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
       })
+      .option('path', {
+        alias: 'p',
+        describe: "Where the AFS is located"
+      })
   }, onadd)
-  .command('remove <did> <pathspec...>', "Remove files or directories from an AFS", (program) => {
+  .command('remove [ -p <path> ] <did> <pathspec...>', "Remove files or directories from an AFS", (program) => {
     program
       .positional('pathspec', {
         type: 'string',
@@ -76,12 +84,20 @@ const { argv } = program
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
       })
+      .option('path', {
+        alias: 'p',
+        describe: "Where the AFS is located"
+      })
   }, onremove)
-  .command('history <did>', "Retrieve the revision history of this AFS", (program) => {
+  .command('history <did> [ -p <path> ]', "Retrieve the revision history of this AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .option('path', {
+        alias: 'p',
+        describe: "Where the AFS is located"
       })
   }, onhistory)
   .command('commit <did>', "Push local staged AFS changes to the Ethereum blockchain and DCDN", (program) => {
@@ -145,6 +161,7 @@ void async function main() {
 
 async function oncreate(argv) {
   let owner = argv.owner
+  const rootPath = argv.path
 
   if (null == owner) {
     onfatal(new Error("Missing AFS owner DID. See 'afs create --help'."))
@@ -162,7 +179,7 @@ async function oncreate(argv) {
 
   let arafs
   try {
-    arafs = await afs.create({ owner, password })
+    arafs = await afs.create({ owner, password, rootPath })
   } catch (err) { onfatal(err) }
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
@@ -175,6 +192,8 @@ async function oncreate(argv) {
 
 async function onhistory(argv) {
   let did = argv.did
+  const rootPath = argv.path
+
   if (null == did) {
     onfatal(new Error("Missing AFS DID. See 'afs add --help'."))
   }
@@ -207,7 +226,9 @@ async function onhistory(argv) {
   try {
     const arafs = await afs.create({ 
       did, 
-      password })
+      password,
+      rootPath,
+    })
     const stream = table.createStream(tableOpts)
 
     arafs.afs.history(argv.partition || arafs.afs.HOME)
@@ -236,6 +257,7 @@ async function onhistory(argv) {
 async function onadd(argv) {
   let [ ...paths ] = argv.pathspec
   let did = argv.did
+  const rootPath = argv.path
 
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs add --help'.")) }
   if (!paths || !paths.length) {
@@ -251,6 +273,7 @@ async function onadd(argv) {
     await afs.add({
       did,
       paths,
+      rootPath,
       password })
     info("file(s) successfully added")
   } catch (err) {
@@ -261,6 +284,7 @@ async function onadd(argv) {
 async function onremove(argv) {
   let [ ...paths ] = argv.pathspec
   let did = argv.did
+  const rootPath = argv.path
 
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
   if (!paths || !paths.length) {
@@ -276,6 +300,7 @@ async function onremove(argv) {
     await afs.remove({
       did,
       paths,
+      rootPath,
       password })
     info("file(s) successfully removed")
   } catch (err) {

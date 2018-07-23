@@ -1,13 +1,14 @@
 /* eslint-disable no-await-in-loop */
 
-const debug = require('debug')('ara-filesystem:remove')
-const { create } = require('./create')
 const { resolve, join } = require('path')
+const { create } = require('./create')
+const debug = require('debug')('ara-filesystem:remove')
 
 async function remove({
   did = '',
   paths = [],
-  password = ''
+  password = '',
+  rootPath,
 } = {}) {
   if (null == did || 'string' !== typeof did || !did) {
     throw new TypeError('ara-filesystem.remove: Expecting non-empty did.')
@@ -24,7 +25,7 @@ async function remove({
 
   let afs
   try {
-    ({ afs } = await create({ did, password }))
+    ({ afs } = await create({ rootPath, did, password }))
   } catch (err) {
     throw err
   }

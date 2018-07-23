@@ -1,19 +1,19 @@
 /* eslint-disable no-shadow */
 
-const debug = require('debug')('ara-filesystem:create')
+const { toHex, writeIdentity } = require('ara-identity/util')
 const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
-const { toHex, writeIdentity } = require('ara-identity/util')
-const { resolve } = require('path')
-const { createCFS } = require('cfsnet/create')
-const aid = require('./aid')
-const bip39 = require('bip39')
-const multidrive = require('multidrive')
-const pify = require('pify')
-const mkdirp = require('mkdirp')
-const rc = require('./rc')()
-const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
+const { createCFS } = require('cfsnet/create')
+const { resolve } = require('path')
+const multidrive = require('multidrive')
+const mkdirp = require('mkdirp')
+const toilet = require('toiletdb')
+const bip39 = require('bip39')
+const debug = require('debug')('ara-filesystem:create')
+const pify = require('pify')
+const aid = require('./aid')
+const rc = require('./rc')()
 
 const {
   validate,
@@ -32,6 +32,7 @@ const {
  */
 async function create({
   password = '',
+  rootPath,
   owner = null,
   did = null,
 }) {
@@ -56,13 +57,13 @@ async function create({
     }
 
     const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({ did, pathPrefix, password })
+    const drives = await createMultidrive({ rootPath, did, pathPrefix, password })
 
     const path = createAFSKeyPath(did)
 
     afs = await pify(drives.create)({
       id: pathPrefix,
-      path
+      path: rootPath || path,
     })
 
     afs.did = did
@@ -102,7 +103,7 @@ async function create({
         id,
         key: kp.publicKey,
         secretKey: kp.secretKey,
-        path,
+        path: rootPath || path,
         storage: defaultStorage(afsDid, password),
         shallow: true
       })
@@ -121,9 +122,9 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({ did, pathPrefix, password }) {
-    await pify(mkdirp)(rc.afs.archive.store)
-    const nodes = resolve(rc.afs.archive.store, pathPrefix)
+  async function createMultidrive({ rootPath, did, pathPrefix, password }) {
+    await pify(mkdirp)(rootPath || rc.afs.archive.store)
+    const nodes = resolve(rootPath || rc.afs.archive.store, pathPrefix)
     const store = toilet(nodes)
 
     const drives = await pify(multidrive)(
