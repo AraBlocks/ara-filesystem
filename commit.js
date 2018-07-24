@@ -218,7 +218,7 @@ function _getFilenameByIndex(index) {
     return kMetadataTreeName
   } else if (index === kMetadataSignaturesIndex) {
     return kMetadataSignaturesName
-  } 
+  }
   debug('index not recognized', index)
   return null
 }
