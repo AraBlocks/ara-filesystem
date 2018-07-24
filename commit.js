@@ -20,7 +20,7 @@ const {
   decryptJSON,
   getDeployedContract,
   validate,
-  hashIdentity
+  hash
 } = require('./util')
 
 async function commit({
@@ -45,7 +45,7 @@ async function commit({
   const accounts = await web3.eth.getAccounts()
   const deployed = getDeployedContract(abi, kStorageAddress)
   const { resolveBufferIndex } = require('./storage')
-  const hIdentity = hashIdentity(did)
+  const hIdentity = hash(did)
 
   const contentsLength = Object.keys(contents).length
   for (let i = 0; i < contentsLength; i++) {
@@ -132,7 +132,7 @@ async function estimateCommitGasCost({
 
   let cost = 0
   try {
-    const hIdentity = hashIdentity(did)
+    const hIdentity = hash(did)
     const { resolveBufferIndex } = require('./storage')
     const deployed = getDeployedContract(abi, kStorageAddress)
 

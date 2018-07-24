@@ -16,7 +16,8 @@ const { defaultStorage } = require('./storage')
 
 const {
   validate,
-  loadSecrets
+  loadSecrets,
+  hash
 } = require('./util')
 
 const {
@@ -54,7 +55,7 @@ async function create({
       throw err
     }
 
-    const pathPrefix = toHex(blake2b(Buffer.from(did, 'hex')))
+    const pathPrefix = hash(did)
     const drives = await createMultidrive({ did, pathPrefix, password })
 
     const path = createAFSKeyPath(did)
@@ -92,7 +93,7 @@ async function create({
     }
 
     const kp = keyPair(blake2b(secretKey))
-    const id = toHex(blake2b(Buffer.from(afsDid, 'hex')))
+    const id = hash(afsDid)
 
     try {
       // generate AFS key path

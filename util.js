@@ -1,5 +1,6 @@
 const { secrets } = require('ara-network')
 const { web3 } = require('ara-context')()
+const { toHex } = require('ara-identity/util')
 const aid = require('./aid')
 const fs = require('fs')
 const path = require('path')
@@ -118,8 +119,8 @@ function decryptJSON(keystore, password) {
   return decryptedJSON
 }
 
-function hashIdentity(did) {
-  return blake2b(Buffer.from(did)).toString('hex')
+function hash(str, encoding = 'hex') {
+  return toHex(blake2b(Buffer.from(str, encoding)))
 }
 
 function normalize(did = '') {
@@ -221,7 +222,7 @@ module.exports = {
   normalize,
   getDocumentOwner,
   isCorrectPassword,
-  hashIdentity,
+  hash,
   validate,
   getDeployedContract,
   getAfsId,

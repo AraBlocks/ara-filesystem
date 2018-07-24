@@ -8,7 +8,7 @@ const {
 } = require('./constants')
 
 const {
-  hashIdentity,
+  hash,
   validate,
   getDeployedContract
 } = require('./util')
@@ -30,7 +30,7 @@ async function estimateSetPriceGasCost({
 
   let cost
   try {
-    const hIdentity = hashIdentity(did)
+    const hIdentity = hash(did)
     const deployed = getDeployedContract(abi, kPriceAddress)
     cost = await deployed.methods
       .setPrice(hIdentity, price, kStorageAddress)
@@ -58,7 +58,7 @@ async function setPrice({
   }
 
   const accounts = await web3.eth.getAccounts()
-  const hIdentity = hashIdentity(did)
+  const hIdentity = hash(did)
   const deployed = getDeployedContract(abi, kPriceAddress)
 
   try {
@@ -84,7 +84,7 @@ async function getPrice({
     throw err
   }
 
-  const hIdentity = hashIdentity(did)
+  const hIdentity = hash(did)
   const deployed = new web3.eth.Contract(abi, kPriceAddress)
   const result = await deployed.methods.getPrice(hIdentity).call()
   debug('price for %s: %d', hIdentity, result)

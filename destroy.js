@@ -14,7 +14,7 @@ const {
 
 const {
   validate,
-  hashIdentity,
+  hash,
   getAfsId
 } = require('./util')
 
@@ -70,7 +70,7 @@ async function destroy({
 
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
   const accounts = await web3.eth.getAccounts()
-  const hIdentity = hashIdentity(did)
+  const hIdentity = hash(did)
 
   try {
     // mark blockchain buffers invalid
