@@ -64,6 +64,21 @@ function getDocumentOwner(ddo, shouldValidate = true) {
   return shouldValidate ? normalize(id) : id
 }
 
+function getDocumentKeyHex(ddo) {
+  if (!ddo || null == ddo || 'object' !== typeof ddo) {
+    throw new TypeError('Expecting DDO')
+  }
+
+  let pk
+  if (ddo.publicKey) {
+    pk = ddo.publicKey[0].publicKeyHex
+  } else if (ddo.didDocument) {
+    pk = ddo.didDocument.publicKey[0].publicKeyHex
+  }
+
+  return pk
+}
+
 async function isCorrectPassword({
   ddo = {},
   password = ''
@@ -175,13 +190,16 @@ async function validate({
     throw new TypeError(`ara-filesystem${label}: Unable to resolve owner DID`)
   }
 
-  if (!password || 'string' !== typeof password) {
-    throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
-  }
+  const writable = Boolean(password) || Boolean(owner)
+  if (writable) {
+    if ('string' !== typeof password) {
+      throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
+    }
 
-  const passwordCorrect = await isCorrectPassword({ ddo, password })
-  if (!passwordCorrect) {
-    throw new Error(`ara-filesystem${label}: Incorrect password`)
+    const passwordCorrect = await isCorrectPassword({ ddo, password })
+    if (!passwordCorrect) {
+      throw new Error(`ara-filesystem${label}: Incorrect password`)
+    }
   }
 
   return {
@@ -221,6 +239,7 @@ module.exports = {
   loadSecrets,
   normalize,
   getDocumentOwner,
+  getDocumentKeyHex,
   isCorrectPassword,
   hash,
   validate,

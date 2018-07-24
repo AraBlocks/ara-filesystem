@@ -55,6 +55,19 @@ test('create() valid id (no method)', async (t) => {
   t.true(afs === resolvedAfs)
 })
 
+test('create() valid id (readonly)', async (t) => {
+  // create AFS
+  const { afs } = await create({ owner: kTestOwnerDid, password: kPassword })
+  t.true('object' === typeof afs)
+  const { did } = afs
+
+  // resolve AFS readonly
+  const { afs: resolvedAfs } = await create({ did })
+  t.true('object' === typeof resolvedAfs)
+
+  t.true(afs === resolvedAfs)
+})
+
 test('create() invalid id (wrong method)', async (t) => {
   const idWrongMethod = `did:littlstar:${kTestOwnerDidNoMethod}`
 
@@ -88,7 +101,6 @@ test('create() null id', async (t) => {
 
 test('create() no password', async (t) => {
   await t.throws(create({ owner: kTestOwnerDid }), TypeError, 'ara-filesystem.create: Expecting non-empty password.')
-  await t.throws(create({ did: kTestOwnerDid }), TypeError, 'ara-filesystem.create: Expecting non-empty password.')
 })
 
 test('create() incorrect password', async (t) => {
