@@ -17,7 +17,6 @@ const {
   getDocumentKeyHex,
   loadSecrets,
   validate,
-  loadSecrets,
   hash
 } = require('./util')
 
@@ -52,6 +51,7 @@ async function create({
 
     const id = getDocumentKeyHex(ddo)
     const drives = await createMultidrive({ did: id, password })
+    const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
 
     afs = await pify(drives.create)({
