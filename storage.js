@@ -10,16 +10,11 @@ const { hash } = require('./util')
 
 const {
   kStorageAddress,
-  kFileMappings
+  kMetadataTreeIndex,
+  kMetadataSignaturesIndex,
+  kMetadataTreeName: mTreeName,
+  kMetadataSignaturesName: mSigName
 } = require('./constants')
-
-const {
-  kMetadataTree,
-  kMetadataSignatures
-} = kFileMappings
-
-const { name: mTreeName } = kMetadataTree
-const { name: mSigName } = kMetadataSignatures
 
 function defaultStorage(identity, password) {
   return (filename, drive, path) => {
@@ -107,11 +102,9 @@ function resolveBufferIndex(path) {
 
   let index = -1
   if (mTreeName === path) {
-    const { index: i } = kMetadataTree
-    index = i
+    index = kMetadataTreeIndex
   } else if (mSigName === path) {
-    const { index: i } = kMetadataSignatures
-    index = i
+    index = kMetadataSignaturesIndex
   }
   return index
 }

@@ -10,7 +10,10 @@ const { setPrice } = require('./price')
 const { abi } = require('./build/contracts/Storage.json')
 
 const {
-  kFileMappings,
+  kMetadataTreeName,
+  kMetadataTreeIndex,
+  kMetadataSignaturesName,
+  kMetadataSignaturesIndex,
   kStagingFile,
   kStorageAddress
 } = require('./constants')
@@ -198,7 +201,7 @@ function _makeStagedFile(path) {
   try {
     fs.mkdirSync(dirname(path))
   } catch (err) {
-    debug('could not make dir at', path)
+    debug('could not make dir at', path, 'err', err)
   }
 }
 
@@ -211,8 +214,13 @@ async function _deleteStagedFile(path) {
 }
 
 function _getFilenameByIndex(index) {
-  const key = Object.keys(kFileMappings).find(k => kFileMappings[k].index === index)
-  return kFileMappings[key].name
+  if (index === kMetadataTreeIndex) {
+    return kMetadataTreeName
+  } else if (index === kMetadataSignaturesIndex) {
+    return kMetadataSignaturesName
+  } 
+  debug('index not recognized', index)
+  return null
 }
 
 module.exports = {
