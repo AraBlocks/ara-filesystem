@@ -2,9 +2,14 @@ const { secrets } = require('ara-network')
 const { create } = require('ara-identity/did')
 const { web3 } = require('ara-context')()
 const aid = require('./aid')
+const fs = require('fs')
+const path = require('path')
+const pify = require('pify')
+const { createIdentityKeyPath } = require('./key-path')
 
 const {
-  blake2b, keyPair,
+  blake2b, 
+  keyPair,
   encrypt: cryptoEncrypt,
   decrypt: cryptoDecrypt,
   randomBytes: cryptoRandomBytes
@@ -69,24 +74,25 @@ async function isCorrectPassword({
     throw new TypeError('Password must be non-empty string.')
   }
 
-  const { publicKey } = generateKeypair(password)
-  let { did: didUri } = create(publicKey)
-  didUri = normalize(didUri)
-
-  let result = true
-  if (owner) {
-    owner = normalize(owner)
-    result = didUri === owner
-  } else {
-    ddo = ddo || null
-    if (!ddo) {
-      const keystore = await loadSecrets(kResolverKey)
-      ddo = await aid.resolve(did, { key: kResolverKey, keystore })
-    }
-    const ddoOwner = getDocumentOwner(ddo)
-    result = didUri === ddoOwner
+  if (!ddo || 'object' !== typeof ddo && 0 < ddo.publicKey.length) {
+    throw new TypeError('Expecting DDO to be object with valid publicKey array.')
   }
-  return result
+
+  const { publicKeyHex } = ddo.publicKey[0]
+
+  password = blake2b(Buffer.from(password))
+  const identityPath = path.resolve(createIdentityKeyPath(ddo), 'keystore/ara')
+
+  let secretKey
+  try {
+    const keys = JSON.parse(await pify(fs.readFile)(identityPath, 'utf8'))
+    secretKey = cryptoDecrypt(keys, { key: password.slice(0, 16) })
+  } catch (err) {
+    return false
+  }
+
+  const publicKey = secretKey.slice(32).toString('hex')
+  return publicKeyHex === publicKey
 }
 
 function encryptJSON(json, password) {
@@ -171,14 +177,13 @@ async function validate({
     throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
   }
 
-  // TODO(cckelly): skip for now
-  // const passwordCorrect = owner
-  //   ? await isCorrectPassword({ owner, ddo, password })
-  //   : await isCorrectPassword({ did, ddo, password })
+  const passwordCorrect = owner
+    ? await isCorrectPassword({ owner, ddo, password })
+    : await isCorrectPassword({ did, ddo, password })
 
-  // if (!passwordCorrect) {
-  //   throw new Error(`ara-filesystem${label}: Incorrect password`)
-  // }
+  if (!passwordCorrect) {
+    throw new Error(`ara-filesystem${label}: Incorrect password`)
+  }
 
   return {
     did,

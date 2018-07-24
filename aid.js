@@ -12,7 +12,7 @@ const {
 async function create({
   password = '',
   owner = '',
-  mnemonic = ''
+  mnemonic
 } = {}) {
   if (null == owner || 'string' !== typeof owner) {
     throw new TypeError('ara-filesystem.aid: Expecting non-empty string.')
