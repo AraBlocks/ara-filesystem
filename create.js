@@ -7,7 +7,6 @@ const { toHex, writeIdentity } = require('ara-identity/util')
 const { resolve } = require('path')
 const { createCFS } = require('cfsnet/create')
 const aid = require('./aid')
-const bip39 = require('bip39')
 const multidrive = require('multidrive')
 const pify = require('pify')
 const mkdirp = require('mkdirp')
@@ -55,7 +54,7 @@ async function create({
       throw err
     }
 
-    const pathPrefix = toHex(blake2b(Buffer.from(did)))
+    const pathPrefix = toHex(blake2b(Buffer.from(did, 'hex')))
     const drives = await createMultidrive({ did, pathPrefix, password })
 
     const path = createAFSKeyPath(did)
@@ -74,9 +73,8 @@ async function create({
       throw err
     }
 
-    mnemonic = bip39.generateMnemonic()
-    const afsId = await aid.create(mnemonic, owner)
-
+    const afsId = await aid.create({ password, owner });
+    ({mnemonic} = afsId)
     await writeIdentity(afsId)
 
     let keystore = await loadSecrets(kArchiverKey)
@@ -93,7 +91,7 @@ async function create({
     }
 
     const kp = keyPair(blake2b(secretKey))
-    const id = toHex(blake2b(Buffer.from(afsDid)))
+    const id = toHex(blake2b(Buffer.from(afsDid, 'hex')))
 
     try {
       // generate AFS key path

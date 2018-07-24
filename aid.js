@@ -9,23 +9,27 @@ const {
   kKeyLength
 } = require('./constants')
 
-async function create(seed, publicKey) {
-  if (null == publicKey || 'string' !== typeof publicKey) {
+async function create({
+  password = '',
+  owner = '',
+  mnemonic = ''
+} = {}) {
+  if (null == owner || 'string' !== typeof owner) {
     throw new TypeError('ara-filesystem.aid: Expecting non-empty string.')
   }
 
   const { hasDIDMethod } = require('./util')
 
-  if ((hasDIDMethod(publicKey) && kKeyLength !== publicKey.slice(kAidPrefix.length).length)
-    || (!hasDIDMethod(publicKey) && kKeyLength !== publicKey.length)) {
-    throw new TypeError('ara-filesystem.aid: Identifier must be 64 chars')
+  if ((hasDIDMethod(owner) && kKeyLength !== owner.slice(kAidPrefix.length).length)
+    || (!hasDIDMethod(owner) && kKeyLength !== owner.length)) {
+    throw new TypeError('ara-filesystem.aid: Owner identifier must be 64 chars')
   }
 
-  if (null == seed || 'string' !== typeof seed) {
-    throw new Error('ara-filesystem.aid: Expecting seed of type string.')
+  if (null == password || 'string' !== typeof password) {
+    throw new Error('ara-filesystem.aid: Expecting password to be non-empty string.')
   }
 
-  publicKey += kOwnerSuffix
+  owner += kOwnerSuffix
 
   let identity
   try {
@@ -33,10 +37,10 @@ async function create(seed, publicKey) {
       authentication:
       {
         authenticationType: kEd25519VerificationKey2018,
-        authenticationKey: publicKey
+        authenticationKey: owner
       }
     }
-    identity = await aid.create({ context, password: seed, did })
+    identity = await aid.create({ context, password, did, mnemonic })
   } catch (err) { debug(err.stack || err) }
 
   return identity

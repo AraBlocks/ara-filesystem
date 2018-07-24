@@ -171,12 +171,14 @@ async function validate({
     throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
   }
 
-  const passwordCorrect = owner
-    ? await isCorrectPassword({ owner, ddo, password })
-    : await isCorrectPassword({ did, ddo, password })
-  if (!passwordCorrect) {
-    throw new Error(`ara-filesystem${label}: Incorrect password`)
-  }
+  // TODO(cckelly): skip for now
+  // const passwordCorrect = owner
+  //   ? await isCorrectPassword({ owner, ddo, password })
+  //   : await isCorrectPassword({ did, ddo, password })
+
+  // if (!passwordCorrect) {
+  //   throw new Error(`ara-filesystem${label}: Incorrect password`)
+  // }
 
   return {
     did,
@@ -194,11 +196,11 @@ function getDeployedContract(abi, address) {
   return new web3.eth.Contract(abi, address)
 }
 
-async function getAfsId(did, mnemonic) {
+async function getAfsId(did, mnemonic, password) {
   const keystore = await loadSecrets(kResolverKey)
   const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
   const owner = getDocumentOwner(afsDdo)
-  return aid.create(mnemonic, owner)
+  return aid.create({ mnemonic, owner, password })
 }
 
 function hasDIDMethod(did) {
