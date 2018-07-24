@@ -14,6 +14,10 @@ async function create({
   owner = '',
   mnemonic
 } = {}) {
+  if (null == password || 'string' !== typeof password) {
+    throw new TypeError('ara-filesystem.aid: Expecting password to be non-empty string.')
+  }
+
   if (null == owner || 'string' !== typeof owner) {
     throw new TypeError('ara-filesystem.aid: Expecting non-empty string.')
   }
@@ -23,10 +27,6 @@ async function create({
   if ((hasDIDMethod(owner) && kKeyLength !== owner.slice(kAidPrefix.length).length)
     || (!hasDIDMethod(owner) && kKeyLength !== owner.length)) {
     throw new TypeError('ara-filesystem.aid: Owner identifier must be 64 chars')
-  }
-
-  if (null == password || 'string' !== typeof password) {
-    throw new Error('ara-filesystem.aid: Expecting password to be non-empty string.')
   }
 
   owner += kOwnerSuffix
@@ -40,7 +40,12 @@ async function create({
         authenticationKey: owner
       }
     }
-    identity = await aid.create({ context, password, did, mnemonic })
+    identity = await aid.create({
+      context,
+      password,
+      did,
+      mnemonic
+    })
   } catch (err) { debug(err.stack || err) }
 
   return identity

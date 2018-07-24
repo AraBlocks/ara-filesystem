@@ -1,28 +1,43 @@
 /* eslint-disable no-await-in-loop */
 
 const { add } = require('../add')
+const aid = require('ara-identity')
+const { writeIdentity } = require('ara-identity/util')
 const { create } = require('../create')
 const { remove } = require('../remove')
 const test = require('ava')
-const {
-  kTestOwnerDid,
-  kPassword
-} = require('./_constants')
 const fs = require('fs')
 const isDirectory = require('is-directory')
 const pify = require('pify')
+const context = require('ara-context')()
 const { resolve, join } = require('path')
 
-const getAFS = ({ context }) => {
-  const { afs } = context
+const {
+  kPassword: password
+} = require('./_constants')
+
+const getAFS = (t) => {
+  const { afs } = t.context
   return afs
 }
 
+test.before(async (t) => {
+  const identity = await aid.create({ context, password })
+  await writeIdentity(identity)
+  let { publicKey } = identity
+  publicKey = publicKey.toString('hex')
+  t.context = { did: publicKey }
+})
+
 test.beforeEach(async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const { did } = t.context
+  let afs
+  try {
+    // eslint-disable-next-line semi
+    ({ afs } = await create({ owner: did, password }));
+  } catch (err) {
+    console.log(err)
+  }
   t.context = { afs }
 })
 
@@ -32,7 +47,7 @@ test.serial('remove() valid did, valid password, no paths', async (t) => {
 
   await t.throws(remove({
     did,
-    password: kPassword
+    password
   }), TypeError, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
 })
 
@@ -45,13 +60,13 @@ test.serial('remove() valid did, valid password, valid path (1)', async (t) => {
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await remove({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await t.throws(afs.access(paths[0]), Error, '')
@@ -66,13 +81,13 @@ test.serial('remove() valid did, valid password, valid path (3)', async (t) => {
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await remove({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   for (const path of paths) {
@@ -89,13 +104,13 @@ test.serial('remove() valid did, valid password, valid directory (1, not nested)
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await remove({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   t.true(await allFilesUnlinked(afs, paths[0]))
@@ -110,13 +125,13 @@ test.serial('remove() valid did, valid password, valid directory (1, nested)', a
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await remove({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   t.true(await allFilesUnlinked(afs, paths[0]))
@@ -131,13 +146,13 @@ test.serial('remove() valid did, valid password, valid directory (2, nested)', a
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await remove({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   t.true(await allFilesUnlinked(afs, paths[0]))
@@ -153,7 +168,7 @@ test.serial('remove() valid did, valid password, invalid directory (1)', async (
   await t.notThrows(remove({
     did,
     paths,
-    password: kPassword
+    password
   }))
 })
 
@@ -166,13 +181,13 @@ test.serial('remove() valid did, valid password, invalid directory (1), valid di
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await t.notThrows(remove({
     did,
     paths,
-    password: kPassword
+    password
   }))
 
   t.true(await allFilesUnlinked(afs, paths[1]))
@@ -187,7 +202,7 @@ test.serial('remove() valid did, valid password, invalid path (1)', async (t) =>
   await t.notThrows(remove({
     did,
     paths,
-    password: kPassword
+    password
   }))
 
   await t.throws(afs.access(paths[0]), Error, '')
@@ -202,13 +217,13 @@ test.serial('remove() valid did, valid password, invalid path (1), valid path (1
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await t.notThrows(remove({
     did,
     paths,
-    password: kPassword
+    password
   }))
 
   for (const path of paths) {
@@ -255,7 +270,7 @@ test.serial('remove() valid did, invalid password, valid path (2)', async (t) =>
 test.serial('remove() invalid did, valid password, no paths', async (t) => {
   await t.throws(remove({
     did: 'invaliddid',
-    password: kPassword
+    password
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
@@ -265,7 +280,7 @@ test.serial('remove() invalid did, valid password, valid path (1)', async (t) =>
   await t.throws(remove({
     did: 'invaliddid',
     paths,
-    password: kPassword
+    password
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
@@ -302,7 +317,7 @@ test.serial('remove() invalid did, valid password, valid path (1), invalid path 
   await t.throws(remove({
     did: 'invaliddid',
     paths,
-    password: kPassword
+    password
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 

@@ -1,5 +1,4 @@
 const { secrets } = require('ara-network')
-const { create } = require('ara-identity/did')
 const { web3 } = require('ara-context')()
 const aid = require('./aid')
 const fs = require('fs')
@@ -8,7 +7,7 @@ const pify = require('pify')
 const { createIdentityKeyPath } = require('./key-path')
 
 const {
-  blake2b, 
+  blake2b,
   keyPair,
   encrypt: cryptoEncrypt,
   decrypt: cryptoDecrypt,
@@ -65,16 +64,14 @@ function getDocumentOwner(ddo, shouldValidate = true) {
 }
 
 async function isCorrectPassword({
-  did,
-  ddo,
-  owner,
-  password
+  ddo = {},
+  password = ''
 } = {}) {
   if (!password || 'string' !== typeof password) {
     throw new TypeError('Password must be non-empty string.')
   }
 
-  if (!ddo || 'object' !== typeof ddo && 0 < ddo.publicKey.length) {
+  if (!ddo || 'object' !== typeof ddo || 0 === ddo.publicKey.length) {
     throw new TypeError('Expecting DDO to be object with valid publicKey array.')
   }
 
@@ -125,7 +122,11 @@ function hashIdentity(did) {
   return blake2b(Buffer.from(did)).toString('hex')
 }
 
-function normalize(did) {
+function normalize(did = '') {
+  if (!did || 'string' !== typeof did) {
+    throw new TypeError('Expecting DID to be non-empty string')
+  }
+
   if (hasDIDMethod(did)) {
     if (0 !== did.indexOf(kAidPrefix)) {
       throw new TypeError('Expecting a DID URI with an "ara" method.')
@@ -177,10 +178,7 @@ async function validate({
     throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
   }
 
-  const passwordCorrect = owner
-    ? await isCorrectPassword({ owner, ddo, password })
-    : await isCorrectPassword({ did, ddo, password })
-
+  const passwordCorrect = await isCorrectPassword({ ddo, password })
   if (!passwordCorrect) {
     throw new Error(`ara-filesystem${label}: Incorrect password`)
   }

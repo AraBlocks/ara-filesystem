@@ -74,7 +74,7 @@ async function create({
     }
 
     const afsId = await aid.create({ password, owner });
-    ({mnemonic} = afsId)
+    ({ mnemonic } = afsId)
 
     await writeIdentity(afsId)
 
