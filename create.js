@@ -1,7 +1,6 @@
 /* eslint-disable no-shadow */
 
 const debug = require('debug')('ara-filesystem:create')
-const { blake2b, keyPair } = require('ara-crypto')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex, writeIdentity } = require('ara-identity/util')
 const { resolve } = require('path')
@@ -16,8 +15,9 @@ const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
 
 const {
+  getDocumentKeyHex,
+  loadSecrets,
   validate,
-  loadSecrets
 } = require('./util')
 
 const {
@@ -39,34 +39,29 @@ async function create({
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
   }
 
-  if ('string' !== typeof password || !password) {
-    throw new TypeError('ara-filesystem.create: Expecting non-empty password')
-  }
-
   let afs
   let mnemonic
   if (did) {
-    let result
+    let ddo
     try {
-      // semicolon because interpreter doesn't like `)(`
-      result = await validate({ did, password, label: 'create' });
-      ({ did } = result)
+      ({ did, ddo } = await validate({ did, password, label: 'create' }))
     } catch (err) {
       throw err
     }
 
-    const pathPrefix = toHex(blake2b(Buffer.from(did)))
-    const drives = await createMultidrive({ did, pathPrefix, password })
-
-    const path = createAFSKeyPath(did)
+    const id = getDocumentKeyHex(ddo)
+    const drives = await createMultidrive({ did: id, password })
+    const key = Buffer.from(id, 'hex')
+    const path = createAFSKeyPath(id)
 
     afs = await pify(drives.create)({
-      id: pathPrefix,
+      id,
+      key,
       path
     })
 
     afs.did = did
-    afs.ddo = result.ddo
+    afs.ddo = ddo
   } else if (owner) {
     try {
       ({ owner: did } = await validate({ owner, password, label: 'create' }))
@@ -92,16 +87,13 @@ async function create({
       throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
     }
 
-    const kp = keyPair(blake2b(secretKey))
-    const id = toHex(blake2b(Buffer.from(afsDid)))
-
     try {
       // generate AFS key path
       const path = createAFSKeyPath(afsDid)
       afs = await createCFS({
-        id,
-        key: kp.publicKey,
-        secretKey: kp.secretKey,
+        id: afsDid,
+        key: publicKey,
+        secretKey,
         path,
         storage: defaultStorage(afsDid, password),
         shallow: true
@@ -112,8 +104,8 @@ async function create({
     afs.ddo = afsDdo
 
     // clear buffers
-    kp.publicKey.fill(0)
-    kp.secretKey.fill(0)
+    publicKey.fill(0)
+    secretKey.fill(0)
   }
 
   return {
@@ -121,20 +113,21 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({ did, pathPrefix, password }) {
+  async function createMultidrive({ did, password }) {
     await pify(mkdirp)(rc.afs.archive.store)
-    const nodes = resolve(rc.afs.archive.store, pathPrefix)
+    const nodes = resolve(rc.afs.archive.store, did)
     const store = toilet(nodes)
 
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
-        const { id, path } = opts
+        const { id, key, path } = opts
         try {
           const afs = await createCFS({
             id,
+            key,
             path,
-            storage: defaultStorage(did, password),
+            storage: defaultStorage(id, password),
             shallow: true
           })
           return done(null, afs)
