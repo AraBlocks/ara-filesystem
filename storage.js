@@ -35,7 +35,7 @@ function defaultStorage(identity, password) {
 function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  
+
   const hIdentity = hash(identity)
   const writable = Boolean(password)
 

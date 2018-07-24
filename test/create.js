@@ -57,7 +57,7 @@ test('create() valid id (no method)', async (t) => {
 
 test('create() valid id (readonly)', async (t) => {
   // create AFS
-  const { afs } = await create({ owner: kTestOwnerDid, password: kPassword })
+  const { afs } = await create({ owner: kTestOwnerDid, password })
   t.true('object' === typeof afs)
   const { did } = afs
 

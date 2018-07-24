@@ -16,8 +16,7 @@ const { defaultStorage } = require('./storage')
 const {
   getDocumentKeyHex,
   loadSecrets,
-  validate,
-  hash
+  validate
 } = require('./util')
 
 const {
