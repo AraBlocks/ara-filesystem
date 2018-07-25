@@ -2,6 +2,9 @@
 
 const test = require('ava')
 const fs = require('fs')
+const { writeIdentity } = require('ara-identity/util')
+const aid = require('ara-identity')
+const context = require('ara-context')()
 const { resolve } = require('path')
 const { create } = require('../create')
 const { add } = require('../add')
@@ -13,8 +16,7 @@ const { kStorageAddress } = require('../constants')
 
 const {
   kPassword: password,
-  kTestDid,
-  kTestOwnerDid
+  kTestDid
 } = require('./_constants')
 
 const {
@@ -26,8 +28,7 @@ const {
 } = require('../commit')
 
 const getDid = (t) => {
-  const { context } = t
-  const { did } = context
+  const { did } = t.context
   return did
 }
 
@@ -43,9 +44,16 @@ const isHex = (input) => {
 }
 
 test.before(async (t) => {
-  const { afs } = await create({ owner: kTestOwnerDid, password })
+  // create owner identity
+  const identity = await aid.create({ context, password })
+  await writeIdentity(identity)
+  let { publicKey } = identity
+  publicKey = publicKey.toString('hex')
+
+  // create afs
+  const { afs } = await create({ owner: publicKey, password })
   const { did } = afs
-  t.context = { did }
+  t.context = { did, publicKey }
 })
 
 test("generateStagedPath() valid did", (t) => {
@@ -86,7 +94,9 @@ test("commit() staged file successfully deleted", async (t) => {
 
 test("commit() previously cached buffers match blockchain buffers", async (t) => {
   const file = resolve(__dirname, '../index.js')
-  const { afs } = await create({ owner: kTestOwnerDid, password })
+
+  const { publicKey } = t.context
+  const { afs } = await create({ owner: publicKey, password })
   const { did } = afs
   await add({ did, paths: [file], password })
   const path = generateStagedPath(did)

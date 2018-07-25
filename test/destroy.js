@@ -4,11 +4,13 @@ const test = require('ava')
 const { create } = require('../create')
 const { commit } = require('../commit')
 const { access } = require('fs')
-const { web3 } = require('ara-context')()
+const context = require('ara-context')()
 const { abi } = require('../build/contracts/Storage.json')
 const pify = require('pify')
 const { hashIdentity } = require('../util')
 const { kStorageAddress } = require('../constants')
+const aid = require('ara-identity')
+const { writeIdentity } = require('ara-identity/util')
 
 const {
   destroy,
@@ -21,16 +23,20 @@ const {
 } = require('../key-path')
 
 const {
-  kTestOwnerDid,
   kPassword: password
 } = require('./_constants')
 
-const getDid = ({ context }) => context.afs.did
+const getDid = t => t.context.afs.did
 
 test.before(async (t) => {
-  const { afs, mnemonic } = await create({ owner: kTestOwnerDid, password })
-  t.context.afs = afs
-  t.context.mnemonic = mnemonic
+  // create owner identity
+  const identity = await aid.create({ context, password })
+  await writeIdentity(identity)
+  let { publicKey } = identity
+  publicKey = publicKey.toString('hex')
+
+  const { afs, mnemonic } = await create({ owner: publicKey, password })
+  t.context = { afs, mnemonic, publicKey }
 })
 
 test("destroy() invalid did", async (t) => {
@@ -72,7 +78,7 @@ test("destroy() valid params without commit", async (t) => {
   const did = getDid(t)
   const { mnemonic } = t.context
 
-  const afsId = await getAfsId(did, mnemonic)
+  const afsId = await getAfsId(did, mnemonic, password)
 
   // make sure paths exist before destroying
   const identityPath = createIdentityKeyPath(afsId)
@@ -86,15 +92,15 @@ test("destroy() valid params without commit", async (t) => {
   // ensure paths are removed
   await t.throws(pify(access)(identityPath))
   await t.throws(pify(access)(afsPath))
-
-  t.pass()
 })
 
 test("destroy() valid params with commit", async (t) => {
-  const { afs, mnemonic } = await create({ owner: kTestOwnerDid, password })
+  const { publicKey: owner } = t.context
+  const { afs, mnemonic } = await create({ owner, password })
   const { did } = afs
   await commit({ did, password })
 
+  const { web3 } = context
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
   const accounts = await web3.eth.getAccounts()
   const hIdentity = hashIdentity(did)

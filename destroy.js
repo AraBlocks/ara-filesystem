@@ -14,7 +14,7 @@ const {
 
 const {
   validate,
-  hashIdentity,
+  hash,
   getAfsId
 } = require('./util')
 
@@ -44,7 +44,7 @@ async function destroy({
 
   try {
     // destroy AFS identity
-    const afsIdentity = await getAfsId(did, mnemonic)
+    const afsIdentity = await getAfsId(did, mnemonic, password)
     path = createIdentityKeyPath(afsIdentity)
     await pify(access)(path)
     await pify(rimraf)(path)
@@ -54,7 +54,6 @@ async function destroy({
     await pify(access)(path)
     await pify(rimraf)(path)
   } catch (err) {
-    console.log('err', err)
     throw new Error('Mnemonic is incorrect')
   }
 
@@ -71,7 +70,7 @@ async function destroy({
 
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
   const accounts = await web3.eth.getAccounts()
-  const hIdentity = hashIdentity(did)
+  const hIdentity = hash(did)
 
   try {
     // mark blockchain buffers invalid

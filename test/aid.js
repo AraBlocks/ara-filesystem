@@ -1,10 +1,7 @@
 /* eslint quotes: "off" */
 
-// TODO(cckelly): archiving seems to be hanging
-
 const test = require('ava')
 const aid = require('../aid')
-const bip39 = require('bip39')
 const { loadSecrets } = require('../util')
 const { toHex, writeIdentity } = require('ara-identity/util')
 
@@ -13,33 +10,30 @@ const {
   kResolverKey
 } = require('../constants')
 
-const { kTestDid } = require('./_constants')
+const {
+  kTestOwnerDid,
+  kPassword: password
+} = require('./_constants')
 
-test.before((t) => {
-  const mnemonic = bip39.generateMnemonic()
-  t.context = { mnemonic }
+test.serial("create() invalid password", async (t) => {
+  await t.throws(aid.create(), TypeError, "Password must not-empty string")
+  await t.throws(aid.create({ password: 123 }), TypeError, "Password must not-empty string")
 })
 
-test.serial("create() invalid seed", async (t) => {
-  await t.throws(aid.create('', 'my_public_key'), TypeError, "Seed must not be null")
-  await t.throws(aid.create(111, 'my_public_key'), TypeError, "Seed must be of type string")
-})
-
-test.serial("create() invalid publicKey", async (t) => {
-  const { context } = t
-  await t.throws(aid.create(context.mnemonic, ''), TypeError, "Public key must not be empty")
-  await t.throws(aid.create(context.mnemonic, kTestDid.slice(32)), TypeError, "DID must be 64 chars")
-  await t.throws(aid.create(context.mnemonic, 111), TypeError, "Public key must be of type string")
+test.serial("create() invalid owner", async (t) => {
+  await t.throws(aid.create({ password }), TypeError, "Public key must not be empty")
+  await t.throws(aid.create({ password, owner: kTestOwnerDid.slice(32) }), TypeError, "DID must be 64 chars")
+  await t.throws(aid.create({ password, owner: 111 }), TypeError, "Public key must be of type string")
 })
 
 test.serial("create() valid params", async (t) => {
-  const { context } = t
-  const { did, ddo } = await aid.create(context.mnemonic, kTestDid)
+  const { did, ddo, mnemonic } = await aid.create({ password, owner: kTestOwnerDid })
   t.true(did && 'object' === typeof did)
   t.true(ddo && 'object' === typeof ddo)
+  t.true(mnemonic && 'string' === typeof mnemonic)
 
   const { authenticationKey } = ddo.authentication[0]
-  t.true(authenticationKey.includes(kTestDid))
+  t.true(authenticationKey.includes(kTestOwnerDid))
 })
 
 test.serial("archive() invalid identity", async (t) => {
@@ -48,14 +42,12 @@ test.serial("archive() invalid identity", async (t) => {
 })
 
 test.serial("archive() invalid opts", async (t) => {
-  const { context } = t
-  const afsId = await aid.create(context.mnemonic, kTestDid)
+  const afsId = await aid.create({ password, owner: kTestOwnerDid })
   await t.throws(aid.archive(afsId, { }), Error, "Expecting options object")
 })
 
 test.serial("archive() valid params", async (t) => {
-  const { context } = t
-  const afsId = await aid.create(context.mnemonic, kTestDid)
+  const afsId = await aid.create({ password, owner: kTestOwnerDid })
 
   const keystore = await loadSecrets(kArchiverKey)
   await t.notThrows(aid.archive(afsId, { key: kArchiverKey, keystore }))
@@ -68,14 +60,12 @@ test.serial("resolve() invalid did", async (t) => {
 })
 
 test.serial("resolve() invalid opts", async (t) => {
-  const { context } = t
-  const afsId = await aid.create(context.mnemonic, kTestDid)
+  const afsId = await aid.create({ password, owner: kTestOwnerDid })
   await t.throws(aid.archive(afsId), Error, "Expecting opts object")
 })
 
 test.serial("resolve() valid params", async (t) => {
-  const { context } = t
-  const afsId = await aid.create(context.mnemonic, kTestDid)
+  const afsId = await aid.create({ password, owner: kTestOwnerDid })
 
   await writeIdentity(afsId)
 

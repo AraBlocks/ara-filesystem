@@ -1,6 +1,9 @@
 /* eslint quotes: "off" */
 
 const test = require('ava')
+const aid = require('ara-identity')
+const { writeIdentity } = require('ara-identity/util')
+const context = require('ara-context')()
 const { create } = require('../create')
 const { commit } = require('../commit')
 
@@ -11,17 +14,22 @@ const {
 } = require('../price')
 
 const {
-  kTestOwnerDid,
   kPassword: password
 } = require('./_constants')
 
-const getDid = ({ context }) => {
-  const { did } = context
+const getDid = (t) => {
+  const { did } = t.context
   return did
 }
 
 test.before(async (t) => {
-  const { afs } = await create({ owner: kTestOwnerDid, password })
+  // create owner identity
+  const identity = await aid.create({ context, password })
+  await writeIdentity(identity)
+  let { publicKey } = identity
+  publicKey = publicKey.toString('hex')
+
+  const { afs } = await create({ owner: publicKey, password })
   const { did } = afs
   t.context = { did }
 })

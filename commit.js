@@ -10,7 +10,10 @@ const { setPrice } = require('./price')
 const { abi } = require('./build/contracts/Storage.json')
 
 const {
-  kFileMappings,
+  kMetadataTreeName,
+  kMetadataTreeIndex,
+  kMetadataSignaturesName,
+  kMetadataSignaturesIndex,
   kStagingFile,
   kStorageAddress
 } = require('./constants')
@@ -20,7 +23,7 @@ const {
   decryptJSON,
   getDeployedContract,
   validate,
-  hashIdentity
+  hash
 } = require('./util')
 
 async function commit({
@@ -45,7 +48,7 @@ async function commit({
   const accounts = await web3.eth.getAccounts()
   const deployed = getDeployedContract(abi, kStorageAddress)
   const { resolveBufferIndex } = require('./storage')
-  const hIdentity = hashIdentity(did)
+  const hIdentity = hash(did)
 
   const contentsLength = Object.keys(contents).length
   for (let i = 0; i < contentsLength; i++) {
@@ -132,7 +135,7 @@ async function estimateCommitGasCost({
 
   let cost = 0
   try {
-    const hIdentity = hashIdentity(did)
+    const hIdentity = hash(did)
     const { resolveBufferIndex } = require('./storage')
     const deployed = getDeployedContract(abi, kStorageAddress)
 
@@ -198,7 +201,7 @@ function _makeStagedFile(path) {
   try {
     fs.mkdirSync(dirname(path))
   } catch (err) {
-    debug('could not make dir at', path)
+    debug('could not make dir at', path, 'err', err)
   }
 }
 
@@ -211,8 +214,13 @@ async function _deleteStagedFile(path) {
 }
 
 function _getFilenameByIndex(index) {
-  const key = Object.keys(kFileMappings).find(k => kFileMappings[k].index === index)
-  return kFileMappings[key].name
+  if (index === kMetadataTreeIndex) {
+    return kMetadataTreeName
+  } else if (index === kMetadataSignaturesIndex) {
+    return kMetadataSignaturesName
+  }
+  debug('index not recognized', index)
+  return null
 }
 
 module.exports = {

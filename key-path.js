@@ -28,7 +28,12 @@ function createIdentityKeyPath(ddo) {
     throw new TypeError('ara-filesystem.key-path: Expecting object for identity')
   }
 
-  const { publicKey } = ddo
+  let { publicKey } = ddo
+  if (Array.isArray(publicKey) && 0 < publicKey.length) {
+    const { publicKeyHex } = publicKey[0]
+    publicKey = Buffer.from(publicKeyHex, 'hex')
+  }
+
   const hash = toHex(blake2b(publicKey))
   return resolve(root, hash)
 }

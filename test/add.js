@@ -2,26 +2,41 @@
 
 const { add } = require('../add')
 const { create } = require('../create')
+const aid = require('ara-identity')
+const { writeIdentity } = require('ara-identity/util')
 const test = require('ava')
-const {
-  kTestOwnerDid,
-  kPassword
-} = require('./_constants')
 const fs = require('fs')
 const isDirectory = require('is-directory')
 const pify = require('pify')
+const context = require('ara-context')()
 const { resolve, join } = require('path')
 
-const getAFS = ({ context }) => {
-  const { afs } = context
+const {
+  kPassword: password
+} = require('./_constants')
+
+const getAFS = (t) => {
+  const { afs } = t.context
   return afs
 }
 
+test.before(async (t) => {
+  const identity = await aid.create({ context, password })
+  await writeIdentity(identity)
+  let { publicKey } = identity
+  publicKey = publicKey.toString('hex')
+  t.context = { did: publicKey }
+})
+
 test.beforeEach(async (t) => {
-  const { afs } = await create({
-    owner: kTestOwnerDid,
-    password: kPassword
-  })
+  const { did } = t.context
+  let afs
+  try {
+    // eslint-disable-next-line semi
+    ({ afs } = await create({ owner: did, password }));
+  } catch (err) {
+    console.log(err)
+  }
   t.context = { afs }
 })
 
@@ -30,7 +45,7 @@ test.serial('add() valid did, valid password, no paths', async (t) => {
   const { did } = afs
   await t.throws(add({
     did,
-    password: kPassword
+    password
   }), TypeError, 'ara-filesystem.add: Expecting one or more filepaths to add')
 })
 
@@ -42,7 +57,7 @@ test.serial('add() valid did, valid password, valid path (1)', async (t) => {
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   const buf = await afs.readFile(paths[0])
@@ -57,7 +72,7 @@ test.serial('add() valid did, valid password, valid path (3)', async (t) => {
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   let buf
@@ -75,7 +90,7 @@ test.serial('add() valid did, valid password, valid directory (1, not nested)', 
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   t.true(await directoriesAreEqual(afs, paths[0]))
@@ -89,7 +104,7 @@ test.serial('add() valid did, valid password, valid directory (1, nested)', asyn
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
   t.true(await directoriesAreEqual(afs, paths[0]))
 })
@@ -102,7 +117,7 @@ test.serial('add() valid did, valid password, valid directory (2, nested)', asyn
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
   t.true(await directoriesAreEqual(afs, paths[0]))
   t.true(await directoriesAreEqual(afs, paths[1]))
@@ -116,7 +131,7 @@ test.serial('add() valid did, valid password, invalid directory (1)', async (t) 
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
   await t.throws(afs.readdir(paths[0]), Error, '')
 })
@@ -129,7 +144,7 @@ test.serial('add() valid did, valid password, invalid directory (1), valid direc
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await t.throws(afs.readdir(paths[0]), Error, '')
@@ -144,7 +159,7 @@ test.serial('add() valid did, valid password, invalid path (1)', async (t) => {
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await t.throws(afs.readFile(paths[0]), Error, '')
@@ -158,7 +173,7 @@ test.serial('add() valid did, valid password, invalid path (1), valid path (1)',
   await add({
     did,
     paths,
-    password: kPassword
+    password
   })
 
   await t.throws(afs.readFile(paths[0]), Error, '')
@@ -202,7 +217,7 @@ test.serial('add() valid did, invalid password, valid path (2)', async (t) => {
 test.serial('add() invalid did, valid password, no paths', async (t) => {
   await t.throws(add({
     did: 'invaliddid',
-    password: kPassword
+    password
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
@@ -212,7 +227,7 @@ test.serial('add() invalid did, valid password, valid path (1)', async (t) => {
   await t.throws(add({
     did: 'invaliddid',
     paths,
-    password: kPassword
+    password
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
@@ -222,7 +237,7 @@ test.serial('add() invalid did, valid password, valid path (1), invalid path (1)
   await t.throws(add({
     did: 'invaliddid',
     paths,
-    password: kPassword
+    password
   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 

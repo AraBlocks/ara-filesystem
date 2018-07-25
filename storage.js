@@ -6,20 +6,15 @@ const { resolve, basename } = require('path')
 const { append, retrieve } = require('./commit')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
-const { hashIdentity } = require('./util')
+const { hash } = require('./util')
 
 const {
   kStorageAddress,
-  kFileMappings
+  kMetadataTreeIndex,
+  kMetadataSignaturesIndex,
+  kMetadataTreeName: mTreeName,
+  kMetadataSignaturesName: mSigName
 } = require('./constants')
-
-const {
-  kMetadataTree,
-  kMetadataSignatures
-} = kFileMappings
-
-const { name: mTreeName } = kMetadataTree
-const { name: mSigName } = kMetadataSignatures
 
 function defaultStorage(identity, password) {
   return (filename, drive, path) => {
@@ -35,7 +30,8 @@ function defaultStorage(identity, password) {
 function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const hIdentity = hashIdentity(identity)
+
+  const hIdentity = hash(identity)
   const writable = Boolean(password)
 
   return ras({
@@ -106,11 +102,9 @@ function resolveBufferIndex(path) {
 
   let index = -1
   if (mTreeName === path) {
-    const { index: i } = kMetadataTree
-    index = i
+    index = kMetadataTreeIndex
   } else if (mSigName === path) {
-    const { index: i } = kMetadataSignatures
-    index = i
+    index = kMetadataSignaturesIndex
   }
   return index
 }

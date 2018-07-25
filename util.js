@@ -1,10 +1,15 @@
 const { secrets } = require('ara-network')
-const { create } = require('ara-identity/did')
 const { web3 } = require('ara-context')()
+const { toHex } = require('ara-identity/util')
 const aid = require('./aid')
+const fs = require('fs')
+const path = require('path')
+const pify = require('pify')
+const { createIdentityKeyPath } = require('./key-path')
 
 const {
-  blake2b, keyPair,
+  blake2b,
+  keyPair,
   encrypt: cryptoEncrypt,
   decrypt: cryptoDecrypt,
   randomBytes: cryptoRandomBytes
@@ -75,33 +80,32 @@ function getDocumentKeyHex(ddo) {
 }
 
 async function isCorrectPassword({
-  did,
-  ddo,
-  owner,
-  password
+  ddo = {},
+  password = ''
 } = {}) {
   if (!password || 'string' !== typeof password) {
     throw new TypeError('Password must be non-empty string.')
   }
 
-  const { publicKey } = generateKeypair(password)
-  let { did: didUri } = create(publicKey)
-  didUri = normalize(didUri)
-
-  let result = true
-  if (owner) {
-    owner = normalize(owner)
-    result = didUri === owner
-  } else {
-    ddo = ddo || null
-    if (!ddo) {
-      const keystore = await loadSecrets(kResolverKey)
-      ddo = await aid.resolve(did, { key: kResolverKey, keystore })
-    }
-    const ddoOwner = getDocumentOwner(ddo)
-    result = didUri === ddoOwner
+  if (!ddo || 'object' !== typeof ddo || 0 === ddo.publicKey.length) {
+    throw new TypeError('Expecting DDO to be object with valid publicKey array.')
   }
-  return result
+
+  const { publicKeyHex } = ddo.publicKey[0]
+
+  password = blake2b(Buffer.from(password))
+  const identityPath = path.resolve(createIdentityKeyPath(ddo), 'keystore/ara')
+
+  let secretKey
+  try {
+    const keys = JSON.parse(await pify(fs.readFile)(identityPath, 'utf8'))
+    secretKey = cryptoDecrypt(keys, { key: password.slice(0, 16) })
+  } catch (err) {
+    return false
+  }
+
+  const publicKey = secretKey.slice(32).toString('hex')
+  return publicKeyHex === publicKey
 }
 
 function encryptJSON(json, password) {
@@ -130,11 +134,15 @@ function decryptJSON(keystore, password) {
   return decryptedJSON
 }
 
-function hashIdentity(did) {
-  return blake2b(Buffer.from(did)).toString('hex')
+function hash(str, encoding = 'hex') {
+  return toHex(blake2b(Buffer.from(str, encoding)))
 }
 
-function normalize(did) {
+function normalize(did = '') {
+  if (!did || 'string' !== typeof did) {
+    throw new TypeError('Expecting DID to be non-empty string')
+  }
+
   if (hasDIDMethod(did)) {
     if (0 !== did.indexOf(kAidPrefix)) {
       throw new TypeError('Expecting a DID URI with an "ara" method.')
@@ -188,9 +196,7 @@ async function validate({
       throw new TypeError(`ara-filesystem${label}: Expecting non-empty string for password`)
     }
 
-    const passwordCorrect = owner
-      ? await isCorrectPassword({ owner, ddo, password })
-      : await isCorrectPassword({ did, ddo, password })
+    const passwordCorrect = await isCorrectPassword({ ddo, password })
     if (!passwordCorrect) {
       throw new Error(`ara-filesystem${label}: Incorrect password`)
     }
@@ -212,11 +218,11 @@ function getDeployedContract(abi, address) {
   return new web3.eth.Contract(abi, address)
 }
 
-async function getAfsId(did, mnemonic) {
+async function getAfsId(did, mnemonic, password) {
   const keystore = await loadSecrets(kResolverKey)
   const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
   const owner = getDocumentOwner(afsDdo)
-  return aid.create(mnemonic, owner)
+  return aid.create({ mnemonic, owner, password })
 }
 
 function hasDIDMethod(did) {
@@ -235,7 +241,7 @@ module.exports = {
   getDocumentOwner,
   getDocumentKeyHex,
   isCorrectPassword,
-  hashIdentity,
+  hash,
   validate,
   getDeployedContract,
   getAfsId,
