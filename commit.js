@@ -1,16 +1,16 @@
 /* eslint-disable no-await-in-loop */
 
-const debug = require('debug')('ara-filesystem:commit')
-const fs = require('fs')
-const pify = require('pify')
-const { resolve, dirname } = require('path')
-const { createAFSKeyPath } = require('./key-path')
-const { setPrice } = require('./price')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
+const debug = require('debug')('ara-filesystem:commit')
+const { createAFSKeyPath } = require('./key-path')
 const contract = require('ara-web3/contract')
+const { resolve, dirname } = require('path')
 const account = require('ara-web3/account')
+const { setPrice } = require('./price')
 const tx = require('ara-web3/tx')
+const pify = require('pify')
+const fs = require('fs')
 
 const {
   kMetadataTreeName,

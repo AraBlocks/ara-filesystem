@@ -1,11 +1,11 @@
+const { createIdentityKeyPath } = require('./key-path')
+const { toHex } = require('ara-identity/util')
 const { secrets } = require('ara-network')
 const { web3 } = require('ara-context')()
-const { toHex } = require('ara-identity/util')
 const aid = require('./aid')
-const fs = require('fs')
 const path = require('path')
 const pify = require('pify')
-const { createIdentityKeyPath } = require('./key-path')
+const fs = require('fs')
 
 const {
   blake2b,

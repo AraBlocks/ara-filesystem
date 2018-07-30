@@ -1,11 +1,12 @@
-const debug = require('debug')('ara-filesystem:destroy')
-const { access } = require('fs')
-const rc = require('./rc')()
-const rimraf = require('rimraf')
-const pify = require('pify')
-const { web3 } = require('ara-context')()
+
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
+const debug = require('debug')('ara-filesystem:destroy')
+const { web3 } = require('ara-context')()
+const { access } = require('fs')
+const rimraf = require('rimraf')
+const pify = require('pify')
+const rc = require('./rc')()
 
 const {
   createAFSKeyPath,

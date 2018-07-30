@@ -1,28 +1,28 @@
 /* eslint-disable no-shadow */
 
+const { toHex, writeIdentity } = require('ara-identity/util')
 const debug = require('debug')('ara-filesystem:create')
 const { createAFSKeyPath } = require('./key-path')
-const { toHex, writeIdentity } = require('ara-identity/util')
-const { resolve } = require('path')
-const { createCFS } = require('cfsnet/create')
-const aid = require('./aid')
-const multidrive = require('multidrive')
-const pify = require('pify')
-const mkdirp = require('mkdirp')
-const rc = require('./rc')()
-const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
+const { createCFS } = require('cfsnet/create')
+const multidrive = require('multidrive')
+const { resolve } = require('path')
+const toilet = require('toiletdb')
+const mkdirp = require('mkdirp')
+const aid = require('./aid')
+const pify = require('pify')
+const rc = require('./rc')()
+
+const {
+  kResolverKey,
+  kArchiverKey
+} = require('./constants')
 
 const {
   getDocumentKeyHex,
   loadSecrets,
   validate
 } = require('./util')
-
-const {
-  kResolverKey,
-  kArchiverKey
-} = require('./constants')
 
 /**
  * Creates an AFS with the given Ara identity
