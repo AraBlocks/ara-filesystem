@@ -3,12 +3,14 @@
 const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
-const { web3 } = require('ara-context')()
 const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
+const contract = require('ara-web3/contract')
+const account = require('ara-web3/account')
+const tx = require('ara-web3/tx')
 
 const {
   kMetadataTreeName,
@@ -21,7 +23,7 @@ const {
 const {
   encryptJSON,
   decryptJSON,
-  getDeployedContract,
+  getDocumentOwner,
   validate,
   hash
 } = require('./util')
@@ -32,7 +34,7 @@ async function commit({
   price = -1
 } = {}) {
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }
@@ -45,8 +47,8 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
-  const accounts = await web3.eth.getAccounts()
-  const deployed = getDeployedContract(abi, kAFSAddress)
+  const owner = getDocumentOwner(ddo, true);
+  const acct = await account.load({ did: owner, password })
   const { resolveBufferIndex } = require('./storage')
 
   const contentsLength = Object.keys(contents).length
@@ -61,10 +63,22 @@ async function commit({
       const data = `0x${buffers[offset]}`
 
       const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
-      await deployed.methods.write(index, offset, data, lastWrite).send({
-        from: accounts[0],
-        gas: 500000
+
+      const transaction = tx.create({
+        account: acct,
+        to: kAFSAddress,
+        data: {
+          abi,
+          name: 'write',
+          values: [
+            index,
+            offset,
+            data,
+            lastWrite
+          ]
+        }
       })
+      tx.sendSignedTransaction(transaction)
     }
   }
 
@@ -135,7 +149,7 @@ async function estimateCommitGasCost({
   let cost = 0
   try {
     const { resolveBufferIndex } = require('./storage')
-    const deployed = getDeployedContract(abi, kAFSAddress)
+    const deployed = contract.get(abi, kAFSAddress)
 
     const path = generateStagedPath(did)
     const contents = _readStagedFile(path, password)

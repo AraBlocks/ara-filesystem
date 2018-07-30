@@ -46,7 +46,7 @@ async function loadSecrets(key) {
   return pub.keystore
 }
 
-function getDocumentOwner(ddo, shouldValidate = true) {
+function getDocumentOwner(ddo, shouldNormalize = true) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
   }
@@ -61,7 +61,7 @@ function getDocumentOwner(ddo, shouldValidate = true) {
   const suffixLength = kOwnerSuffix.length
   const id = pk.slice(0, pk.length - suffixLength)
 
-  return shouldValidate ? normalize(id) : id
+  return shouldNormalize ? normalize(id) : id
 }
 
 function getDocumentKeyHex(ddo) {

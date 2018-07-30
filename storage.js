@@ -1,13 +1,12 @@
-const debug = require('debug')('ara-filesystem:storage')
-const ras = require('random-access-storage')
-const raf = require('random-access-file')
-const unixify = require('unixify')
-const { resolve, basename } = require('path')
-const { append, retrieve } = require('./commit')
-const { web3 } = require('ara-context')()
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
-const { hash } = require('./util')
+const debug = require('debug')('ara-filesystem:storage')
+const contract = require('ara-web3/contract')
+const ras = require('random-access-storage')
+const account = require('ara-web3/account')
+const raf = require('random-access-file')
+const unixify = require('unixify')
+const tx = require('ara-web3/tx')
 
 const {
   kMetadataTreeIndex,
@@ -15,6 +14,21 @@ const {
   kMetadataTreeName: mTreeName,
   kMetadataSignaturesName: mSigName
 } = require('./constants')
+
+const {
+  append,
+  retrieve
+} = require('./commit')
+
+const {
+  hash,
+  getDocumentOwner
+} = require('./util')
+
+const {
+  resolve,
+  basename
+} = require('path')
 
 function defaultStorage(identity, password) {
   return (filename, drive, path) => {
@@ -29,7 +43,7 @@ function defaultStorage(identity, password) {
 
 function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
-  const deployed = new web3.eth.Contract(abi, kAFSAddress)
+  const deployed = contract.get(abi, kAFSAddress)
 
   const writable = Boolean(password)
 
@@ -67,17 +81,23 @@ function create({ filename, identity, password }) {
 
     async del(req) {
       if (writable) {
-        const opts = await _getTxOpts()
-        await deployed.methods.unlist().send(opts)
+        { ddo } = await validate({ identity, password, label: 'storage' })
+        const owner = getDocumentOwner(ddo, true)
+        const acct = await account.load({ did: owner, password })
+
+        const transaction = tx.create({
+          account: acct,
+          to: kAFSAddress,
+          data: {
+            abi,
+            name: 'unlist'
+          }
+        })
+        tx.sendSignedTransaction(transaction)
       }
       req.callback(null)
     }
   })
-}
-
-async function _getTxOpts(index = 0) {
-  const defaultAccount = await web3.eth.getAccounts()
-  return { from: defaultAccount[index], gas: 5000000 }
 }
 
 function _decode(bytes) {
