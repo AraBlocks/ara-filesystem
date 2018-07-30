@@ -11,10 +11,18 @@ const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
 const { validate, hashDID, getDocumentOwner } = require('ara-util')
 const { kAFSAddress } = require('ara-contracts/constants')
+const { abi: afsAbi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const contract = require('ara-web3/contract')
+const proxyRc = require('ara-contracts/rc')
 const account = require('ara-web3/account')
 const tx = require('ara-web3/tx')
+const solc = require('solc')
+
+const {
+  kRegistryAddress,
+  kAFSAddress
+} = require('ara-contracts/constants')
 
 const {
   proxyExists,
