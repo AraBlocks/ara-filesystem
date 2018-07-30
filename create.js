@@ -1,6 +1,5 @@
 /* eslint-disable no-shadow */
 
-const { toHex, writeIdentity } = require('ara-identity/util')
 const debug = require('debug')('ara-filesystem:create')
 const { createAFSKeyPath } = require('./key-path')
 const { defaultStorage } = require('./storage')

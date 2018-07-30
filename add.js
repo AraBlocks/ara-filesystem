@@ -4,13 +4,16 @@ const debug = require('debug')('ara-filesystem:add')
 const { join, basename, resolve } = require('path')
 const mirror = require('mirror-folder')
 const isDirectory = require('is-directory')
-const { resolve, join } = require('path')
 const ignored = require('./lib/ignore')
 const { create } = require('./create')
-const { stat, access } = require('fs')
 const isFile = require('is-file')
 const pify = require('pify')
 const fs = require('fs')
+
+const {
+  resolve,
+  join
+} = require('path')
 
 async function add(opts) {
   if (null === opts.did || 'string' !== typeof opts.did || !opts.did) {
