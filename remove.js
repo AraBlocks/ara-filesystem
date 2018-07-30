@@ -2,7 +2,11 @@
 
 const debug = require('debug')('ara-filesystem:remove')
 const { create } = require('./create')
-const { resolve, join } = require('path')
+
+const {
+  resolve,
+  join
+} = require('path')
 
 async function remove(opts) {
   if (null == opts.did || 'string' !== typeof opts.did || !opts.did) {

@@ -1,9 +1,10 @@
+const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const debug = require('debug')('ara-filesystem:aid')
-const aid = require('ara-identity')
 const context = require('ara-context')()
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const hasDIDMethod = require('has-did-method')
 const { normalize } = require('ara-util')
+const aid = require('ara-identity')
 
 const {
   kAidPrefix,

@@ -1,15 +1,14 @@
 /* eslint-disable no-await-in-loop */
 
 const debug = require('debug')('ara-filesystem:add')
-const { create } = require('./create')
-const { resolve, join } = require('path')
-const fs = require('fs')
-const { stat, access } = require('fs')
-const pify = require('pify')
 const isDirectory = require('is-directory')
-const isFile = require('is-file')
-
+const { resolve, join } = require('path')
 const ignored = require('./lib/ignore')
+const { create } = require('./create')
+const { stat, access } = require('fs')
+const isFile = require('is-file')
+const pify = require('pify')
+const fs = require('fs')
 
 async function add(opts) {
   if (null === opts.did || 'string' !== typeof opts.did || !opts.did) {

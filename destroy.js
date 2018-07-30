@@ -1,6 +1,9 @@
+
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
+const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:destroy')
+const { web3 } = require('ara-context')()
 const { access } = require('fs')
-const rc = require('./rc')()
 const rimraf = require('rimraf')
 const pify = require('pify')
 const { web3 } = require('ara-context')()
@@ -8,6 +11,7 @@ const { getAFSOwnerIdentity, validate } = require('ara-util')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
 const { contract } = require('ara-web3')
+const rc = require('./rc')()
 
 const {
   createAFSKeyPath,
