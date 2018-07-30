@@ -14,7 +14,7 @@ function createAFSKeyPath(did) {
   try {
     fs.accessSync(root)
   } catch (err) {
-    fs.mkdir(root)
+    fs.mkdirSync(root)
   }
 
   const hash = blake2b(Buffer.from(did, 'hex'))
