@@ -12,6 +12,9 @@ const { setPrice } = require('./price')
 const { contract } = require('ara-web3')
 const { validate, hashDID } = require('ara-util')
 const { kAFSAddress } = require('ara-contracts/constants')
+const contract = require('ara-web3/contract')
+const account = require('ara-web3/account')
+const tx = require('ara-web3/tx')
 
 const {
   proxyExists,

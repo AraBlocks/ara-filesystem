@@ -1,7 +1,9 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:storage')
+const contract = require('ara-web3/contract')
 const ras = require('random-access-storage')
+const account = require('ara-web3/account')
 const raf = require('random-access-file')
 const unixify = require('unixify')
 
