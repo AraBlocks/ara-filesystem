@@ -23,9 +23,9 @@ const {
 } = require('./constants')
 
 const {
-  getDocumentKeyHex,
+  validate,
   loadSecrets,
-  validate
+  getDocumentKeyHex
 } = require('./util')
 
 /**

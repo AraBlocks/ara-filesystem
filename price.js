@@ -1,11 +1,11 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
+const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:price')
 const contract = require('ara-web3/contract')
 const account = require('ara-web3/account')
 const tx = require('ara-web3/tx')
 
 const {
-  hash,
   validate,
   getDocumentOwner
 } = require('./util')
@@ -43,6 +43,7 @@ async function setPrice({
   password = '',
   price = 0,
 } = {}) {
+  let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
@@ -53,7 +54,7 @@ async function setPrice({
     throw new TypeError('Price should be 0 or positive whole number')
   }
 
-  const owner = getDocumentOwner(ddo, true);
+  const owner = getDocumentOwner(ddo, true)
   const acct = await account.load({ did: owner, password })
 
   try {

@@ -21,7 +21,7 @@ const {
 } = require('./commit')
 
 const {
-  hash,
+  validate,
   getDocumentOwner
 } = require('./util')
 

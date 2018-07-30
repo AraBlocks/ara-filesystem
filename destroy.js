@@ -1,8 +1,8 @@
-
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:destroy')
-const { web3 } = require('ara-context')()
+const account = require('ara-web3/account')
+const tx = require('ara-web3/tx')
 const { access } = require('fs')
 const rimraf = require('rimraf')
 const pify = require('pify')
@@ -15,8 +15,8 @@ const {
 
 const {
   validate,
-  hash,
-  getAfsId
+  getAfsId,
+  getDocumentOwner
 } = require('./util')
 
 const {
@@ -29,8 +29,9 @@ async function destroy({
   mnemonic = '',
   password = ''
 } = {}) {
+  let ddo
   try {
-    ({ did } = await validate({ did, password, label: 'destroy' }))
+    ({ did, ddo } = await validate({ did, password, label: 'destroy' }))
   } catch (err) {
     throw err
   }
@@ -69,12 +70,19 @@ async function destroy({
     debug('db file at %s does not exist', path)
   }
 
-  const deployed = new web3.eth.Contract(abi, kAFSAddress) // use ara-web3 to get deployed proxy
-  const accounts = await web3.eth.getAccounts()
+  const owner = getDocumentOwner(ddo, true)
+  const acct = await account.load({ did: owner, password })
 
   try {
-    // mark blockchain buffers invalid
-    await deployed.methods.unlist().send({ from: accounts[0], gas: 500000 })
+    const transaction = tx.create({
+      account: acct,
+      to: kAFSAddress,
+      data: {
+        abi,
+        name: 'unlist'
+      }
+    })
+    tx.sendSignedTransaction(transaction)
   } catch (err) {
     throw new Error(err)
   }

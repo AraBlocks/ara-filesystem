@@ -12,19 +12,18 @@ const pify = require('pify')
 const fs = require('fs')
 
 const {
+  kStagingFile,
   kMetadataTreeName,
   kMetadataTreeIndex,
   kMetadataSignaturesName,
-  kMetadataSignaturesIndex,
-  kStagingFile
+  kMetadataSignaturesIndex
 } = require('./constants')
 
 const {
+  validate,
   encryptJSON,
   decryptJSON,
-  getDocumentOwner,
-  validate,
-  hash
+  getDocumentOwner
 } = require('./util')
 
 const {
@@ -37,6 +36,7 @@ async function commit({
   password = '',
   price = -1
 } = {}) {
+  let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
@@ -51,7 +51,7 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
-  const owner = getDocumentOwner(ddo, true);
+  const owner = getDocumentOwner(ddo, true)
   const acct = await account.load({ did: owner, password })
   const { resolveBufferIndex } = require('./storage')
 
