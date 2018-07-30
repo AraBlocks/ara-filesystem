@@ -75,7 +75,7 @@ async function getPrice({
 
   const deployed = new contract.get(abi, kAFSAddress)
   const result = await deployed.methods.price_().call()
-  debug('price for %s: %d', hIdentity, result)
+  debug('price for %s: %d', did, result)
   return result
 }
 

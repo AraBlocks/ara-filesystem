@@ -45,14 +45,9 @@
     "cli-width": "^2.2.0",
     "debug": "^3.1.0",
     "did-document": "github:arablocks/did-document",
-<<<<<<< cc5734a79e1593f4f5d7dcb0ea32c472d12235d5
-    "extend": "^3.0.1",
     "has-did-method": "^0.1.0",
-    "hypercore": "^6.16.0",
-=======
     "extend": "^3.0.2",
     "hypercore": "^6.18.1",
->>>>>>> feat(): progress
     "hyperdrive": "^9.14.0",
     "ignore": "^3.3.10",
     "inquirer": "^6.0.0",
@@ -78,11 +73,7 @@
     "table": "^4.0.3",
     "toiletdb": "^1.4.1",
     "unixify": "^1.0.0",
-<<<<<<< cc5734a79e1593f4f5d7dcb0ea32c472d12235d5
-    "web3": "^1.0.0-beta.34",
-=======
     "web3": "^1.0.0-beta.35",
->>>>>>> feat(): progress
     "yargs": "^11.1.0"
   },
   "devDependencies": {
