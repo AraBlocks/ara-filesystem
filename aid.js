@@ -10,7 +10,6 @@ const {
   kKeyLength,
   kAidPrefix,
   kOwnerSuffix,
-  kKeyLength,
   kArchiverSecret,
   kResolverSecret,
   kArchiverRemote,

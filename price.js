@@ -1,5 +1,6 @@
 const { kAFSAddress } = require('ara-contracts/constants')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
+const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:price')
 
 const {

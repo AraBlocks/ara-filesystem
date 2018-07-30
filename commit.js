@@ -9,7 +9,7 @@ const { toHex } = require('ara-identity/util')
 const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
-const { validate, hashDID } = require('ara-util')
+const { validate, hashDID, getDocumentOwner } = require('ara-util')
 const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:commit')
 const contract = require('ara-web3/contract')
@@ -35,12 +35,8 @@ const {
 } = require('./constants')
 
 const {
-  hash,
-  validate,
-  normalize,
   encryptJSON,
-  decryptJSON,
-  getDocumentOwner
+  decryptJSON
 } = require('./util')
 
 const {

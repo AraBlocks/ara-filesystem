@@ -6,7 +6,8 @@ const tx = require('ara-web3/tx')
 const { access } = require('fs')
 const rimraf = require('rimraf')
 const pify = require('pify')
-const { getAFSOwnerIdentity, validate } = require('ara-util')
+const { web3 } = require('ara-context')()
+const { getAFSOwnerIdentity, validate, getDocumentOwner } = require('ara-util')
 const { contract } = require('ara-web3')
 const rc = require('./rc')()
 
@@ -19,8 +20,6 @@ const {
   createAFSKeyPath,
   createIdentityKeyPath
 } = require('./key-path')
-
-const { getDocumentOwner } = require('./util')
 
 const {
   basename,

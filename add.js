@@ -11,8 +11,8 @@ const pify = require('pify')
 const fs = require('fs')
 
 const {
-  resolve,
-  join
+  join,
+  resolve
 } = require('path')
 
 async function add(opts) {
