@@ -77,7 +77,7 @@ function create({ filename, identity, password }) {
 
     async del(req) {
       if (writable) {
-        { ddo } = await validate({ identity, password, label: 'storage' })
+        const { ddo } = await validate({ identity, password, label: 'storage' })
         const owner = getDocumentOwner(ddo, true)
         const acct = await account.load({ did: owner, password })
 
