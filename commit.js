@@ -3,6 +3,8 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:commit')
+const fs = require('fs')
+const pify = require('pify')
 const { createAFSKeyPath } = require('./key-path')
 const { validate, hashDID } = require('ara-util')
 const { toHex } = require('ara-identity/util')
@@ -10,8 +12,9 @@ const { resolve, dirname } = require('path')
 const { web3 } = require('ara-context')()
 const { contract } = require('ara-web3')
 const { setPrice } = require('./price')
-const pify = require('pify')
-const fs = require('fs')
+const contract = require('ara-web3/contract')
+const account = require('ara-web3/account')
+const tx = require('ara-web3/tx')
 
 const {
   kMetadataTreeName,
@@ -25,7 +28,9 @@ const {
 
 const {
   encryptJSON,
-  decryptJSON
+  decryptJSON,
+  getDocumentOwner,
+  validate
 } = require('./util')
 
 async function commit({
@@ -35,7 +40,7 @@ async function commit({
   estimate = false
 } = {}) {
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }
