@@ -7,16 +7,11 @@ const { createAFSKeyPath } = require('./key-path')
 const { validate, hashDID } = require('ara-util')
 const { toHex } = require('ara-identity/util')
 const { resolve, dirname } = require('path')
-const { web3 } = require('ara-context')()
-const { contract } = require('ara-web3')
+const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
-const pify = require('pify')
-const fs = require('fs')
-
-const {
-  kRegistryAddress,
-  kAFSAddress
-} = require('ara-contracts/constants')
+const { contract } = require('ara-web3')
+const { validate, hashDID } = require('ara-util')
+const { kAFSAddress } = require('ara-contracts/constants')
 
 const {
   proxyExists,
@@ -93,9 +88,19 @@ async function commit({
 
   let result
   if (exists) {
-    result = await _append({ deployed, mtData, msData, hIdentity }, estimate)
+    result = await _append({
+      deployed,
+      mtData,
+      msData,
+      hIdentity
+    }, estimate)
   } else {
-    result = await _write({ deployed, mtData, msData, hIdentity }, estimate) 
+    result = await _write({
+      deployed,
+      mtData,
+      msData,
+      hIdentity
+    }, estimate)
   }
 
   if (estimate) {
@@ -183,11 +188,13 @@ async function _append(opts, estimate = true) {
 
 async function _write(opts, estimate = true) {
   const { offsets: mtOffsets, sizes: mtSizes, buffer: mtBuffer } = opts.mtData
-  const { offsets: msOffsets, sizes: msSizes, buffer: msBuffer } = opts.msData 
+  const { offsets: msOffsets, sizes: msSizes, buffer: msBuffer } = opts.msData
 
   const { deployed, hIdentity } = opts
-  const query = deployed.methods.write(hIdentity, mtOffsets, msOffsets, 
-    mtSizes, msSizes, mtBuffer, msBuffer)
+  const query = deployed.methods.write(
+    hIdentity, mtOffsets, msOffsets,
+    mtSizes, msSizes, mtBuffer, msBuffer
+    )
 
   if (!estimate) {
     const accounts = await web3.eth.getAccounts()
@@ -221,7 +228,7 @@ function _getWriteData(index, contents, append) {
   } else {
     offsets.shift()
     buffers.shift()
-    const buffer = `0x${buffers.join('')}`
+    buffer = `0x${buffers.join('')}`
     result = { offsets, buffer }
   }
 
@@ -283,7 +290,7 @@ async function _deleteStagedFile(path) {
 // if it has, we know that AFS has been committed already
 async function _hasBeenCommitted(contents, hIdentity) {
   const buf = `0x${_getBufferFromStaged(contents, 0, 0)}`
-  const deployed = contract.get(abi, kStorageAddress)
+  const deployed = contract.get(abi, kAFSAddress)
   return deployed.methods.hasBuffer(hIdentity, 0, 0, buf).call()
 }
 
