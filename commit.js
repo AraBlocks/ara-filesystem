@@ -9,10 +9,7 @@ const { toHex } = require('ara-identity/util')
 const { resolve, dirname } = require('path')
 const { web3 } = require('ara-context')()
 const { contract } = require('ara-web3')
-const contract = require('ara-web3/contract')
-const account = require('ara-web3/account')
 const { setPrice } = require('./price')
-const tx = require('ara-web3/tx')
 const pify = require('pify')
 const fs = require('fs')
 
@@ -29,9 +26,13 @@ const {
 const {
   encryptJSON,
   decryptJSON,
-  getDocumentOwner,
-  validate
+  getDocumentOwner
 } = require('./util')
+
+const {
+  resolve,
+  dirname
+} = require('path')
 
 async function commit({
   did = '',
