@@ -4,9 +4,10 @@ const rc = require('./rc')()
 const rimraf = require('rimraf')
 const pify = require('pify')
 const { web3 } = require('ara-context')()
-const { abi } = require('./build/contracts/Storage.json')
-const { kStorageAddress } = require('./constants')
-const { getAFSOwnerIdentity, validate, hashDID } = require('ara-util')
+const { getAFSOwnerIdentity, validate } = require('ara-util')
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
+const { kAFSAddress } = require('ara-contracts/constants')
+const { contract } = require('ara-web3')
 
 const {
   createAFSKeyPath,
@@ -63,13 +64,12 @@ async function destroy({
     debug('db file at %s does not exist', path)
   }
 
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
+  const deployed = contract.get(abi, kAFSAddress) // use ara-web3 to get deployed proxy
   const accounts = await web3.eth.getAccounts()
-  const hIdentity = hashDID(did)
 
   try {
     // mark blockchain buffers invalid
-    await deployed.methods.del(hIdentity).send({ from: accounts[0], gas: 500000 })
+    await deployed.methods.unlist().send({ from: accounts[0], gas: 500000 })
   } catch (err) {
     throw new Error(err)
   }

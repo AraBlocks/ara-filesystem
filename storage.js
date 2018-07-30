@@ -4,16 +4,16 @@ const raf = require('random-access-file')
 const unixify = require('unixify')
 const { resolve, basename } = require('path')
 const { web3 } = require('ara-context')()
-const { abi } = require('./build/contracts/Storage.json')
 const { hashDID } = require('ara-util')
 
 const {
   writeToStaged,
   readFromStaged
 } = require('./commit')
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
+const { kAFSAddress } = require('ara-contracts/constants')
 
 const {
-  kStorageAddress,
   kMetadataTreeIndex,
   kMetadataSignaturesIndex,
   kMetadataTreeName: mTreeName,
@@ -34,9 +34,8 @@ function defaultStorage(identity, password, storage = null) {
 
 function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
+  const deployed = new web3.eth.Contract(abi, kAFSAddress)
 
-  const hIdentity = hashDID(identity)
   const writable = Boolean(password)
 
   return ras({
@@ -51,7 +50,7 @@ function create({ filename, identity, password }) {
       }) : null
       // data is not staged, must retrieve from bc
       if (!buffer) {
-        buffer = await deployed.methods.read(hIdentity, fileIndex, offset).call()
+        buffer = await deployed.methods.read(fileIndex, offset).call()
       }
       req.callback(null, _decode(buffer))
     },
@@ -74,7 +73,7 @@ function create({ filename, identity, password }) {
     async del(req) {
       if (writable) {
         const opts = await _getTxOpts()
-        await deployed.methods.del(hIdentity).send(opts)
+        await deployed.methods.unlist().send(opts)
       }
       req.callback(null)
     }
