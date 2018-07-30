@@ -12,6 +12,9 @@ const { contract } = require('ara-web3')
 const { validate, hashDID } = require('ara-util')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
+const contract = require('ara-web3/contract')
+const account = require('ara-web3/account')
+const tx = require('ara-web3/tx')
 
 const {
   kMetadataTreeName,
@@ -35,7 +38,7 @@ async function commit({
   estimate = false
 } = {}) {
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }

@@ -1,7 +1,8 @@
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
-const { web3 } = require('ara-context')()
-const { abi } = require('./build/contracts/Price.json')
-const { contract } = require('ara-web3')
+const contract = require('ara-web3/contract')
+const account = require('ara-web3/account')
+const tx = require('ara-web3/tx')
 
 const {
   validate,
@@ -44,7 +45,7 @@ async function setPrice({
   price = 0,
 } = {}) {
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }
@@ -53,14 +54,21 @@ async function setPrice({
     throw new TypeError('Price should be 0 or positive whole number')
   }
 
-  const accounts = await web3.eth.getAccounts()
   const deployed = contract.get(abi, kAFSAddress)
 
   try {
-    await deployed.methods.setPrice(price).send({
-      from: accounts[0],
-      gas: 500000
+    const transaction = tx.create({
+      account: acct,
+      to: kAFSAddress,
+      data: {
+        abi,
+        name: 'setPrice',
+        values: [
+          price
+        ]
+      }
     })
+    tx.sendSignedTransaction(transaction)
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
@@ -79,7 +87,7 @@ async function getPrice({
     throw err
   }
 
-  const deployed = new web3.eth.Contract(abi, kAFSAddress)
+  const deployed = contract.get(abi, kAFSAddress)
   const result = await deployed.methods.price_().call()
   debug('price for %s: %d', did, result)
   return result
