@@ -8,7 +8,7 @@ const raf = require('random-access-file')
 const unixify = require('unixify')
 const { resolve, basename } = require('path')
 const { web3 } = require('ara-context')()
-const { hashDID } = require('ara-util')
+const { hashDID, validate, getDocumentOwner } = require('ara-util')
 
 const {
   writeToStaged,

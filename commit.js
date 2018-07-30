@@ -17,6 +17,7 @@ const account = require('ara-web3/account')
 const tx = require('ara-web3/tx')
 
 const {
+  kStagingFile,
   kMetadataTreeName,
   kMetadataTreeIndex,
   kMetadataTreeBufferSize,
@@ -27,6 +28,7 @@ const {
 } = require('./constants')
 
 const {
+  validate,
   encryptJSON,
   decryptJSON
 } = require('./util')
@@ -42,6 +44,7 @@ async function commit({
   price = -1,
   estimate = false
 } = {}) {
+  let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {

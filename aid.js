@@ -7,9 +7,9 @@ const { normalize } = require('ara-util')
 const aid = require('ara-identity')
 
 const {
+  kKeyLength,
   kAidPrefix,
-  kOwnerSuffix,
-  kKeyLength
+  kOwnerSuffix
 } = require('./constants')
 
 async function create({
