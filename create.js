@@ -1,6 +1,5 @@
 /* eslint-disable no-shadow */
 
-const { toHex, writeIdentity } = require('ara-identity/util')
 const debug = require('debug')('ara-filesystem:create')
 const { createAFSKeyPath } = require('./key-path')
 const { defaultStorage } = require('./storage')
@@ -12,6 +11,11 @@ const mkdirp = require('mkdirp')
 const aid = require('./aid')
 const pify = require('pify')
 const rc = require('./rc')()
+
+const {
+  toHex,
+  writeIdentity
+} = require('ara-identity/util')
 
 const {
   kResolverKey,

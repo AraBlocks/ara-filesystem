@@ -2,13 +2,16 @@
 
 const debug = require('debug')('ara-filesystem:add')
 const isDirectory = require('is-directory')
-const { resolve, join } = require('path')
 const ignored = require('./lib/ignore')
 const { create } = require('./create')
-const { stat, access } = require('fs')
 const isFile = require('is-file')
 const pify = require('pify')
 const fs = require('fs')
+
+const {
+  resolve,
+  join
+} = require('path')
 
 async function add(opts) {
   if (null === opts.did || 'string' !== typeof opts.did || !opts.did) {
@@ -42,7 +45,7 @@ async function add(opts) {
     for (const path of files) {
       // ensure local file path exists
       try {
-        await pify(access)(path)
+        await pify(fs.access)(path)
         // directories
         if (await pify(isDirectory)(path)) {
           // add local directory to AFS at path
@@ -93,7 +96,7 @@ async function add(opts) {
     const dest = src.replace(process.cwd(), afs.HOME)
 
     // file stats
-    const stats = await pify(stat)(src)
+    const stats = await pify(fs.stat)(src)
 
     try {
       const { mtime } = await pify(afs.stat)(dest)

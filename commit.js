@@ -31,6 +31,11 @@ const {
   decryptJSON
 } = require('./util')
 
+const {
+  resolve,
+  dirname
+} = require('path')
+
 async function commit({
   did = '',
   password = '',
