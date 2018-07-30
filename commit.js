@@ -11,10 +11,18 @@ const { setPrice } = require('./price')
 const { validate, hashDID } = require('ara-util')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
+const { abi: afsAbi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const contract = require('ara-web3/contract')
+const proxyRc = require('ara-contracts/rc')
 const account = require('ara-web3/account')
 const tx = require('ara-web3/tx')
+const solc = require('solc')
+
+const {
+  kRegistryAddress,
+  kAFSAddress
+} = require('ara-contracts/constants')
 
 const {
   kStagingFile,
@@ -50,6 +58,10 @@ async function commit({
   } catch (err) {
     throw err
   }
+
+  // call registry to check if this did has been deployed before
+  // if not, _deployProxy(did, acct) then add to registry
+  // otherwise, get proxy address
 
   const path = generateStagedPath(did)
   try {
