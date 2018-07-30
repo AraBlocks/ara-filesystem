@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 
-const { abi } = require('ara-contracts/build/contracts/AFS.json')
-const { kAFSAddress } = require('ara-contracts/constants')
+const { abi: regAbi } = require('ara-contracts/build/contracts/Registry.json')
+const { abi: afsAbi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
 const { validate, hashDID } = require('ara-util')
@@ -12,6 +12,11 @@ const { contract } = require('ara-web3')
 const { setPrice } = require('./price')
 const pify = require('pify')
 const fs = require('fs')
+
+const {
+  kRegistryAddress,
+  kAFSAddress
+} = require('ara-contracts/constants')
 
 const {
   kStagingFile,
@@ -48,6 +53,10 @@ async function commit({
   } catch (err) {
     throw err
   }
+
+  // call registry to check if this did has been deployed before
+  // if not, _deployProxy(did, acct) then add to registry
+  // otherwise, get proxy address
 
   const path = generateStagedPath(did)
   try {
