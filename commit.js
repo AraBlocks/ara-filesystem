@@ -7,15 +7,15 @@ const { web3 } = require('ara-context')()
 const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
-const { abi } = require('./build/contracts/Storage.json')
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
+const { kAFSAddress } = require('ara-contracts/constants')
 
 const {
   kMetadataTreeName,
   kMetadataTreeIndex,
   kMetadataSignaturesName,
   kMetadataSignaturesIndex,
-  kStagingFile,
-  kStorageAddress
+  kStagingFile
 } = require('./constants')
 
 const {
@@ -46,7 +46,7 @@ async function commit({
 
   const contents = _readStagedFile(path, password)
   const accounts = await web3.eth.getAccounts()
-  const deployed = getDeployedContract(abi, kStorageAddress)
+  const deployed = getDeployedContract(abi, kAFSAddress)
   const { resolveBufferIndex } = require('./storage')
   const hIdentity = hash(did)
 
@@ -62,7 +62,7 @@ async function commit({
       const data = `0x${buffers[offset]}`
 
       const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
-      await deployed.methods.write(hIdentity, index, offset, data, lastWrite).send({
+      await deployed.methods.write(index, offset, data, lastWrite).send({
         from: accounts[0],
         gas: 500000
       })
@@ -137,7 +137,7 @@ async function estimateCommitGasCost({
   try {
     const hIdentity = hash(did)
     const { resolveBufferIndex } = require('./storage')
-    const deployed = getDeployedContract(abi, kStorageAddress)
+    const deployed = getDeployedContract(abi, kAFSAddress)
 
     const path = generateStagedPath(did)
     const contents = _readStagedFile(path, password)
@@ -155,7 +155,7 @@ async function estimateCommitGasCost({
 
         const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
         cost += await deployed.methods
-          .write(hIdentity, index, offset, data, lastWrite)
+          .write(index, offset, data, lastWrite)
           .estimateGas({ gas: 500000 })
       }
     }

@@ -3,11 +3,6 @@ const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Price.json')
 
 const {
-  kPriceAddress,
-  kStorageAddress
-} = require('./constants')
-
-const {
   hash,
   validate,
   getDeployedContract
@@ -31,9 +26,9 @@ async function estimateSetPriceGasCost({
   let cost
   try {
     const hIdentity = hash(did)
-    const deployed = getDeployedContract(abi, kPriceAddress)
+    const deployed = getDeployedContract(abi, kAFSAddress)
     cost = await deployed.methods
-      .setPrice(hIdentity, price, kStorageAddress)
+      .setPrice(price)
       .estimateGas({ gas: 500000 })
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
@@ -59,10 +54,10 @@ async function setPrice({
 
   const accounts = await web3.eth.getAccounts()
   const hIdentity = hash(did)
-  const deployed = getDeployedContract(abi, kPriceAddress)
+  const deployed = getDeployedContract(abi, kAFSAddress)
 
   try {
-    await deployed.methods.setPrice(hIdentity, price, kStorageAddress).send({
+    await deployed.methods.setPrice(price).send({
       from: accounts[0],
       gas: 500000
     })
@@ -85,8 +80,8 @@ async function getPrice({
   }
 
   const hIdentity = hash(did)
-  const deployed = new web3.eth.Contract(abi, kPriceAddress)
-  const result = await deployed.methods.getPrice(hIdentity).call()
+  const deployed = new web3.eth.Contract(abi, kAFSAddress)
+  const result = await deployed.methods.price_().call()
   debug('price for %s: %d', hIdentity, result)
   return result
 }
