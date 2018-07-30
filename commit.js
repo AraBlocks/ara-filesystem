@@ -1,16 +1,17 @@
 /* eslint-disable no-await-in-loop */
 
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
+const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:commit')
-const fs = require('fs')
-const pify = require('pify')
-const { toHex } = require('ara-identity/util')
-const { web3 } = require('ara-context')()
-const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
-const { setPrice } = require('./price')
-const { abi } = require('./build/contracts/Storage.json')
-const { contract } = require('ara-web3')
 const { validate, hashDID } = require('ara-util')
+const { toHex } = require('ara-identity/util')
+const { resolve, dirname } = require('path')
+const { web3 } = require('ara-context')()
+const { contract } = require('ara-web3')
+const { setPrice } = require('./price')
+const pify = require('pify')
+const fs = require('fs')
 
 const {
   kMetadataTreeName,
@@ -19,8 +20,7 @@ const {
   kMetadataSignaturesName,
   kMetadataSignaturesIndex,
   kMetadataSignaturesBufferSize,
-  kStagingFile,
-  kStorageAddress
+  kStagingFile
 } = require('./constants')
 
 const {
@@ -49,7 +49,7 @@ async function commit({
 
   const contents = _readStagedFile(path, password)
   const accounts = await web3.eth.getAccounts()
-  const deployed = contract.get(abi, kStorageAddress)
+  const deployed = contract.get(abi, kAFSAddress)
   const hIdentity = hashDID(did)
 
   const exists = await _hasBeenCommitted(contents, hIdentity)
