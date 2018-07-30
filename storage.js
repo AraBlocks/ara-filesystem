@@ -22,6 +22,16 @@ const {
   kMetadataSignaturesName: mSigName
 } = require('./constants')
 
+const {
+  validate,
+  getDocumentOwner
+} = require('./util')
+
+const {
+  resolve,
+  basename
+} = require('path')
+
 function defaultStorage(identity, password, storage = null) {
   return (filename, drive, path) => {
     filename = unixify(filename)

@@ -7,6 +7,7 @@ const { secret } = require('./rc')()
 const aid = require('ara-identity')
 
 const {
+  kKeyLength,
   kAidPrefix,
   kOwnerSuffix,
   kKeyLength,

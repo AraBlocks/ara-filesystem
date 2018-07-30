@@ -14,6 +14,7 @@ const pify = require('pify')
 const fs = require('fs')
 
 const {
+  kStagingFile,
   kMetadataTreeName,
   kMetadataTreeIndex,
   kMetadataTreeBufferSize,
@@ -24,6 +25,7 @@ const {
 } = require('./constants')
 
 const {
+  validate,
   encryptJSON,
   decryptJSON,
   getDocumentOwner
@@ -40,6 +42,7 @@ async function commit({
   price = -1,
   estimate = false
 } = {}) {
+  let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {

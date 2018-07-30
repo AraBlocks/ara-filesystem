@@ -2,7 +2,7 @@
 
 const debug = require('debug')('ara-filesystem:add')
 const { create } = require('./create')
-const { join, basename, resolve, join } = require('path')
+const { join, basename, resolve } = require('path')
 const pify = require('pify')
 const isFile = require('is-file')
 const mirror = require('mirror-folder')
