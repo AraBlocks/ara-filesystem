@@ -70,7 +70,6 @@ async function destroy({
 
   const deployed = new web3.eth.Contract(abi, kAFSAddress) // use ara-web3 to get deployed proxy
   const accounts = await web3.eth.getAccounts()
-  const hIdentity = hash(did)
 
   try {
     // mark blockchain buffers invalid

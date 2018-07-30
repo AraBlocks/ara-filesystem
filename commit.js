@@ -48,7 +48,6 @@ async function commit({
   const accounts = await web3.eth.getAccounts()
   const deployed = getDeployedContract(abi, kAFSAddress)
   const { resolveBufferIndex } = require('./storage')
-  const hIdentity = hash(did)
 
   const contentsLength = Object.keys(contents).length
   for (let i = 0; i < contentsLength; i++) {
@@ -135,7 +134,6 @@ async function estimateCommitGasCost({
 
   let cost = 0
   try {
-    const hIdentity = hash(did)
     const { resolveBufferIndex } = require('./storage')
     const deployed = getDeployedContract(abi, kAFSAddress)
 

@@ -31,7 +31,6 @@ function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kAFSAddress)
 
-  const hIdentity = hash(identity)
   const writable = Boolean(password)
 
   return ras({

@@ -25,7 +25,6 @@ async function estimateSetPriceGasCost({
 
   let cost
   try {
-    const hIdentity = hash(did)
     const deployed = getDeployedContract(abi, kAFSAddress)
     cost = await deployed.methods
       .setPrice(price)
@@ -53,7 +52,6 @@ async function setPrice({
   }
 
   const accounts = await web3.eth.getAccounts()
-  const hIdentity = hash(did)
   const deployed = getDeployedContract(abi, kAFSAddress)
 
   try {
@@ -79,10 +77,9 @@ async function getPrice({
     throw err
   }
 
-  const hIdentity = hash(did)
   const deployed = new web3.eth.Contract(abi, kAFSAddress)
   const result = await deployed.methods.price_().call()
-  debug('price for %s: %d', hIdentity, result)
+  debug('price for %s: %d', did, result)
   return result
 }
 
