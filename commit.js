@@ -84,6 +84,7 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
+<<<<<<< b353f6cb5c1ea7ab4514c061723205c2682b6f2c
   const accounts = await web3.eth.getAccounts()
   const deployed = contract.get(abi, kAFSAddress)
   const hIdentity = hashDID(did)
