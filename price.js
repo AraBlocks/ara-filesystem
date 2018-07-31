@@ -61,7 +61,7 @@ async function setPrice({
   const acct = await account.load({ did: owner, password })
 
   try {
-    const transaction = tx.create({
+    const transaction = await tx.create({
       account: acct,
       to: kAFSAddress,
       data: {
@@ -72,7 +72,7 @@ async function setPrice({
         ]
       }
     })
-    tx.sendSignedTransaction(transaction)
+    await tx.sendSignedTransaction(transaction)
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
