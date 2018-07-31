@@ -79,7 +79,7 @@ async function commit({
 
       const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
 
-      const transaction = tx.create({
+      const transaction = await tx.create({
         account: acct,
         to: kAFSAddress, // change to proxy
         data: {
@@ -93,7 +93,7 @@ async function commit({
           ]
         }
       })
-      tx.sendSignedTransaction(transaction)
+      await tx.sendSignedTransaction(transaction)
     }
   }
 
@@ -106,11 +106,11 @@ async function commit({
   return null
 }
 
-function async _deployProxy(did, account) {
+async function _deployProxy(did, account) {
   const source = fs.readFileSync(proxyRc, 'utf8')
   const compiledFile = solc.compile(source, 1)
   const compiledContract = compiledFile.contracts['Proxy']
-  const abi = compileContract.interface
+  const abi = compiledContract.interface
   const bytecode = compiledContract.bytecode
   
   const proxy = await contract.deploy({

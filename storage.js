@@ -85,7 +85,7 @@ function create({ filename, identity, password }) {
         const owner = getDocumentOwner(ddo, true)
         const acct = await account.load({ did: owner, password })
 
-        const transaction = tx.create({
+        const transaction = await tx.create({
           account: acct,
           to: kAFSAddress,
           data: {
@@ -93,7 +93,7 @@ function create({ filename, identity, password }) {
             name: 'unlist'
           }
         })
-        tx.sendSignedTransaction(transaction)
+        await tx.sendSignedTransaction(transaction)
       }
       req.callback(null)
     }

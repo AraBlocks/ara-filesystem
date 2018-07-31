@@ -74,7 +74,7 @@ async function destroy({
   const acct = await account.load({ did: owner, password })
 
   try {
-    const transaction = tx.create({
+    const transaction = await tx.create({
       account: acct,
       to: kAFSAddress,
       data: {
@@ -82,7 +82,7 @@ async function destroy({
         name: 'unlist'
       }
     })
-    tx.sendSignedTransaction(transaction)
+    await tx.sendSignedTransaction(transaction)
   } catch (err) {
     throw new Error(err)
   }
