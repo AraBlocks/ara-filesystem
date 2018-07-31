@@ -106,24 +106,6 @@ async function commit({
   return null
 }
 
-async function _deployProxy(did, account) {
-  const source = fs.readFileSync(proxyRc, 'utf8')
-  const compiledFile = solc.compile(source, 1)
-  const compiledContract = compiledFile.contracts['Proxy']
-  const abi = compiledContract.interface
-  const bytecode = compiledContract.bytecode
-  
-  const proxy = await contract.deploy({
-    account,
-    abi,
-    bytecode,
-    arguments: [
-      kRegistryAddress,
-      did
-    ]
-  })
-}
-
 function append({
   did,
   fileIndex,
