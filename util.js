@@ -5,6 +5,7 @@ const aid = require('./aid')
 const fs = require('fs')
 const path = require('path')
 const pify = require('pify')
+const hasDIDMethod = require('has-did-method')
 const { createIdentityKeyPath } = require('./key-path')
 
 const {
@@ -225,10 +226,6 @@ async function getAfsId(did, mnemonic, password) {
   return aid.create({ mnemonic, owner, password })
 }
 
-function hasDIDMethod(did) {
-  return 0 === did.indexOf(kDidPrefix)
-}
-
 module.exports = {
   generateKeypair,
   encrypt,
@@ -244,6 +241,5 @@ module.exports = {
   hash,
   validate,
   getDeployedContract,
-  getAfsId,
-  hasDIDMethod
+  getAfsId
 }
