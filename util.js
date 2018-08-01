@@ -18,7 +18,6 @@ const {
 
 const {
   kAidPrefix,
-  kDidPrefix,
   kOwnerSuffix,
   kResolverKey
 } = require('./constants')
