@@ -2,6 +2,7 @@ const debug = require('debug')('ara-filesystem:aid')
 const aid = require('ara-identity')
 const context = require('ara-context')()
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
+const hasDIDMethod = require('has-did-method')
 
 const {
   kAidPrefix,
@@ -21,8 +22,6 @@ async function create({
   if (null == owner || 'string' !== typeof owner) {
     throw new TypeError('ara-filesystem.aid: Expecting non-empty string.')
   }
-
-  const { hasDIDMethod } = require('./util')
 
   if ((hasDIDMethod(owner) && kKeyLength !== owner.slice(kAidPrefix.length).length)
     || (!hasDIDMethod(owner) && kKeyLength !== owner.length)) {
