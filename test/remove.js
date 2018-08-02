@@ -55,7 +55,7 @@ test.serial('remove() valid did, valid password, valid path (1)', async (t) => {
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./index.js']
+  const paths = [ './index.js' ]
 
   await add({
     did,
@@ -76,7 +76,7 @@ test.serial('remove() valid did, valid password, valid path (3)', async (t) => {
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./index.js', './add.js', './aid.js']
+  const paths = [ './index.js', './add.js', './aid.js' ]
 
   await add({
     did,
@@ -99,7 +99,7 @@ test.serial('remove() valid did, valid password, valid directory (1, not nested)
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./bin']
+  const paths = [ './bin' ]
 
   await add({
     did,
@@ -120,7 +120,7 @@ test.serial('remove() valid did, valid password, valid directory (1, nested)', a
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./test']
+  const paths = [ './test' ]
 
   await add({
     did,
@@ -141,7 +141,7 @@ test.serial('remove() valid did, valid password, valid directory (2, nested)', a
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./test', './build']
+  const paths = [ './test', './build' ]
 
   await add({
     did,
@@ -163,7 +163,7 @@ test.serial('remove() valid did, valid password, invalid directory (1)', async (
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./doesnotexist']
+  const paths = [ './doesnotexist' ]
 
   await t.notThrows(remove({
     did,
@@ -176,7 +176,7 @@ test.serial('remove() valid did, valid password, invalid directory (1), valid di
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./doesnotexist', './bin']
+  const paths = [ './doesnotexist', './bin' ]
 
   await add({
     did,
@@ -197,7 +197,7 @@ test.serial('remove() valid did, valid password, invalid path (1)', async (t) =>
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./doesnotexist.js']
+  const paths = [ './doesnotexist.js' ]
 
   await t.notThrows(remove({
     did,
@@ -212,7 +212,7 @@ test.serial('remove() valid did, valid password, invalid path (1), valid path (1
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./doesnotexist.js', './index.js']
+  const paths = [ './doesnotexist.js', './index.js' ]
 
   await add({
     did,
@@ -245,7 +245,7 @@ test.serial('remove() valid did, invalid password, valid path (1)', async (t) =>
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./index.js']
+  const paths = [ './index.js' ]
 
   await t.throws(remove({
     did,
@@ -258,7 +258,7 @@ test.serial('remove() valid did, invalid password, valid path (2)', async (t) =>
   const afs = getAFS(t)
   const { did } = afs
 
-  const paths = ['./index.js', './add.js']
+  const paths = [ './index.js', './add.js' ]
 
   await t.throws(remove({
     did,
@@ -275,7 +275,7 @@ test.serial('remove() invalid did, valid password, no paths', async (t) => {
 })
 
 test.serial('remove() invalid did, valid password, valid path (1)', async (t) => {
-  const paths = ['./index.js']
+  const paths = [ './index.js' ]
 
   await t.throws(remove({
     did: 'invaliddid',
@@ -292,7 +292,7 @@ test.serial('remove() invalid did, invalid password, no paths', async (t) => {
 })
 
 test.serial('remove() invalid did, invalid password, valid path (1)', async (t) => {
-  const paths = ['./index.js']
+  const paths = [ './index.js' ]
 
   await t.throws(remove({
     did: 'invaliddid',
@@ -302,7 +302,7 @@ test.serial('remove() invalid did, invalid password, valid path (1)', async (t) 
 })
 
 test.serial('remove() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
-  const paths = ['./index.js', './doesnotexist.js']
+  const paths = [ './index.js', './doesnotexist.js' ]
 
   await t.throws(remove({
     did: 'invaliddid',
@@ -312,7 +312,7 @@ test.serial('remove() invalid did, invalid password, valid path (1), invalid pat
 })
 
 test.serial('remove() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
-  const paths = ['./index.js', './doesnotexist.js']
+  const paths = [ './index.js', './doesnotexist.js' ]
 
   await t.throws(remove({
     did: 'invaliddid',

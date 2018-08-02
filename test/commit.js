@@ -85,7 +85,7 @@ test("commit() no changes to commit", async (t) => {
 test("commit() staged file successfully deleted", async (t) => {
   const did = getDid(t)
   const file = resolve(__dirname, 'commit.js')
-  await add({ did, paths: [file], password })
+  await add({ did, paths: [ file ], password })
 
   const path = generateStagedPath(did)
   await runValidCommit(t)
@@ -98,7 +98,7 @@ test("commit() previously cached buffers match blockchain buffers", async (t) =>
   const { publicKey } = t.context
   const { afs } = await create({ owner: publicKey, password })
   const { did } = afs
-  await add({ did, paths: [file], password })
+  await add({ did, paths: [ file ], password })
   const path = generateStagedPath(did)
 
   let contents = fs.readFileSync(path, 'utf8')

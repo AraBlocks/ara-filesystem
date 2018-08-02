@@ -247,8 +247,9 @@ async function onadd(argv) {
 
   const { password } = await promptForPassword()
 
+  let instance
   try {
-    await afs.add({
+    instance = await afs.add({
       did,
       paths,
       password })
@@ -256,6 +257,7 @@ async function onadd(argv) {
   } catch (err) {
     onfatal(err)
   }
+  instance.close()
 }
 
 async function onremove(argv) {
@@ -271,9 +273,9 @@ async function onremove(argv) {
   info("paths: ", paths)
 
   const { password } = await promptForPassword()
-
+  let instance
   try {
-    await afs.remove({
+    instance = await afs.remove({
       did,
       paths,
       password })
@@ -281,6 +283,7 @@ async function onremove(argv) {
   } catch (err) {
     onfatal(err)
   }
+  instance.close()
 }
 
 async function oncommit({ did, price }) {
