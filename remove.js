@@ -4,23 +4,21 @@ const debug = require('debug')('ara-filesystem:remove')
 const { create } = require('./create')
 const { resolve, join } = require('path')
 
-async function remove({
-  did = '',
-  paths = [],
-  password = ''
-} = {}) {
-  if (null == did || 'string' !== typeof did || !did) {
+async function remove(opts) {
+  if (null == opts.did || 'string' !== typeof opts.did || !opts.did) {
     throw new TypeError('ara-filesystem.remove: Expecting non-empty did.')
   }
 
-  if (null == password || 'string' !== typeof password || !password) {
+  if (null == opts.password || 'string' !== typeof opts.password || !opts.password) {
     throw new TypeError('ara-filesystem.remove: Password required to continue')
   }
 
-  if (null === paths || (!(paths instanceof Array) && 'string' !== typeof paths)
-    || 0 === paths.length) {
+  if (null === opts.paths || (!(opts.paths instanceof Array)
+    && 'string' !== typeof opts.paths) || 0 === opts.paths.length) {
     throw new TypeError('ara-filesystem.remove: Expecting one or more filepaths to remove')
   }
+
+  const { did, password, paths } = opts
 
   let afs
   try {
@@ -53,7 +51,8 @@ async function remove({
       }
     }
   }
-  afs.close()
+
+  return afs
 }
 
 module.exports = {
