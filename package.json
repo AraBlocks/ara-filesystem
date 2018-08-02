@@ -37,6 +37,8 @@
     "ara-identity": "github:arablocks/ara-identity",
     "ara-network": "github:arablocks/ara-network",
     "ara-runtime-configuration": "github:arablocks/ara-runtime-configuration",
+    "ara-util": "github:arablocks/ara-util",
+    "ara-web3": "github:arablocks/ara-web3",
     "cfsnet": "github:arablocks/cfsnet",
     "cli-width": "^2.2.0",
     "debug": "^3.1.0",

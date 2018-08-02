@@ -64,21 +64,6 @@ function getDocumentOwner(ddo, shouldValidate = true) {
   return shouldValidate ? normalize(id) : id
 }
 
-function getDocumentKeyHex(ddo) {
-  if (!ddo || null == ddo || 'object' !== typeof ddo) {
-    throw new TypeError('Expecting DDO')
-  }
-
-  let pk
-  if (ddo.publicKey) {
-    pk = ddo.publicKey[0].publicKeyHex
-  } else if (ddo.didDocument) {
-    pk = ddo.didDocument.publicKey[0].publicKeyHex
-  }
-
-  return pk
-}
-
 async function isCorrectPassword({
   ddo = {},
   password = ''
@@ -214,17 +199,6 @@ async function resolve(did) {
   return ddo
 }
 
-function getDeployedContract(abi, address) {
-  return new web3.eth.Contract(abi, address)
-}
-
-async function getAfsId(did, mnemonic, password) {
-  const keystore = await loadSecrets(kResolverKey)
-  const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
-  const owner = getDocumentOwner(afsDdo)
-  return aid.create({ mnemonic, owner, password })
-}
-
 module.exports = {
   generateKeypair,
   encrypt,
@@ -235,10 +209,7 @@ module.exports = {
   loadSecrets,
   normalize,
   getDocumentOwner,
-  getDocumentKeyHex,
   isCorrectPassword,
   hash,
-  validate,
-  getDeployedContract,
-  getAfsId
+  validate
 }

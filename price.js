@@ -1,6 +1,7 @@
 const debug = require('debug')('ara-filesystem:price')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Price.json')
+const { contract } = require('ara-web3')
 
 const {
   kPriceAddress,
@@ -9,8 +10,7 @@ const {
 
 const {
   hash,
-  validate,
-  getDeployedContract
+  validate
 } = require('./util')
 
 async function estimateSetPriceGasCost({
@@ -31,7 +31,7 @@ async function estimateSetPriceGasCost({
   let cost
   try {
     const hIdentity = hash(did)
-    const deployed = getDeployedContract(abi, kPriceAddress)
+    const deployed = contract.get(abi, kPriceAddress)
     cost = await deployed.methods
       .setPrice(hIdentity, price, kStorageAddress)
       .estimateGas({ gas: 500000 })
@@ -59,7 +59,7 @@ async function setPrice({
 
   const accounts = await web3.eth.getAccounts()
   const hIdentity = hash(did)
-  const deployed = getDeployedContract(abi, kPriceAddress)
+  const deployed = contract.get(abi, kPriceAddress)
 
   try {
     await deployed.methods.setPrice(hIdentity, price, kStorageAddress).send({

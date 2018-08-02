@@ -6,6 +6,7 @@ const pify = require('pify')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 const { kStorageAddress } = require('./constants')
+const { getAFSOwnerIdentity } = require('ara-util')
 
 const {
   createAFSKeyPath,
@@ -14,8 +15,7 @@ const {
 
 const {
   validate,
-  hash,
-  getAfsId
+  hash
 } = require('./util')
 
 const {
@@ -44,7 +44,7 @@ async function destroy({
 
   try {
     // destroy AFS identity
-    const afsIdentity = await getAfsId(did, mnemonic, password)
+    const afsIdentity = await getAFSOwnerIdentity({ did, mnemonic, password })
     path = createIdentityKeyPath(afsIdentity)
     await pify(access)(path)
     await pify(rimraf)(path)
@@ -81,6 +81,5 @@ async function destroy({
 }
 
 module.exports = {
-  destroy,
-  getAfsId
+  destroy
 }
