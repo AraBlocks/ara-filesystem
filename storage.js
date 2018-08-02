@@ -6,7 +6,7 @@ const { resolve, basename } = require('path')
 const { append, retrieve } = require('./commit')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
-const { hash } = require('./util')
+const { hashDID } = require('ara-util')
 
 const {
   kStorageAddress,
@@ -31,7 +31,7 @@ function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
 
-  const hIdentity = hash(identity)
+  const hIdentity = hashDID(identity)
   const writable = Boolean(password)
 
   return ras({

@@ -9,6 +9,7 @@ const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
 const { abi } = require('./build/contracts/Storage.json')
 const { contract } = require('ara-web3')
+const { validate, hashDID } = require('ara-util')
 
 const {
   kMetadataTreeName,
@@ -21,9 +22,7 @@ const {
 
 const {
   encryptJSON,
-  decryptJSON,
-  validate,
-  hash
+  decryptJSON
 } = require('./util')
 
 async function commit({
@@ -48,7 +47,7 @@ async function commit({
   const accounts = await web3.eth.getAccounts()
   const deployed = contract.get(abi, kStorageAddress)
   const { resolveBufferIndex } = require('./storage')
-  const hIdentity = hash(did)
+  const hIdentity = hashDID(did)
 
   const contentsLength = Object.keys(contents).length
   for (let i = 0; i < contentsLength; i++) {
@@ -135,7 +134,7 @@ async function estimateCommitGasCost({
 
   let cost = 0
   try {
-    const hIdentity = hash(did)
+    const hIdentity = hashDID(did)
     const { resolveBufferIndex } = require('./storage')
     const deployed = contract.get(abi, kStorageAddress)
 

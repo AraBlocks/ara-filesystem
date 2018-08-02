@@ -12,11 +12,11 @@ const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
-const { validate } = require('./util')
 
 const {
   getDocumentKeyHex,
-  loadSecretsKeystore
+  loadSecretsKeystore,
+  validate
 } = require('ara-util')
 
 const {
