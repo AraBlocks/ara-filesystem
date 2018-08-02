@@ -9,6 +9,12 @@ const hasDIDMethod = require('has-did-method')
 const { createIdentityKeyPath } = require('./key-path')
 
 const {
+  normalize,
+  loadSecretsKeystore,
+  isCorrectPassword
+} = require('ara-util')
+
+const {
   blake2b,
   keyPair,
   encrypt: cryptoEncrypt,
@@ -41,11 +47,6 @@ function randomBytes(size) {
   return cryptoRandomBytes(size)
 }
 
-async function loadSecrets(key) {
-  const { public: pub } = await secrets.load({ key, public: true })
-  return pub.keystore
-}
-
 function getDocumentOwner(ddo, shouldValidate = true) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
@@ -62,35 +63,6 @@ function getDocumentOwner(ddo, shouldValidate = true) {
   const id = pk.slice(0, pk.length - suffixLength)
 
   return shouldValidate ? normalize(id) : id
-}
-
-async function isCorrectPassword({
-  ddo = {},
-  password = ''
-} = {}) {
-  if (!password || 'string' !== typeof password) {
-    throw new TypeError('Password must be non-empty string.')
-  }
-
-  if (!ddo || 'object' !== typeof ddo || 0 === ddo.publicKey.length) {
-    throw new TypeError('Expecting DDO to be object with valid publicKey array.')
-  }
-
-  const { publicKeyHex } = ddo.publicKey[0]
-
-  password = blake2b(Buffer.from(password))
-  const identityPath = path.resolve(createIdentityKeyPath(ddo), 'keystore/ara')
-
-  let secretKey
-  try {
-    const keys = JSON.parse(await pify(fs.readFile)(identityPath, 'utf8'))
-    secretKey = cryptoDecrypt(keys, { key: password.slice(0, 16) })
-  } catch (err) {
-    return false
-  }
-
-  const publicKey = secretKey.slice(32).toString('hex')
-  return publicKeyHex === publicKey
 }
 
 function encryptJSON(json, password) {
@@ -121,24 +93,6 @@ function decryptJSON(keystore, password) {
 
 function hash(str, encoding = 'hex') {
   return toHex(blake2b(Buffer.from(str, encoding)))
-}
-
-function normalize(did = '') {
-  if (!did || 'string' !== typeof did) {
-    throw new TypeError('Expecting DID to be non-empty string')
-  }
-
-  if (hasDIDMethod(did)) {
-    if (0 !== did.indexOf(kAidPrefix)) {
-      throw new TypeError('Expecting a DID URI with an "ara" method.')
-    } else {
-      did = did.substring(kAidPrefix.length)
-      if (64 !== did.length) {
-        throw new Error('DID is not 64 characters')
-      }
-    }
-  }
-  return did
 }
 
 async function validate({
@@ -194,7 +148,7 @@ async function validate({
 }
 
 async function resolve(did) {
-  const keystore = await loadSecrets(kResolverKey)
+  const keystore = await loadSecretsKeystore(kResolverKey)
   const ddo = await aid.resolve(did, { key: kResolverKey, keystore })
   return ddo
 }
@@ -206,8 +160,6 @@ module.exports = {
   encryptJSON,
   decryptJSON,
   randomBytes,
-  loadSecrets,
-  normalize,
   getDocumentOwner,
   isCorrectPassword,
   hash,

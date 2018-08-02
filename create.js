@@ -12,12 +12,12 @@ const mkdirp = require('mkdirp')
 const rc = require('./rc')()
 const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
-const { getDocumentKeyHex } = require('ara-util')
+const { validate } = require('./util')
 
 const {
-  loadSecrets,
-  validate
-} = require('./util')
+  getDocumentKeyHex,
+  loadSecretsKeystore
+} = require('ara-util')
 
 const {
   kResolverKey,
@@ -73,13 +73,13 @@ async function create({
 
     await writeIdentity(afsId)
 
-    let keystore = await loadSecrets(kArchiverKey)
+    let keystore = await loadSecretsKeystore(kArchiverKey)
     await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
 
-    keystore = await loadSecrets(kResolverKey)
+    keystore = await loadSecretsKeystore(kResolverKey)
     const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     if (null == afsDdo || 'object' !== typeof afsDdo) {
