@@ -1,6 +1,10 @@
 pragma solidity ^0.4.24;
 
+import "bytes/BytesLib.sol";
+
 contract Storage {
+
+  using BytesLib for bytes;
 
   address public owner;
 
@@ -11,11 +15,11 @@ contract Storage {
 
   struct Buffers {
     mapping (uint256 => bytes) buffers;
-    uint256 largest_key;
     uint256[] keys;
     bool invalid;
   }
 
+  event WriteAttempt(uint _bufferLength, uint256 _offset, uint8 _size);
   event Commit(string _identity);
   event MarkedInvalid(string _identity);
 
@@ -28,18 +32,18 @@ contract Storage {
     _;
   }
 
-  function write(string identity, uint8 file, uint256 offset, bytes buffer, bool last_write) public restricted {
-    // make sure AFS hasn't been removed
+  function write(string identity, uint8 file, uint256[] offsets, 
+    uint8[] sizes, bytes buffer) public restricted {
+
+    require(offsets.length == sizes.length);
     require(!buffer_mappings[identity][file].invalid);
 
-    buffer_mappings[identity][file].buffers[offset] = buffer;
-    buffer_mappings[identity][file].keys.push(offset);
-    if (offset > buffer_mappings[identity][file].largest_key) {
-      buffer_mappings[identity][file].largest_key = offset;
-    }
-
-    if (last_write) {
-      emit Commit(identity);
+    for (uint i = 0; i < offsets.length; i++) {
+      uint256 offset = offsets[i];
+      uint8 size = sizes[i];
+      bytes memory slice = buffer.slice(offset, size);
+      buffer_mappings[identity][file].buffers[offsets[i]] = slice;
+      buffer_mappings[identity][file].keys.push(offset);
     }
   }
 

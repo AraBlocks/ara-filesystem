@@ -3,6 +3,7 @@
 const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
+const { toHex } = require('ara-identity/util')
 const { web3 } = require('ara-context')()
 const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
@@ -50,24 +51,32 @@ async function commit({
   const { resolveBufferIndex } = require('./storage')
   const hIdentity = hash(did)
 
-  const contentsLength = Object.keys(contents).length
-  for (let i = 0; i < contentsLength; i++) {
-    const key = Object.keys(contents)[i]
-    const buffers = contents[key]
-    const index = resolveBufferIndex(key)
-    const buffersLength = Object.keys(buffers).length
+  for (let i = 0; i < 2; i++) {
+    let buffer = ''
+    const index = _getFilenameByIndex(i)
+    const map = contents[index]
+    const offsets = Object.keys(map).map(v => parseInt(v, '10'))
+    const buffers = Object.values(map)
 
-    for (let j = 0; j < buffersLength; j++) {
-      const offset = Object.keys(buffers)[j]
-      const data = `0x${buffers[offset]}`
+    const sizes = buffers.map((v, i) => {
+      buffer += v
+      
+      const length = v.length / 2
+      const bufferLength = buffer.length / 2
+      if (offsets[i+1] && offsets[i+1] !== buffer.length / 2) {
+        const diff = offsets[i+1] - buffer.length / 2
+        buffer += toHex(Buffer.alloc(diff))
+      }
+      return length
+    })
 
-      const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
-      await deployed.methods.write(hIdentity, index, offset, data, lastWrite).send({
-        from: accounts[0],
-        gas: 500000
-      })
-    }
+    buffer = `0x${buffer}`
+
+    await deployed.methods.write(hIdentity, i, offsets, sizes, buffer)
+      .send({ from: accounts[0], gas: 500000 })
   }
+
+  return
 
   await _deleteStagedFile(path)
 
@@ -133,37 +142,39 @@ async function estimateCommitGasCost({
     throw err
   }
 
-  let cost = 0
-  try {
-    const hIdentity = hash(did)
-    const { resolveBufferIndex } = require('./storage')
-    const deployed = getDeployedContract(abi, kStorageAddress)
+  const path = generateStagedPath(did)
+  const contents = _readStagedFile(path, password)
+  const accounts = await web3.eth.getAccounts()
+  const deployed = getDeployedContract(abi, kStorageAddress)
+  const hIdentity = hash(did)
 
-    const path = generateStagedPath(did)
-    const contents = _readStagedFile(path, password)
+  let gasCost = 0
+  for (let i = 0; i < 2; i++) {
+    let buffer = ''
+    const index = _getFilenameByIndex(i)
+    const map = contents[index]
+    const offsets = Object.keys(map).map(v => parseInt(v, '10'))
+    const buffers = Object.values(map)
 
-    const contentsLength = Object.keys(contents).length
-    for (let i = 0; i < contentsLength; i++) {
-      const key = Object.keys(contents)[i]
-      const buffers = contents[key]
-      const index = resolveBufferIndex(key)
-      const buffersLength = Object.keys(buffers).length
-
-      for (let j = 0; j < buffersLength; j++) {
-        const offset = Object.keys(buffers)[j]
-        const data = `0x${buffers[offset]}`
-
-        const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
-        cost += await deployed.methods
-          .write(hIdentity, index, offset, data, lastWrite)
-          .estimateGas({ gas: 500000 })
+    const sizes = buffers.map((v, i) => {
+      buffer += v
+      
+      const length = v.length / 2
+      const bufferLength = buffer.length / 2
+      if (offsets[i+1] && offsets[i+1] !== buffer.length / 2) {
+        const diff = offsets[i+1] - buffer.length / 2
+        buffer += toHex(Buffer.alloc(diff))
       }
-    }
-  } catch (err) {
-    throw new Error(err)
+      return length
+    })
+
+    buffer = `0x${buffer}`
+
+    const call = await deployed.methods.write(hIdentity, i, offsets, sizes, buffer)
+    gasCost += await call.estimateGas({ gas: 500000 })
   }
 
-  return cost
+  return gasCost
 }
 
 function _readStagedFile(path, password) {
