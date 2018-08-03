@@ -148,33 +148,58 @@ async function estimateCommitGasCost({
   const deployed = getDeployedContract(abi, kStorageAddress)
   const hIdentity = hash(did)
 
-  let gasCost = 0
-  for (let i = 0; i < 2; i++) {
-    let buffer = ''
-    const index = _getFilenameByIndex(i)
-    const map = contents[index]
-    const offsets = Object.keys(map).map(v => parseInt(v, '10'))
-    const buffers = Object.values(map)
+  // metadata/tree map
+  let map = contents[_getFilenameByIndex(0)]
 
-    const sizes = buffers.map((v, i) => {
-      buffer += v
-      
-      const length = v.length / 2
-      const bufferLength = buffer.length / 2
-      if (offsets[i+1] && offsets[i+1] !== buffer.length / 2) {
-        const diff = offsets[i+1] - buffer.length / 2
-        buffer += toHex(Buffer.alloc(diff))
-      }
-      return length
-    })
+  const {
+    buffer: mtBuffer,
+    offsets: mtOffsets,
+    sizes: mtSizes 
+  } = _getWriteData(map)
 
-    buffer = `0x${buffer}`
+  // metadata/signatures map
+  map = contents[_getFilenameByIndex(1)]
 
-    const call = await deployed.methods.write(hIdentity, i, offsets, sizes, buffer)
-    gasCost += await call.estimateGas({ gas: 500000 })
+  const {
+    buffer: msBuffer,
+    offsets: msOffsets,
+    sizes: msSizes
+  } = _getWriteData(map)
+
+  const call = await deployed.methods.writeAll(hIdentity, mtOffsets, msOffsets,
+    mtSizes, msSizes, mtBuffer, msBuffer)
+
+  const cost = await call.estimateGas({ gas: 1000000 })
+
+  return cost
+}
+
+function _getWriteData(map) {
+  let buffer = ''
+  const offsets = Object.keys(map).map(v => parseInt(v, '10'))
+  const sizes = Object.values(map).map((v, i) => {
+    buffer += v
+    const length = _hexToBytes(v.length)
+    const bufferLength = _hexToBytes(buffer.length)
+
+    // inserts 0s to fill buffer based on offsets
+    if (offsets[i+1] && offsets[i+1] !== _hexToBytes(buffer.length)) {
+      const diff = offsets[i+1] - _hexToBytes(buffer.length)
+      buffer += toHex(Buffer.alloc(diff))
+    }
+    return length
+  })
+  buffer = `0x${buffer}`
+
+  return {
+    buffer,
+    offsets,
+    sizes
   }
+}
 
-  return gasCost
+function _hexToBytes(hex) {
+  return hex / 2
 }
 
 function _readStagedFile(path, password) {
