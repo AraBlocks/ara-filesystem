@@ -51,32 +51,23 @@ async function commit({
   const { resolveBufferIndex } = require('./storage')
   const hIdentity = hash(did)
 
-  for (let i = 0; i < 2; i++) {
-    let buffer = ''
-    const index = _getFilenameByIndex(i)
-    const map = contents[index]
-    const offsets = Object.keys(map).map(v => parseInt(v, '10'))
-    const buffers = Object.values(map)
+    // metadata/tree
+  const {
+    buffer: mtBuffer,
+    offsets: mtOffsets,
+    sizes: mtSizes 
+  } = _getWriteData(0, contents)
 
-    const sizes = buffers.map((v, i) => {
-      buffer += v
-      
-      const length = v.length / 2
-      const bufferLength = buffer.length / 2
-      if (offsets[i+1] && offsets[i+1] !== buffer.length / 2) {
-        const diff = offsets[i+1] - buffer.length / 2
-        buffer += toHex(Buffer.alloc(diff))
-      }
-      return length
-    })
+  // metadata/signatures
+  const {
+    buffer: msBuffer,
+    offsets: msOffsets,
+    sizes: msSizes
+  } = _getWriteData(1, contents)
 
-    buffer = `0x${buffer}`
-
-    await deployed.methods.write(hIdentity, i, offsets, sizes, buffer)
-      .send({ from: accounts[0], gas: 500000 })
-  }
-
-  return
+  await deployed.methods.writeAll(hIdentity, mtOffsets, msOffsets,
+    mtSizes, msSizes, mtBuffer, msBuffer)
+    .send({ from: accounts[0], gas: 500000 })
 
   await _deleteStagedFile(path)
 
@@ -148,23 +139,19 @@ async function estimateCommitGasCost({
   const deployed = getDeployedContract(abi, kStorageAddress)
   const hIdentity = hash(did)
 
-  // metadata/tree map
-  let map = contents[_getFilenameByIndex(0)]
-
+  // metadata/tree
   const {
     buffer: mtBuffer,
     offsets: mtOffsets,
     sizes: mtSizes 
-  } = _getWriteData(map)
+  } = _getWriteData(0, contents)
 
-  // metadata/signatures map
-  map = contents[_getFilenameByIndex(1)]
-
+  // metadata/signatures
   const {
     buffer: msBuffer,
     offsets: msOffsets,
     sizes: msSizes
-  } = _getWriteData(map)
+  } = _getWriteData(1, contents)
 
   const call = await deployed.methods.writeAll(hIdentity, mtOffsets, msOffsets,
     mtSizes, msSizes, mtBuffer, msBuffer)
@@ -174,7 +161,8 @@ async function estimateCommitGasCost({
   return cost
 }
 
-function _getWriteData(map) {
+function _getWriteData(index, contents) {
+  const map = contents[_getFilenameByIndex(index)]
   let buffer = ''
   const offsets = Object.keys(map).map(v => parseInt(v, '10'))
   const sizes = Object.values(map).map((v, i) => {
