@@ -48,14 +48,13 @@ async function commit({
   const contents = _readStagedFile(path, password)
   const accounts = await web3.eth.getAccounts()
   const deployed = getDeployedContract(abi, kStorageAddress)
-  const { resolveBufferIndex } = require('./storage')
   const hIdentity = hash(did)
 
-    // metadata/tree
+  // metadata/tree
   const {
     buffer: mtBuffer,
     offsets: mtOffsets,
-    sizes: mtSizes 
+    sizes: mtSizes
   } = _getWriteData(0, contents)
 
   // metadata/signatures
@@ -65,9 +64,10 @@ async function commit({
     sizes: msSizes
   } = _getWriteData(1, contents)
 
-  await deployed.methods.writeAll(hIdentity, mtOffsets, msOffsets,
-    mtSizes, msSizes, mtBuffer, msBuffer)
-    .send({ from: accounts[0], gas: 500000 })
+  await deployed.methods.writeAll(
+    hIdentity, mtOffsets, msOffsets, mtSizes,
+    msSizes, mtBuffer, msBuffer
+  ).send({ from: accounts[0], gas: 100000 })
 
   await _deleteStagedFile(path)
 
@@ -135,7 +135,6 @@ async function estimateCommitGasCost({
 
   const path = generateStagedPath(did)
   const contents = _readStagedFile(path, password)
-  const accounts = await web3.eth.getAccounts()
   const deployed = getDeployedContract(abi, kStorageAddress)
   const hIdentity = hash(did)
 
@@ -143,7 +142,7 @@ async function estimateCommitGasCost({
   const {
     buffer: mtBuffer,
     offsets: mtOffsets,
-    sizes: mtSizes 
+    sizes: mtSizes
   } = _getWriteData(0, contents)
 
   // metadata/signatures
@@ -153,8 +152,10 @@ async function estimateCommitGasCost({
     sizes: msSizes
   } = _getWriteData(1, contents)
 
-  const call = await deployed.methods.writeAll(hIdentity, mtOffsets, msOffsets,
-    mtSizes, msSizes, mtBuffer, msBuffer)
+  const call = await deployed.methods.writeAll(
+    hIdentity, mtOffsets, msOffsets,
+    mtSizes, msSizes, mtBuffer, msBuffer
+  )
 
   const cost = await call.estimateGas({ gas: 1000000 })
 
@@ -164,15 +165,14 @@ async function estimateCommitGasCost({
 function _getWriteData(index, contents) {
   const map = contents[_getFilenameByIndex(index)]
   let buffer = ''
-  const offsets = Object.keys(map).map(v => parseInt(v, '10'))
+  const offsets = Object.keys(map).map(v => parseInt(v, 10))
   const sizes = Object.values(map).map((v, i) => {
     buffer += v
     const length = _hexToBytes(v.length)
-    const bufferLength = _hexToBytes(buffer.length)
 
     // inserts 0s to fill buffer based on offsets
-    if (offsets[i+1] && offsets[i+1] !== _hexToBytes(buffer.length)) {
-      const diff = offsets[i+1] - _hexToBytes(buffer.length)
+    if (offsets[i + 1] && offsets[i + 1] !== _hexToBytes(buffer.length)) {
+      const diff = offsets[i + 1] - _hexToBytes(buffer.length)
       buffer += toHex(Buffer.alloc(diff))
     }
     return length
