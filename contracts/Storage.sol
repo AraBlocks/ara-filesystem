@@ -19,7 +19,6 @@ contract Storage {
     bool invalid;
   }
 
-  event WriteAttempt(uint _bufferLength, uint256 _offset, uint8 _size);
   event Commit(string _identity);
   event MarkedInvalid(string _identity);
 
@@ -30,6 +29,34 @@ contract Storage {
   modifier restricted() {
     require (msg.sender == owner);
     _;
+  }
+
+  function writeAll(string identity, uint256[] mtOffsets, uint256[] msOffsets,
+    uint8[] mtSizes, uint8[] msSizes, bytes mtBuffer, bytes msBuffer) public restricted {
+
+    require(!buffer_mappings[identity][0].invalid);
+    require(mtOffsets.length == mtSizes.length && msOffsets.length == msSizes.length);
+
+    uint256 offset;
+    uint8 size;
+    bytes memory slice;
+    for (uint i = 0; i < mtOffsets.length; i++) {
+      offset = mtOffsets[i];
+      size = mtSizes[i];
+      slice = mtBuffer.slice(offset, size);
+      buffer_mappings[identity][0].buffers[offset] = slice;
+      buffer_mappings[identity][0].keys.push(offset);
+    }
+
+    for (uint j = 0; j < msOffsets.length; j++) {
+      offset = msOffsets[j];
+      size = msSizes[j];
+      slice = msBuffer.slice(offset, size);
+      buffer_mappings[identity][1].buffers[offset] = slice;
+      buffer_mappings[identity][1].keys.push(offset);
+    }
+
+    emit Commit(identity);
   }
 
   function write(string identity, uint8 file, uint256[] offsets, 
