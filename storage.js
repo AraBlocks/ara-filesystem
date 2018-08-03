@@ -1,12 +1,16 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:storage')
-const contract = require('ara-web3/contract')
 const ras = require('random-access-storage')
-const account = require('ara-web3/account')
 const raf = require('random-access-file')
 const unixify = require('unixify')
-const tx = require('ara-web3/tx')
+
+const {
+  contract,
+  account,
+  call,
+  tx
+} = require('ara-web3')
 
 const {
   kMetadataTreeIndex,
@@ -22,6 +26,7 @@ const {
 
 const {
   validate,
+  hashIdentity,
   getDocumentOwner
 } = require('./util')
 
@@ -30,20 +35,19 @@ const {
   basename
 } = require('path')
 
-function defaultStorage(identity, password) {
+function defaultStorage(identity, password, proxy = '') {
   return (filename, drive, path) => {
     filename = unixify(filename)
     if ('home' === basename(path) && (filename.includes(mTreeName)
       || filename.includes(mSigName))) {
-      return create({ filename, identity, password })
+      return create({ filename, identity, password, proxy })
     }
     return raf(resolve(path, filename))
   }
 }
 
-function create({ filename, identity, password }) {
+function create({ filename, identity, password, proxy = ''}) {
   const fileIndex = resolveBufferIndex(filename)
-  const deployed = contract.get(abi, kAFSAddress)
 
   const writable = Boolean(password)
 
@@ -58,8 +62,16 @@ function create({ filename, identity, password }) {
         password
       }) : null
       // data is not staged, must retrieve from bc
-      if (!buffer) {
-        buffer = await deployed.methods.read(fileIndex, offset).call()
+      if (!buffer && proxy) {
+        buffer = await call({
+          abi: afsAbi,
+          address: proxy,
+          functionName: 'read',
+          arguments: [
+            fileIndex,
+            offset
+          ]
+        })
       }
       req.callback(null, _decode(buffer))
     },
@@ -80,14 +92,14 @@ function create({ filename, identity, password }) {
     },
 
     async del(req) {
-      if (writable) {
+      if (writable && proxy) {
         const { ddo } = await validate({ identity, password, label: 'storage' })
         const owner = getDocumentOwner(ddo, true)
         const acct = await account.load({ did: owner, password })
 
         const transaction = await tx.create({
           account: acct,
-          to: kAFSAddress,
+          to: proxy,
           data: {
             abi,
             name: 'unlist'

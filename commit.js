@@ -19,6 +19,13 @@ const {
 } = require('ara-contracts/constants')
 
 const {
+  proxyExists,
+  deployProxy,
+  getProxyAddress
+} = require('ara-contracts/registry')
+
+const {
+  kAidPrefix,
   kStagingFile,
   kMetadataTreeName,
   kMetadataTreeIndex,
@@ -27,7 +34,9 @@ const {
 } = require('./constants')
 
 const {
+  hash,
   validate,
+  normalize,
   encryptJSON,
   decryptJSON,
   getDocumentOwner
@@ -39,9 +48,9 @@ const {
 } = require('path')
 
 async function commit({
-  did = '',
   password = '',
-  price = -1
+  price = -1,
+  did = ''
 } = {}) {
   let ddo
   try {
@@ -50,9 +59,16 @@ async function commit({
     throw err
   }
 
-  // call registry to check if this did has been deployed before
-  // if not, _deployProxy(did, acct) then add to registry
-  // otherwise, get proxy address
+  const owner = getDocumentOwner(ddo, true)
+
+  let proxyAddress
+  if (await proxyExists(did)) {
+    proxyAddress = await getProxyAddress(did)
+  } else {
+    proxyAddress = await deployProxy({ requesterDid: owner, contentDid: did, password })
+  }
+
+  debug('address', proxyAddress)
 
   const path = generateStagedPath(did)
   try {
@@ -62,8 +78,8 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
-  const owner = getDocumentOwner(ddo, true)
-  const acct = await account.load({ did: owner, password })
+  const prefixedDid = kAidPrefix + owner
+  const acct = await account.load({ did: prefixedDid, password })
   const { resolveBufferIndex } = require('./storage')
 
   const contentsLength = Object.keys(contents).length
@@ -81,10 +97,11 @@ async function commit({
 
       const transaction = await tx.create({
         account: acct,
-        to: kAFSAddress, // change to proxy
+        to: proxyAddress,
+        gasLimit: 1000000,
         data: {
-          afsAbi,
-          name: 'write',
+          abi: afsAbi,
+          functionName: 'write',
           values: [
             index,
             offset,

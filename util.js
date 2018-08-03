@@ -22,30 +22,36 @@ const {
   kResolverKey
 } = require('./constants')
 
+// ara-identity
 function generateKeypair(password) {
   const passHash = blake2b(Buffer.from(password))
   const { publicKey, secretKey } = keyPair(passHash)
   return { publicKey, secretKey }
 }
 
+// afs
 function encrypt(value, opts) {
   return cryptoEncrypt(value, opts)
 }
 
+// afs
 function decrypt(value, opts) {
   const keystore = JSON.parse(value.keystore)
   return cryptoDecrypt(keystore, opts)
 }
 
+// afs
 function randomBytes(size) {
   return cryptoRandomBytes(size)
 }
 
+// ara-identity
 async function loadSecrets(key) {
   const { public: pub } = await secrets.load({ key, public: true })
   return pub.keystore
 }
 
+// ara-identity
 function getDocumentOwner(ddo, shouldNormalize = true) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
@@ -64,6 +70,7 @@ function getDocumentOwner(ddo, shouldNormalize = true) {
   return shouldNormalize ? normalize(id) : id
 }
 
+// ara-identity
 function getDocumentKeyHex(ddo) {
   if (!ddo || null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting DDO')
@@ -79,6 +86,7 @@ function getDocumentKeyHex(ddo) {
   return pk
 }
 
+// ara-identity
 async function isCorrectPassword({
   ddo = {},
   password = ''
@@ -108,6 +116,7 @@ async function isCorrectPassword({
   return publicKeyHex === publicKey
 }
 
+// afs
 function encryptJSON(json, password) {
   const { secretKey } = generateKeypair(password)
   const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
@@ -123,6 +132,7 @@ function encryptJSON(json, password) {
   return encryptedJSON
 }
 
+// afs
 function decryptJSON(keystore, password) {
   const { secretKey } = generateKeypair(password)
   const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))
@@ -134,10 +144,12 @@ function decryptJSON(keystore, password) {
   return decryptedJSON
 }
 
+// ara-crypto
 function hash(str, encoding = 'hex') {
   return toHex(blake2b(Buffer.from(str, encoding)))
 }
 
+// ara-identity
 function normalize(did = '') {
   if (!did || 'string' !== typeof did) {
     throw new TypeError('Expecting DID to be non-empty string')
@@ -156,6 +168,7 @@ function normalize(did = '') {
   return did
 }
 
+// ara-identity
 async function validate({
   password,
   label = '',
@@ -208,16 +221,14 @@ async function validate({
   }
 }
 
+// ara-identity
 async function resolve(did) {
   const keystore = await loadSecrets(kResolverKey)
   const ddo = await aid.resolve(did, { key: kResolverKey, keystore })
   return ddo
 }
 
-function getDeployedContract(abi, address) {
-  return new web3.eth.Contract(abi, address)
-}
-
+// ara-identity
 async function getAfsId(did, mnemonic, password) {
   const keystore = await loadSecrets(kResolverKey)
   const afsDdo = await aid.resolve(did, { key: kResolverKey, keystore })
@@ -225,6 +236,7 @@ async function getAfsId(did, mnemonic, password) {
   return aid.create({ mnemonic, owner, password })
 }
 
+// ara-identity
 function hasDIDMethod(did) {
   return 0 === did.indexOf(kDidPrefix)
 }
@@ -243,7 +255,6 @@ module.exports = {
   isCorrectPassword,
   hash,
   validate,
-  getDeployedContract,
   getAfsId,
   hasDIDMethod
 }
