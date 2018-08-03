@@ -14,6 +14,11 @@ const { contract } = require('ara-web3')
 const rc = require('./rc')()
 
 const {
+  proxyExists
+  getProxyAddress
+} = require('ara-contracts/registry')
+
+const {
   createAFSKeyPath,
   createIdentityKeyPath
 } = require('./key-path')
@@ -37,6 +42,10 @@ async function destroy({
 
   if (!mnemonic || 'string' !== typeof mnemonic) {
     throw new TypeError('Expecting non-empty string for mnemonic')
+  }
+
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.destroy: This content does not have a valid proxy contract')
   }
 
   mnemonic = mnemonic.trim()
@@ -71,11 +80,12 @@ async function destroy({
 
   const owner = getDocumentOwner(ddo, true)
   const acct = await account.load({ did: owner, password })
+  const proxy = await getProxyAddress(did)
 
   try {
     const transaction = await tx.create({
       account: acct,
-      to: kAFSAddress,
+      to: proxy,
       data: {
         abi,
         name: 'unlist'

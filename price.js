@@ -1,11 +1,21 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:price')
-const contract = require('ara-web3/contract')
-const account = require('ara-web3/account')
-const tx = require('ara-web3/tx')
 
 const {
+  proxyExists,
+  getProxyAddress
+} = require('ara-contracts/registry')
+
+const {
+  contract,
+  account,
+  call,
+  tx
+} = require('ara-web3')
+
+const {
+  hash,
   validate,
   hashDID,
   getDocumentOwner
@@ -57,13 +67,19 @@ async function setPrice({
     throw new TypeError('Price should be 0 or positive whole number')
   }
 
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
+  }
+
+  const proxy = await getProxyAddress(did)
+
   const owner = getDocumentOwner(ddo, true)
   const acct = await account.load({ did: owner, password })
 
   try {
     const transaction = await tx.create({
       account: acct,
-      to: kAFSAddress,
+      to: proxy,
       data: {
         abi,
         name: 'setPrice',
@@ -82,17 +98,21 @@ async function setPrice({
 }
 
 async function getPrice({
-  did = '',
-  password = ''
+  did = ''
 } = {}) {
-  try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
-  } catch (err) {
-    throw err
+  did = hashDID(did)
+
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
   }
 
-  const deployed = contract.get(abi, kAFSAddress)
-  const result = await deployed.methods.price_().call()
+  const proxy = await registry.getProxyAddress(contentDid)
+
+  const result = await call({
+    abi: afsAbi,
+    address: proxy,
+    functionName: 'price_'
+  })
   debug('price for %s: %d', did, result)
   return result
 }

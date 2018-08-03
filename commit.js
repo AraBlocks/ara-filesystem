@@ -25,6 +25,13 @@ const {
 } = require('ara-contracts/constants')
 
 const {
+  proxyExists,
+  deployProxy,
+  getProxyAddress
+} = require('ara-contracts/registry')
+
+const {
+  kAidPrefix,
   kStagingFile,
   kMetadataTreeName,
   kMetadataTreeIndex,
@@ -36,7 +43,9 @@ const {
 } = require('./constants')
 
 const {
+  hash,
   validate,
+  normalize,
   encryptJSON,
   decryptJSON
 } = require('./util')
@@ -47,10 +56,10 @@ const {
 } = require('path')
 
 async function commit({
-  did = '',
   password = '',
   price = -1,
-  estimate = false
+  estimate = false,
+  did = ''
 } = {}) {
   let ddo
   try {
@@ -59,9 +68,16 @@ async function commit({
     throw err
   }
 
-  // call registry to check if this did has been deployed before
-  // if not, _deployProxy(did, acct) then add to registry
-  // otherwise, get proxy address
+  const owner = getDocumentOwner(ddo, true)
+
+  let proxyAddress
+  if (await proxyExists(did)) {
+    proxyAddress = await getProxyAddress(did)
+  } else {
+    proxyAddress = await deployProxy({ requesterDid: owner, contentDid: did, password })
+  }
+
+  debug('address', proxyAddress)
 
   const path = generateStagedPath(did)
   try {
