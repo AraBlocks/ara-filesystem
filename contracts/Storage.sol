@@ -60,7 +60,7 @@ contract Storage {
   }
 
   function write(string identity, uint8 file, uint256[] offsets, 
-    uint8[] sizes, bytes buffer) public restricted {
+    uint8[] sizes, bytes buffer, bool last_write) public restricted {
 
     require(offsets.length == sizes.length);
     require(!buffer_mappings[identity][file].invalid);
@@ -71,6 +71,10 @@ contract Storage {
       bytes memory slice = buffer.slice(offset, size);
       buffer_mappings[identity][file].buffers[offsets[i]] = slice;
       buffer_mappings[identity][file].keys.push(offset);
+    }
+
+    if (last_write) {
+      emit Commit(identity);
     }
   }
 
