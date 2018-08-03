@@ -16,6 +16,7 @@ const {
 } = require('ara-web3')
 
 const {
+  hash,
   validate,
   getDocumentOwner
 } = require('ara-util')

@@ -56,6 +56,7 @@ function decryptJSON(keystore, password) {
   return decryptedJSON
 }
 
+
 module.exports = {
   generateKeypair,
   encrypt,

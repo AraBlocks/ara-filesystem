@@ -46,6 +46,10 @@ async function destroy({
     throw new Error('ara-filesystem.destroy: This content does not have a valid proxy contract')
   }
 
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.destroy: This content does not have a valid proxy contract')
+  }
+
   mnemonic = mnemonic.trim()
 
   let path
