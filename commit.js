@@ -67,7 +67,7 @@ async function commit({
   await deployed.methods.writeAll(
     hIdentity, mtOffsets, msOffsets, mtSizes,
     msSizes, mtBuffer, msBuffer
-  ).send({ from: accounts[0], gas: 100000 })
+  ).send({ from: accounts[0], gas: 1000000 })
 
   await _deleteStagedFile(path)
 
