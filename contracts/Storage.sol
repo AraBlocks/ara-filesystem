@@ -15,12 +15,14 @@ contract Storage {
 
   struct Buffers {
     mapping (uint256 => bytes) buffers;
-    uint256[] keys;
     bool invalid;
   }
 
   event Commit(string _identity);
   event MarkedInvalid(string _identity);
+
+  uint8 constant mtBufferSize = 40;
+  uint8 constant msBufferSize = 64;
 
   constructor() public {
     owner = msg.sender;
@@ -31,7 +33,29 @@ contract Storage {
     _;
   }
 
-  function writeAll(string identity, uint256[] mtOffsets, uint256[] msOffsets,
+  function append(string identity, uint256[] mtOffsets, uint256[] msOffsets,
+    bytes mtBuffer, bytes msBuffer) public restricted {
+
+    require(!buffer_mappings[identity][0].invalid);
+
+    uint256 offset;
+    bytes memory slice;
+    for (uint i = 0; i < mtOffsets.length; i++) {
+      offset = mtOffsets[i];
+      slice = mtBuffer.slice(i * mtBufferSize, mtBufferSize);
+      buffer_mappings[identity][0].buffers[offset] = slice;
+    }
+
+    for (uint j = 0; j < msOffsets.length; j++) {
+      offset = msOffsets[j];
+      slice = msBuffer.slice(j * msBufferSize, msBufferSize);
+      buffer_mappings[identity][1].buffers[offset] = slice;
+    }
+
+    emit Commit(identity);
+  }
+
+  function write(string identity, uint256[] mtOffsets, uint256[] msOffsets,
     uint8[] mtSizes, uint8[] msSizes, bytes mtBuffer, bytes msBuffer) public restricted {
 
     require(!buffer_mappings[identity][0].invalid);
@@ -45,7 +69,6 @@ contract Storage {
       size = mtSizes[i];
       slice = mtBuffer.slice(offset, size);
       buffer_mappings[identity][0].buffers[offset] = slice;
-      buffer_mappings[identity][0].keys.push(offset);
     }
 
     for (uint j = 0; j < msOffsets.length; j++) {
@@ -53,34 +76,17 @@ contract Storage {
       size = msSizes[j];
       slice = msBuffer.slice(offset, size);
       buffer_mappings[identity][1].buffers[offset] = slice;
-      buffer_mappings[identity][1].keys.push(offset);
     }
 
     emit Commit(identity);
   }
 
-  function write(string identity, uint8 file, uint256[] offsets, 
-    uint8[] sizes, bytes buffer, bool last_write) public restricted {
-
-    require(offsets.length == sizes.length);
-    require(!buffer_mappings[identity][file].invalid);
-
-    for (uint i = 0; i < offsets.length; i++) {
-      uint256 offset = offsets[i];
-      uint8 size = sizes[i];
-      bytes memory slice = buffer.slice(offset, size);
-      buffer_mappings[identity][file].buffers[offsets[i]] = slice;
-      buffer_mappings[identity][file].keys.push(offset);
-    }
-
-    if (last_write) {
-      emit Commit(identity);
-    }
+  function hasBuffer(string identity, uint8 file, uint256 offset, bytes buffer) public view returns (bool exists) {
+    return buffer_mappings[identity][file].buffers[offset].equal(buffer);
   }
 
   function exists(string identity) public view returns (bool doesExist) {
-    return buffer_mappings[identity][0].keys.length > 0 
-      && !buffer_mappings[identity][0].invalid;
+    return !buffer_mappings[identity][0].invalid;
   }
 
   function read(string identity, uint8 file, uint256 offset) public view returns (bytes buffer) {

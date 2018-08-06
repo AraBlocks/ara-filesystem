@@ -3,10 +3,14 @@ const ras = require('random-access-storage')
 const raf = require('random-access-file')
 const unixify = require('unixify')
 const { resolve, basename } = require('path')
-const { append, retrieve } = require('./commit')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 const { hash } = require('./util')
+
+const {
+  writeToStaged,
+  readFromStaged
+} = require('./commit')
 
 const {
   kStorageAddress,
@@ -38,7 +42,7 @@ function create({ filename, identity, password }) {
     async read(req) {
       const { offset, size } = req
       debug(filename, 'read at offset', offset, 'size', size)
-      let buffer = (writable) ? retrieve({
+      let buffer = (writable) ? readFromStaged({
         did: identity,
         fileIndex,
         offset,
@@ -55,7 +59,7 @@ function create({ filename, identity, password }) {
       if (writable) {
         const { data, offset, size } = req
         debug(filename, 'staged write at offset', offset, 'size', size)
-        append({
+        writeToStaged({
           did: identity,
           fileIndex,
           data,

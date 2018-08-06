@@ -10,14 +10,16 @@ module.exports = {
   kTreeFile: 'tree',
   kSignaturesFile: 'signatures',
   kStagingFile: './staged.json',
-  kStorageAddress: '0x17647ef21c6fd7e67486c57affbb1faf9eb30ea5',
-  kPriceAddress: '0x75076e4fbba61f65efb41d64e45cff340b1e518a',
+  kStorageAddress: '0x69797a4586692c4fafea7b33f77aac071da0e2e9',
+  kPriceAddress: '0x383864fd16afa0af2c5516e73753e4e07e1de704',
 
   // metadata/tree constants
   kMetadataTreeName: 'metadata/tree',
   kMetadataTreeIndex: 0,
+  kMetadataTreeBufferSize: 40,
 
   // metadata/signatures constants
   kMetadataSignaturesName: 'metadata/signatures',
-  kMetadataSignaturesIndex: 1
+  kMetadataSignaturesIndex: 1,
+  kMetadataSignaturesBufferSize: 64
 }

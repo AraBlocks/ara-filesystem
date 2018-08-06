@@ -13,8 +13,10 @@ const { abi } = require('./build/contracts/Storage.json')
 const {
   kMetadataTreeName,
   kMetadataTreeIndex,
+  kMetadataTreeBufferSize,
   kMetadataSignaturesName,
   kMetadataSignaturesIndex,
+  kMetadataSignaturesBufferSize,
   kStagingFile,
   kStorageAddress
 } = require('./constants')
@@ -30,7 +32,8 @@ const {
 async function commit({
   did = '',
   password = '',
-  price = -1
+  price = -1,
+  estimate = false
 } = {}) {
   try {
     ({ did } = await validate({ did, password, label: 'commit' }))
@@ -46,28 +49,24 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
-  const accounts = await web3.eth.getAccounts()
   const deployed = getDeployedContract(abi, kStorageAddress)
   const hIdentity = hash(did)
 
-  // metadata/tree
-  const {
-    buffer: mtBuffer,
-    offsets: mtOffsets,
-    sizes: mtSizes
-  } = _getWriteData(0, contents)
+  const exists = await _hasBeenCommitted(contents, hIdentity)
 
-  // metadata/signatures
-  const {
-    buffer: msBuffer,
-    offsets: msOffsets,
-    sizes: msSizes
-  } = _getWriteData(1, contents)
+  const mtData = _getWriteData(0, contents, exists)
+  const msData = _getWriteData(1, contents, exists)
 
-  await deployed.methods.writeAll(
-    hIdentity, mtOffsets, msOffsets, mtSizes,
-    msSizes, mtBuffer, msBuffer
-  ).send({ from: accounts[0], gas: 1000000 })
+  let result
+  if (exists) {
+    result = await _append({ deployed, mtData, msData, hIdentity }, estimate)
+  } else {
+    result = await _write({ deployed, mtData, msData, hIdentity }, estimate) 
+  }
+
+  if (estimate) {
+    return result
+  }
 
   await _deleteStagedFile(path)
 
@@ -75,10 +74,10 @@ async function commit({
     await setPrice({ did, password, price })
   }
 
-  return null
+  return result
 }
 
-function append({
+function writeToStaged({
   did,
   fileIndex,
   offset,
@@ -95,7 +94,7 @@ function append({
   })
 }
 
-function retrieve({
+function readFromStaged({
   did,
   fileIndex,
   offset = 0,
@@ -122,68 +121,82 @@ function generateStagedPath(did) {
   return path
 }
 
-// TODO(cckelly): cleanup
 async function estimateCommitGasCost({
   did = '',
   password = ''
 } = {}) {
-  try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
-  } catch (err) {
-    throw err
-  }
-
-  const path = generateStagedPath(did)
-  const contents = _readStagedFile(path, password)
-  const deployed = getDeployedContract(abi, kStorageAddress)
-  const hIdentity = hash(did)
-
-  // metadata/tree
-  const {
-    buffer: mtBuffer,
-    offsets: mtOffsets,
-    sizes: mtSizes
-  } = _getWriteData(0, contents)
-
-  // metadata/signatures
-  const {
-    buffer: msBuffer,
-    offsets: msOffsets,
-    sizes: msSizes
-  } = _getWriteData(1, contents)
-
-  const call = await deployed.methods.writeAll(
-    hIdentity, mtOffsets, msOffsets,
-    mtSizes, msSizes, mtBuffer, msBuffer
-  )
-
-  const cost = await call.estimateGas({ gas: 1000000 })
-
-  return cost
+  return commit({
+    did,
+    password,
+    estimate: true
+  })
 }
 
-function _getWriteData(index, contents) {
+async function _append(opts, estimate = true) {
+  const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
+  const { offsets: msOffsets, buffer: msBuffer } = opts.msData
+
+  const { deployed, hIdentity } = opts
+  const query = deployed.methods.append(hIdentity, mtOffsets, msOffsets, mtBuffer, msBuffer)
+
+  if (!estimate) {
+    const accounts = await web3.eth.getAccounts()
+    return query.send({ from: accounts[0], gas: 1000000 })
+  } else {
+    return query.estimateGas({ gas: 1000000 })
+  }
+}
+
+async function _write(opts, estimate = true) {
+  const { offsets: mtOffsets, sizes: mtSizes, buffer: mtBuffer } = opts.mtData
+  const { offsets: msOffsets, sizes: msSizes, buffer: msBuffer } = opts.msData 
+
+  const { deployed, hIdentity } = opts
+  const query = deployed.methods.write(hIdentity, mtOffsets, msOffsets, 
+    mtSizes, msSizes, mtBuffer, msBuffer)
+
+  if (!estimate) {
+    const accounts = await web3.eth.getAccounts()
+    return query.send({ from: accounts[0], gas: 1000000 })
+  } else {
+    return query.estimateGas({ gas: 1000000 })
+  }
+}
+
+function _getWriteData(index, contents, append) {
   const map = contents[_getFilenameByIndex(index)]
   let buffer = ''
   const offsets = Object.keys(map).map(v => parseInt(v, 10))
-  const sizes = Object.values(map).map((v, i) => {
-    buffer += v
-    const length = _hexToBytes(v.length)
-
-    // inserts 0s to fill buffer based on offsets
-    if (offsets[i + 1] && offsets[i + 1] !== _hexToBytes(buffer.length)) {
-      const diff = offsets[i + 1] - _hexToBytes(buffer.length)
-      buffer += toHex(Buffer.alloc(diff))
-    }
-    return length
-  })
-  buffer = `0x${buffer}`
-
-  return {
-    buffer,
-    offsets,
-    sizes
+  if (append) {
+    offsets.shift()
   }
+
+  const buffers = Object.values(map)
+  if (append) {
+    buffers.shift()
+  }
+
+  let result
+  if (!append) {
+    const sizes = buffers.map((v, i) => {
+      buffer += v
+      const length = _hexToBytes(v.length)
+
+      // inserts 0s to fill buffer based on offsets
+      if (offsets[i+1] && offsets[i+1] !== _hexToBytes(buffer.length)) {
+        const diff = offsets[i+1] - _hexToBytes(buffer.length)
+        buffer += toHex(Buffer.alloc(diff))
+      }
+      return length
+    })
+    buffer = `0x${buffer}`
+    result = { buffer, offsets, sizes }
+  } else {
+    const buffer = `0x${buffers.join('')}`
+    result = { offsets, buffer }
+  }
+
+  return result
 }
 
 function _hexToBytes(hex) {
@@ -237,6 +250,19 @@ async function _deleteStagedFile(path) {
   }
 }
 
+// checks to see if header written to staged has been pushed to blockchain
+// if it has, we know that AFS has been committed already
+async function _hasBeenCommitted(contents, hIdentity) {
+  const buf = `0x${_getBufferFromStaged(contents, 0, 0)}`
+  const deployed = getDeployedContract(abi, kStorageAddress)
+  return deployed.methods.hasBuffer(hIdentity, 0, 0, buf).call()
+}
+
+function _getBufferFromStaged(contents, index, offset) {
+  const map = contents[_getFilenameByIndex(index)]
+  return map[offset]
+}
+
 function _getFilenameByIndex(index) {
   if (index === kMetadataTreeIndex) {
     return kMetadataTreeName
@@ -249,8 +275,8 @@ function _getFilenameByIndex(index) {
 
 module.exports = {
   commit,
-  append,
-  retrieve,
+  writeToStaged,
+  readFromStaged,
   generateStagedPath,
   estimateCommitGasCost
 }
