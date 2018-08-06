@@ -1,6 +1,10 @@
 pragma solidity ^0.4.24;
 
+import "bytes/BytesLib.sol";
+
 contract Storage {
+
+  using BytesLib for bytes;
 
   address public owner;
 
@@ -11,7 +15,6 @@ contract Storage {
 
   struct Buffers {
     mapping (uint256 => bytes) buffers;
-    uint256 largest_key;
     uint256[] keys;
     bool invalid;
   }
@@ -28,14 +31,46 @@ contract Storage {
     _;
   }
 
-  function write(string identity, uint8 file, uint256 offset, bytes buffer, bool last_write) public restricted {
-    // make sure AFS hasn't been removed
+  function writeAll(string identity, uint256[] mtOffsets, uint256[] msOffsets,
+    uint8[] mtSizes, uint8[] msSizes, bytes mtBuffer, bytes msBuffer) public restricted {
+
+    require(!buffer_mappings[identity][0].invalid);
+    require(mtOffsets.length == mtSizes.length && msOffsets.length == msSizes.length);
+
+    uint256 offset;
+    uint8 size;
+    bytes memory slice;
+    for (uint i = 0; i < mtOffsets.length; i++) {
+      offset = mtOffsets[i];
+      size = mtSizes[i];
+      slice = mtBuffer.slice(offset, size);
+      buffer_mappings[identity][0].buffers[offset] = slice;
+      buffer_mappings[identity][0].keys.push(offset);
+    }
+
+    for (uint j = 0; j < msOffsets.length; j++) {
+      offset = msOffsets[j];
+      size = msSizes[j];
+      slice = msBuffer.slice(offset, size);
+      buffer_mappings[identity][1].buffers[offset] = slice;
+      buffer_mappings[identity][1].keys.push(offset);
+    }
+
+    emit Commit(identity);
+  }
+
+  function write(string identity, uint8 file, uint256[] offsets, 
+    uint8[] sizes, bytes buffer, bool last_write) public restricted {
+
+    require(offsets.length == sizes.length);
     require(!buffer_mappings[identity][file].invalid);
 
-    buffer_mappings[identity][file].buffers[offset] = buffer;
-    buffer_mappings[identity][file].keys.push(offset);
-    if (offset > buffer_mappings[identity][file].largest_key) {
-      buffer_mappings[identity][file].largest_key = offset;
+    for (uint i = 0; i < offsets.length; i++) {
+      uint256 offset = offsets[i];
+      uint8 size = sizes[i];
+      bytes memory slice = buffer.slice(offset, size);
+      buffer_mappings[identity][file].buffers[offsets[i]] = slice;
+      buffer_mappings[identity][file].keys.push(offset);
     }
 
     if (last_write) {

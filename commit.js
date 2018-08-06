@@ -3,6 +3,7 @@
 const debug = require('debug')('ara-filesystem:commit')
 const fs = require('fs')
 const pify = require('pify')
+const { toHex } = require('ara-identity/util')
 const { web3 } = require('ara-context')()
 const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
@@ -46,27 +47,26 @@ async function commit({
   const contents = _readStagedFile(path, password)
   const accounts = await web3.eth.getAccounts()
   const deployed = contract.get(abi, kStorageAddress)
-  const { resolveBufferIndex } = require('./storage')
   const hIdentity = hashDID(did)
 
-  const contentsLength = Object.keys(contents).length
-  for (let i = 0; i < contentsLength; i++) {
-    const key = Object.keys(contents)[i]
-    const buffers = contents[key]
-    const index = resolveBufferIndex(key)
-    const buffersLength = Object.keys(buffers).length
+  // metadata/tree
+  const {
+    buffer: mtBuffer,
+    offsets: mtOffsets,
+    sizes: mtSizes
+  } = _getWriteData(0, contents)
 
-    for (let j = 0; j < buffersLength; j++) {
-      const offset = Object.keys(buffers)[j]
-      const data = `0x${buffers[offset]}`
+  // metadata/signatures
+  const {
+    buffer: msBuffer,
+    offsets: msOffsets,
+    sizes: msSizes
+  } = _getWriteData(1, contents)
 
-      const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
-      await deployed.methods.write(hIdentity, index, offset, data, lastWrite).send({
-        from: accounts[0],
-        gas: 500000
-      })
-    }
-  }
+  await deployed.methods.writeAll(
+    hIdentity, mtOffsets, msOffsets, mtSizes,
+    msSizes, mtBuffer, msBuffer
+  ).send({ from: accounts[0], gas: 1000000 })
 
   await _deleteStagedFile(path)
 
@@ -132,37 +132,61 @@ async function estimateCommitGasCost({
     throw err
   }
 
-  let cost = 0
-  try {
-    const hIdentity = hashDID(did)
-    const { resolveBufferIndex } = require('./storage')
-    const deployed = contract.get(abi, kStorageAddress)
+  const path = generateStagedPath(did)
+  const contents = _readStagedFile(path, password)
+  const deployed = getDeployedContract(abi, kStorageAddress)
+  const hIdentity = hashDID(did)
 
-    const path = generateStagedPath(did)
-    const contents = _readStagedFile(path, password)
+  // metadata/tree
+  const {
+    buffer: mtBuffer,
+    offsets: mtOffsets,
+    sizes: mtSizes
+  } = _getWriteData(0, contents)
 
-    const contentsLength = Object.keys(contents).length
-    for (let i = 0; i < contentsLength; i++) {
-      const key = Object.keys(contents)[i]
-      const buffers = contents[key]
-      const index = resolveBufferIndex(key)
-      const buffersLength = Object.keys(buffers).length
+  // metadata/signatures
+  const {
+    buffer: msBuffer,
+    offsets: msOffsets,
+    sizes: msSizes
+  } = _getWriteData(1, contents)
 
-      for (let j = 0; j < buffersLength; j++) {
-        const offset = Object.keys(buffers)[j]
-        const data = `0x${buffers[offset]}`
+  const call = await deployed.methods.writeAll(
+    hIdentity, mtOffsets, msOffsets,
+    mtSizes, msSizes, mtBuffer, msBuffer
+  )
 
-        const lastWrite = contentsLength - 1 === i && buffersLength - 1 === j
-        cost += await deployed.methods
-          .write(hIdentity, index, offset, data, lastWrite)
-          .estimateGas({ gas: 500000 })
-      }
-    }
-  } catch (err) {
-    throw new Error(err)
-  }
+  const cost = await call.estimateGas({ gas: 1000000 })
 
   return cost
+}
+
+function _getWriteData(index, contents) {
+  const map = contents[_getFilenameByIndex(index)]
+  let buffer = ''
+  const offsets = Object.keys(map).map(v => parseInt(v, 10))
+  const sizes = Object.values(map).map((v, i) => {
+    buffer += v
+    const length = _hexToBytes(v.length)
+
+    // inserts 0s to fill buffer based on offsets
+    if (offsets[i + 1] && offsets[i + 1] !== _hexToBytes(buffer.length)) {
+      const diff = offsets[i + 1] - _hexToBytes(buffer.length)
+      buffer += toHex(Buffer.alloc(diff))
+    }
+    return length
+  })
+  buffer = `0x${buffer}`
+
+  return {
+    buffer,
+    offsets,
+    sizes
+  }
+}
+
+function _hexToBytes(hex) {
+  return hex / 2
 }
 
 function _readStagedFile(path, password) {
