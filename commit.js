@@ -121,7 +121,6 @@ function generateStagedPath(did) {
   return path
 }
 
-// TODO(cckelly): cleanup
 async function estimateCommitGasCost({
   did = '',
   password = ''
@@ -134,7 +133,7 @@ async function estimateCommitGasCost({
 
   const path = generateStagedPath(did)
   const contents = _readStagedFile(path, password)
-  const deployed = getDeployedContract(abi, kStorageAddress)
+  const deployed = contract.get(abi, kStorageAddress)
   const hIdentity = hashDID(did)
 
   // metadata/tree
