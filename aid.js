@@ -3,6 +3,7 @@ const aid = require('ara-identity')
 const context = require('ara-context')()
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const hasDIDMethod = require('has-did-method')
+const { normalize } = require('ara-util')
 
 const {
   kAidPrefix,
@@ -71,8 +72,6 @@ async function resolve(did, opts = {}) {
   if (!did || null === did || 'string' !== typeof did) {
     throw new TypeError('ara-filesystem.aid: DID to resolve must be non-empty string')
   }
-
-  const { normalize } = require('./util')
 
   did = normalize(did)
   did = kAidPrefix + did

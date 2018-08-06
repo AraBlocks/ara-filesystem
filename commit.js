@@ -9,6 +9,8 @@ const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
 const { abi } = require('./build/contracts/Storage.json')
+const { contract } = require('ara-web3')
+const { validate, hashDID } = require('ara-util')
 
 const {
   kMetadataTreeName,
@@ -21,10 +23,7 @@ const {
 
 const {
   encryptJSON,
-  decryptJSON,
-  getDeployedContract,
-  validate,
-  hash
+  decryptJSON
 } = require('./util')
 
 async function commit({
@@ -47,8 +46,8 @@ async function commit({
 
   const contents = _readStagedFile(path, password)
   const accounts = await web3.eth.getAccounts()
-  const deployed = getDeployedContract(abi, kStorageAddress)
-  const hIdentity = hash(did)
+  const deployed = contract.get(abi, kStorageAddress)
+  const hIdentity = hashDID(did)
 
   // metadata/tree
   const {
@@ -122,7 +121,6 @@ function generateStagedPath(did) {
   return path
 }
 
-// TODO(cckelly): cleanup
 async function estimateCommitGasCost({
   did = '',
   password = ''
@@ -135,8 +133,8 @@ async function estimateCommitGasCost({
 
   const path = generateStagedPath(did)
   const contents = _readStagedFile(path, password)
-  const deployed = getDeployedContract(abi, kStorageAddress)
-  const hIdentity = hash(did)
+  const deployed = contract.get(abi, kStorageAddress)
+  const hIdentity = hashDID(did)
 
   // metadata/tree
   const {
