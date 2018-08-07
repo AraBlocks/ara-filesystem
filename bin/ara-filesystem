@@ -146,6 +146,11 @@ const { argv } = program
         type: 'string',
         describe: "The path where the AFS should be extracted."
       })
+      .option('existing', {
+        alias: 'e',
+        type: 'boolean',
+        describe: "Keep existing files in folder"
+      })
   }, onunarchive)
 
 void async function main() {
@@ -401,13 +406,19 @@ async function ondestroy({ did, force }) {
   process.exit(1)
 }
 
-async function onunarchive({ did, pathspec }) {
+async function onunarchive({ did, pathspec, existing }) {
+
   info("unarchiving AFS with DID %s to %s", did, pathspec)
 
   const { password } = await promptForPassword()
 
   try {
-    await afs.unarchive({ did, password, path: pathspec })
+    await afs.unarchive({
+      did,
+      password,
+      path: pathspec,
+      keepExisting: existing
+    })
   } catch (err) {
     onfatal(err)
   }

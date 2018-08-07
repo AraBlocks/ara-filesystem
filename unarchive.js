@@ -7,7 +7,8 @@ const { validate } = require('ara-util')
 async function unarchive({
   did = '',
   password = '',
-  path = ''
+  path = '',
+  keepExisting = false
 } = {}) {
   try {
     ({ did } = await validate({ did, password, label: 'commit' }))
@@ -20,12 +21,19 @@ async function unarchive({
   }
 
   const { afs } = await create({ did, password })
+
+  try {
+    await afs.readdir('/home')
+  } catch (err) {
+    throw new Error('Can only unarchive a non-empty AFS')
+  }
+
   path = path || __dirname
 
   const progress = mirror({
     name: '/home',
     fs: afs
-  }, { name: path }, {}, onerror)
+  }, { name: path }, { keepExisting }, onerror)
 
   progress.on('put', onput)
   progress.on('skip', onskip)

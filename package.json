@@ -34,7 +34,6 @@
     "ara-console": "github:arablocks/ara-console",
     "ara-context": "github:arablocks/ara-context",
     "ara-crypto": "github:arablocks/ara-crypto",
-    "ara-identity": "github:arablocks/ara-identity",
     "ara-network": "github:arablocks/ara-network",
     "ara-runtime-configuration": "github:arablocks/ara-runtime-configuration",
     "ara-util": "github:arablocks/ara-util",
