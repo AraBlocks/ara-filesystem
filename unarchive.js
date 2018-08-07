@@ -7,20 +7,15 @@ const { isAbsolute, resolve } = require('path')
 
 async function unarchive({
   did = '',
-  password = '',
   path = ''
 } = {}) {
-  try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
-  } catch (err) {
-    throw err
-  }
-
-  if (path && 'string' !== typeof path) {
+  if (!did || 'string' !== typeof did) {
+    throw new TypeError('DID URI must be of type string')
+  } else if (path && 'string' !== typeof path) {
     throw new TypeError('Path must be of type string')
   }
 
-  const { afs } = await create({ did, password })
+  const { afs } = await create({ did })
 
   try {
     const result = await afs.readdir(afs.HOME)    
