@@ -3,6 +3,7 @@ const { create } = require('./create')
 const unixify = require('unixify')
 const mirror = require('mirror-folder')
 const { validate } = require('ara-util')
+const { isAbsolute, resolve } = require('path')
 
 async function unarchive({
   did = '',
@@ -23,12 +24,18 @@ async function unarchive({
   const { afs } = await create({ did, password })
 
   try {
-    await afs.readdir('/home')
+    const result = await afs.readdir('/home')    
+    if (0 === result.length) {
+      throw new Error('Can only unarchive a non-empty AFS')
+    }
   } catch (err) {
-    throw new Error('Can only unarchive a non-empty AFS')
+    throw err
   }
 
   path = path || __dirname
+  if (!isAbsolute(path)) {
+    path = resolve(path)
+  }
 
   const progress = mirror({
     name: '/home',
