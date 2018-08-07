@@ -8,8 +8,7 @@ const { isAbsolute, resolve } = require('path')
 async function unarchive({
   did = '',
   password = '',
-  path = '',
-  keepExisting = true
+  path = ''
 } = {}) {
   try {
     ({ did } = await validate({ did, password, label: 'commit' }))
@@ -22,10 +21,9 @@ async function unarchive({
   }
 
   const { afs } = await create({ did, password })
-  console.log('actual home', afs.HOME)
 
   try {
-    const result = await afs.readdir('/home')    
+    const result = await afs.readdir(afs.HOME)    
     if (0 === result.length) {
       throw new Error('Can only unarchive a non-empty AFS')
     }
@@ -39,9 +37,9 @@ async function unarchive({
   }
 
   const progress = mirror({
-    name: '/home',
+    name: afs.HOME,
     fs: afs
-  }, { name: path }, { keepExisting }, onerror)
+  }, { name: path }, { keepExisting: true }, onerror)
 
   progress.on('put', onput)
   progress.on('skip', onskip)
