@@ -45,10 +45,9 @@ test.serial('unarchive() valid unarchive', async (t) => {
 
   // test unarchive to cwd
   await unarchive({ did })
-  t.pass()
-  // await t.notThrows(pify(fs.access)(kTestFilename))
-  // const result = await pify(fs.readFile)(kTestFilename, 'utf8')
-  // t.is(result, 'Hello World!')
+  await t.notThrows(pify(fs.access)(kTestFilename))
+  const result = await pify(fs.readFile)(kTestFilename, 'utf8')
+  t.is(result, 'Hello World!')
 })
 
 test.after((t) => {
