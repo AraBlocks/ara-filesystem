@@ -8,7 +8,7 @@ async function unarchive({
   did = '',
   password = '',
   path = '',
-  keepExisting = false
+  keepExisting = true
 } = {}) {
   try {
     ({ did } = await validate({ did, password, label: 'commit' }))
