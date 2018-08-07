@@ -146,8 +146,8 @@ const { argv } = program
         type: 'string',
         describe: "The path where the AFS should be extracted."
       })
-      .option('existing', {
-        alias: 'e',
+      .option('overwrite', {
+        alias: 'o',
         type: 'boolean',
         describe: "Keep existing files in folder"
       })
@@ -406,7 +406,7 @@ async function ondestroy({ did, force }) {
   process.exit(1)
 }
 
-async function onunarchive({ did, pathspec, existing }) {
+async function onunarchive({ did, pathspec, overwrite }) {
 
   info("unarchiving AFS with DID %s to %s", did, pathspec)
 
@@ -417,7 +417,7 @@ async function onunarchive({ did, pathspec, existing }) {
       did,
       password,
       path: pathspec,
-      keepExisting: existing
+      keepExisting: !overwrite
     })
   } catch (err) {
     onfatal(err)
