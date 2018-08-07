@@ -22,6 +22,7 @@ async function unarchive({
   }
 
   const { afs } = await create({ did, password })
+  console.log('actual home', afs.HOME)
 
   try {
     const result = await afs.readdir('/home')    
