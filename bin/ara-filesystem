@@ -136,6 +136,17 @@ const { argv } = program
         describe: 'Force destroy operation',
       })
   }, ondestroy)
+  .command('unarchive <did> [pathspec]', "Unarchive an AFS to a directory", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .positional('pathspec', {
+        type: 'string',
+        describe: "The path where the AFS should be extracted."
+      })
+  }, onunarchive)
 
 void async function main() {
   if (argv.debug) {
@@ -388,6 +399,20 @@ async function ondestroy({ did, force }) {
   }
 
   process.exit(1)
+}
+
+async function onunarchive({ did, pathspec }) {
+  info("unarchiving AFS with DID %s to %s", did, pathspec)
+
+  const { password } = await promptForPassword()
+
+  try {
+    await afs.unarchive({ did, password, path: pathspec })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("successfully unarchived AFS %s to %s", did, pathspec)
 }
 
 async function promptForPassword() {
