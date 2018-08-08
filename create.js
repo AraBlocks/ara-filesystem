@@ -24,18 +24,26 @@ const {
   kArchiverKey
 } = require('./constants')
 
+const noop = () => void 0
+
 /**
  * Creates an AFS with the given Ara identity
- * @param  {string} did
- * @return {Promise}
+ * @param {String}  did
+ * @param {String}   owner
+ * @param {String}   password
+ * @param {Function} storage
+ * @return {Object}
  */
 async function create({
   password = '',
   owner = null,
   did = null,
+  storage = noop
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
+  } else if (storage && 'function' !== typeof storage) {
+    throw new TypeError('ara-filesystem.create: Expecting storage to be a function.')
   }
 
   let afs
@@ -49,7 +57,10 @@ async function create({
     }
 
     const id = getDocumentKeyHex(ddo)
-    const drives = await createMultidrive({ did: id, password })
+    if (storage === noop) {
+      storage = defaultStorage(id, password)
+    }
+    const drives = await createMultidrive({ did: id, password, storage })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
 
@@ -86,6 +97,10 @@ async function create({
       throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
     }
 
+    if (storage === noop) {
+      storage = defaultStorage(afsDid, password)
+    }
+
     try {
       // generate AFS key path
       const path = createAFSKeyPath(afsDid)
@@ -94,7 +109,7 @@ async function create({
         key: publicKey,
         secretKey,
         path,
-        storage: defaultStorage(afsDid, password),
+        storage,
         shallow: true
       })
     } catch (err) { debug(err.stack || err) }
@@ -112,7 +127,7 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({ did, password }) {
+  async function createMultidrive({ did, password, storage }) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, did)
     const store = toilet(nodes)
@@ -126,7 +141,7 @@ async function create({
             id,
             key,
             path,
-            storage: defaultStorage(id, password),
+            storage,
             shallow: true
           })
           return done(null, afs)
