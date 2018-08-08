@@ -55,7 +55,9 @@ async function commit({
   const exists = await _hasBeenCommitted(contents, hIdentity)
 
   const mtData = _getWriteData(0, contents, exists)
+  console.log('mtData', mtData)
   const msData = _getWriteData(1, contents, exists)
+  console.log('msData', msData)
 
   let result
   if (exists) {
@@ -167,14 +169,7 @@ function _getWriteData(index, contents, append) {
   const map = contents[_getFilenameByIndex(index)]
   let buffer = ''
   const offsets = Object.keys(map).map(v => parseInt(v, 10))
-  if (append) {
-    offsets.shift()
-  }
-
   const buffers = Object.values(map)
-  if (append) {
-    buffers.shift()
-  }
 
   let result
   if (!append) {
@@ -192,6 +187,8 @@ function _getWriteData(index, contents, append) {
     buffer = `0x${buffer}`
     result = { buffer, offsets, sizes }
   } else {
+    offsets.shift()
+    buffers.shift()
     const buffer = `0x${buffers.join('')}`
     result = { offsets, buffer }
   }

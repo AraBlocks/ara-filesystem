@@ -18,7 +18,8 @@ contract Storage {
     bool invalid;
   }
 
-  event Commit(string _identity);
+  event Write(string _identity);
+  event Append(string _identity);
   event MarkedInvalid(string _identity);
 
   uint8 constant mtBufferSize = 40;
@@ -37,22 +38,22 @@ contract Storage {
     bytes mtBuffer, bytes msBuffer) public restricted {
 
     require(!buffer_mappings[identity][0].invalid);
+    
+    uint256 maxOffsetLength = mtOffsets.length > msOffsets.length ? mtOffsets.length : msOffsets.length;
 
-    uint256 offset;
-    bytes memory slice;
-    for (uint i = 0; i < mtOffsets.length; i++) {
-      offset = mtOffsets[i];
-      slice = mtBuffer.slice(i * mtBufferSize, mtBufferSize);
-      buffer_mappings[identity][0].buffers[offset] = slice;
+    for (uint i = 0; i < maxOffsetLength; i++) {
+      // metadata/tree
+      if (i <= mtOffsets.length - 1) {
+        buffer_mappings[identity][0].buffers[mtOffsets[i]] = mtBuffer.slice(i * mtBufferSize, mtBufferSize);
+      }
+
+      // metadata/signatures
+      if (i <= msOffsets.length - 1) {
+        buffer_mappings[identity][1].buffers[msOffsets[i]] = msBuffer.slice(i * msBufferSize, msBufferSize);
+      }
     }
 
-    for (uint j = 0; j < msOffsets.length; j++) {
-      offset = msOffsets[j];
-      slice = msBuffer.slice(j * msBufferSize, msBufferSize);
-      buffer_mappings[identity][1].buffers[offset] = slice;
-    }
-
-    emit Commit(identity);
+    emit Append(identity);
   }
 
   function write(string identity, uint256[] mtOffsets, uint256[] msOffsets,
@@ -61,24 +62,21 @@ contract Storage {
     require(!buffer_mappings[identity][0].invalid);
     require(mtOffsets.length == mtSizes.length && msOffsets.length == msSizes.length);
 
-    uint256 offset;
-    uint8 size;
-    bytes memory slice;
-    for (uint i = 0; i < mtOffsets.length; i++) {
-      offset = mtOffsets[i];
-      size = mtSizes[i];
-      slice = mtBuffer.slice(offset, size);
-      buffer_mappings[identity][0].buffers[offset] = slice;
+    uint256 maxOffsetLength = mtOffsets.length > msOffsets.length ? mtOffsets.length : msOffsets.length;
+
+    for (uint i = 0; i < maxOffsetLength; i++) {
+      // metadata/tree
+      if (i <= mtOffsets.length - 1) {
+        buffer_mappings[identity][0].buffers[mtOffsets[i]] = mtBuffer.slice(mtOffsets[i], mtSizes[i]);
+      }
+      
+      // metadata/signatures
+      if (i <= msOffsets.length - 1) {
+        buffer_mappings[identity][1].buffers[msOffsets[i]] = msBuffer.slice(msOffsets[i], msSizes[i]);
+      }
     }
 
-    for (uint j = 0; j < msOffsets.length; j++) {
-      offset = msOffsets[j];
-      size = msSizes[j];
-      slice = msBuffer.slice(offset, size);
-      buffer_mappings[identity][1].buffers[offset] = slice;
-    }
-
-    emit Commit(identity);
+    emit Write(identity);
   }
 
   function hasBuffer(string identity, uint8 file, uint256 offset, bytes buffer) public view returns (bool exists) {

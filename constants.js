@@ -10,8 +10,8 @@ module.exports = {
   kTreeFile: 'tree',
   kSignaturesFile: 'signatures',
   kStagingFile: './staged.json',
-  kStorageAddress: '0x69797a4586692c4fafea7b33f77aac071da0e2e9',
-  kPriceAddress: '0x383864fd16afa0af2c5516e73753e4e07e1de704',
+  kStorageAddress: '0x4ac562dbcba73fae01f6e74773183cc394f98512',
+  kPriceAddress: '0xf25186b5081ff5ce73482ad761db0eb0d25abfbf',
 
   // metadata/tree constants
   kMetadataTreeName: 'metadata/tree',
