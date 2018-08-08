@@ -9,6 +9,8 @@ const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
 const { abi } = require('./build/contracts/Storage.json')
+const { contract } = require('ara-web3')
+const { validate, hashDID } = require('ara-util')
 
 const {
   kMetadataTreeName,
@@ -23,10 +25,7 @@ const {
 
 const {
   encryptJSON,
-  decryptJSON,
-  getDeployedContract,
-  validate,
-  hash
+  decryptJSON
 } = require('./util')
 
 async function commit({
@@ -49,15 +48,14 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
-  const deployed = getDeployedContract(abi, kStorageAddress)
-  const hIdentity = hash(did)
+  const accounts = await web3.eth.getAccounts()
+  const deployed = contract.get(abi, kStorageAddress)
+  const hIdentity = hashDID(did)
 
   const exists = await _hasBeenCommitted(contents, hIdentity)
 
   const mtData = _getWriteData(0, contents, exists)
-  console.log('mtData', mtData)
   const msData = _getWriteData(1, contents, exists)
-  console.log('msData', msData)
 
   let result
   if (exists) {

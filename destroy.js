@@ -6,17 +6,12 @@ const pify = require('pify')
 const { web3 } = require('ara-context')()
 const { abi } = require('./build/contracts/Storage.json')
 const { kStorageAddress } = require('./constants')
+const { getAFSOwnerIdentity, validate, hashDID } = require('ara-util')
 
 const {
   createAFSKeyPath,
   createIdentityKeyPath
 } = require('./key-path')
-
-const {
-  validate,
-  hash,
-  getAfsId
-} = require('./util')
 
 const {
   basename,
@@ -44,7 +39,7 @@ async function destroy({
 
   try {
     // destroy AFS identity
-    const afsIdentity = await getAfsId(did, mnemonic, password)
+    const afsIdentity = await getAFSOwnerIdentity({ did, mnemonic, password })
     path = createIdentityKeyPath(afsIdentity)
     await pify(access)(path)
     await pify(rimraf)(path)
@@ -70,7 +65,7 @@ async function destroy({
 
   const deployed = new web3.eth.Contract(abi, kStorageAddress)
   const accounts = await web3.eth.getAccounts()
-  const hIdentity = hash(did)
+  const hIdentity = hashDID(did)
 
   try {
     // mark blockchain buffers invalid
@@ -81,6 +76,5 @@ async function destroy({
 }
 
 module.exports = {
-  destroy,
-  getAfsId
+  destroy
 }

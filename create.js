@@ -15,9 +15,9 @@ const { defaultStorage } = require('./storage')
 
 const {
   getDocumentKeyHex,
-  loadSecrets,
+  loadSecretsKeystore,
   validate
-} = require('./util')
+} = require('ara-util')
 
 const {
   kResolverKey,
@@ -73,13 +73,13 @@ async function create({
 
     await writeIdentity(afsId)
 
-    let keystore = await loadSecrets(kArchiverKey)
+    let keystore = await loadSecretsKeystore(kArchiverKey)
     await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
 
-    keystore = await loadSecrets(kResolverKey)
+    keystore = await loadSecretsKeystore(kResolverKey)
     const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
 
     if (null == afsDdo || 'object' !== typeof afsDdo) {
