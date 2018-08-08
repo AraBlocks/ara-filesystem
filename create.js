@@ -24,8 +24,6 @@ const {
   kArchiverKey
 } = require('./constants')
 
-const noop = () => void 0
-
 /**
  * Creates an AFS with the given Ara identity
  * @param {String}  did
@@ -38,7 +36,7 @@ async function create({
   password = '',
   owner = null,
   did = null,
-  storage = noop
+  storage = null
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
@@ -57,9 +55,6 @@ async function create({
     }
 
     const id = getDocumentKeyHex(ddo)
-    if (storage === noop) {
-      storage = defaultStorage(id, password)
-    }
     const drives = await createMultidrive({ did: id, password, storage })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
@@ -97,10 +92,6 @@ async function create({
       throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
     }
 
-    if (storage === noop) {
-      storage = defaultStorage(afsDid, password)
-    }
-
     try {
       // generate AFS key path
       const path = createAFSKeyPath(afsDid)
@@ -109,7 +100,7 @@ async function create({
         key: publicKey,
         secretKey,
         path,
-        storage,
+        storage: defaultStorage(afsDid, password, storage),
         shallow: true
       })
     } catch (err) { debug(err.stack || err) }
@@ -141,7 +132,7 @@ async function create({
             id,
             key,
             path,
-            storage,
+            storage: defaultStorage(id, password, storage),
             shallow: true
           })
           return done(null, afs)

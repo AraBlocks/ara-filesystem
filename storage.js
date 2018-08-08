@@ -16,14 +16,15 @@ const {
   kMetadataSignaturesName: mSigName
 } = require('./constants')
 
-function defaultStorage(identity, password) {
+function defaultStorage(identity, password, storage = null) {
   return (filename, drive, path) => {
     filename = unixify(filename)
     if ('home' === basename(path) && (filename.includes(mTreeName)
       || filename.includes(mSigName))) {
       return create({ filename, identity, password })
     }
-    return raf(resolve(path, filename))
+    const file = resolve(path, filename)
+    return storage ? storage(file) : raf(file)
   }
 }
 
