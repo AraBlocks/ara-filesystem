@@ -9,7 +9,7 @@ const pify = require('pify')
 const rc = require('./rc')()
 
 const {
-  proxyExists
+  proxyExists,
   getProxyAddress
 } = require('ara-contracts/registry')
 
