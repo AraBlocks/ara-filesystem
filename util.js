@@ -12,18 +12,15 @@ function generateKeypair(password) {
   return { publicKey, secretKey }
 }
 
-// afs
 function encrypt(value, opts) {
   return cryptoEncrypt(value, opts)
 }
 
-// afs
 function decrypt(value, opts) {
   const keystore = JSON.parse(value.keystore)
   return cryptoDecrypt(keystore, opts)
 }
 
-// afs
 function randomBytes(size) {
   return cryptoRandomBytes(size)
 }
@@ -43,7 +40,6 @@ function encryptJSON(json, password) {
   return encryptedJSON
 }
 
-// afs
 function decryptJSON(keystore, password) {
   const { secretKey } = generateKeypair(password)
   const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))

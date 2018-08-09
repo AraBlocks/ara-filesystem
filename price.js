@@ -26,8 +26,9 @@ async function estimateSetPriceGasCost({
   password = '',
   price = 0
 } = {}) {
+  let ddo
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'price' }))
   } catch (err) {
     throw err
   }
@@ -36,17 +37,34 @@ async function estimateSetPriceGasCost({
     throw new TypeError('Price should be 0 or positive whole number')
   }
 
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
+  }
+
+  const proxy = await getProxyAddress(did)
+
+  const owner = getDocumentOwner(ddo, true)
+  const acct = await account.load({ did: owner, password })
+
   let cost
   try {
-    const deployed = contract.get(abi, kAFSAddress)
-    cost = await deployed.methods
-      .setPrice(price)
-      .estimateGas({ gas: 500000 })
+    const transaction = await tx.create({
+      account: acct,
+      to: proxy,
+      data: {
+        abi,
+        name: 'setPrice',
+        values: [
+          price
+        ]
+      }
+    })
+
+    return tx.estimateCost(transaction)
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
   }
-  return cost
 }
 
 async function setPrice({
@@ -56,7 +74,7 @@ async function setPrice({
 } = {}) {
   let ddo
   try {
-    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'price' }))
   } catch (err) {
     throw err
   }
@@ -104,7 +122,7 @@ async function getPrice({
     throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
   }
 
-  const proxy = await registry.getProxyAddress(contentDid)
+  const proxy = await getProxyAddress(contentDid)
 
   const result = await call({
     abi: afsAbi,
