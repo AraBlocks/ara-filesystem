@@ -29,7 +29,23 @@ const {
   kMetadataSignaturesName: mSigName
 } = require('./constants')
 
-function defaultStorage(identity, password, storage = null) {
+const {
+  append,
+  retrieve
+} = require('./commit')
+
+const {
+  validate,
+  hashIdentity,
+  getDocumentOwner
+} = require('./util')
+
+const {
+  resolve,
+  basename
+} = require('path')
+
+function defaultStorage(identity, password, proxy = '', storage = null) {
   return (filename, drive, path) => {
     filename = unixify(filename)
     if ('home' === basename(path) && (filename.includes(mTreeName)

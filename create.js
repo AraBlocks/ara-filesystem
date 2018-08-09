@@ -155,7 +155,10 @@ async function create({
             id,
             key,
             path,
+<<<<<<< HEAD
             storage: defaultStorage(id, password, storage),
+=======
+>>>>>>> f36d38a7caaf5c864a4c12fc974cdef544c06c87
             storage: defaultStorage(id, password, proxy),
             shallow: true
           })
