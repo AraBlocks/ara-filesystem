@@ -4,23 +4,11 @@ const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
 const raf = require('random-access-file')
 const unixify = require('unixify')
-const { resolve, basename } = require('path')
-const { web3 } = require('ara-context')()
-const { hashDID, validate, getDocumentOwner } = require('ara-util')
 
 const {
-  writeToStaged,
-  readFromStaged
-} = require('./commit')
-const { abi } = require('ara-contracts/build/contracts/AFS.json')
-const { kAFSAddress } = require('ara-contracts/constants')
-
-const {
-  contract,
-  account,
-  call,
-  tx
-} = require('ara-web3')
+  proxyExists,
+  getProxyAddress
+} = require('ara-contracts/registry')
 
 const {
   kMetadataTreeIndex,
@@ -30,37 +18,51 @@ const {
 } = require('./constants')
 
 const {
-  append,
-  retrieve
+  writeToStaged,
+  readFromStaged
 } = require('./commit')
 
 const {
+  tx,
+  account,
+  contract
+} = require('ara-web3')
+
+const {
+  hashDID,
   validate,
-  hashIdentity,
   getDocumentOwner
-} = require('./util')
+} = require('ara-util')
 
 const {
   resolve,
   basename
 } = require('path')
 
-function defaultStorage(identity, password, proxy = '', storage = null) {
+function defaultStorage(identity, password, storage = null) {
+  if (storage && 'function' !== typeof storage) {
+    throw new TypeError('ara-filesystem.storage: Expecting storage to be a function.')
+  }
   return (filename, drive, path) => {
     filename = unixify(filename)
     if ('home' === basename(path) && (filename.includes(mTreeName)
       || filename.includes(mSigName))) {
-      return create({ filename, identity, password, proxy })
+      return create({ filename, identity, password})
     }
     const file = resolve(path, filename)
     return storage ? storage(file) : raf(file)
   }
 }
 
-function create({ filename, identity, password, proxy = ''}) {
+function create({ filename, identity, password }) {
   const fileIndex = resolveBufferIndex(filename)
 
   const writable = Boolean(password)
+
+  let proxy
+  if (await proxyExists(identity)) {
+    proxy = await getProxyAddress(identity)
+  }
 
   return ras({
     async read(req) {
@@ -75,7 +77,7 @@ function create({ filename, identity, password, proxy = ''}) {
       // data is not staged, must retrieve from bc
       if (!buffer && proxy) {
         buffer = await call({
-          abi: afsAbi,
+          abi,
           address: proxy,
           functionName: 'read',
           arguments: [
@@ -149,11 +151,6 @@ function resolveBufferIndex(path) {
     index = kMetadataSignaturesIndex
   }
   return index
-}
-
-module.exports = {
-  resolveBufferIndex,
-  defaultStorage
 }
 
 module.exports = {

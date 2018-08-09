@@ -1,9 +1,13 @@
 const debug = require('debug')('ara-filesystem:unarchive')
+const { validate } = require('ara-util')
+const mirror = require('mirror-folder')
 const { create } = require('./create')
 const unixify = require('unixify')
-const mirror = require('mirror-folder')
-const { validate } = require('ara-util')
-const { isAbsolute, resolve } = require('path')
+
+const {
+  resolve,
+  isAbsolute
+} = require('path')
 
 async function unarchive({
   did = '',

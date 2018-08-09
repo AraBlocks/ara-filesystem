@@ -1,31 +1,14 @@
 /* eslint-disable no-await-in-loop */
 
-const { abi: regAbi } = require('ara-contracts/build/contracts/Registry.json')
-const { abi: afsAbi } = require('ara-contracts/build/contracts/AFS.json')
-const debug = require('debug')('ara-filesystem:commit')
-const fs = require('fs')
-const pify = require('pify')
-const { toHex } = require('ara-identity/util')
-const { web3 } = require('ara-context')()
-const { resolve, dirname } = require('path')
-const { createAFSKeyPath } = require('./key-path')
-const contract = require('ara-web3/contract')
-const proxyRc = require('ara-contracts/rc')
-const account = require('ara-web3/account')
-const { setPrice } = require('./price')
-const { validate, hashDID, getDocumentOwner } = require('ara-util')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kAFSAddress } = require('ara-contracts/constants')
-const { abi: afsAbi } = require('ara-contracts/build/contracts/AFS.json')
-const proxyRc = require('ara-contracts/rc')
-const account = require('ara-web3/account')
-const tx = require('ara-web3/tx')
-const solc = require('solc')
-
-const {
-  kRegistryAddress,
-  kAFSAddress
-} = require('ara-contracts/constants')
+const debug = require('debug')('ara-filesystem:commit')
+const { createAFSKeyPath } = require('./key-path')
+const { toHex } = require('ara-identity/util')
+const { web3 } = require('ara-context')()
+const { setPrice } = require('./price')
+const pify = require('pify')
+const fs = require('fs')
 
 const {
   proxyExists,
@@ -41,14 +24,22 @@ const {
   kMetadataTreeBufferSize,
   kMetadataSignaturesName,
   kMetadataSignaturesIndex,
-  kMetadataSignaturesBufferSize,
-  kStagingFile
+  kMetadataSignaturesBufferSize
 } = require('./constants')
 
 const {
-  hash,
+  tx,
+  account,
+  contract
+} = require('ara-web3')
+
+const {
+  hashDID,
   validate,
-  normalize,
+  getDocumentOwner
+} = require('ara-util')
+
+const {
   encryptJSON,
   decryptJSON
 } = require('./util')

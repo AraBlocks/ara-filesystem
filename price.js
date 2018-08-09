@@ -8,20 +8,18 @@ const {
 } = require('ara-contracts/registry')
 
 const {
-  contract,
-  account,
+  tx,
   call,
-  tx
+  account,
+  contract
 } = require('ara-web3')
 
 const {
   hash,
-  validate,
   hashDID,
+  validate,
   getDocumentOwner
 } = require('ara-util')
-
-const { kAFSAddress } = require('ara-contracts/constants')
 
 async function estimateSetPriceGasCost({
   did = '',
