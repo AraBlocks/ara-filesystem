@@ -114,7 +114,7 @@ function create({ filename, identity, password }) {
           to: proxy,
           data: {
             abi,
-            name: 'unlist'
+            functionName: 'unlist'
           }
         })
         await tx.sendSignedTransaction(transaction)
