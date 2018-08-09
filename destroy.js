@@ -14,7 +14,7 @@ const { contract } = require('ara-web3')
 const rc = require('./rc')()
 
 const {
-  proxyExists
+  proxyExists,
   getProxyAddress
 } = require('ara-contracts/registry')
 

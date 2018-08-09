@@ -74,7 +74,7 @@ async function commit({
   if (await proxyExists(did)) {
     proxyAddress = await getProxyAddress(did)
   } else {
-    proxyAddress = await deployProxy({ requesterDid: owner, contentDid: did, password })
+    proxyAddress = await deployProxy({ contentDid: did, password })
   }
 
   debug('address', proxyAddress)
