@@ -45,6 +45,7 @@
     "cli-width": "^2.2.0",
     "debug": "^3.1.0",
     "did-document": "github:arablocks/did-document",
+    "extend": "^3.0.2",
     "has-did-method": "^0.1.0",
     "extend": "^3.0.2",
     "hypercore": "^6.18.1",

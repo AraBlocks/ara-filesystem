@@ -1,5 +1,4 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
-const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:destroy')
 const { access } = require('fs')
 const rimraf = require('rimraf')
@@ -18,8 +17,7 @@ const {
 
 const {
   tx,
-  account,
-  contract
+  account
 } = require('ara-web3')
 
 const {

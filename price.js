@@ -1,6 +1,5 @@
 const { kAFSAddress } = require('ara-contracts/constants')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
-const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:price')
 
 const {
@@ -11,8 +10,7 @@ const {
 const {
   tx,
   call,
-  account,
-  contract
+  account
 } = require('ara-web3')
 
 const {
@@ -45,14 +43,13 @@ async function estimateSetPriceGasCost({
   const owner = getDocumentOwner(ddo, true)
   const acct = await account.load({ did: owner, password })
 
-  let cost
   try {
     const transaction = await tx.create({
       account: acct,
       to: proxy,
       data: {
         abi,
-        name: 'setPrice',
+        functionName: 'setPrice',
         values: [
           price
         ]
@@ -97,7 +94,7 @@ async function setPrice({
       to: proxy,
       data: {
         abi,
-        name: 'setPrice',
+        functionName: 'setPrice',
         values: [
           price
         ]
@@ -119,10 +116,10 @@ async function getPrice({
     throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
   }
 
-  const proxy = await getProxyAddress(contentDid)
+  const proxy = await getProxyAddress(did)
 
   const result = await call({
-    abi: afsAbi,
+    abi,
     address: proxy,
     functionName: 'price_'
   })

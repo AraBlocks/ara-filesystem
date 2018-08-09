@@ -1,5 +1,4 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
-const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
 const raf = require('random-access-file')
@@ -24,8 +23,8 @@ const {
 
 const {
   tx,
-  account,
-  contract
+  call,
+  account
 } = require('ara-web3')
 
 const {
@@ -46,22 +45,27 @@ function defaultStorage(identity, password, storage = null, proxy = '') {
     filename = unixify(filename)
     if ('home' === basename(path) && (filename.includes(mTreeName)
       || filename.includes(mSigName))) {
-      return create({ filename, identity, password})
+      return create({
+        filename,
+        identity,
+        password,
+        proxy
+      })
     }
     const file = resolve(path, filename)
     return storage ? storage(file) : raf(file)
   }
 }
 
-function create({ filename, identity, password }) {
+function create({
+  filename,
+  identity,
+  password,
+  proxy
+} = {}) {
   const fileIndex = resolveBufferIndex(filename)
 
   const writable = Boolean(password)
-
-  let proxy
-  if (await proxyExists(identity)) {
-    proxy = await getProxyAddress(identity)
-  }
 
   return ras({
     async read(req) {

@@ -13,6 +13,11 @@ const pify = require('pify')
 const rc = require('./rc')()
 
 const {
+  proxyExists,
+  getProxyAddress
+} = require('ara-contracts/registry')
+
+const {
   toHex,
   writeIdentity
 } = require('ara-identity/util')
@@ -52,15 +57,29 @@ async function create({
       throw err
     }
 
+    let proxy
+    if (await proxyExists(did)) {
+      proxy = await getProxyAddress(did)
+    }
+
     const id = getDocumentKeyHex(ddo)
     const drives = await createMultidrive({ did: id, password, storage })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
-    afs = await pify(drives.create)({
-      id,
-      key,
-      path
-    })
+    if (proxy) {
+      afs = await pify(drives.create)({
+        id,
+        key,
+        path,
+        proxy
+      })
+    } else {
+      afs = await pify(drives.create)({
+        id,
+        key,
+        path
+      })
+    }
 
     afs.did = did
     afs.ddo = ddo
@@ -123,7 +142,11 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({ did, password, storage }) {
+  async function createMultidrive({
+    did,
+    password,
+    storage
+  } = {}) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, did)
     const store = toilet(nodes)
@@ -131,13 +154,19 @@ async function create({
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
-        const { id, key, path } = opts
+        const {
+          id,
+          key,
+          path,
+          proxy
+        } = opts
+
         try {
           const afs = await createCFS({
             id,
             key,
             path,
-            storage: defaultStorage(id, password, storage, proxy)
+            storage: proxy ? defaultStorage(id, password, storage, proxy) : defaultStorage(id, password, storage),
           })
           return done(null, afs)
         } catch (err) {
