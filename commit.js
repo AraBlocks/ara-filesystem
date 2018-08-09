@@ -1,7 +1,6 @@
 /* eslint-disable no-await-in-loop */
 
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
-const { kAFSAddress } = require('ara-contracts/constants')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
 const { toHex } = require('ara-identity/util')
@@ -16,23 +15,20 @@ const {
 } = require('ara-contracts/registry')
 
 const {
-  kAidPrefix,
   kStagingFile,
   kMetadataTreeName,
   kMetadataTreeIndex,
-  kMetadataTreeBufferSize,
   kMetadataSignaturesName,
-  kMetadataSignaturesIndex,
-  kMetadataSignaturesBufferSize
+  kMetadataSignaturesIndex
 } = require('./constants')
 
 const {
   tx,
+  call,
   account
 } = require('ara-web3')
 
 const {
-  hashDID,
   validate,
   getDocumentOwner
 } = require('ara-util')
@@ -193,11 +189,11 @@ async function _append(opts, estimate = true) {
     }
   })
 
-  if (!estimate) {
-    return tx.sendSignedTransaction(transaction)
-  } else {
+  if (estimate) {
     return tx.estimateCost(transaction)
   }
+
+  return tx.sendSignedTransaction(transaction)
 }
 
 async function _write(opts, estimate = true) {
@@ -224,11 +220,11 @@ async function _write(opts, estimate = true) {
     }
   })
 
-  if (!estimate) {
-    return tx.sendSignedTransaction(transaction)
-  } else {
+  if (estimate) {
     return tx.estimateCost(transaction)
   }
+
+  return tx.sendSignedTransaction(transaction)
 }
 
 function _getWriteData(index, contents, append) {
@@ -244,8 +240,8 @@ function _getWriteData(index, contents, append) {
       const length = _hexToBytes(v.length)
 
       // inserts 0s to fill buffer based on offsets
-      if (offsets[i+1] && offsets[i+1] !== _hexToBytes(buffer.length)) {
-        const diff = offsets[i+1] - _hexToBytes(buffer.length)
+      if (offsets[i + 1] && offsets[i + 1] !== _hexToBytes(buffer.length)) {
+        const diff = offsets[i + 1] - _hexToBytes(buffer.length)
         buffer += toHex(Buffer.alloc(diff))
       }
       return length
@@ -322,8 +318,8 @@ async function _hasBeenCommitted(contents, proxy) {
     address: proxy,
     functionName: 'hasBuffer',
     arguments: [
-      fileIndex,
-      offset,
+      0,
+      0,
       buf
     ]
   })

@@ -1,8 +1,6 @@
 const debug = require('debug')('ara-filesystem:unarchive')
-const { validate } = require('ara-util')
 const mirror = require('mirror-folder')
 const { create } = require('./create')
-const unixify = require('unixify')
 
 const {
   resolve,
@@ -22,7 +20,7 @@ async function unarchive({
   const { afs } = await create({ did })
 
   try {
-    const result = await afs.readdir(afs.HOME)    
+    const result = await afs.readdir(afs.HOME)
     if (0 === result.length) {
       throw new Error('Can only unarchive a non-empty AFS')
     }
@@ -60,7 +58,6 @@ async function unarchive({
     debug('unarchive complete')
     afs.close()
   }
-
 }
 
 module.exports = {
