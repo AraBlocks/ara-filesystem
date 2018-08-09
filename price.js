@@ -9,14 +9,13 @@ const {
 } = require('ara-contracts/registry')
 
 const {
-  contract,
-  account,
+  tx,
   call,
-  tx
+  account,
+  contract
 } = require('ara-web3')
 
 const {
-  hash,
   validate,
   getDocumentOwner
 } = require('ara-util')

@@ -4,8 +4,8 @@ const debug = require('debug')('ara-filesystem:remove')
 const { create } = require('./create')
 
 const {
-  resolve,
-  join
+  join,
+  resolve
 } = require('path')
 
 async function remove(opts) {
