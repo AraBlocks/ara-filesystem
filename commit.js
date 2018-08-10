@@ -249,7 +249,7 @@ async function _deleteStagedFile(path) {
 // if it has, we know that AFS has been committed already
 async function _hasBeenCommitted(contents, hIdentity) {
   const buf = `0x${_getBufferFromStaged(contents, 0, 0)}`
-  const deployed = getDeployedContract(abi, kStorageAddress)
+  const deployed = contract.get(abi, kStorageAddress)
   return deployed.methods.hasBuffer(hIdentity, 0, 0, buf).call()
 }
 
