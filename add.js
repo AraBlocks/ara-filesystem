@@ -2,12 +2,10 @@
 
 const debug = require('debug')('ara-filesystem:add')
 const { create } = require('./create')
-const { resolve, join } = require('path')
-const fs = require('fs')
-const { stat, access } = require('fs')
+const { join, basename } = require('path')
 const pify = require('pify')
-const isDirectory = require('is-directory')
 const isFile = require('is-file')
+const mirror = require('mirror-folder')
 
 const ignored = require('./lib/ignore')
 
@@ -36,128 +34,63 @@ async function add(opts) {
     throw err
   }
 
-  await addAll(paths)
+  await mirrorPaths(paths)
 
-  async function addAll(files) {
-    // ensure paths exists
-    for (const path of files) {
-      // ensure local file path exists
-      try {
-        await pify(access)(path)
-        // directories
-        if (await pify(isDirectory)(path)) {
-          // add local directory to AFS at path
-          try {
-            debug('Adding directory %s', path)
-            await createDirectory(path)
-          } catch (err) {
-            debug('createDirectory: ', err.stack)
-            debug('E: Failed to add path %s', path)
-          }
-        }
-
-        // files
-        if (await pify(isFile)(path)) {
-          try {
-            debug('Adding file %s', path)
-            await addFile(path)
-          } catch (err) {
-            debug('addFile:', err.stack)
-            debug('E: Failed to add path %s', path)
-          }
-        }
-      } catch (err) {
-        debug('%s does not exist', path)
-      }
-    }
-  }
-
-  async function createDirectory(path) {
-    const src = resolve(path)
-    const dest = src.replace(process.cwd(), afs.HOME)
-    await afs.mkdirp(dest)
-
-    const files = await fs.readdirSync(path)
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      files[i] = join(src, file)
-    }
-    await addAll(files)
-  }
-
-  async function addFile(path) {
-    if (!force && ignored.ignores(path)) {
-      throw new Error(`ignore: ${path} is ignored. Use '--force' to force add file.`)
-    }
-    // paths
-    const src = resolve(path)
-    const dest = src.replace(process.cwd(), afs.HOME)
-
-    // file stats
-    const stats = await pify(stat)(src)
-
-    try {
-      const { mtime } = await pify(afs.stat)(dest)
-      if (stats.mtime <= mtime) {
-        if (force) {
-          debug('Force adding %s', path)
-        } else {
-          return
-        }
-      }
-    } catch (err) {
-      // file does not exist in AFS, it will be created later
-    }
-
-    // IO stream
-    const reader = fs.createReadStream(src, { autoClose: true })
-    const writer = afs.createWriteStream(dest)
-
-    reader.setMaxListeners(0)
-    writer.setMaxListeners(0)
-    await createPipe({ reader, writer, stats })
-    debug('Successfully added file', path)
-  }
-
-  async function createPipe({ reader, writer, stats }) {
-    if (!stats || 0 === stats.size) {
-      return writer.end()
-    }
-
-    // work
-    // eslint-disable-next-line no-shadow
-    const result = await new Promise((resolve, reject) => {
-      writer.on('finish', onfinish)
-      writer.on('debug', ondebug)
-
-      reader.on('debug', ondebug)
-      reader.on('data', ondata)
-      reader.on('end', onend)
-
-      reader.pipe(writer)
-
-      function ondata(chunk) {
-        debug('Read stream received buffer of size %s', chunk.length)
-        debug('Writing chunk %s', chunk.length)
-      }
-
-      function onfinish() {
-        debug('Write stream finished')
-        process.nextTick(resolve)
-      }
-
-      function onend() {
-        debug('Read stream ended')
-      }
-
-      function ondebug(err) {
-        reject(err)
-      }
-    })
-    return result
-  }
+  debug('full copy complete')
+  debug(await afs.readdir(afs.HOME))
 
   return afs
+
+  async function mirrorPaths(paths) {
+    for (const path of paths) {
+      await mirrorPath(path)
+    }
+  }
+
+  async function mirrorPath(path) {
+    debug(`copy start: ${path}`)
+    let name = afs.HOME
+
+    // Check if file
+    if (await pify(isFile)(path)) {
+      name = join(afs.HOME, basename(path))
+    }
+
+    // Mirror and log
+    const progress = mirror({ name: path }, { name, fs: afs }, { keepExisting: true, ignore })
+    progress.on('put', (src, dst) => {
+      debug(`adding path ${dst.name}`)
+    })
+    progress.on('skip', (src, dst) => {
+      debug(`skipping path ${dst.name}`)
+    })
+    progress.on('ignore', (src, dst) => {
+      debug(`ignoring path ${dst.name}. Use '--force' to force add file`)
+    })
+    progress.on('del', (dst) => {
+      debug(`deleting path ${dst.name}`)
+    })
+
+    // Await end or error
+    const error = await new Promise((resolve, reject) => progress.once('end', resolve).once('error', reject))
+
+    if (error) {
+      debug(`copy error: ${path}: ${error}`)
+    } else {
+      debug(`copy complete: ${path}`)
+    }
+  }
+
+  function ignore(path, stat) {
+    if (ignored.ignores(path)) {
+      if (force) {
+        debug(`forcing add path ${path}`)
+        return false
+      }
+      return true
+    }
+    return false
+  }
 }
 
 module.exports = {
