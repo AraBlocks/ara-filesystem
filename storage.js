@@ -38,8 +38,8 @@ function defaultStorage(identity, password, storage = null, proxy = '') {
   }
   return (filename, drive, path) => {
     filename = unixify(filename)
-    if ('home' === basename(path) && (filename.includes(mTreeName)
-      || filename.includes(mSigName))) {
+    if ('home' === basename(path)
+      && (filename.includes(mTreeName) || filename.includes(mSigName))) {
       return create({
         filename,
         identity,

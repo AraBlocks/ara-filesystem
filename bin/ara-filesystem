@@ -369,7 +369,7 @@ async function promptCostConfirmation(cost) {
     type: 'confirm',
     name: 'answer',
     message: 
-    `This operation will cost ${cost} gas. Are you sure you
+    `This operation will cost ${cost} ETH. Are you sure you
     want to proceed?`
   })
 }

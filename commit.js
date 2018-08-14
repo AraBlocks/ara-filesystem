@@ -15,6 +15,7 @@ const {
 } = require('ara-contracts/registry')
 
 const {
+  kAidPrefix,
   kStagingFile,
   kMetadataTreeName,
   kMetadataTreeIndex,
@@ -55,7 +56,6 @@ async function commit({
   } catch (err) {
     throw err
   }
-
   let proxy
   if (await proxyExists(did)) {
     proxy = await getProxyAddress(did)
@@ -63,7 +63,7 @@ async function commit({
     proxy = await deployProxy({ contentDid: did, password })
   }
 
-  debug('address', proxy)
+  debug('proxy address', proxy)
 
   const path = generateStagedPath(did)
   try {
@@ -79,7 +79,8 @@ async function commit({
   const mtData = _getWriteData(0, contents, exists)
   const msData = _getWriteData(1, contents, exists)
 
-  const owner = getDocumentOwner(ddo, true)
+  let owner = getDocumentOwner(ddo, true)
+  owner = kAidPrefix + owner
   const acct = await account.load({ did: owner, password })
 
   let result
@@ -171,10 +172,10 @@ async function _append(opts, estimate = true) {
   const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
   const { offsets: msOffsets, buffer: msBuffer } = opts.msData
 
-  const { acct, proxy } = opts
+  const { account, proxy } = opts
 
   const transaction = await tx.create({
-    account: acct,
+    account,
     to: proxy,
     gasLimit: 1000000,
     data: {
@@ -200,10 +201,10 @@ async function _write(opts, estimate = true) {
   const { offsets: mtOffsets, sizes: mtSizes, buffer: mtBuffer } = opts.mtData
   const { offsets: msOffsets, sizes: msSizes, buffer: msBuffer } = opts.msData
 
-  const { acct, proxy } = opts
+  const { account, proxy } = opts
 
   const transaction = await tx.create({
-    account: acct,
+    account,
     to: proxy,
     gasLimit: 1000000,
     data: {
@@ -212,8 +213,6 @@ async function _write(opts, estimate = true) {
       values: [
         mtOffsets,
         msOffsets,
-        mtSizes,
-        msSizes,
         mtBuffer,
         msBuffer
       ]

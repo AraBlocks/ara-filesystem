@@ -1,5 +1,6 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
+const { kAidPrefix } = require('./constants')
 
 const {
   proxyExists,
@@ -39,7 +40,8 @@ async function estimateSetPriceGasCost({
 
   const proxy = await getProxyAddress(did)
 
-  const owner = getDocumentOwner(ddo, true)
+  let owner = getDocumentOwner(ddo, true)
+  owner = kAidPrefix + owner
   const acct = await account.load({ did: owner, password })
 
   try {
@@ -84,7 +86,8 @@ async function setPrice({
 
   const proxy = await getProxyAddress(did)
 
-  const owner = getDocumentOwner(ddo, true)
+  let owner = getDocumentOwner(ddo, true)
+  owner = kAidPrefix + owner
   const acct = await account.load({ did: owner, password })
 
   try {
