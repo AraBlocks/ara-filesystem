@@ -352,11 +352,10 @@ async function onsetprice({ did, price }) {
 
 async function ongetprice({did}) {
   info("getting price of AFS identity %s", did)
-  const { password } = await promptForPassword()
 
   let price 
   try {
-    price = await afs.getPrice({ did, password })
+    price = await afs.getPrice({ did })
   } catch (err) {
     onfatal(err)
   }
