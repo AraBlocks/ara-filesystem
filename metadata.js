@@ -40,8 +40,11 @@ async function read(opts = {}) {
 
   const { did, key } = opts
   const contents = await _readMetadataFile(did)
+  if (!contents.hasOwnProperty(key)) {
+    throw new Error('Metadata file does not contain key', key)
+  }
 
-  debug('metadata key %s: %s', key, value.toString())
+  debug('metadata key %s: %s', key, contents[key].toString())
   return contents[key]
 }
 
@@ -57,13 +60,29 @@ async function del(opts) {
   const { did, key } = opts
   const contents = await _readMetadataFile(did)
   if (!contents.hasOwnProperty(key)) {
-    throw new Error('Metadata file does not contrain key', key)
+    throw new Error('Metadata file does not contain key', key)
   }
 
   delete contents[key]
   await _writeMetadataFile(did, contents)
 
   debug('%s removed from metadata', key)
+}
+
+async function clear(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts to be an object')
+  } else if (!opts.did || 'string' !== typeof opts.did) {
+    throw new TypeError('DID URI must be a non-empty string')
+  }
+
+  const { did } = opts
+  if (!(await _metadataFileExists(did))) {
+    throw new Error('No metadata to clear')
+  }
+
+  // sets metadata contents to {}
+  await _createMetadataFile(did)
 }
 
 async function _readMetadataFile(did) {
@@ -104,4 +123,5 @@ module.exports = {
   del,
   write,
   read,
+  clear
 }
