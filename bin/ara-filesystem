@@ -170,7 +170,7 @@ const { argv } = program
             describe: 'Print full metadata after write'
           })
         }, onmetadatawrite)
-      .command('metadata read <did> <key>', "Read a key's value from AFS metadata", (program) => {
+      .command('read <did> <key>', "Read a key's value from AFS metadata", (program) => {
         program
           .positional('did', {
             type: 'string',
@@ -181,7 +181,7 @@ const { argv } = program
             describe: "The key to write"
           })
         }, onmetadataread)
-      .command('metadata delete <did> <key>', "Delete a key-value pair from the AFS' metadata file", (program) => {
+      .command('delete <did> <key>', "Delete a key-value pair from the AFS' metadata file", (program) => {
         program
           .positional('did', {
             type: 'string',
@@ -192,6 +192,13 @@ const { argv } = program
             describe: "The key to write"
           })
         }, onmetadatadelete)
+      .command('clear <did>', "Clears all metadata from an AFS", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+        }, onmetadataclear)
   })
 
 void async function main() {
@@ -464,7 +471,7 @@ async function onunarchive({ did, pathspec }) {
 
 
 async function onmetadatawrite({ did, key, value, print }) {
-  info("writing key %s with value %s to AFS metadatta", key, value)
+  info("writing key %s with value %s to AFS metadata", key, value)
 
   let result
   try {
@@ -484,11 +491,46 @@ async function onmetadatawrite({ did, key, value, print }) {
 }
 
 async function onmetadataread({ did, key }) {
-  info('reading...')
+  info("reading %s from AFS metadata", key)
+
+  let result
+  try {
+    result = await afs.metadata.read({
+      did,
+      key
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("result %s", result)
 }
 
 async function onmetadatadelete({ did, key }) {
-  info('deleting...')
+  info("deleting %s from AFS metadata", key)
+
+  try {
+    await afs.metadata.del({
+      did,
+      key
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("deleted %s from AFS metadata", key)
+}
+
+async function onmetadataclear({ did }) {
+  info("clearing AFS metadata")
+
+  try {
+    await afs.metadata.clear({ did })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("metadata cleared successfully!")
 }
 
 async function promptForPassword() {
