@@ -15,6 +15,7 @@ const ProgressStream = require('progress-stream')
 const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
 const table = require('table')
+const prettyjson = require('prettyjson')
 
 const isDirectory = require('is-directory')
 const isFile = require('is-file')
@@ -150,7 +151,7 @@ const { argv } = program
   // metadata commands
   .command('metadata', "CRUD operation interface for an AFS' metadata", (program) => {
     program
-      .command('write <did> <key> <value>', "Write a key-value pair to the AFS' metadata file", (program) => {
+      .command('write-key <did> <key> <value>', "Write a key-value pair to the AFS' metadata file", (program) => {
         program
           .positional('did', {
             type: 'string',
@@ -169,8 +170,8 @@ const { argv } = program
             type: 'boolean',
             describe: 'Print full metadata after write'
           })
-        }, onmetadatawrite)
-      .command('read <did> <key>', "Read a key's value from AFS metadata", (program) => {
+        }, onmetadatawritekey)
+      .command('read-key <did> <key>', "Read a key's value from AFS metadata", (program) => {
         program
           .positional('did', {
             type: 'string',
@@ -180,8 +181,8 @@ const { argv } = program
             type: 'string',
             describe: "The key to write"
           })
-        }, onmetadataread)
-      .command('delete <did> <key>', "Delete a key-value pair from the AFS' metadata file", (program) => {
+        }, onmetadatareadkey)
+      .command('delete-key <did> <key>', "Delete a key-value pair from the AFS' metadata file", (program) => {
         program
           .positional('did', {
             type: 'string',
@@ -191,7 +192,7 @@ const { argv } = program
             type: 'string',
             describe: "The key to write"
           })
-        }, onmetadatadelete)
+        }, onmetadatadeletekey)
       .command('clear <did>', "Clears all metadata from an AFS", (program) => {
         program
           .positional('did', {
@@ -199,6 +200,25 @@ const { argv } = program
             describe: "An AFS ARA decentralized identity (did) URI"
           })
         }, onmetadataclear)
+      .command('print <did>', "Prints current metadata for an AFS", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+        }, onmetadataprint)
+      .command('write-file <did> <filepath>', "Writes contents of entire file to metadata", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('print', {
+            alias: 'p',
+            type: 'boolean',
+            describe: 'Print full metadata after write'
+          })
+        }, onmetadatawritefile)
   })
 
 void async function main() {
@@ -471,7 +491,7 @@ async function onunarchive({ did, pathspec }) {
 }
 
 
-async function onmetadatawrite({ did, key, value, print }) {
+async function onmetadatawritekey({ did, key, value, print }) {
   info("writing key %s with value %s to AFS metadata", key, value)
 
   let result
@@ -487,11 +507,12 @@ async function onmetadatawrite({ did, key, value, print }) {
 
   info("successfully wrote %s", key)
   if (print) {
-    info(JSON.stringify(result))
+    // info swallows prettyjson output
+    console.log(prettyjson.render(result))
   }
 }
 
-async function onmetadataread({ did, key }) {
+async function onmetadatareadkey({ did, key }) {
   info("reading %s from AFS metadata", key)
 
   let result
@@ -504,10 +525,10 @@ async function onmetadataread({ did, key }) {
     onfatal(err)
   }
 
-  info("result %s", result)
+  console.log(prettyjson.render(result))
 }
 
-async function onmetadatadelete({ did, key }) {
+async function onmetadatadeletekey({ did, key }) {
   info("deleting %s from AFS metadata", key)
 
   try {
@@ -532,6 +553,29 @@ async function onmetadataclear({ did }) {
   }
 
   info("metadata cleared successfully!")
+}
+
+async function onmetadataprint({ did }) {
+  const contents = await afs.metadata.readFile(did)
+  console.log(prettyjson.render(contents))
+}
+
+async function onmetadatawritefile({ did, filepath, print }) {
+  info("writing contents of %s to AFS metadata", filepath)
+
+  let result
+  try {
+    result = await afs.metadata.writeFile({
+      did,
+      filepath
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  if (result) {
+    console.log(prettyjson.render(result))
+  }
 }
 
 async function promptForPassword() {

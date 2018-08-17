@@ -2,10 +2,42 @@ const debug = require('debug')('ara-filesystem:debug')
 const { createAFSKeyPath } = require('./key-path')
 const { createCFS } = require('cfsnet/create')
 const { resolve } = require('path')
+const pify = require('pify')
+const fs = require('fs')
 
 const kMetadataFile = 'metadata.json'
 
-async function write(opts = {}) {
+// TODO(cckelly): multiple keys for CLI?
+
+async function writeFile(opts = {}) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts to be an object')
+  } else if (!opts.did || 'string' !== typeof opts.did) {
+    throw new TypeError('DID URI must be a non-empty string')
+  } else if (!opts.filepath || 'string' !== typeof opts.filepath) {
+    throw new TypeError('File path must be a non-empty string')
+  }
+
+  const { did, filepath } = opts
+  try {
+    await pify(fs.access)(filepath)
+  } catch (err) {
+    throw new Error('Filepath', filepath, 'doesn\'t exist')
+  }
+
+  let contents = await pify(fs.readFile)(filepath, 'utf8')
+  try {
+    contents = JSON.parse(contents)
+  } catch (err) {
+    throw new Error('Contents of file is not valid JSON')
+  }
+
+  await _writeMetadataFile(did, contents)  
+
+  return contents
+}
+
+async function writeKey(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object')
   } else if (!opts.did || 'string' !== typeof opts.did) {
@@ -29,7 +61,7 @@ async function write(opts = {}) {
   return contents
 }
 
-async function read(opts = {}) {
+async function readKey(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object')
   } else if (!opts.did || 'string' !== typeof opts.did) {
@@ -48,7 +80,7 @@ async function read(opts = {}) {
   return contents[key]
 }
 
-async function del(opts) {
+async function delKey(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object')
   } else if (!opts.did || 'string' !== typeof opts.did) {
@@ -120,8 +152,10 @@ function _getEtcPath(did) {
 }
 
 module.exports = {
-  del,
-  write,
-  read,
-  clear
+  writeFile,
+  writeKey,
+  readKey,
+  delKey,
+  clear,
+  readFile: _readMetadataFile
 }
