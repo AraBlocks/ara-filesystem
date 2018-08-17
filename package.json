@@ -58,6 +58,7 @@
     "openzeppelin-solidity": "1.10.0",
     "pify": "^3.0.0",
     "pretty-bytes": "^4.0.2",
+    "prettyjson": "^1.2.1",
     "progress": "^2.0.0",
     "progress-stream": "^2.0.0",
     "random-access-file": "^2.0.1",
