@@ -496,7 +496,7 @@ async function onmetadatawritekey({ did, key, value, print }) {
 
   let result
   try {
-    result = await afs.metadata.write({
+    result = await afs.metadata.writeKey({
       did,
       key,
       value
@@ -517,7 +517,7 @@ async function onmetadatareadkey({ did, key }) {
 
   let result
   try {
-    result = await afs.metadata.read({
+    result = await afs.metadata.readKey({
       did,
       key
     })
@@ -532,7 +532,7 @@ async function onmetadatadeletekey({ did, key }) {
   info("deleting %s from AFS metadata", key)
 
   try {
-    await afs.metadata.del({
+    await afs.metadata.delKey({
       did,
       key
     })

@@ -7,8 +7,6 @@ const fs = require('fs')
 
 const kMetadataFile = 'metadata.json'
 
-// TODO(cckelly): multiple keys for CLI?
-
 async function writeFile(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object')
@@ -22,7 +20,7 @@ async function writeFile(opts = {}) {
   try {
     await pify(fs.access)(filepath)
   } catch (err) {
-    throw new Error('Filepath', filepath, 'doesn\'t exist')
+    throw new Error(`Filepath ${filepath} 'doesn\'t exist`)
   }
 
   let contents = await pify(fs.readFile)(filepath, 'utf8')
@@ -118,8 +116,17 @@ async function clear(opts) {
 }
 
 async function _readMetadataFile(did) {
+  if (!did || 'string' !== typeof did) {
+    throw new TypeError('DID URI must be non-empty string')
+  }
+  
   const cfs = await _getEtcCFS(did)
-  const file = await cfs.readFile(kMetadataFile)
+  let file
+  try {
+    file = await cfs.readFile(kMetadataFile)
+  } catch (err) {
+    throw new Error('Metadata file doesn\t exist')
+  }
   return JSON.parse(file.toString())
 }
 
