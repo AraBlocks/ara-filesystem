@@ -65,3 +65,6 @@ typings/
 
 # truffle compiled contracts
 build/
+
+package-lock.json
+.DS_Store
