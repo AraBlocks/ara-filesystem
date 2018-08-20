@@ -3,6 +3,7 @@ const { destroy } = require('./destroy')
 const { add } = require('./add')
 const { remove } = require('./remove')
 const { unarchive } = require('./unarchive')
+const metadata = require('./metadata')
 
 const {
   commit,
@@ -25,5 +26,6 @@ module.exports = {
   getPrice,
   estimateSetPriceGasCost,
   estimateCommitGasCost,
-  unarchive
+  unarchive,
+  metadata
 }

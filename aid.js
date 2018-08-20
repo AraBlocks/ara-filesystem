@@ -14,6 +14,7 @@ const {
 async function create({
   password = '',
   owner = '',
+  metadataPublicKey = '',
   mnemonic
 } = {}) {
   if (null == password || 'string' !== typeof password) {
@@ -31,19 +32,23 @@ async function create({
 
   owner += kOwnerSuffix
 
+  const keys = metadataPublicKey 
+    ? [{ id: 'metadata', value: metadataPublicKey }]
+    : null
+
   let identity
   try {
-    const did = {
-      authentication:
-      {
-        authenticationType: kEd25519VerificationKey2018,
-        authenticationKey: owner
-      }
+    const ddo = {
+      authentication: {
+        type: kEd25519VerificationKey2018,
+        publicKey: owner
+      },
+      keys
     }
     identity = await aid.create({
       context,
       password,
-      did,
+      ddo,
       mnemonic
     })
   } catch (err) { debug(err.stack || err) }

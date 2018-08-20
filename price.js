@@ -75,11 +75,10 @@ async function setPrice({
 }
 
 async function getPrice({
-  did = '',
-  password = ''
+  did = ''
 } = {}) {
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did } = await validate({ did, label: 'commit' }))
   } catch (err) {
     throw err
   }

@@ -74,24 +74,13 @@ async function create({
       throw err
     }
 
-    const afsId = await aid.create({ password, owner });
+    let afsId = await aid.create({ password, owner });
     ({ mnemonic } = afsId)
-
-    await writeIdentity(afsId)
-
-    let keystore = await loadSecretsKeystore(kArchiverKey)
-    await aid.archive(afsId, { key: kArchiverKey, keystore })
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
 
-    keystore = await loadSecretsKeystore(kResolverKey)
-    const afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
-
-    if (null == afsDdo || 'object' !== typeof afsDdo) {
-      throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
-    }
-
+    let afsDdo
     try {
       // generate AFS key path
       const path = createAFSKeyPath(afsDid)
@@ -100,10 +89,32 @@ async function create({
         key: publicKey,
         secretKey,
         path,
-        storage: defaultStorage(afsDid, password, storage),
-        shallow: true
+        storage: defaultStorage(afsDid, password, storage)
       })
-    } catch (err) { debug(err.stack || err) }
+
+      const etcPath = resolve(path, 'etc')
+      // metadata partition publicKey
+      const { key } = await createCFS({ path: etcPath })
+      const metadataPublicKey = toHex(key)
+
+      // recreate identity with additional publicKey
+      afsId = await aid.create({ password, owner, metadataPublicKey })
+      await writeIdentity(afsId)
+
+      // TODO(cckelly): add back in once new archive method is functional
+      //let keystore = await loadSecretsKeystore(kArchiverKey)
+      //await aid.archive(afsId, { key: kArchiverKey, keystore })
+
+      // keystore = await loadSecretsKeystore(kResolverKey)
+      // afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
+
+      // if (null == afsDdo || 'object' !== typeof afsDdo) {
+      //   throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
+      // }
+
+    } catch (err) { 
+      throw err
+    }
 
     afs.did = afsDid
     afs.ddo = afsDdo
@@ -132,8 +143,7 @@ async function create({
             id,
             key,
             path,
-            storage: defaultStorage(id, password, storage),
-            shallow: true
+            storage: defaultStorage(id, password, storage)
           })
           return done(null, afs)
         } catch (err) {
