@@ -30,7 +30,7 @@ async function destroy({
   }
 
   if (!mnemonic || 'string' !== typeof mnemonic) {
-    throw new TypeError('Expecting non-empty string for mnemonic')
+    throw new TypeError('Expecting non-empty string for mnemonic.')
   }
 
   mnemonic = mnemonic.trim()
@@ -49,7 +49,7 @@ async function destroy({
     await pify(access)(path)
     await pify(rimraf)(path)
   } catch (err) {
-    throw new Error('Mnemonic is incorrect')
+    throw new Error('Mnemonic is incorrect.')
   }
 
   const { store } = rc.afs.archive

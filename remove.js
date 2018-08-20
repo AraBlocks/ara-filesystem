@@ -6,16 +6,16 @@ const { resolve, join } = require('path')
 
 async function remove(opts) {
   if (null == opts.did || 'string' !== typeof opts.did || !opts.did) {
-    throw new TypeError('ara-filesystem.remove: Expecting non-empty did.')
+    throw new TypeError('Expecting non-empty did.')
   }
 
   if (null == opts.password || 'string' !== typeof opts.password || !opts.password) {
-    throw new TypeError('ara-filesystem.remove: Password required to continue')
+    throw new TypeError('Password required to continue.')
   }
 
   if (null === opts.paths || (!(opts.paths instanceof Array)
     && 'string' !== typeof opts.paths) || 0 === opts.paths.length) {
-    throw new TypeError('ara-filesystem.remove: Expecting one or more filepaths to remove')
+    throw new TypeError('Expecting one or more filepaths to remove.')
   }
 
   const { did, password, paths } = opts

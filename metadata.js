@@ -9,25 +9,25 @@ const kMetadataFile = 'metadata.json'
 
 async function writeFile(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
-    throw new TypeError('Expecting opts to be an object')
+    throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
-    throw new TypeError('DID URI must be a non-empty string')
+    throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.filepath || 'string' !== typeof opts.filepath) {
-    throw new TypeError('File path must be a non-empty string')
+    throw new TypeError('File path must be a non-empty string.')
   }
 
   const { did, filepath } = opts
   try {
     await pify(fs.access)(filepath)
   } catch (err) {
-    throw new Error(`Filepath ${filepath} 'doesn\'t exist`)
+    throw new Error(`Filepath ${filepath} 'doesn\'t exist.`)
   }
 
   let contents = await pify(fs.readFile)(filepath, 'utf8')
   try {
     contents = JSON.parse(contents)
   } catch (err) {
-    throw new Error('Contents of file is not valid JSON')
+    throw new Error('Contents of file is not valid JSON.')
   }
 
   await _writeMetadataFile(did, contents)  
@@ -37,13 +37,13 @@ async function writeFile(opts = {}) {
 
 async function writeKey(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
-    throw new TypeError('Expecting opts to be an object')
+    throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
-    throw new TypeError('DID URI must be a non-empty string')
+    throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.key || 'string' !== typeof opts.key) {
-    throw new TypeError('Key must be be a non-empty string')
+    throw new TypeError('Key must be be a non-empty string.')
   } else if (!opts.value) {
-    throw new TypeError('Must provide a value to store')
+    throw new TypeError('Must provide a value to store.')
   }
 
   const { did, key, value } = opts
@@ -61,17 +61,17 @@ async function writeKey(opts = {}) {
 
 async function readKey(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
-    throw new TypeError('Expecting opts to be an object')
+    throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
-    throw new TypeError('DID URI must be a non-empty string')
+    throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.key || 'string' !== typeof opts.key) {
-    throw new TypeError('Key must be a non-empty string')
+    throw new TypeError('Key must be a non-empty string.')
   }
 
   const { did, key } = opts
   const contents = await _readMetadataFile(did)
   if (!contents.hasOwnProperty(key)) {
-    throw new Error('Metadata file does not contain key', key)
+    throw new Error(`Metadata file does not contain key ${key}.`)
   }
 
   debug('metadata key %s: %s', key, contents[key].toString())
@@ -80,17 +80,17 @@ async function readKey(opts = {}) {
 
 async function delKey(opts) {
   if (!opts || 'object' !== typeof opts) {
-    throw new TypeError('Expecting opts to be an object')
+    throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
-    throw new TypeError('DID URI must be a non-empty string')
+    throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.key || 'string' !== typeof opts.key) {
-    throw new TypeError('Key must be a non-empty string')
+    throw new TypeError('Key must be a non-empty string.')
   }
 
   const { did, key } = opts
   const contents = await _readMetadataFile(did)
   if (!contents.hasOwnProperty(key)) {
-    throw new Error('Metadata file does not contain key', key)
+    throw new Error(`Metadata file does not contain key ${key}.`)
   }
 
   delete contents[key]
@@ -101,14 +101,14 @@ async function delKey(opts) {
 
 async function clear(opts) {
   if (!opts || 'object' !== typeof opts) {
-    throw new TypeError('Expecting opts to be an object')
+    throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
-    throw new TypeError('DID URI must be a non-empty string')
+    throw new TypeError('DID URI must be a non-empty string.')
   }
 
   const { did } = opts
   if (!(await _metadataFileExists(did))) {
-    throw new Error('No metadata to clear')
+    throw new Error('No metadata to clear.')
   }
 
   // sets metadata contents to {}
@@ -117,7 +117,7 @@ async function clear(opts) {
 
 async function _readMetadataFile(did) {
   if (!did || 'string' !== typeof did) {
-    throw new TypeError('DID URI must be non-empty string')
+    throw new TypeError('DID URI must be non-empty string.')
   }
   
   const cfs = await _getEtcCFS(did)
@@ -125,7 +125,7 @@ async function _readMetadataFile(did) {
   try {
     file = await cfs.readFile(kMetadataFile)
   } catch (err) {
-    throw new Error('Metadata file doesn\t exist')
+    throw new Error('Metadata file doesn\t exist.')
   }
   return JSON.parse(file.toString())
 }

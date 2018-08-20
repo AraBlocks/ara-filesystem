@@ -39,9 +39,9 @@ async function create({
   storage = null
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
-    throw new TypeError('ara-filesystem.create: Expecting non-empty string.')
+    throw new TypeError('Expecting non-empty string.')
   } else if (storage && 'function' !== typeof storage) {
-    throw new TypeError('ara-filesystem.create: Expecting storage to be a function.')
+    throw new TypeError('Expecting storage to be a function.')
   }
 
   let afs
