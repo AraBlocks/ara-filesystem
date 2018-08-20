@@ -8,7 +8,7 @@ function createAFSKeyPath(did) {
   const { root } = rc.afs.archive
 
   if (null == did || 'string' !== typeof did) {
-    throw new TypeError('ara-filesystem.key-path: Expecting non-empty string for id')
+    throw new TypeError('Expecting non-empty string for id.')
   }
 
   try {
@@ -25,7 +25,7 @@ function createIdentityKeyPath(ddo) {
   const { root } = rc.araId.archive
 
   if (null == ddo || 'object' !== typeof ddo) {
-    throw new TypeError('ara-filesystem.key-path: Expecting object for identity')
+    throw new TypeError('Expecting object for identity.')
   }
 
   let { publicKey } = ddo
