@@ -11,16 +11,16 @@ const ignored = require('./lib/ignore')
 
 async function add(opts) {
   if (null === opts.did || 'string' !== typeof opts.did || !opts.did) {
-    throw new TypeError('ara-filesystem.add: Expecting non-empty did.')
+    throw new TypeError('Expecting non-empty DID.')
   }
 
   if (null === opts.password || 'string' !== typeof opts.password || !opts.password) {
-    throw new TypeError('ara-filesystem.add: Password required to continue')
+    throw new TypeError('Password required to continue.')
   }
 
   if (null === opts.paths || (!(opts.paths instanceof Array)
     && 'string' !== typeof opts.paths) || 0 === opts.paths.length) {
-    throw new TypeError('ara-filesystem.add: Expecting one or more filepaths to add')
+    throw new TypeError('Expecting one or more filepaths to add.')
   }
 
   const {

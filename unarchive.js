@@ -10,9 +10,9 @@ async function unarchive({
   path = ''
 } = {}) {
   if (!did || 'string' !== typeof did) {
-    throw new TypeError('DID URI must be of type string')
+    throw new TypeError('DID URI must be of type string.')
   } else if (path && 'string' !== typeof path) {
-    throw new TypeError('Path must be of type string')
+    throw new TypeError('Path must be of type string.')
   }
 
   const { afs } = await create({ did })
@@ -20,7 +20,7 @@ async function unarchive({
   try {
     const result = await afs.readdir(afs.HOME)    
     if (0 === result.length) {
-      throw new Error('Can only unarchive a non-empty AFS')
+      throw new Error('Can only unarchive a non-empty AFS.')
     }
   } catch (err) {
     throw err

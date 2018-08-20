@@ -96,13 +96,13 @@ function _decode(bytes) {
 
 function resolveBufferIndex(path) {
   if (!path || 'string' !== typeof path) {
-    throw new TypeError('Path must be non-empty string')
+    throw new TypeError('Path must be non-empty string.')
   }
 
   path = unixify(path)
 
   if (-1 === path.indexOf('/')) {
-    throw new Error('Path is not properly formatted')
+    throw new Error('Path is not properly formatted.')
   }
 
   let index = -1

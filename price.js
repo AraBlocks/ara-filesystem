@@ -25,7 +25,7 @@ async function estimateSetPriceGasCost({
   }
 
   if (0 > price || 'number' !== typeof price) {
-    throw new TypeError('Price should be 0 or positive whole number')
+    throw new TypeError('Price should be 0 or positive whole number.')
   }
 
   let cost
@@ -54,7 +54,7 @@ async function setPrice({
   }
 
   if (0 > price || 'number' !== typeof price) {
-    throw new TypeError('Price should be 0 or positive whole number')
+    throw new TypeError('Price should be 0 or positive whole number.')
   }
 
   const accounts = await web3.eth.getAccounts()

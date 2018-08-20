@@ -18,16 +18,16 @@ async function create({
   mnemonic
 } = {}) {
   if (null == password || 'string' !== typeof password) {
-    throw new TypeError('ara-filesystem.aid: Expecting password to be non-empty string.')
+    throw new TypeError('Expecting password to be non-empty string.')
   }
 
   if (null == owner || 'string' !== typeof owner) {
-    throw new TypeError('ara-filesystem.aid: Expecting non-empty string.')
+    throw new TypeError('Expecting non-empty string.')
   }
 
   if ((hasDIDMethod(owner) && kKeyLength !== owner.slice(kAidPrefix.length).length)
     || (!hasDIDMethod(owner) && kKeyLength !== owner.length)) {
-    throw new TypeError('ara-filesystem.aid: Owner identifier must be 64 chars')
+    throw new TypeError('Owner identifier must be 64 chars.')
   }
 
   owner += kOwnerSuffix
@@ -65,7 +65,9 @@ async function create({
 async function archive(identity, opts) {
   try {
     await aid.archive(identity, opts)
-  } catch (err) { throw new Error(err) }
+  } catch (err) { 
+    throw err
+  }
 }
 
 /**
@@ -75,7 +77,7 @@ async function archive(identity, opts) {
  */
 async function resolve(did, opts = {}) {
   if (!did || null === did || 'string' !== typeof did) {
-    throw new TypeError('ara-filesystem.aid: DID to resolve must be non-empty string')
+    throw new TypeError('DID to resolve must be non-empty string.')
   }
 
   did = normalize(did)
