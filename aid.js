@@ -69,7 +69,7 @@ async function create({
  */
 async function archive(identity) {
   if (!identity || 'object' !== typeof identity) {
-    throw new TypeError('ara-filesystem.aid: Identity to archive must be valid identity object')
+    throw new TypeError('Identity to archive must be valid identity object')
   }
 
   try {

@@ -101,12 +101,10 @@ async function create({
       await writeIdentity(afsId)
 
       await aid.archive(afsId)
-      console.log('ARCHIVED!')
 
       afsDdo = await aid.resolve(afsDid)
-      console.log('afsDdo', afsDdo)
       if (null == afsDdo || 'object' !== typeof afsDdo) {
-        throw new TypeError('ara-filesystem.create: AFS identity not successfully resolved')
+        throw new TypeError('AFS identity not successfully resolved.')
       }
 
     } catch (err) { 
