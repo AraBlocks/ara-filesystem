@@ -49,6 +49,7 @@
     "hyperdrive": "^9.14.0",
     "ignore": "^3.3.8",
     "inquirer": "^6.0.0",
+    "is-buffer": "^2.0.3",
     "is-directory": "^0.3.1",
     "is-file": "^1.0.0",
     "is-symlink": "^0.1.1",
