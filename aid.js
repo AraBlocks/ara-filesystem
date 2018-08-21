@@ -4,11 +4,16 @@ const context = require('ara-context')()
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const hasDIDMethod = require('has-did-method')
 const { normalize } = require('ara-util')
+const { secret } = require('./rc')()
 
 const {
   kAidPrefix,
   kOwnerSuffix,
-  kKeyLength
+  kKeyLength,
+  kArchiverSecret,
+  kResolverSecret,
+  kArchiverRemote,
+  kResolverRemote
 } = require('./constants')
 
 async function create({
@@ -62,8 +67,17 @@ async function create({
  * @param  {Object} opts
  * @return {void}
  */
-async function archive(identity, opts) {
+async function archive(identity) {
+  if (!identity || 'object' !== typeof identity) {
+    throw new TypeError('ara-filesystem.aid: Identity to archive must be valid identity object')
+  }
+
   try {
+    const opts = {
+      secret: kArchiverSecret,
+      name: kArchiverRemote,
+      keyring: secret.archiver
+    }
     await aid.archive(identity, opts)
   } catch (err) { 
     throw err
@@ -75,7 +89,7 @@ async function archive(identity, opts) {
  * @param  {string} did
  * @return {Promise}
  */
-async function resolve(did, opts = {}) {
+async function resolve(did) {
   if (!did || null === did || 'string' !== typeof did) {
     throw new TypeError('DID to resolve must be non-empty string.')
   }
@@ -85,6 +99,11 @@ async function resolve(did, opts = {}) {
 
   let result
   try {
+    const opts = {
+      secret: kResolverSecret,
+      name: kResolverRemote,
+      keyring: secret.resolver
+    }
     result = await aid.resolve(did, opts)
   } catch (err) { debug(err.stack || err) }
 
