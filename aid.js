@@ -37,7 +37,7 @@ async function create({
 
   owner += kOwnerSuffix
 
-  const keys = metadataPublicKey 
+  const publicKeys = metadataPublicKey 
     ? [{ id: 'metadata', value: metadataPublicKey }]
     : null
 
@@ -48,7 +48,7 @@ async function create({
         type: kEd25519VerificationKey2018,
         publicKey: owner
       },
-      keys
+      publicKeys
     }
     identity = await aid.create({
       context,
@@ -105,7 +105,9 @@ async function resolve(did) {
       keyring: secret.resolver
     }
     result = await aid.resolve(did, opts)
-  } catch (err) { debug(err.stack || err) }
+  } catch (err) {
+    throw err
+  }
 
   return result
 }

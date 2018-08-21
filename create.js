@@ -97,12 +97,13 @@ async function create({
       const metadataPublicKey = toHex(key)
 
       // recreate identity with additional publicKey
-      afsId = await aid.create({ password, owner, metadataPublicKey })
-      await writeIdentity(afsId)
+      afsId = await aid.create({ password, mnemonic, owner, metadataPublicKey });
+      ({ mnemonic } = afsId)
 
+      await writeIdentity(afsId)
       await aid.archive(afsId)
 
-      afsDdo = await aid.resolve(afsDid)
+      afsDdo = await aid.resolve(toHex(afsId.publicKey))
       if (null == afsDdo || 'object' !== typeof afsDdo) {
         throw new TypeError('AFS identity not successfully resolved.')
       }
