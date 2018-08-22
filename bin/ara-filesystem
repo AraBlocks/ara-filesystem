@@ -179,7 +179,7 @@ const { argv } = program
           .positional('value', {
             type: 'string',
             describe: "The value to write"
-          })  
+          })
           .option('print', {
             alias: 'p',
             type: 'boolean',
@@ -268,8 +268,8 @@ async function oncreate(argv) {
   } catch (err) { onfatal(err) }
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
-  info('Please safely store the following 12 word mnemonic phrase for this AFS.' + 
-    ' This phrase will be required to restore and delete this AFS.'+ 
+  info('Please safely store the following 12 word mnemonic phrase for this AFS.' +
+    ' This phrase will be required to restore and delete this AFS.'+
     ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
 
   arafs.afs.close()
@@ -307,8 +307,8 @@ async function onhistory(argv) {
   }
 
   try {
-    const arafs = await afs.create({ 
-      did, 
+    const arafs = await afs.create({
+      did,
       password })
     const stream = table.createStream(tableOpts)
 
@@ -444,7 +444,7 @@ async function onsetprice({ did, price }) {
 async function ongetprice({did}) {
   info("getting price of AFS identity %s", did)
 
-  let price 
+  let price
   try {
     price = await afs.getPrice({ did })
   } catch (err) {
@@ -458,7 +458,7 @@ async function promptCostConfirmation(cost) {
   return await inquirer.prompt({
     type: 'confirm',
     name: 'answer',
-    message: 
+    message:
     `This operation will cost ${cost} gas. Are you sure you
     want to proceed?`
   })
@@ -473,8 +473,8 @@ async function ondestroy({ did, force }) {
 
   let result = force
   if (!result) {
-    const { answer } = await displayConfirmationPrompt({ 
-      message: `Destroy will remove this AFS from the entire ARA network. Continue?` 
+    const { answer } = await displayConfirmationPrompt({
+      message: `Destroy will remove this AFS from the entire ARA network. Continue?`
     })
     result = answer
   }
@@ -603,7 +603,7 @@ async function promptForPassword() {
     "Please provide the passphrase for your identity. This is needed to " +
     "complete this action.\n" +
     "Passphrase:"
-  }]) 
+  }])
 }
 
 async function promptForMnemonic() {
