@@ -37,7 +37,7 @@ async function create({
 
   owner += kOwnerSuffix
 
-  const publicKeys = metadataPublicKey 
+  const publicKeys = metadataPublicKey
     ? [{ id: 'metadata', value: metadataPublicKey }]
     : null
 
@@ -75,13 +75,13 @@ async function archive(identity, opts) {
   }
 
   try {
-    opts = opts || {
-      secret: kArchiverSecret,
-      name: kArchiverRemote,
-      keyring: secret.archiver
+    opts = {
+      secret: opts.secret || kArchiverSecret,
+      name: opts.name || kArchiverRemote,
+      keyring: opts.keyring || secret.archiver
     }
     await aid.archive(identity, opts)
-  } catch (err) { 
+  } catch (err) {
     throw err
   }
 }
@@ -103,10 +103,10 @@ async function resolve(did, opts) {
 
   let result
   try {
-    opts = opts || {
-      secret: kResolverSecret,
-      name: kResolverRemote,
-      keyring: secret.resolver
+    opts = {
+      secret: opts.secret || kResolverSecret,
+      name: opts.name || kResolverRemote,
+      keyring: opts.keyring || secret.resolver
     }
     result = await aid.resolve(did, opts)
   } catch (err) {
