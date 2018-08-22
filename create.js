@@ -15,7 +15,6 @@ const { defaultStorage } = require('./storage')
 
 const {
   getDocumentKeyHex,
-  loadSecretsKeystore,
   validate
 } = require('ara-util')
 
@@ -98,19 +97,16 @@ async function create({
       const metadataPublicKey = toHex(key)
 
       // recreate identity with additional publicKey
-      afsId = await aid.create({ password, owner, metadataPublicKey })
+      afsId = await aid.create({ password, mnemonic, owner, metadataPublicKey });
+      ({ mnemonic } = afsId)
+
       await writeIdentity(afsId)
+      await aid.archive(afsId)
 
-      // TODO(cckelly): add back in once new archive method is functional
-      //let keystore = await loadSecretsKeystore(kArchiverKey)
-      //await aid.archive(afsId, { key: kArchiverKey, keystore })
-
-      // keystore = await loadSecretsKeystore(kResolverKey)
-      // afsDdo = await aid.resolve(afsDid, { key: kResolverKey, keystore })
-
-      // if (null == afsDdo || 'object' !== typeof afsDdo) {
-      //   throw new TypeError('ara-filesystem.create: AFS identity not successfully archived')
-      // }
+      afsDdo = await aid.resolve(toHex(afsId.publicKey))
+      if (null == afsDdo || 'object' !== typeof afsDdo) {
+        throw new TypeError('AFS identity not successfully resolved.')
+      }
 
     } catch (err) { 
       throw err
