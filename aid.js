@@ -67,13 +67,15 @@ async function create({
  * @param  {Object} opts
  * @return {void}
  */
-async function archive(identity) {
+async function archive(identity, opts) {
   if (!identity || 'object' !== typeof identity) {
     throw new TypeError('Identity to archive must be valid identity object')
+  } else if (opts && 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts to be of type object.')
   }
 
   try {
-    const opts = {
+    opts = opts || {
       secret: kArchiverSecret,
       name: kArchiverRemote,
       keyring: secret.archiver
@@ -89,9 +91,11 @@ async function archive(identity) {
  * @param  {string} did
  * @return {Promise}
  */
-async function resolve(did) {
+async function resolve(did, opts) {
   if (!did || null === did || 'string' !== typeof did) {
     throw new TypeError('DID to resolve must be non-empty string.')
+  } else if (opts && 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts to be of type object.')
   }
 
   did = normalize(did)
@@ -99,7 +103,7 @@ async function resolve(did) {
 
   let result
   try {
-    const opts = {
+    opts = opts || {
       secret: kResolverSecret,
       name: kResolverRemote,
       keyring: secret.resolver
