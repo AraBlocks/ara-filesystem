@@ -172,10 +172,10 @@ async function _append(opts, estimate = true) {
   const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
   const { offsets: msOffsets, buffer: msBuffer } = opts.msData
 
-  const { account, proxy } = opts
+  const { account: acct, proxy } = opts
 
   const transaction = await tx.create({
-    account,
+    acct,
     to: proxy,
     gasLimit: 1000000,
     data: {
@@ -198,13 +198,13 @@ async function _append(opts, estimate = true) {
 }
 
 async function _write(opts, estimate = true) {
-  const { offsets: mtOffsets, sizes: mtSizes, buffer: mtBuffer } = opts.mtData
-  const { offsets: msOffsets, sizes: msSizes, buffer: msBuffer } = opts.msData
+  const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
+  const { offsets: msOffsets, buffer: msBuffer } = opts.msData
 
-  const { account, proxy } = opts
+  const { account: acct, proxy } = opts
 
   const transaction = await tx.create({
-    account,
+    acct,
     to: proxy,
     gasLimit: 1000000,
     data: {
