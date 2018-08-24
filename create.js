@@ -35,7 +35,8 @@ async function create({
   password = '',
   owner = null,
   did = null,
-  storage = null
+  storage = null,
+  keyringOpts
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('Expecting non-empty string.')
@@ -101,14 +102,14 @@ async function create({
       ({ mnemonic } = afsId)
 
       await writeIdentity(afsId)
-      await aid.archive(afsId)
+      await aid.archive(afsId, keyringOpts)
 
       afsDdo = await aid.resolve(toHex(afsId.publicKey))
       if (null == afsDdo || 'object' !== typeof afsDdo) {
         throw new TypeError('AFS identity not successfully resolved.')
       }
 
-    } catch (err) { 
+    } catch (err) {
       throw err
     }
 

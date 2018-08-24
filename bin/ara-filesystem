@@ -55,6 +55,21 @@ const { argv } = program
         type: 'string',
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
+      .option('secret', {
+        alias: 's',
+        type: 'string',
+        describe: 'key filename. Default: kArchiverSecret in constants.js',
+      })
+      .option('name', {
+        alias: 'n',
+        type: 'string',
+        describe: 'Keyring name. Default: kArchiverRemote in constants.js',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        describe: 'Keyring path. Default: kSecretsDir = \'secret\' in rc.js',
+      })
   }, oncreate)
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
     program
@@ -164,7 +179,7 @@ const { argv } = program
           .positional('value', {
             type: 'string',
             describe: "The value to write"
-          })  
+          })
           .option('print', {
             alias: 'p',
             type: 'boolean',
@@ -242,16 +257,19 @@ async function oncreate(argv) {
     owner = 'did:ara:' + owner
   }
 
+  const { secret, name, keyring } = argv
+  const opts = { secret, name, keyring }
+
   const { password } = await promptForPassword()
 
   let arafs
   try {
-    arafs = await afs.create({ owner, password })
+    arafs = await afs.create({ owner, password, opts })
   } catch (err) { onfatal(err) }
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
-  info('Please safely store the following 12 word mnemonic phrase for this AFS.' + 
-    ' This phrase will be required to restore and delete this AFS.'+ 
+  info('Please safely store the following 12 word mnemonic phrase for this AFS.' +
+    ' This phrase will be required to restore and delete this AFS.'+
     ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
 
   arafs.afs.close()
@@ -289,8 +307,8 @@ async function onhistory(argv) {
   }
 
   try {
-    const arafs = await afs.create({ 
-      did, 
+    const arafs = await afs.create({
+      did,
       password })
     const stream = table.createStream(tableOpts)
 
@@ -426,7 +444,7 @@ async function onsetprice({ did, price }) {
 async function ongetprice({did}) {
   info("getting price of AFS identity %s", did)
 
-  let price 
+  let price
   try {
     price = await afs.getPrice({ did })
   } catch (err) {
@@ -440,7 +458,7 @@ async function promptCostConfirmation(cost) {
   return await inquirer.prompt({
     type: 'confirm',
     name: 'answer',
-    message: 
+    message:
     `This operation will cost ${cost} gas. Are you sure you
     want to proceed?`
   })
@@ -455,8 +473,8 @@ async function ondestroy({ did, force }) {
 
   let result = force
   if (!result) {
-    const { answer } = await displayConfirmationPrompt({ 
-      message: `Destroy will remove this AFS from the entire ARA network. Continue?` 
+    const { answer } = await displayConfirmationPrompt({
+      message: `Destroy will remove this AFS from the entire ARA network. Continue?`
     })
     result = answer
   }
@@ -585,7 +603,7 @@ async function promptForPassword() {
     "Please provide the passphrase for your identity. This is needed to " +
     "complete this action.\n" +
     "Passphrase:"
-  }]) 
+  }])
 }
 
 async function promptForMnemonic() {
