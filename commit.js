@@ -175,7 +175,7 @@ async function _append(opts, estimate = true) {
   const { account: acct, proxy } = opts
 
   const transaction = await tx.create({
-    acct,
+    account: acct,
     to: proxy,
     gasLimit: 1000000,
     data: {
@@ -204,7 +204,7 @@ async function _write(opts, estimate = true) {
   const { account: acct, proxy } = opts
 
   const transaction = await tx.create({
-    acct,
+    account: acct,
     to: proxy,
     gasLimit: 1000000,
     data: {
