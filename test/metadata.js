@@ -38,7 +38,7 @@ test('writeFile(opts) file errors', async (t) => {
 
   const invalidJSON = '{name:"ara"}'
   await pify(fs.writeFile)('invalid.json', invalidJSON)
-  await t.throws(metadata.writeFile({ did, filepath: 'invalid.json'}), Error)
+  await t.throws(metadata.writeFile({ did, filepath: 'invalid.json' }), Error)
 })
 
 test('writeFile(opts) valid write', async (t) => {
@@ -64,7 +64,7 @@ test('writeKey(opts) invalid opts', async (t) => {
 test('writeKey(opts) valid key write', async (t) => {
   const did = getDid(t)
   const contents = await metadata.writeKey({ did, key: 'my_key', value: 1234 })
-  t.true(contents.hasOwnProperty('my_key') && contents['my_key'] === 1234)
+  t.true(contents.hasOwnProperty('my_key') && 1234 === contents.my_key)
 })
 
 test('readKey(opts) invalid opts', async (t) => {
@@ -126,7 +126,7 @@ test('readFile(did) valid file read', async (t) => {
   t.deepEqual(expected, result)
 })
 
-test.after((t) => {
+test.after(() => {
   fs.unlinkSync('invalid.json')
   fs.unlinkSync('valid.json')
 })

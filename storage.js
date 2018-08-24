@@ -5,11 +5,6 @@ const raf = require('random-access-file')
 const unixify = require('unixify')
 
 const {
-  proxyExists,
-  getProxyAddress
-} = require('ara-contracts/registry')
-
-const {
   writeToStaged,
   readFromStaged
 } = require('./commit')

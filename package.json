@@ -47,7 +47,6 @@
     "did-document": "github:arablocks/did-document",
     "extend": "^3.0.2",
     "has-did-method": "^0.1.0",
-    "extend": "^3.0.2",
     "hypercore": "^6.18.1",
     "hyperdrive": "^9.14.0",
     "ignore": "^3.3.10",

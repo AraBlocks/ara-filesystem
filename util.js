@@ -1,8 +1,8 @@
+const ss = require('ara-secret-storage')
+
 const {
   blake2b,
   keyPair,
-  encrypt: cryptoEncrypt,
-  decrypt: cryptoDecrypt,
   randomBytes: cryptoRandomBytes
 } = require('ara-crypto')
 
@@ -51,7 +51,6 @@ function decryptJSON(keystore, password) {
 
   return decryptedJSON
 }
-
 
 module.exports = {
   generateKeypair,

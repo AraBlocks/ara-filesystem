@@ -37,7 +37,7 @@ async function create({
 
   owner += kOwnerSuffix
 
-  const publicKeys = metadataPublicKey 
+  const publicKeys = metadataPublicKey
     ? [{ id: 'metadata', value: metadataPublicKey }]
     : null
 
@@ -81,7 +81,7 @@ async function archive(identity, opts) {
       keyring: secret.archiver
     }
     await aid.archive(identity, opts)
-  } catch (err) { 
+  } catch (err) {
     throw err
   }
 }

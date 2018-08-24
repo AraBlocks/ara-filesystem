@@ -1,6 +1,5 @@
 /* eslint-disable no-shadow */
 
-const debug = require('debug')('ara-filesystem:create')
 const { createAFSKeyPath } = require('./key-path')
 const { defaultStorage } = require('./storage')
 const { createCFS } = require('cfsnet/create')
@@ -39,7 +38,8 @@ async function create({
   password = '',
   owner = null,
   did = null,
-  storage = null
+  storage = null,
+  keyringOpts
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
     throw new TypeError('Expecting non-empty string.')
@@ -114,18 +114,23 @@ async function create({
       const metadataPublicKey = toHex(key)
 
       // recreate identity with additional publicKey
-      afsId = await aid.create({ password, mnemonic, owner, metadataPublicKey });
+      afsId = await aid.create({
+        password,
+        mnemonic,
+        owner,
+        metadataPublicKey
+      });
+
       ({ mnemonic } = afsId)
 
       await writeIdentity(afsId)
-      await aid.archive(afsId)
+      await aid.archive(afsId, keyringOpts)
 
       afsDdo = await aid.resolve(toHex(afsId.publicKey))
       if (null == afsDdo || 'object' !== typeof afsDdo) {
         throw new TypeError('AFS identity not successfully resolved.')
       }
-
-    } catch (err) { 
+    } catch (err) {
       throw err
     }
 
@@ -166,7 +171,7 @@ async function create({
             id,
             key,
             path,
-            storage: proxy ? defaultStorage(id, password, storage, proxy) : defaultStorage(id, password, storage),
+            storage: proxy ? defaultStorage(id, password, storage, proxy) : defaultStorage(id, password, storage)
           })
           return done(null, afs)
         } catch (err) {

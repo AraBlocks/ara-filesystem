@@ -20,7 +20,7 @@ async function writeFile(opts = {}) {
   try {
     await pify(fs.access)(filepath)
   } catch (err) {
-    throw new Error(`Filepath ${filepath} 'doesn\'t exist.`)
+    throw new Error(`Filepath ${filepath} 'doesn't exist.`)
   }
 
   let contents = await pify(fs.readFile)(filepath, 'utf8')
@@ -30,7 +30,7 @@ async function writeFile(opts = {}) {
     throw new Error('Contents of file is not valid JSON.')
   }
 
-  await _writeMetadataFile(did, contents)  
+  await _writeMetadataFile(did, contents)
 
   return contents
 }
@@ -119,7 +119,7 @@ async function _readMetadataFile(did) {
   if (!did || 'string' !== typeof did) {
     throw new TypeError('DID URI must be non-empty string.')
   }
-  
+
   const cfs = await _getEtcCFS(did)
   let file
   try {
