@@ -16,8 +16,8 @@ const defaults = () => ({
   },
   network: {
     identity: {
-      root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
-      archiver: 'ara-archiver'
+      root: resolve(os.homedir(), kAraDir, kIdentitiesDir),
+      archiver: 'ara-archiver',
       resolver: 'ara-resolver'
     }
   }
