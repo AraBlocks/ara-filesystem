@@ -14,11 +14,6 @@ const defaults = () => ({
       store: resolve(os.homedir(), kAraDir, kAfsDir, 'nodes')
     }
   },
-  araId: {
-    archive: {
-      root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
-    },
-  },
   network: {
     identity: {
       root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
