@@ -20,7 +20,7 @@ async function writeFile(opts = {}) {
   try {
     await pify(fs.access)(filepath)
   } catch (err) {
-    throw new Error(`Filepath ${filepath} 'doesn't exist.`)
+    throw new Error(`Filepath ${filepath} doesn't exist.`)
   }
 
   let contents = await pify(fs.readFile)(filepath, 'utf8')
@@ -125,7 +125,7 @@ async function _readMetadataFile(did) {
   try {
     file = await cfs.readFile(kMetadataFile)
   } catch (err) {
-    throw new Error('Metadata file doesn\t exist.')
+    throw new Error('Metadata file doesn\'t exist.')
   }
   return JSON.parse(file.toString())
 }

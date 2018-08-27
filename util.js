@@ -25,7 +25,6 @@ function randomBytes(size) {
   return cryptoRandomBytes(size)
 }
 
-// afs
 function encryptJSON(json, password) {
   const { secretKey } = generateKeypair(password)
   const encryptionKey = Buffer.allocUnsafe(16).fill(secretKey.slice(0, 16))

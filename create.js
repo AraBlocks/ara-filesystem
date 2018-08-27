@@ -66,20 +66,12 @@ async function create({
     const drives = await createMultidrive({ did: id, password, storage })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
+    
+    const opts = { id, key, path }
     if (proxy) {
-      afs = await pify(drives.create)({
-        id,
-        key,
-        path,
-        proxy
-      })
-    } else {
-      afs = await pify(drives.create)({
-        id,
-        key,
-        path
-      })
+      opts.proxy = proxy
     }
+    afs = await pify(drives.create)(opts)
 
     afs.did = did
     afs.ddo = ddo

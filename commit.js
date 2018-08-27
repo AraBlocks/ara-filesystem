@@ -83,22 +83,12 @@ async function commit({
   owner = kAidPrefix + owner
   const acct = await account.load({ did: owner, password })
 
-  let result
-  if (exists) {
-    result = await _append({
+  const result = await _write({
       mtData,
       msData,
       account: acct,
       proxy
-    }, estimate)
-  } else {
-    result = await _write({
-      mtData,
-      msData,
-      account: acct,
-      proxy
-    }, estimate)
-  }
+    }, estimate, exists)
 
   if (estimate) {
     return result
@@ -168,7 +158,7 @@ async function estimateCommitGasCost({
   })
 }
 
-async function _append(opts, estimate = true) {
+async function _write(opts, estimate = true, append = false) {
   const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
   const { offsets: msOffsets, buffer: msBuffer } = opts.msData
 
@@ -180,36 +170,7 @@ async function _append(opts, estimate = true) {
     gasLimit: 1000000,
     data: {
       abi,
-      functionName: 'append',
-      values: [
-        mtOffsets,
-        msOffsets,
-        mtBuffer,
-        msBuffer
-      ]
-    }
-  })
-
-  if (estimate) {
-    return tx.estimateCost(transaction)
-  }
-
-  return tx.sendSignedTransaction(transaction)
-}
-
-async function _write(opts, estimate = true) {
-  const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
-  const { offsets: msOffsets, buffer: msBuffer } = opts.msData
-
-  const { account: acct, proxy } = opts
-
-  const transaction = await tx.create({
-    account: acct,
-    to: proxy,
-    gasLimit: 1000000,
-    data: {
-      abi,
-      functionName: 'write',
+      functionName: append ? 'append' : 'write',
       values: [
         mtOffsets,
         msOffsets,
