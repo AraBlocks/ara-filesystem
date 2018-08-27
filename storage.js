@@ -1,11 +1,8 @@
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
 const raf = require('random-access-file')
 const unixify = require('unixify')
-const { resolve, basename } = require('path')
-const { web3 } = require('ara-context')()
-const { abi } = require('./build/contracts/Storage.json')
-const { hashDID } = require('ara-util')
 
 const {
   writeToStaged,
@@ -13,30 +10,55 @@ const {
 } = require('./commit')
 
 const {
-  kStorageAddress,
   kMetadataTreeIndex,
   kMetadataSignaturesIndex,
   kMetadataTreeName: mTreeName,
   kMetadataSignaturesName: mSigName
 } = require('./constants')
 
-function defaultStorage(identity, password, storage = null) {
+const {
+  validate,
+  getDocumentOwner,
+  web3: {
+    tx,
+    call,
+    account
+  }
+} = require('ara-util')
+
+const {
+  resolve,
+  basename
+} = require('path')
+
+function defaultStorage(identity, password, storage = null, proxy = '') {
+  if (storage && 'function' !== typeof storage) {
+    throw new TypeError('ara-filesystem.storage: Expecting storage to be a function.')
+  }
   return (filename, drive, path) => {
     filename = unixify(filename)
-    if ('home' === basename(path) && (filename.includes(mTreeName)
-      || filename.includes(mSigName))) {
-      return create({ filename, identity, password })
+    if ('home' === basename(path)
+      && (filename.includes(mTreeName) || filename.includes(mSigName))) {
+      return create({
+        filename,
+        identity,
+        password,
+        proxy
+      })
     }
     const file = resolve(path, filename)
     return storage ? storage(file) : raf(file)
   }
 }
 
-function create({ filename, identity, password }) {
+function create({
+  filename,
+  identity,
+  password,
+  proxy
+} = {}) {
   const fileIndex = resolveBufferIndex(filename)
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
 
-  const hIdentity = hashDID(identity)
   const writable = Boolean(password)
 
   return ras({
@@ -50,8 +72,16 @@ function create({ filename, identity, password }) {
         password
       }) : null
       // data is not staged, must retrieve from bc
-      if (!buffer) {
-        buffer = await deployed.methods.read(hIdentity, fileIndex, offset).call()
+      if (!buffer && proxy) {
+        buffer = await call({
+          abi,
+          address: proxy,
+          functionName: 'read',
+          arguments: [
+            fileIndex,
+            offset
+          ]
+        })
       }
       req.callback(null, _decode(buffer))
     },
@@ -72,18 +102,24 @@ function create({ filename, identity, password }) {
     },
 
     async del(req) {
-      if (writable) {
-        const opts = await _getTxOpts()
-        await deployed.methods.del(hIdentity).send(opts)
+      if (writable && proxy) {
+        const { ddo } = await validate({ identity, password, label: 'storage' })
+        const owner = getDocumentOwner(ddo, true)
+        const acct = await account.load({ did: owner, password })
+
+        const transaction = await tx.create({
+          account: acct,
+          to: proxy,
+          data: {
+            abi,
+            functionName: 'unlist'
+          }
+        })
+        await tx.sendSignedTransaction(transaction)
       }
       req.callback(null)
     }
   })
-}
-
-async function _getTxOpts(index = 0) {
-  const defaultAccount = await web3.eth.getAccounts()
-  return { from: defaultAccount[index], gas: 5000000 }
 }
 
 function _decode(bytes) {
@@ -112,11 +148,6 @@ function resolveBufferIndex(path) {
     index = kMetadataSignaturesIndex
   }
   return index
-}
-
-module.exports = {
-  resolveBufferIndex,
-  defaultStorage
 }
 
 module.exports = {

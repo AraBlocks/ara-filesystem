@@ -3,7 +3,6 @@ const context = require('ara-context')()
 const aid = require('ara-identity')
 const fs = require('fs')
 const pify = require('pify')
-const { resolve } = require('path')
 const { create, unarchive, add } = require('../')
 const { writeIdentity } = require('ara-identity/util')
 const { kPassword: password } = require('./_constants')
@@ -50,6 +49,6 @@ test.serial('unarchive() valid unarchive', async (t) => {
   t.is(result, 'Hello World!')
 })
 
-test.after((t) => {
+test.after(() => {
   fs.unlinkSync(kTestFilename)
 })

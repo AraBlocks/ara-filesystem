@@ -1,44 +1,68 @@
 /* eslint-disable no-await-in-loop */
 
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
-const fs = require('fs')
-const pify = require('pify')
-const { toHex } = require('ara-identity/util')
-const { web3 } = require('ara-context')()
-const { resolve, dirname } = require('path')
 const { createAFSKeyPath } = require('./key-path')
 const { setPrice } = require('./price')
-const { abi } = require('./build/contracts/Storage.json')
-const { contract } = require('ara-web3')
-const { validate, hashDID } = require('ara-util')
+const pify = require('pify')
+const fs = require('fs')
 
 const {
+  proxyExists,
+  deployProxy,
+  getProxyAddress
+} = require('ara-contracts/registry')
+
+const {
+  kAidPrefix,
+  kStagingFile,
   kMetadataTreeName,
   kMetadataTreeIndex,
-  kMetadataTreeBufferSize,
   kMetadataSignaturesName,
-  kMetadataSignaturesIndex,
-  kMetadataSignaturesBufferSize,
-  kStagingFile,
-  kStorageAddress
+  kMetadataSignaturesIndex
 } = require('./constants')
+
+const {
+  validate,
+  getDocumentOwner,
+  web3: {
+    tx,
+    call,
+    account,
+    toHex
+  }
+} = require('ara-util')
 
 const {
   encryptJSON,
   decryptJSON
 } = require('./util')
 
+const {
+  resolve,
+  dirname
+} = require('path')
+
 async function commit({
-  did = '',
   password = '',
   price = -1,
-  estimate = false
+  estimate = false,
+  did = ''
 } = {}) {
+  let ddo
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }
+  let proxy
+  if (await proxyExists(did)) {
+    proxy = await getProxyAddress(did)
+  } else {
+    proxy = await deployProxy({ contentDid: did, password })
+  }
+
+  debug('proxy address', proxy)
 
   const path = generateStagedPath(did)
   try {
@@ -48,21 +72,22 @@ async function commit({
   }
 
   const contents = _readStagedFile(path, password)
-  const accounts = await web3.eth.getAccounts()
-  const deployed = contract.get(abi, kStorageAddress)
-  const hIdentity = hashDID(did)
 
-  const exists = await _hasBeenCommitted(contents, hIdentity)
+  const exists = await _hasBeenCommitted(contents, proxy)
 
   const mtData = _getWriteData(0, contents, exists)
   const msData = _getWriteData(1, contents, exists)
 
-  let result
-  if (exists) {
-    result = await _append({ deployed, mtData, msData, hIdentity }, estimate)
-  } else {
-    result = await _write({ deployed, mtData, msData, hIdentity }, estimate) 
-  }
+  let owner = getDocumentOwner(ddo, true)
+  owner = `${kAidPrefix}${owner}`
+  const acct = await account.load({ did: owner, password })
+
+  const result = await _write({
+      mtData,
+      msData,
+      account: acct,
+      proxy
+    }, estimate, exists)
 
   if (estimate) {
     return result
@@ -132,35 +157,33 @@ async function estimateCommitGasCost({
   })
 }
 
-async function _append(opts, estimate = true) {
+async function _write(opts, estimate = true, append = false) {
   const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
   const { offsets: msOffsets, buffer: msBuffer } = opts.msData
 
-  const { deployed, hIdentity } = opts
-  const query = deployed.methods.append(hIdentity, mtOffsets, msOffsets, mtBuffer, msBuffer)
+  const { account: acct, proxy } = opts
 
-  if (!estimate) {
-    const accounts = await web3.eth.getAccounts()
-    return query.send({ from: accounts[0], gas: 1000000 })
-  } else {
-    return query.estimateGas({ gas: 1000000 })
+  const transaction = await tx.create({
+    account: acct,
+    to: proxy,
+    gasLimit: 1000000,
+    data: {
+      abi,
+      functionName: append ? 'append' : 'write',
+      values: [
+        mtOffsets,
+        msOffsets,
+        mtBuffer,
+        msBuffer
+      ]
+    }
+  })
+
+  if (estimate) {
+    return tx.estimateCost(transaction)
   }
-}
 
-async function _write(opts, estimate = true) {
-  const { offsets: mtOffsets, sizes: mtSizes, buffer: mtBuffer } = opts.mtData
-  const { offsets: msOffsets, sizes: msSizes, buffer: msBuffer } = opts.msData 
-
-  const { deployed, hIdentity } = opts
-  const query = deployed.methods.write(hIdentity, mtOffsets, msOffsets, 
-    mtSizes, msSizes, mtBuffer, msBuffer)
-
-  if (!estimate) {
-    const accounts = await web3.eth.getAccounts()
-    return query.send({ from: accounts[0], gas: 1000000 })
-  } else {
-    return query.estimateGas({ gas: 1000000 })
-  }
+  return tx.sendSignedTransaction(transaction)
 }
 
 function _getWriteData(index, contents, append) {
@@ -176,8 +199,8 @@ function _getWriteData(index, contents, append) {
       const length = _hexToBytes(v.length)
 
       // inserts 0s to fill buffer based on offsets
-      if (offsets[i+1] && offsets[i+1] !== _hexToBytes(buffer.length)) {
-        const diff = offsets[i+1] - _hexToBytes(buffer.length)
+      if (offsets[i + 1] && offsets[i + 1] !== _hexToBytes(buffer.length)) {
+        const diff = offsets[i + 1] - _hexToBytes(buffer.length)
         buffer += toHex(Buffer.alloc(diff))
       }
       return length
@@ -187,7 +210,7 @@ function _getWriteData(index, contents, append) {
   } else {
     offsets.shift()
     buffers.shift()
-    const buffer = `0x${buffers.join('')}`
+    buffer = `0x${buffers.join('')}`
     result = { offsets, buffer }
   }
 
@@ -247,10 +270,18 @@ async function _deleteStagedFile(path) {
 
 // checks to see if header written to staged has been pushed to blockchain
 // if it has, we know that AFS has been committed already
-async function _hasBeenCommitted(contents, hIdentity) {
+async function _hasBeenCommitted(contents, proxy) {
   const buf = `0x${_getBufferFromStaged(contents, 0, 0)}`
-  const deployed = contract.get(abi, kStorageAddress)
-  return deployed.methods.hasBuffer(hIdentity, 0, 0, buf).call()
+  return call({
+    abi,
+    address: proxy,
+    functionName: 'hasBuffer',
+    arguments: [
+      0,
+      0,
+      buf
+    ]
+  })
 }
 
 function _getBufferFromStaged(contents, index, offset) {

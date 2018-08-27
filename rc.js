@@ -1,12 +1,12 @@
-const extend = require('extend')
 const rc = require('ara-runtime-configuration')
-const os = require('os')
 const { resolve } = require('path')
+const extend = require('extend')
+const os = require('os')
 
 const kAraDir = '.ara'
 const kAfsDir = 'afs'
 const kIdentitiesDir = 'identities'
-const kSecretsDir = 'secret'
+const kSecretsDir = 'keyrings'
 
 const defaults = () => ({
   afs: {

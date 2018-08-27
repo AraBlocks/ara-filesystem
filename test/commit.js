@@ -11,12 +11,13 @@ const { add } = require('../add')
 const { decryptJSON } = require('../util')
 const { blake2b } = require('ara-crypto')
 const { web3 } = require('ara-context')()
-const { abi } = require('../build/contracts/Storage.json')
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const { kStorageAddress } = require('../constants')
 
 const {
   kPassword: password,
-  kTestDid
+  kTestDid,
+  kTestOwnerDid
 } = require('./_constants')
 
 const {
@@ -51,7 +52,7 @@ test.before(async (t) => {
   publicKey = publicKey.toString('hex')
 
   // create afs
-  const { afs } = await create({ owner: publicKey, password })
+  const { afs } = await create({ owner: kTestOwnerDid, password })
   const { did } = afs
   t.context = { did, publicKey }
 })

@@ -1,17 +1,30 @@
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:destroy')
+const { kAidPrefix } = require('./constants')
 const { access } = require('fs')
-const rc = require('./rc')()
 const rimraf = require('rimraf')
 const pify = require('pify')
-const { web3 } = require('ara-context')()
-const { abi } = require('./build/contracts/Storage.json')
-const { kStorageAddress } = require('./constants')
-const { getAFSOwnerIdentity, validate, hashDID } = require('ara-util')
+const rc = require('./rc')()
+
+const {
+  proxyExists,
+  getProxyAddress
+} = require('ara-contracts/registry')
 
 const {
   createAFSKeyPath,
   createIdentityKeyPath
 } = require('./key-path')
+
+const {
+  validate,
+  getDocumentOwner,
+  getAFSOwnerIdentity,
+  web3: {
+    tx,
+    account
+  }
+} = require('ara-util')
 
 const {
   basename,
@@ -23,14 +36,19 @@ async function destroy({
   mnemonic = '',
   password = ''
 } = {}) {
+  let ddo
   try {
-    ({ did } = await validate({ did, password, label: 'destroy' }))
+    ({ did, ddo } = await validate({ did, password, label: 'destroy' }))
   } catch (err) {
     throw err
   }
 
   if (!mnemonic || 'string' !== typeof mnemonic) {
     throw new TypeError('Expecting non-empty string for mnemonic.')
+  }
+
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.destroy: This content does not have a valid proxy contract')
   }
 
   mnemonic = mnemonic.trim()
@@ -63,13 +81,21 @@ async function destroy({
     debug('db file at %s does not exist', path)
   }
 
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const accounts = await web3.eth.getAccounts()
-  const hIdentity = hashDID(did)
+  const owner = getDocumentOwner(ddo, true)
+  owner = `${kAidPrefix}${owner}`
+  const acct = await account.load({ did: owner, password })
+  const proxy = await getProxyAddress(did)
 
   try {
-    // mark blockchain buffers invalid
-    await deployed.methods.del(hIdentity).send({ from: accounts[0], gas: 500000 })
+    const transaction = await tx.create({
+      account: acct,
+      to: proxy,
+      data: {
+        abi,
+        name: 'unlist'
+      }
+    })
+    await tx.sendSignedTransaction(transaction)
   } catch (err) {
     throw new Error(err)
   }
