@@ -1,5 +1,6 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:destroy')
+const { kAidPrefix } = require('./constants')
 const { access } = require('fs')
 const rimraf = require('rimraf')
 const pify = require('pify')
@@ -81,7 +82,7 @@ async function destroy({
   }
 
   const owner = getDocumentOwner(ddo, true)
-  owner = `\${kAidPrefix}${owner}`
+  owner = `${kAidPrefix}${owner}`
   const acct = await account.load({ did: owner, password })
   const proxy = await getProxyAddress(did)
 

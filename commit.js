@@ -79,7 +79,7 @@ async function commit({
   const msData = _getWriteData(1, contents, exists)
 
   let owner = getDocumentOwner(ddo, true)
-  owner = `\${kAidPrefix}${owner}`
+  owner = `${kAidPrefix}${owner}`
   const acct = await account.load({ did: owner, password })
 
   const result = await _write({

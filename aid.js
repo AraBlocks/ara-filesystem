@@ -99,7 +99,7 @@ async function resolve(did, opts = {}) {
   }
 
   did = normalize(did)
-  did = `\${kAidPrefix}${did}`
+  did = `${kAidPrefix}${did}`
 
   let result
   try {
