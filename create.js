@@ -1,5 +1,6 @@
 /* eslint-disable no-shadow */
 
+const { writeIdentity } = require('ara-identity/util')
 const { createAFSKeyPath } = require('./key-path')
 const { defaultStorage } = require('./storage')
 const { createCFS } = require('cfsnet/create')
@@ -17,13 +18,9 @@ const {
 } = require('ara-contracts/registry')
 
 const {
-  toHex,
-  writeIdentity
-} = require('ara-identity/util')
-
-const {
   getDocumentKeyHex,
-  validate
+  validate,
+  web3: { toHex }
 } = require('ara-util')
 
 /**

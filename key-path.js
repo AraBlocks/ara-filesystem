@@ -1,4 +1,4 @@
-const { toHex } = require('ara-identity/util')
+const { toHex } = require('ara-util/web3')
 const { blake2b } = require('ara-crypto')
 const { resolve } = require('path')
 const rc = require('./rc')()

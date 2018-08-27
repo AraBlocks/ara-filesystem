@@ -16,14 +16,13 @@ const {
 } = require('./key-path')
 
 const {
-  tx,
-  account
-} = require('ara-web3')
-
-const {
   validate,
   getDocumentOwner,
-  getAFSOwnerIdentity
+  getAFSOwnerIdentity,
+  web3: {
+    tx,
+    account
+  }
 } = require('ara-util')
 
 const {
