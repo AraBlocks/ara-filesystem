@@ -1,10 +1,4 @@
 module.exports = {
-
-  kArchiverSecret: 'ara-archiver',
-  kResolverSecret: 'ara-resolver',
-  kArchiverName: 'remote1',
-  kResolverName: 'remote2',
-
   kDidPrefix: 'did:',
   kAidPrefix: 'did:ara:',
   kOwnerSuffix: '#owner',

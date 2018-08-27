@@ -62,7 +62,6 @@ const { argv } = program
         alias: 's',
         type: 'string',
         describe: 'Secret for the `archiver` key',
-        default: constants.kResolverSecret,
         required: true
       })
       .option('archiverName', {
@@ -76,7 +75,6 @@ const { argv } = program
         alias: 's',
         type: 'string',
         describe: 'Secret for the `resolver` key',
-        default: constants.kArchiverSecret,
         required: true
       })
       .option('resolverName', {
