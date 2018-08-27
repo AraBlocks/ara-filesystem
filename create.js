@@ -113,9 +113,9 @@ async function create({
       ({ mnemonic } = afsId)
 
       await writeIdentity(afsId)
-      await aid.archive(afsId, keyringOpts)
+      await aid.archive(afsId, keyringOpts && keyringOpts.archiver)
 
-      afsDdo = await aid.resolve(toHex(afsId.publicKey))
+      afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts && keyringOpts.resolver)
       if (null == afsDdo || 'object' !== typeof afsDdo) {
         throw new TypeError('AFS identity not successfully resolved.')
       }
