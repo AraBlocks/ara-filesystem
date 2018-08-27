@@ -11,7 +11,6 @@ const pify = require('pify')
 const program = require('yargs')
 const afs = require('../')
 const fs = require('fs')
-const constants = require('../constants')
 const ProgressStream = require('progress-stream')
 const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
@@ -68,7 +67,7 @@ const { argv } = program
         alias: 'an',
         type: 'string',
         describe: 'Name of `archiver` key in keyring',
-        default: constants.kArchiverName,
+        default: rc.network.identity.archiver,
         required: true
       })
       .option('resolverSecret', {
@@ -81,7 +80,7 @@ const { argv } = program
         alias: 'rn',
         type: 'string',
         describe: 'Name of `resolver` key in keyring',
-        default: constants.kResolverName,
+        default: rc.network.identity.resolver,
         required: true
       })
       .option('keyring', {
