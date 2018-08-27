@@ -32,10 +32,17 @@ async function commit({
   did = '',
   password = '',
   price = -1,
-  estimate = false
+  estimate = false,
+  resolver = null
 } = {}) {
+  if (!resolver) {
+    throw new Error('Expecting `resolver` to be passed')
+  } else if (!resolver.secret) {
+    throw new Error('Expecting `resolver.secret` to be passed')
+  }
+
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did } = await validate({ did, password, label: 'commit', secret: resolver.secret, name: resolver.name, keyring: resolver.keyring }))
   } catch (err) {
     throw err
   }

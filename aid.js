@@ -74,12 +74,14 @@ async function archive(identity, opts) {
     throw new TypeError('Missing key secret')
   }
 
+    console.log("ARCHIVE:", opts)
   try {
     opts = {
       secret: opts.secret,
       name: opts.name || rc.network.identity.archiver,
       keyring: opts.keyring || rc.network.identity.keyring
     }
+
     await aid.archive(identity, opts)
   } catch (err) {
     throw err
@@ -102,6 +104,7 @@ async function resolve(did, opts) {
     throw new TypeError('Missing key secret')
   }
 
+        console.log("RESOLVE:", opts)
   did = normalize(did)
   did = kAidPrefix + did
 

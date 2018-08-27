@@ -21,10 +21,16 @@ const {
 async function destroy({
   did = '',
   mnemonic = '',
-  password = ''
+  password = '',
+  resolver = null
 } = {}) {
+  if (!resolver) {
+    throw new Error('Expecting `resolver` to be passed')
+  } else if (!resolver.secret) {
+    throw new Error('Expecting `resolver.secret` to be passed')
+  }
   try {
-    ({ did } = await validate({ did, password, label: 'destroy' }))
+    ({ did } = await validate({ did, password, label: 'destroy', secret: resolver.secret, name: resolver.name, keyring: resolver.keyring }))
   } catch (err) {
     throw err
   }

@@ -31,12 +31,18 @@ async function create({
   owner = null,
   did = null,
   storage = null,
-  keyringOpts
+  keyringOpts = null
 }) {
   if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
-    throw new TypeError('Expecting non-empty string.')
+    throw new Error('Expecting either `owner` or `did` to be passed')
   } else if (storage && 'function' !== typeof storage) {
     throw new TypeError('Expecting storage to be a function.')
+  } else if (null == keyringOpts) {
+    throw new Error('Expecting `keyringOpts` to be passed')
+  } else if (!keyringOpts.resolver) {
+    throw new Error('Expecting `keyringOpts.resolver` to be passed')
+  } else if (!keyringOpts.archiver) {
+    throw new Error('Expecting `keyringOpts.archiver` to be passed')
   }
 
   let afs
@@ -44,7 +50,14 @@ async function create({
   if (did) {
     let ddo
     try {
-      ({ did, ddo } = await validate({ did, password, label: 'create' }))
+      ({ did, ddo } = await validate({ 
+        did, 
+        password, 
+        label: 'create', 
+        secret: keyringOpts.resolver.secret, 
+        keyring: keyringOpts.resolver.keyring, 
+        name: keyringOpts.resolver.name 
+      }))
     } catch (err) {
       throw err
     }
@@ -64,7 +77,14 @@ async function create({
     afs.ddo = ddo
   } else if (owner) {
     try {
-      ({ owner: did } = await validate({ owner, password, label: 'create' }))
+      ({ owner: did } = await validate({ 
+        owner, 
+        password, 
+        label: 'create',
+        secret: keyringOpts.resolver.secret, 
+        keyring: keyringOpts.resolver.keyring, 
+        name: keyringOpts.resolver.name 
+      }))
     } catch (err) {
       throw err
     }

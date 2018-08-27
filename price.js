@@ -16,10 +16,15 @@ const {
 async function estimateSetPriceGasCost({
   did = '',
   password = '',
-  price = 0
+  price = 0,
+  resolverKey = { secret: null }
 } = {}) {
+  if (resolverKey.secret) {
+    throw new Error(`Missing secret for resolver key`)
+  }
+
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did } = await validate({ did, password, label: 'commit', secret: resolverKey.secret, keyring: resolverKey.keyring, name: resolverKey.name }))
   } catch (err) {
     throw err
   }
@@ -46,9 +51,14 @@ async function setPrice({
   did = '',
   password = '',
   price = 0,
+  resolverKey = { secret: null }
 } = {}) {
+  if (resolverKey.secret) {
+    throw new Error(`Missing secret for resolver key`)
+  }
+
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did } = await validate({ did, password, label: 'commit', secret: resolverKey.secret, keyring: resolverKey.keyring, name: resolverKey.name }))
   } catch (err) {
     throw err
   }
@@ -75,10 +85,15 @@ async function setPrice({
 }
 
 async function getPrice({
-  did = ''
+  did = '',
+  resolverKey = { secret: null }
 } = {}) {
+  if (resolverKey.secret) {
+    throw new Error(`Missing secret for resolver key`)
+  }
+
   try {
-    ({ did } = await validate({ did, label: 'commit' }))
+    ({ did } = await validate({ did, label: 'commit', secret: resolverKey.secret, keyring: resolverKey.keyring, name: resolverKey.name }))
   } catch (err) {
     throw err
   }
