@@ -22,7 +22,7 @@ function createAFSKeyPath(did) {
 }
 
 function createIdentityKeyPath(ddo) {
-  const { root } = rc.araId.archive
+  const { root } = rc.network.identity
 
   if (null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting object for identity.')
