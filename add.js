@@ -1,13 +1,12 @@
 /* eslint-disable no-await-in-loop */
 
 const debug = require('debug')('ara-filesystem:add')
-const { create } = require('./create')
 const { join, basename } = require('path')
-const pify = require('pify')
-const isFile = require('is-file')
 const mirror = require('mirror-folder')
-
 const ignored = require('./lib/ignore')
+const { create } = require('./create')
+const isFile = require('is-file')
+const pify = require('pify')
 
 async function add(opts) {
   if (null === opts.did || 'string' !== typeof opts.did || !opts.did) {
@@ -41,8 +40,8 @@ async function add(opts) {
 
   return afs
 
-  async function mirrorPaths(paths) {
-    for (const path of paths) {
+  async function mirrorPaths(p) {
+    for (const path of p) {
       await mirrorPath(path)
     }
   }
@@ -81,7 +80,7 @@ async function add(opts) {
     }
   }
 
-  function ignore(path, stat) {
+  function ignore(path) {
     if (ignored.ignores(path)) {
       if (force) {
         debug(`forcing add path ${path}`)

@@ -22,6 +22,7 @@ const isFile = require('is-file')
 const isSymlink = require('is-symlink')
 
 const ignored = require('../lib/ignore')
+const { kAidPrefix } = require('../constants')
 
 const toLower = (x) => String(x).toLowerCase()
 const $0 = basename(process.argv[1] || package.name)
@@ -254,7 +255,7 @@ async function oncreate(argv) {
   }
 
   if (0 != owner.indexOf('did:ara:')) {
-    owner = 'did:ara:' + owner
+    owner = `${kAidPrefix}${owner}`
   }
 
   const { secret, name, keyring } = argv
@@ -458,8 +459,8 @@ async function promptCostConfirmation(cost) {
   return await inquirer.prompt({
     type: 'confirm',
     name: 'answer',
-    message:
-    `This operation will cost ${cost} gas. Are you sure you
+    message: 
+    `This operation will cost ${cost} ETH. Are you sure you
     want to proceed?`
   })
 }

@@ -1,27 +1,27 @@
 /* eslint-disable no-shadow */
 
-const debug = require('debug')('ara-filesystem:create')
+const { writeIdentity } = require('ara-identity/util')
 const { createAFSKeyPath } = require('./key-path')
-const { toHex, writeIdentity } = require('ara-identity/util')
-const { resolve } = require('path')
-const { createCFS } = require('cfsnet/create')
-const aid = require('./aid')
-const multidrive = require('multidrive')
-const pify = require('pify')
-const mkdirp = require('mkdirp')
-const rc = require('./rc')()
-const toilet = require('toiletdb')
 const { defaultStorage } = require('./storage')
+const { createCFS } = require('cfsnet/create')
+const multidrive = require('multidrive')
+const { resolve } = require('path')
+const toilet = require('toiletdb')
+const mkdirp = require('mkdirp')
+const aid = require('./aid')
+const pify = require('pify')
+const rc = require('./rc')()
+
+const {
+  proxyExists,
+  getProxyAddress
+} = require('ara-contracts/registry')
 
 const {
   getDocumentKeyHex,
-  validate
+  validate,
+  web3: { toHex }
 } = require('ara-util')
-
-const {
-  kResolverKey,
-  kArchiverKey
-} = require('./constants')
 
 /**
  * Creates an AFS with the given Ara identity
@@ -54,16 +54,21 @@ async function create({
       throw err
     }
 
+    let proxy
+    if (await proxyExists(did)) {
+      proxy = await getProxyAddress(did)
+    }
+
     const id = getDocumentKeyHex(ddo)
     const drives = await createMultidrive({ did: id, password, storage })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
-
-    afs = await pify(drives.create)({
-      id,
-      key,
-      path
-    })
+    
+    const opts = { id, key, path }
+    if (proxy) {
+      opts.proxy = proxy
+    }
+    afs = await pify(drives.create)(opts)
 
     afs.did = did
     afs.ddo = ddo
@@ -98,7 +103,13 @@ async function create({
       const metadataPublicKey = toHex(key)
 
       // recreate identity with additional publicKey
-      afsId = await aid.create({ password, mnemonic, owner, metadataPublicKey });
+      afsId = await aid.create({
+        password,
+        mnemonic,
+        owner,
+        metadataPublicKey
+      });
+
       ({ mnemonic } = afsId)
 
       await writeIdentity(afsId)
@@ -108,7 +119,6 @@ async function create({
       if (null == afsDdo || 'object' !== typeof afsDdo) {
         throw new TypeError('AFS identity not successfully resolved.')
       }
-
     } catch (err) {
       throw err
     }
@@ -126,7 +136,11 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({ did, password, storage }) {
+  async function createMultidrive({
+    did,
+    password,
+    storage
+  } = {}) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, did)
     const store = toilet(nodes)
@@ -134,13 +148,19 @@ async function create({
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
-        const { id, key, path } = opts
+        const {
+          id,
+          key,
+          path,
+          proxy
+        } = opts
+
         try {
           const afs = await createCFS({
             id,
             key,
             path,
-            storage: defaultStorage(id, password, storage)
+            storage: proxy ? defaultStorage(id, password, storage, proxy) : defaultStorage(id, password, storage)
           })
           return done(null, afs)
         } catch (err) {

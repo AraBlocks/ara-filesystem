@@ -1,25 +1,30 @@
+const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
-const { web3 } = require('ara-context')()
-const { abi } = require('./build/contracts/Price.json')
-const { contract } = require('ara-web3')
+const { kAidPrefix } = require('./constants')
+
+const {
+  proxyExists,
+  getProxyAddress
+} = require('ara-contracts/registry')
 
 const {
   validate,
-  hashDID
+  getDocumentOwner,
+  web3: {
+    tx,
+    call,
+    account
+  }
 } = require('ara-util')
-
-const {
-  kPriceAddress,
-  kStorageAddress
-} = require('./constants')
 
 async function estimateSetPriceGasCost({
   did = '',
   password = '',
   price = 0
 } = {}) {
+  let ddo
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'price' }))
   } catch (err) {
     throw err
   }
@@ -28,18 +33,34 @@ async function estimateSetPriceGasCost({
     throw new TypeError('Price should be 0 or positive whole number.')
   }
 
-  let cost
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
+  }
+
+  const proxy = await getProxyAddress(did)
+
+  let owner = getDocumentOwner(ddo, true)
+  owner = `${kAidPrefix}${owner}`
+  const acct = await account.load({ did: owner, password })
+
   try {
-    const hIdentity = hashDID(did)
-    const deployed = contract.get(abi, kPriceAddress)
-    cost = await deployed.methods
-      .setPrice(hIdentity, price, kStorageAddress)
-      .estimateGas({ gas: 500000 })
+    const transaction = await tx.create({
+      account: acct,
+      to: proxy,
+      data: {
+        abi,
+        functionName: 'setPrice',
+        values: [
+          price
+        ]
+      }
+    })
+
+    return tx.estimateCost(transaction)
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
   }
-  return cost
 }
 
 async function setPrice({
@@ -47,8 +68,9 @@ async function setPrice({
   password = '',
   price = 0,
 } = {}) {
+  let ddo
   try {
-    ({ did } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'price' }))
   } catch (err) {
     throw err
   }
@@ -57,15 +79,29 @@ async function setPrice({
     throw new TypeError('Price should be 0 or positive whole number.')
   }
 
-  const accounts = await web3.eth.getAccounts()
-  const hIdentity = hashDID(did)
-  const deployed = contract.get(abi, kPriceAddress)
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
+  }
+
+  const proxy = await getProxyAddress(did)
+
+  let owner = getDocumentOwner(ddo, true)
+  owner = `${kAidPrefix}${owner}`
+  const acct = await account.load({ did: owner, password })
 
   try {
-    await deployed.methods.setPrice(hIdentity, price, kStorageAddress).send({
-      from: accounts[0],
-      gas: 500000
+    const transaction = await tx.create({
+      account: acct,
+      to: proxy,
+      data: {
+        abi,
+        functionName: 'setPrice',
+        values: [
+          price
+        ]
+      }
     })
+    await tx.sendSignedTransaction(transaction)
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
@@ -77,16 +113,18 @@ async function setPrice({
 async function getPrice({
   did = ''
 } = {}) {
-  try {
-    ({ did } = await validate({ did, label: 'commit' }))
-  } catch (err) {
-    throw err
+  if (!(await proxyExists(did))) {
+    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
   }
 
-  const hIdentity = hashDID(did)
-  const deployed = new web3.eth.Contract(abi, kPriceAddress)
-  const result = await deployed.methods.getPrice(hIdentity).call()
-  debug('price for %s: %d', hIdentity, result)
+  const proxy = await getProxyAddress(did)
+
+  const result = await call({
+    abi,
+    address: proxy,
+    functionName: 'price_'
+  })
+  debug('price for %s: %d', did, result)
   return result
 }
 
