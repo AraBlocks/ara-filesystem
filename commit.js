@@ -3,7 +3,6 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
-const { toHex } = require('ara-identity/util')
 const { setPrice } = require('./price')
 const pify = require('pify')
 const fs = require('fs')
@@ -24,14 +23,14 @@ const {
 } = require('./constants')
 
 const {
-  tx,
-  call,
-  account
-} = require('ara-web3')
-
-const {
   validate,
-  getDocumentOwner
+  getDocumentOwner,
+  web3: {
+    tx,
+    call,
+    account,
+    toHex
+  }
 } = require('ara-util')
 
 const {
