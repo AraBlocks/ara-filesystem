@@ -18,11 +18,6 @@ const {
   validate
 } = require('ara-util')
 
-const {
-  kResolverKey,
-  kArchiverKey
-} = require('./constants')
-
 /**
  * Creates an AFS with the given Ara identity
  * @param {String}  did

@@ -4,16 +4,12 @@ const context = require('ara-context')()
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const hasDIDMethod = require('has-did-method')
 const { normalize } = require('ara-util')
-const { secret } = require('./rc')()
+const rc = require('./rc')()
 
 const {
   kAidPrefix,
   kOwnerSuffix,
   kKeyLength,
-  kArchiverSecret,
-  kResolverSecret,
-  kArchiverName,
-  kResolverName,
 } = require('./constants')
 
 async function create({
@@ -74,11 +70,15 @@ async function archive(identity, opts) {
     throw new TypeError('Expecting opts to be of type object.')
   }
 
+  if (!opts.secret) {
+    throw new TypeError('Missing key secret')
+  }
+
   try {
     opts = {
-      secret: opts.secret || kArchiverSecret,
-      name: opts.name || kArchiverName,
-      keyring: opts.keyring || secret.archiver
+      secret: opts.secret,
+      name: opts.name || rc.network.identity.archiver,
+      keyring: opts.keyring || rc.network.identity.keyring
     }
     await aid.archive(identity, opts)
   } catch (err) {
@@ -98,15 +98,19 @@ async function resolve(did, opts) {
     throw new TypeError('Expecting opts to be of type object.')
   }
 
+  if (!opts.secret) {
+    throw new TypeError('Missing key secret')
+  }
+
   did = normalize(did)
   did = kAidPrefix + did
 
   let result
   try {
     opts = {
-      secret: opts.secret || kResolverSecret,
-      name: opts.name || kResolverName,
-      keyring: opts.keyring || secret.resolver
+      secret: opts.secret
+      name: opts.name || rc.network.identity.resolver
+      keyring: opts.keyring || rc.network.identity.keyring
     }
     result = await aid.resolve(did, opts)
   } catch (err) {
