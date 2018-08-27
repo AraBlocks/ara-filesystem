@@ -59,26 +59,26 @@ const { argv } = program
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
       .option('archiverSecret', {
-        alias: 's',
+        alias: 'as',
         type: 'string',
         describe: 'Secret for the `archiver` key',
         required: true
       })
       .option('archiverName', {
-        alias: 'n',
+        alias: 'an',
         type: 'string',
         describe: 'Name of `archiver` key in keyring',
         default: constants.kArchiverName,
         required: true
       })
       .option('resolverSecret', {
-        alias: 's',
+        alias: 'rs',
         type: 'string',
         describe: 'Secret for the `resolver` key',
         required: true
       })
       .option('resolverName', {
-        alias: 'n',
+        alias: 'rn',
         type: 'string',
         describe: 'Name of `resolver` key in keyring',
         default: constants.kResolverName,

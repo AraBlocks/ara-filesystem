@@ -109,8 +109,8 @@ async function resolve(did, opts = {}) {
   let result
   try {
     opts = {
-      secret: opts.secret
-      name: opts.name || rc.network.identity.resolver
+      secret: opts.secret,
+      name: opts.name || rc.network.identity.resolver,
       keyring: opts.keyring || rc.network.identity.keyring
     }
     result = await aid.resolve(did, opts)
