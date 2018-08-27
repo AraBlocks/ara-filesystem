@@ -40,7 +40,7 @@ async function estimateSetPriceGasCost({
   const proxy = await getProxyAddress(did)
 
   let owner = getDocumentOwner(ddo, true)
-  owner = kAidPrefix + owner
+  owner = `\${kAidPrefix}${owner}`
   const acct = await account.load({ did: owner, password })
 
   try {
@@ -86,7 +86,7 @@ async function setPrice({
   const proxy = await getProxyAddress(did)
 
   let owner = getDocumentOwner(ddo, true)
-  owner = kAidPrefix + owner
+  owner = `\${kAidPrefix}${owner}`
   const acct = await account.load({ did: owner, password })
 
   try {

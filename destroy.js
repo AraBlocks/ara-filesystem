@@ -81,6 +81,7 @@ async function destroy({
   }
 
   const owner = getDocumentOwner(ddo, true)
+  owner = `\${kAidPrefix}${owner}`
   const acct = await account.load({ did: owner, password })
   const proxy = await getProxyAddress(did)
 
