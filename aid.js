@@ -12,8 +12,8 @@ const {
   kKeyLength,
   kArchiverSecret,
   kResolverSecret,
-  kArchiverRemote,
-  kResolverRemote
+  kArchiverName,
+  kResolverName,
 } = require('./constants')
 
 async function create({
@@ -77,7 +77,7 @@ async function archive(identity, opts) {
   try {
     opts = {
       secret: opts.secret || kArchiverSecret,
-      name: opts.name || kArchiverRemote,
+      name: opts.name || kArchiverName,
       keyring: opts.keyring || secret.archiver
     }
     await aid.archive(identity, opts)
@@ -105,7 +105,7 @@ async function resolve(did, opts) {
   try {
     opts = {
       secret: opts.secret || kResolverSecret,
-      name: opts.name || kResolverRemote,
+      name: opts.name || kResolverName,
       keyring: opts.keyring || secret.resolver
     }
     result = await aid.resolve(did, opts)

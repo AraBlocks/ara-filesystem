@@ -11,11 +11,13 @@ const pify = require('pify')
 const program = require('yargs')
 const afs = require('../')
 const fs = require('fs')
+const constants = require('../constants')
 const ProgressStream = require('progress-stream')
 const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
 const table = require('table')
 const prettyjson = require('prettyjson')
+const rc = require('../rc')()
 
 const isDirectory = require('is-directory')
 const isFile = require('is-file')
@@ -55,20 +57,39 @@ const { argv } = program
         type: 'string',
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
-      .option('secret', {
+      .option('archiverSecret', {
         alias: 's',
         type: 'string',
-        describe: 'key filename. Default: kArchiverSecret in constants.js',
+        describe: 'Secret for the `archiver` key',
+        default: constants.kResolverSecret,
+        required: true
       })
-      .option('name', {
+      .option('archiverName', {
         alias: 'n',
         type: 'string',
-        describe: 'Keyring name. Default: kArchiverRemote in constants.js',
+        describe: 'Name of `archiver` key in keyring',
+        default: constants.kArchiverName,
+        required: true
+      })
+      .option('resolverSecret', {
+        alias: 's',
+        type: 'string',
+        describe: 'Secret for the `resolver` key',
+        default: constants.kArchiverSecret,
+        required: true
+      })
+      .option('resolverName', {
+        alias: 'n',
+        type: 'string',
+        describe: 'Name of `resolver` key in keyring',
+        default: constants.kResolverName,
+        required: true
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        describe: 'Keyring path. Default: kSecretsDir = \'secret\' in rc.js',
+        describe: 'Keyring path.',
+        default: rc.network.identity.keyring + ".pub"
       })
   }, oncreate)
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
@@ -257,14 +278,24 @@ async function oncreate(argv) {
     owner = 'did:ara:' + owner
   }
 
-  const { secret, name, keyring } = argv
-  const opts = { secret, name, keyring }
+  const keyringOpts = {
+    archiver: {
+      secret: argv.archiverSecret,
+      name: argv.archiverName,
+      keyring: argv.keyring
+    },
+    resolver: {
+      secret: argv.resolverSecret,
+      name: argv.resolverName,
+      keyring: argv.keyring
+    },
+  }
 
   const { password } = await promptForPassword()
 
   let arafs
   try {
-    arafs = await afs.create({ owner, password, opts })
+    arafs = await afs.create({ owner, password, keyringOpts })
   } catch (err) { onfatal(err) }
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
