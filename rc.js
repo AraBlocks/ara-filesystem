@@ -6,7 +6,6 @@ const { resolve } = require('path')
 const kAraDir = '.ara'
 const kAfsDir = 'afs'
 const kIdentitiesDir = 'identities'
-const kSecretsDir = 'secret'
 
 const defaults = () => ({
   afs: {
@@ -20,9 +19,12 @@ const defaults = () => ({
       root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
     },
   },
-  secret: {
-    archiver: resolve(os.homedir(), kAraDir, kSecretsDir, 'ara-archiver.pub'),
-    resolver: resolve(os.homedir(), kAraDir, kSecretsDir, 'ara-resolver.pub')
+  network: {
+    identity: {
+      root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
+      archiver: 'ara-archiver'
+      resolver: 'ara-resolver'
+    }
   }
 })
 
