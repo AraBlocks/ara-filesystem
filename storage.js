@@ -17,14 +17,13 @@ const {
 } = require('./constants')
 
 const {
-  tx,
-  call,
-  account
-} = require('ara-web3')
-
-const {
   validate,
-  getDocumentOwner
+  getDocumentOwner,
+  web3: {
+    tx,
+    call,
+    account
+  }
 } = require('ara-util')
 
 const {
