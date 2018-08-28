@@ -100,7 +100,11 @@ async function resolve(did, opts = {}) {
   }
 
   if (!opts.secret) {
-    throw new TypeError('Missing key secret')
+    throw new Error('Keyring secret was not passed')
+  }
+
+  if (!opts.keyring && !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
+    throw new Error(`Keyring path was not passed or set`)
   }
 
   did = normalize(did)
