@@ -51,7 +51,7 @@ async function writeKey(opts = {}) {
     await _createMetadataFile(did)
   }
 
-  const contents = await _readMetadataFile(did)
+  const contents = await readFile({ did })
   contents[key] = value
 
   await _writeMetadataFile(did, contents)
@@ -69,7 +69,7 @@ async function readKey(opts = {}) {
   }
 
   const { did, key } = opts
-  const contents = await _readMetadataFile(did)
+  const contents = await readFile({ did })
   if (!contents.hasOwnProperty(key)) {
     throw new Error(`Metadata file does not contain key ${key}.`)
   }
@@ -88,7 +88,7 @@ async function delKey(opts) {
   }
 
   const { did, key } = opts
-  const contents = await _readMetadataFile(did)
+  const contents = await readFile({ did })
   if (!contents.hasOwnProperty(key)) {
     throw new Error(`Metadata file does not contain key ${key}.`)
   }
@@ -115,11 +115,13 @@ async function clear(opts) {
   await _createMetadataFile(did)
 }
 
-async function _readMetadataFile(did) {
-  if (!did || 'string' !== typeof did) {
-    throw new TypeError('DID URI must be non-empty string.')
+async function readFile(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts to be an object.')
+  } else if (!opts.did || 'string' !== typeof opts.did) {
+    throw new TypeError('DID URI must be a non-empty string.')
   }
-
+  const { did } = opts
   const cfs = await _getEtcCFS(did)
   let file
   try {
@@ -161,8 +163,8 @@ function _getEtcPath(did) {
 module.exports = {
   writeFile,
   writeKey,
+  readFile,
   readKey,
   delKey,
-  clear,
-  readFile: _readMetadataFile
+  clear
 }

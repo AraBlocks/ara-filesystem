@@ -43,12 +43,30 @@ const {
   dirname
 } = require('path')
 
-async function commit({
-  password = '',
-  price = -1,
-  estimate = false,
-  did = ''
-} = {}) {
+/**
+ * Commits the AFS with the given Ara identity
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.password
+ * @param {Boolean}  opts.estimate
+ * @param {Number}   opts.price
+ * @return {Object}
+ */
+async function commit(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if ('string' !== typeof opts.did || !opts.did) {
+    throw new TypeError('Expecting non-empty string.')
+  } else if ('string' !== typeof opts.password || !opts.password) {
+    throw TypeError('Expecting non-empty password.')
+  } else if ('boolean' !== typeof opts.estimate) {
+    throw new TypeError('Expecting boolean.')
+  } else if ('number' !== typeof opts.price || opts.price < 0) {
+    throw new TypeError('Expecting whole number price.')
+  }
+
+  let { did } = opts
+  const { password, price, estimate } = opts
   let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'commit' }))
@@ -146,10 +164,22 @@ function generateStagedPath(did) {
   return path
 }
 
-async function estimateCommitGasCost({
-  did = '',
-  password = ''
-} = {}) {
+/**
+ * Estimates the gas cost of sending the staged commit
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.password
+ * @return {Object}
+ */
+async function estimateCommitGasCost(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if ('string' !== typeof opts.did || !opts.did) {
+    throw new TypeError('Expecting non-empty string.')
+  } else if ('string' !== typeof opts.password || !opts.password) {
+    throw TypeError('Expecting non-empty password.')
+  }
+  const { did, password } = opts
   return commit({
     did,
     password,

@@ -31,11 +31,27 @@ const {
   resolve: resolvePath
 } = require('path')
 
-async function destroy({
-  did = '',
-  mnemonic = '',
-  password = ''
-} = {}) {
+/**
+ * Destroys the AFS with the given Ara identity
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.password
+ * @param {String}   opts.mnemonic
+ * @return {Object}
+ */
+async function destroy(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if ('string' !== typeof opts.did || !opts.did) {
+    throw new TypeError('Expecting non-empty string.')
+  } else if ('string' !== typeof opts.password || !opts.password) {
+    throw TypeError('Expecting non-empty password.')
+  } else if ('string' !== typeof opts.mnemonic || !opts.mnemonic) {
+    throw new TypeError('Expecting non-empty mnemonic.')
+  }
+
+  let { did } = opts
+  const { password, mnemonic } = opts
   let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'destroy' }))
