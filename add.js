@@ -8,16 +8,21 @@ const { create } = require('./create')
 const isFile = require('is-file')
 const pify = require('pify')
 
+/**
+ * Adds one or more files to the AFS
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.password
+ * @param {Boolean}  opts.force
+ * @param {Array}    opts.paths
+ * @return {Object}
+ */
 async function add(opts) {
   if (null === opts.did || 'string' !== typeof opts.did || !opts.did) {
     throw new TypeError('Expecting non-empty DID.')
-  }
-
-  if (null === opts.password || 'string' !== typeof opts.password || !opts.password) {
+  } else if (null === opts.password || 'string' !== typeof opts.password || !opts.password) {
     throw new TypeError('Password required to continue.')
-  }
-
-  if (null === opts.paths || (!(opts.paths instanceof Array)
+  } else if (null === opts.paths || (!(opts.paths instanceof Array)
     && 'string' !== typeof opts.paths) || 0 === opts.paths.length) {
     throw new TypeError('Expecting one or more filepaths to add.')
   }

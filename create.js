@@ -25,24 +25,38 @@ const {
 
 /**
  * Creates an AFS with the given Ara identity
- * @param {String}  did
- * @param {String}   owner
- * @param {String}   password
- * @param {Function} storage
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.owner
+ * @param {String}   opts.password
+ * @param {Function} opts.storage
+ * @param {?Object}  opts.keyringOpts
  * @return {Object}
  */
-async function create({
-  password = '',
-  owner = null,
-  did = null,
-  storage = null,
-  keyringOpts
-}) {
-  if ((null == owner || 'string' !== typeof owner || !owner) && (null == did || 'string' !== typeof did || !did)) {
+async function create(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if (('string' !== typeof opts.owner || !opts.owner)
+    && ('string' !== typeof opts.did || !opts.did)) {
     throw new TypeError('Expecting non-empty string.')
-  } else if (storage && 'function' !== typeof storage) {
+  } else if ('string' !== typeof opts.password || !opts.password) {
+    throw TypeError('Expecting non-empty password.')
+  } else if (opts.storage && 'function' !== typeof opts.storage) {
     throw new TypeError('Expecting storage to be a function.')
+  } else if (opts.keyringOpts && 'object' !== typeof opts.keyringOpts) {
+    throw new TypeError('Expecting opts.keyringOpts to be an object.')
   }
+
+  let {
+    did,
+    owner
+  } = opts
+
+  const {
+    password,
+    storage,
+    keyringOpts
+  } = opts
 
   let afs
   let mnemonic
@@ -60,7 +74,7 @@ async function create({
     }
 
     const id = getDocumentKeyHex(ddo)
-    const drives = await createMultidrive({ did: id, password, storage })
+    const drives = await _createMultidrive({ did: id, password, storage })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
     
@@ -136,7 +150,7 @@ async function create({
     mnemonic
   }
 
-  async function createMultidrive({
+  async function _createMultidrive({
     did,
     password,
     storage

@@ -17,11 +17,27 @@ const {
   }
 } = require('ara-util')
 
-async function estimateSetPriceGasCost({
-  did = '',
-  password = '',
-  price = 0
-} = {}) {
+/**
+ * Estimates the gas cost setting the price
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.password
+ * @param {Number}   opts.price
+ * @return {Object}
+ */
+async function estimateSetPriceGasCost(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if ('string' !== typeof opts.did || !opts.did) {
+    throw new TypeError('Expecting non-empty string.')
+  } else if ('string' !== typeof opts.password || !opts.password) {
+    throw TypeError('Expecting non-empty password.')
+  } else if ('number' !== typeof opts.price || opts.price < 0) {
+    throw new TypeError('Expecting whole number price.')
+  }
+
+  let { did } = opts
+  const { password, price } = opts
   let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'price' }))
@@ -63,11 +79,27 @@ async function estimateSetPriceGasCost({
   }
 }
 
-async function setPrice({
-  did = '',
-  password = '',
-  price = 0,
-} = {}) {
+/**
+ * Sets the price of the given Ara identity
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.password
+ * @param {Number}   opts.price
+ * @return {Object}
+ */
+async function setPrice(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if ('string' !== typeof opts.did || !opts.did) {
+    throw new TypeError('Expecting non-empty string.')
+  } else if ('string' !== typeof opts.password || !opts.password) {
+    throw TypeError('Expecting non-empty password.')
+  } else if ('number' !== typeof opts.price || opts.price < 0) {
+    throw new TypeError('Expecting whole number price.')
+  }
+
+  let { did } = opts
+  const { password, price } = opts
   let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'price' }))
@@ -110,9 +142,21 @@ async function setPrice({
   debug('price for', did, 'set to', price, 'ARA')
 }
 
-async function getPrice({
-  did = ''
-} = {}) {
+/**
+ * Gets the price of the given Ara identity
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @return {Object}
+ */
+async function getPrice(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if ('string' !== typeof opts.did || !opts.did) {
+    throw new TypeError('Expecting non-empty string.')
+  }
+
+  const { did } = opts
+
   if (!(await proxyExists(did))) {
     throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
   }

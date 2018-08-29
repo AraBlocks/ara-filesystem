@@ -7,15 +7,23 @@ const {
   isAbsolute
 } = require('path')
 
-async function unarchive({
-  did = '',
-  path = ''
-} = {}) {
-  if (!did || 'string' !== typeof did) {
+/**
+ * Unarchives the AFS with the given Ara identity
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.path
+ * @return {Object}
+ */
+async function unarchive(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if (!did || 'string' !== typeof did) {
     throw new TypeError('DID URI must be of type string.')
   } else if (path && 'string' !== typeof path) {
     throw new TypeError('Path must be of type string.')
   }
+
+  const { did, path } = opts
 
   const { afs } = await create({ did })
 
