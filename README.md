@@ -162,7 +162,7 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 
 ### `async create(opts)` <a name="create"></a>
 
-> **Stability : 1** Experimental
+> **Stability: 2** Stable
 
 Creates/obtains and returns a reference to an `AFS`.
 
@@ -191,6 +191,8 @@ const { afs } = await create({ did, password })
 
 ### `async destroy(opts)` <a name="destroy"></a>
 
+> **Stability: 2** Stable
+
 Destroys the local copy of an `AFS` and unlists it from the blockchain (if owner).
 
 - `opts`
@@ -209,6 +211,8 @@ await destroy({
 ```
 
 ### `async add(opts)` <a name="add"></a>
+
+> **Stability: 2** Stable
 
 Adds one or more files to an existing `AFS`.
 
@@ -231,6 +235,8 @@ afs = await add({
 
 ### `async remove(opts)` <a name="remove"></a>
 
+> **Stability: 2** Stable
+
 Removes one or more files from an `AFS`.
 
 - `opts`
@@ -247,6 +253,8 @@ const afs = remove({
 ```
 
 ### `async commit(opts)` <a name="commit"></a>
+
+> **Stability: 2** Stable
 
 Commits any changes to an `AFS` to the blockchain.
 
@@ -266,6 +274,8 @@ const result = await commit({
 
 ### `async estimateCommitGasCost(opts)` <a name="estimatecommit"></a>
 
+> **Stability: 2** Stable
+
 Estimates the cost (in ETH) of committing an `AFS`.
 
 - `opts`
@@ -280,6 +290,8 @@ const cost = await estimateCommitGasCost({
 ```
 
 ### `async setPrice(opts)` <a name="setprice"></a>
+
+> **Stability: 2** Stable
 
 Sets the price in Ara tokens of an `AFS`.
 
@@ -299,6 +311,8 @@ await setPrice({
 
 ### `async getPrice(opts)` <a name="getprice"></a>
 
+> **Stability: 2** Stable
+
 Gets the price in Ara tokens of an `AFS`.
 
 - `opts`
@@ -309,6 +323,8 @@ const price = await getPrice({ did })
 ```
 
 ### `async estimateSetPriceGasCost(opts)` <a name="estimateprice"></a>
+
+> **Stability: 2** Stable
 
 Estimates the cost (in ETH) of setting the price of an `AFS`.
 
@@ -322,6 +338,8 @@ const cost = await estimateSetPriceGasCost({ did, password })
 ```
 
 ### `async unarchive(opts)` <a name="unarchive"></a>
+
+> **Stability: 2** Stable
 
 Unarchives an `AFS`.
 
@@ -338,6 +356,8 @@ await unarchive({
 
 ### `async metadata.writeFile(opts)` <a name="writefile"></a>
 
+> **Stability: 2** Stable
+
 Writes a metadata JSON file to the metadata partition of an `AFS`.
 
 - `opts`
@@ -352,6 +372,8 @@ const result = await metadata.writeFile({
 ```
 
 ### `async metadata.writeKey(opts)` <a name="writekey"></a>
+
+> **Stability: 2** Stable
 
 Writes a metadata key/value pair to the metadata partition of an `AFS`.
 
@@ -372,6 +394,8 @@ const result = await metadata.writeKey({
 
 ### `async metadata.readKey(opts)` <a name="readkey"></a>
 
+> **Stability: 2** Stable
+
 Reads a metadata key from the metadata partition of an `AFS`.
 
 - `opts`
@@ -386,6 +410,8 @@ const result = await metadata.readKey({
 ```
 
 ### `async metadata.delKey(opts)` <a name="delkey"></a>
+
+> **Stability: 2** Stable
 
 Deletes a metadata key/value pair from the metadata partition of an `AFS`.
 
@@ -402,6 +428,8 @@ await metadata.delKey({
 
 ### `async metadata.clear(opts)` <a name="clear"></a>
 
+> **Stability: 2** Stable
+
 Empties all metadata contents of an `AFS`.
 
 - `opts`
@@ -412,6 +440,8 @@ await afs.metadata.clear({ did })
 ```
 
 ### `async metadata.readFile(opts)` <a name="readfile"></a>
+
+> **Stability: 2** Stable
 
 Reads all metadata from an `AFS`.
 
