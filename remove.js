@@ -17,7 +17,9 @@ const {
  * @return {Object}
  */
 async function remove(opts) {
-  if ('string' !== typeof opts.did || !opts.did) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if ('string' !== typeof opts.did || !opts.did) {
     throw new TypeError('Expecting non-empty did.')
   } else if ('string' !== typeof opts.password || !opts.password) {
     throw new TypeError('Password required to continue.')
