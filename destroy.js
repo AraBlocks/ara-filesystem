@@ -22,7 +22,6 @@ const {
   normalize,
   resolveDDO,
   getDocumentOwner,
-  getAFSOwnerIdentity,
   web3: {
     tx,
     account
