@@ -47,7 +47,7 @@ async function writeFile(opts = {}) {
  * @param {Object}                             opts
  * @param {String}                             opts.did
  * @param {String}                             opts.key
- * @param {String|Number|Object|Array|Boolean} opts.value
+ * @param {Mixed} opts.value
  * @return {Object}
  */
 async function writeKey(opts = {}) {
@@ -79,7 +79,7 @@ async function writeKey(opts = {}) {
  * @param {Object} opts
  * @param {String} opts.did
  * @param {String} opts.key
- * @return {String|Number|Object|Array|Boolean}
+ * @return {Mixed}
  */
 async function readKey(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
