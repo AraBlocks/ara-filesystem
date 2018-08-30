@@ -44,7 +44,7 @@ The follow section lists the prerequisites for running the project as well as th
   - `$ ank --help`
 
 - Generate secrets for both the Archiver & Resolver nodes
-      ```sh
+```sh
       $ ank -i <did> -s ara-archiver -n remote1 -o ~/.ara/keyrings/ara-archiver  // Generating secrets for the archiver node
       $ ank -i <did> -s ara-resolver -n remote2 -o ~/.ara/keyrings/ara-resolver  // Generating secrets for the resolver node
       ```
