@@ -85,7 +85,8 @@ async function destroy(opts) {
 
   if (password && mnemonic) {
     if (!(await proxyExists(did))) {
-      throw new Error('This content does not have a valid proxy contract')
+      debug('This content does not have a valid proxy contract.')
+      return
     }
     const afsDdo = await resolveDDO(did)
     let owner = getDocumentOwner(afsDdo, true)
