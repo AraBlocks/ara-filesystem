@@ -44,8 +44,10 @@ The follow section lists the prerequisites for running the project as well as th
   - `$ ank --help`
 
 - Generate secrets for both the Archiver & Resolver nodes
-  - `$ ank -i <did> -s ara-archiver -n remote1 -o ~/.ara/keyrings/ara-archiver  // Generating secrets for the archiver node`
-  - `$ ank -i <did> -s ara-resolver -n remote2 -o ~/.ara/keyrings/ara-resolver  // Generating secrets for the resolver node`
+      ```sh
+      $ ank -i <did> -s ara-archiver -n remote1 -o ~/.ara/keyrings/ara-archiver  // Generating secrets for the archiver node
+      $ ank -i <did> -s ara-resolver -n remote2 -o ~/.ara/keyrings/ara-resolver  // Generating secrets for the resolver node
+      ```
 
 - Once the secrets are generated, the Archiver & Resolver Network nodes can be started.
   - Be sure to have cloned the [archiver](https://github.com/AraBlocks/ara-network-node-identity-archiver) and [resolver](https://github.com/AraBlocks/ara-network-node-identity-resolver) repositories
