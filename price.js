@@ -23,7 +23,6 @@ const {
  * @param {String}   opts.did
  * @param {String}   opts.password
  * @param {Number}   opts.price
- * @return {Object}
  */
 async function estimateSetPriceGasCost(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -50,7 +49,7 @@ async function estimateSetPriceGasCost(opts) {
   }
 
   if (!(await proxyExists(did))) {
-    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
+    throw new Error('This content does not have a valid proxy contract')
   }
 
   const proxy = await getProxyAddress(did)
@@ -85,7 +84,6 @@ async function estimateSetPriceGasCost(opts) {
  * @param {String}   opts.did
  * @param {String}   opts.password
  * @param {Number}   opts.price
- * @return {Object}
  */
 async function setPrice(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -112,7 +110,7 @@ async function setPrice(opts) {
   }
 
   if (!(await proxyExists(did))) {
-    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
+    throw new Error('This content does not have a valid proxy contract')
   }
 
   const proxy = await getProxyAddress(did)
@@ -146,7 +144,7 @@ async function setPrice(opts) {
  * Gets the price of the given Ara identity
  * @param {Object}   opts
  * @param {String}   opts.did
- * @return {Object}
+ * @return {Number}
  */
 async function getPrice(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -158,7 +156,7 @@ async function getPrice(opts) {
   const { did } = opts
 
   if (!(await proxyExists(did))) {
-    throw new Error('ara-filesystem.price: This content does not have a valid proxy contract')
+    throw new Error('This content does not have a valid proxy contract')
   }
 
   const proxy = await getProxyAddress(did)

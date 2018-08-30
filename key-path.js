@@ -22,23 +22,28 @@ function createAFSKeyPath(did) {
 }
 
 function createIdentityKeyPath(ddo) {
-  const { root } = rc.araId.archive
-
   if (null == ddo || 'object' !== typeof ddo) {
     throw new TypeError('Expecting object for identity.')
   }
 
   let { publicKey } = ddo
+  return createIdentityKeyPathFromPublicKey(publicKey)
+}
+
+function createIdentityKeyPathFromPublicKey(publicKey) {
+  const { root } = rc.araId.archive
   if (Array.isArray(publicKey) && 0 < publicKey.length) {
     const { publicKeyHex } = publicKey[0]
     publicKey = Buffer.from(publicKeyHex, 'hex')
   }
-
+  if ('string' === typeof publicKey)
+    publicKey = Buffer.from(publicKey, 'hex')
   const hash = toHex(blake2b(publicKey))
   return resolve(root, hash)
 }
 
 module.exports = {
   createAFSKeyPath,
-  createIdentityKeyPath
+  createIdentityKeyPath,
+  createIdentityKeyPathFromPublicKey
 }

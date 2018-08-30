@@ -151,27 +151,27 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 * [async estimateCommitGasCost(opts)](#estimatecommit)
 * [async setPrice(opts)](#setprice)
 * [async getPrice(opts)](#getprice)
-* [async estimateSetPriceGascost(opts)](#estimateprice)
+* [async estimateSetPriceGasCost(opts)](#estimateprice)
 * [async unarchive(opts)](#unarchive)
-* [async writeFile(opts)](#writefile)
-* [async writeKey(opts)](#writekey)
-* [async readKey(opts)](#readkey)
-* [async delKey(opts)](#delkey)
-* [async clear(opts)](#clear)
-* [async readFile(opts)](#clear)
+* [async metadata.writeFile(opts)](#writefile)
+* [async metadata.writeKey(opts)](#writekey)
+* [async metadata.readKey(opts)](#readkey)
+* [async metadata.delKey(opts)](#delkey)
+* [async metadata.clear(opts)](#clear)
+* [async metadata.readFile(opts)](#readfile)
 
 ### `async create(opts)` <a name="create"></a>
 
 > **Stability : 1** Experimental
 
-Creates/obtains and returns a reference to an `AFS`
+Creates/obtains and returns a reference to an `AFS`.
 
 - `opts`
   - `did` - The `DID` of an existing `AFS`
   - `owner` - `DID` of the owner of the `AFS` to be created
-  - `password` - password for `owner`
-  - `storage` - optional storage function to use for the `AFS`
-  - `keyringOpts` - optional keyring options
+  - `password` - The password of the `owner` of this `AFS`
+  - `storage` - optional Storage function to use for the `AFS`
+  - `keyringOpts` - optional Keyring options
 
 To create a new `AFS`:
 
@@ -185,11 +185,242 @@ const { afs } = await create({ owner, password })
 To obtain a reference to an existing `AFS`:
 
 ```js
-const { did } = existingAfs
+const did = 
 const { afs } = await create({ did, password })
 ```
 
 ### `async destroy(opts)` <a name="destroy"></a>
+
+Destroys the local copy of an `AFS` and unlists it from the blockchain (if owner).
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to be destroyed
+  - `password` - The password of the owner of this `AFS`
+  - `mnemonic` - The mnemonic for this `AFS`
+
+```js
+const { afs, mnemonic } = await create({ owner, password })
+const { did } = afs
+await destroy({
+  did,
+  mnemonic,
+  password
+})
+```
+
+### `async add(opts)` <a name="add"></>
+
+Adds one or more files to an existing `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to add files to
+  - `password` - The password of the owner of this `AFS`
+  - `force` - Force add the path(s)
+  - `paths` - The path(s) of the files to add
+
+```js
+const { afs, mnemonic } = await create({ owner, password })
+const { did } = afs
+const paths = ['./index.js', './add.js', './picture.png']
+afs = await add({
+  did,
+  paths,
+  password
+})
+```
+
+### `async remove(opts)` <a name="remove"></>
+
+Removes one or more files from an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` where the files are located
+  - `password` - The password of the owner of this `AFS`
+  - `paths` - The path(s) of the files to remove
+
+```js
+const afs = remove({
+  did,
+  paths,
+  password
+})
+```
+
+### `async commit(opts)` <a name="commit"></>
+
+Commits any changes to an `AFS` to the blockchain.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to commit
+  - `password` - The password of the owner of this `AFS`
+  - `estimate` - optional Flag to check cost of `commit`
+  - `price` - optional Price in Ara tokens to set this `AFS` 
+
+```js
+const result = await commit({
+  did,
+  password,
+  price
+})
+```
+
+### `async estimateCommitGasCost(opts)` <a name="estimatecommit"></>
+
+Estimates the cost (in ETH) of committing an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to commit
+  - `password` - The password of the owner of this `AFS`
+
+```js
+const cost = await estimateCommitGasCost({
+  did,
+  password
+})
+```
+
+### `async setPrice(opts)` <a name="setprice"></>
+
+Sets the price in Ara tokens of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to set the price of
+  - `password` - The password of the owner of this `AFS`
+  - `price` - The price in Ara tokens to set this `AFS`
+
+```js
+const price = 10
+await setPrice({
+  did,
+  password,
+  price
+})
+```
+
+### `async getPrice(opts)` <a name="getprice"></>
+
+Gets the price in Ara tokens of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to get the price of
+
+```js
+const price = await getPrice({ did })
+```
+
+### `async estimateSetPriceGasCost(opts)` <a name="estimateprice"></>
+
+Estimates the cost (in ETH) of setting the price of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to set the price of
+  - `password` - The password of the owner of this `AFS`
+  - `price` - The price in Ara tokens to set this `AFS`
+
+```js
+const cost = await estimateSetPriceGasCost({ did, password })
+```
+
+### `async unarchive(opts)` <a name="unarchive"></>
+
+Unarchives an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to unarchive
+  - `path` - optional Path to the `AFS`
+
+```js
+await unarchive({
+  did,
+  path
+})
+```
+
+### `async metadata.writeFile(opts)` <a name="writefile"></>
+
+Writes a metadata JSON file to the metadata partition of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to write to
+  - `filepath` - The path of the metadata JSON file to copy
+
+```js
+const result = await metadata.writeFile({
+  did,
+  filepath
+})
+```
+
+### `async metadata.writeKey(opts)` <a name="writekey"></>
+
+Writes a metadata key/value pair to the metadata partition of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to write to
+  - `key` - The key to write
+  - `value` - The value to write
+
+```js
+const key = 'foo'
+const value = 'bar'
+const result = await metadata.writeKey({
+  did,
+  key,
+  value
+})
+```
+
+### `async metadata.readKey(opts)` <a name="readkey"></>
+
+Reads a metadata key from the metadata partition of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to read from
+  - `key` - The key to write
+
+```js
+const result = await metadata.readKey({
+  did,
+  key
+})
+```
+
+### `async metadata.delKey(opts)` <a name="delkey"></>
+
+Deletes a metadata key/value pair from the metadata partition of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to delete from
+  - `key` - The key to write
+
+```js
+await metadata.delKey({
+  did,
+  key
+})
+```
+
+### `async metadata.clear(opts)` <a name="clear"></>
+
+Empties all metadata contents of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` whose metadata is to be emptied
+
+```js
+await afs.metadata.clear({ did })
+```
+
+### `async metadata.readFile(opts)` <a name="readfile"></>
+
+Reads all metadata from an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to read from
+
+```js
+const contents = await metadata.readFile({ did })
+```
 
 ## Contributing
 - [Commit message format](/.github/COMMIT_FORMAT.md)
