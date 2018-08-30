@@ -41,7 +41,7 @@ The follow section lists the prerequisites for running the project as well as th
 - Test the CLI by running the following commands,
   - `$ aid --help`
   - `$ ann --help`
-  - `$ ans --help`
+  - `$ ank --help`
 
 - Generate secrets for both the Archiver & Resolver nodes
   - `$ ank -i <did> -s ara-archiver -n remote1 -o ~/.ara/keyrings/ara-archiver  // Generating secrets for the archiver node`
