@@ -13,11 +13,14 @@ const {
 
 const {
   createAFSKeyPath,
-  createIdentityKeyPath
+  createIdentityKeyPath,
+  createIdentityKeyPathFromPublicKey
 } = require('./key-path')
 
 const {
   validate,
+  normalize,
+  resolveDDO,
   getDocumentOwner,
   getAFSOwnerIdentity,
   web3: {
@@ -37,44 +40,25 @@ const {
  * @param {String}   opts.did
  * @param {String}   opts.password
  * @param {String}   opts.mnemonic
- * @return {Object}
  */
 async function destroy(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts object.')
   } else if ('string' !== typeof opts.did || !opts.did) {
     throw new TypeError('Expecting non-empty string.')
-  } else if ('string' !== typeof opts.password || !opts.password) {
+  } else if (opts.password && 'string' !== typeof opts.password) {
     throw TypeError('Expecting non-empty password.')
-  } else if ('string' !== typeof opts.mnemonic || !opts.mnemonic) {
+  } else if (opts.mnemonic && 'string' !== typeof opts.mnemonic) {
     throw new TypeError('Expecting non-empty mnemonic.')
   }
 
   let { did } = opts
-  const { password, mnemonic } = opts
-  let ddo
-  try {
-    ({ did, ddo } = await validate({ did, password, label: 'destroy' }))
-  } catch (err) {
-    throw err
-  }
-
-  if (!mnemonic || 'string' !== typeof mnemonic) {
-    throw new TypeError('Expecting non-empty string for mnemonic.')
-  }
-
-  if (!(await proxyExists(did))) {
-    throw new Error('ara-filesystem.destroy: This content does not have a valid proxy contract')
-  }
-
-  mnemonic = mnemonic.trim()
-
+  did = normalize(did)
   let path
 
   try {
     // destroy AFS identity
-    const afsIdentity = await getAFSOwnerIdentity({ did, mnemonic, password })
-    path = createIdentityKeyPath(afsIdentity)
+    path = createIdentityKeyPathFromPublicKey(did)
     await pify(access)(path)
     await pify(rimraf)(path)
 
@@ -83,7 +67,7 @@ async function destroy(opts) {
     await pify(access)(path)
     await pify(rimraf)(path)
   } catch (err) {
-    throw new Error('Mnemonic is incorrect.')
+    throw err
   }
 
   const { store } = rc.afs.archive
@@ -97,23 +81,41 @@ async function destroy(opts) {
     debug('db file at %s does not exist', path)
   }
 
-  const owner = getDocumentOwner(ddo, true)
-  owner = `${kAidPrefix}${owner}`
-  const acct = await account.load({ did: owner, password })
-  const proxy = await getProxyAddress(did)
+  const { password } = opts
+  let { mnemonic } = opts
 
-  try {
-    const transaction = await tx.create({
-      account: acct,
-      to: proxy,
-      data: {
-        abi,
-        name: 'unlist'
-      }
-    })
-    await tx.sendSignedTransaction(transaction)
-  } catch (err) {
-    throw new Error(err)
+  if (password && mnemonic) {
+    if (!(await proxyExists(did))) {
+      throw new Error('This content does not have a valid proxy contract')
+    }
+    const afsDdo = await resolveDDO(did)
+    let owner = getDocumentOwner(afsDdo, true)
+    mnemonic = mnemonic.trim()
+
+    let ddo
+    try {
+      ({ did, ddo } = await validate({ did, password, label: 'destroy' }))
+    } catch (err) {
+      throw err
+    }
+
+    owner = `${kAidPrefix}${owner}`
+    const acct = await account.load({ did: owner, password })
+    const proxy = await getProxyAddress(did)
+
+    try {
+      const transaction = await tx.create({
+        account: acct,
+        to: proxy,
+        data: {
+          abi,
+          name: 'unlist'
+        }
+      })
+      await tx.sendSignedTransaction(transaction)
+    } catch (err) {
+      throw new Error(err)
+    }
   }
 }
 

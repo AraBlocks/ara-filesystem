@@ -7,6 +7,13 @@ const fs = require('fs')
 
 const kMetadataFile = 'metadata.json'
 
+/**
+ * Writes a metadata JSON file to the metadata partition of an AFS
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.filepath
+ * @return {Object}
+ */
 async function writeFile(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object.')
@@ -35,6 +42,14 @@ async function writeFile(opts = {}) {
   return contents
 }
 
+/**
+ * Writes a metadata key/value pair to the metadata partition of an AFS
+ * @param {Object}                             opts
+ * @param {String}                             opts.did
+ * @param {String}                             opts.key
+ * @param {String|Number|Object|Array|Boolean} opts.value
+ * @return {Object}
+ */
 async function writeKey(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object.')
@@ -59,6 +74,13 @@ async function writeKey(opts = {}) {
   return contents
 }
 
+/**
+ * Reads a metadata key from the metadata partition of an AFS
+ * @param {Object} opts
+ * @param {String} opts.did
+ * @param {String} opts.key
+ * @return {String|Number|Object|Array|Boolean}
+ */
 async function readKey(opts = {}) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object.')
@@ -78,6 +100,12 @@ async function readKey(opts = {}) {
   return contents[key]
 }
 
+/**
+ * Deletes a metadata key/value pair from the metadata partition of an AFS
+ * @param {Object} opts
+ * @param {String} opts.did
+ * @param {String} opts.key
+ */
 async function delKey(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object.')
@@ -99,6 +127,11 @@ async function delKey(opts) {
   debug('%s removed from metadata', key)
 }
 
+/**
+ * Empties all metadata contents of an AFS
+ * @param {Object} opts
+ * @param {String} opts.did
+ */
 async function clear(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object.')
@@ -115,6 +148,12 @@ async function clear(opts) {
   await _createMetadataFile(did)
 }
 
+/**
+ * Reads all metadata from an AFS
+ * @param {Object} opts
+ * @param {String} opts.did
+ * @return {Object}
+ */
 async function readFile(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be an object.')
