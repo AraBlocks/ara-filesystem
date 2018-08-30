@@ -186,7 +186,7 @@ const { afs } = await create({ owner, password })
 To obtain a reference to an existing `AFS`:
 
 ```js
-const did = 
+const did = did:ara:df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 const { afs } = await create({ did, password })
 ```
 
@@ -224,7 +224,7 @@ Adds one or more files to an existing `AFS`.
   - `paths` - The path(s) of the files to add
 
 ```js
-const { afs, mnemonic } = await create({ owner, password })
+let { afs, mnemonic } = await create({ owner, password })
 const { did } = afs
 const paths = ['./index.js', './add.js', './picture.png']
 afs = await add({
