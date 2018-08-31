@@ -259,13 +259,13 @@ async function oncreate(argv) {
   }
 
   const { secret, name, keyring } = argv
-  const opts = { secret, name, keyring }
+  const keyringOpts = { secret, name, keyring }
 
   const { password } = await promptForPassword()
 
   let arafs
   try {
-    arafs = await afs.create({ owner, password, opts })
+    arafs = await afs.create({ owner, password, keyringOpts })
   } catch (err) { onfatal(err) }
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
