@@ -21,15 +21,6 @@ function createAFSKeyPath(did) {
   return resolve(root, toHex(hash))
 }
 
-function createIdentityKeyPath(ddo) {
-  if (null == ddo || 'object' !== typeof ddo) {
-    throw new TypeError('Expecting object for identity.')
-  }
-
-  let { publicKey } = ddo
-  return createIdentityKeyPathFromPublicKey(publicKey)
-}
-
 function createIdentityKeyPathFromPublicKey(publicKey) {
   const { root } = rc.araId.archive
   if (Array.isArray(publicKey) && 0 < publicKey.length) {
@@ -44,6 +35,5 @@ function createIdentityKeyPathFromPublicKey(publicKey) {
 
 module.exports = {
   createAFSKeyPath,
-  createIdentityKeyPath,
   createIdentityKeyPathFromPublicKey
 }

@@ -13,7 +13,6 @@ const {
 
 const {
   createAFSKeyPath,
-  createIdentityKeyPath,
   createIdentityKeyPathFromPublicKey
 } = require('./key-path')
 
