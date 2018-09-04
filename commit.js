@@ -3,7 +3,6 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
-const { setPrice } = require('./price')
 const pify = require('pify')
 const fs = require('fs')
 
@@ -39,6 +38,11 @@ const {
 } = require('./util')
 
 const {
+  setPrice,
+  estimateSetPriceGasCost
+} = require('./price')
+
+const {
   resolve,
   dirname
 } = require('path')
@@ -61,7 +65,7 @@ async function commit(opts) {
     throw TypeError('Expecting non-empty password.')
   } else if ('boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
-  } else if ('number' !== typeof opts.price || opts.price < 0) {
+  } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
   }
 
@@ -108,12 +112,17 @@ async function commit(opts) {
     }, estimate, exists)
 
   if (estimate) {
-    return result
+    if (0 < price) {
+      const setPriceGasCost = await estimateSetPriceGasCost({ did, password, price})
+      return result + setPriceGasCost
+    } else {
+      return result
+    }
   }
 
   await _deleteStagedFile(path)
 
-  if (0 <= price) {
+  if (0 < price) {
     await setPrice({ did, password, price })
   }
 
@@ -169,6 +178,7 @@ function generateStagedPath(did) {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {Number}   opts.price
  * @return {Object}
  */
 async function estimateCommitGasCost(opts) {
@@ -178,12 +188,16 @@ async function estimateCommitGasCost(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if ('string' !== typeof opts.password || !opts.password) {
     throw TypeError('Expecting non-empty password.')
+  } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
+    throw new TypeError('Expecting whole number price.')
   }
+
   const { did, password } = opts
   return commit({
     did,
     password,
-    estimate: true
+    estimate: true,
+    price
   })
 }
 
