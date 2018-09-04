@@ -426,7 +426,7 @@ async function onsetprice({ did, price }) {
   let result = argv.force
   if (!result) {
     try {
-      const cost = await afs.estimateSetPriceGasCost({ did, password })
+      const cost = await afs.estimateSetPriceGasCost({ did, password, price })
       const { answer } = await promptCostConfirmation(cost)
       result = answer
     } catch (err) {
