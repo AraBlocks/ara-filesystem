@@ -282,11 +282,13 @@ Estimates the cost (in ETH) of committing an `AFS`.
 - `opts`
   - `did` - The `DID` of the `AFS` to commit
   - `password` - The password of the owner of this `AFS`
+  - `price` - optional The price in Ara tokens to set this `AFS`
 
 ```js
 const cost = await estimateCommitGasCost({
   did,
-  password
+  password,
+  price
 })
 ```
 
