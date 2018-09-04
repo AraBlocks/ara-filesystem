@@ -335,7 +335,7 @@ Estimates the cost (in ETH) of setting the price of an `AFS`.
   - `price` - The price in Ara tokens to set this `AFS`
 
 ```js
-const cost = await estimateSetPriceGasCost({ did, password })
+const cost = await estimateSetPriceGasCost({ did, password, price })
 ```
 
 ### `async unarchive(opts)` <a name="unarchive"></a>
