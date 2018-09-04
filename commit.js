@@ -192,7 +192,7 @@ async function estimateCommitGasCost(opts) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  const { did, password } = opts
+  const { did, password, price } = opts
   return commit({
     did,
     password,
