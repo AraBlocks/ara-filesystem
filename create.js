@@ -39,7 +39,7 @@ async function create(opts) {
   } else if (('string' !== typeof opts.owner || !opts.owner)
     && ('string' !== typeof opts.did || !opts.did)) {
     throw new TypeError('Expecting non-empty string.')
-  } else if ('string' !== typeof opts.password || !opts.password) {
+  } else if (opts.password && 'string' !== typeof opts.password) {
     throw TypeError('Expecting non-empty password.')
   } else if (opts.storage && 'function' !== typeof opts.storage) {
     throw new TypeError('Expecting storage to be a function.')
