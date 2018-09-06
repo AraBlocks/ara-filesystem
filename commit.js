@@ -69,8 +69,11 @@ async function commit(opts) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  let { did } = opts
-  const { password, price, estimate } = opts
+  let { did, estimate } = opts
+  const { password, price } = opts
+
+  estimate = estimate || false
+
   let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'commit' }))
@@ -206,7 +209,6 @@ async function _write(opts, estimate = true, append = false) {
   const { offsets: msOffsets, buffer: msBuffer } = opts.msData
 
   const { account: acct, proxy } = opts
-
   const transaction = await tx.create({
     account: acct,
     to: proxy,
