@@ -23,8 +23,7 @@ async function unarchive(opts) {
     throw new TypeError('Path must be of type string.')
   }
 
-  const { did, path } = opts
-
+  const { did } = opts
   const { afs } = await create({ did })
 
   try {
@@ -36,7 +35,7 @@ async function unarchive(opts) {
     throw err
   }
 
-  path = path || __dirname
+  let path = opts.path || __dirname
   if (!isAbsolute(path)) {
     path = resolve(path)
   }
@@ -44,27 +43,24 @@ async function unarchive(opts) {
   const progress = mirror({
     name: afs.HOME,
     fs: afs
-  }, { name: path }, { keepExisting: true }, onerror)
+  }, { name: path }, { keepExisting: true })
 
-  progress.on('put', onput)
-  progress.on('skip', onskip)
-  progress.on('end', onend)
-
-  function onerror(err) {
-    debug('unarchive error', err)
-  }
-
-  function onput(src) {
+  progress.on('put', (src) => {
     debug('onput', src.name)
-  }
+  })
 
-  function onskip(src) {
+  progress.on('skip', (src) => {
     debug('onskip', src.name)
-  }
+  })
 
-  function onend() {
-    debug('unarchive complete')
-    afs.close()
+  // Await end or error
+  const error = await new Promise((resolve, reject) => progress.once('end', resolve).once('error', reject))
+  afs.close()
+
+  if (error) {
+    debug(`unarchive error: ${path}: ${error}`)
+  } else {
+    debug(`unarchive complete: ${path}`)
   }
 }
 
