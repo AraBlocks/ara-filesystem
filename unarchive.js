@@ -17,9 +17,9 @@ const {
 async function unarchive(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts object.')
-  } else if (!did || 'string' !== typeof did) {
+  } else if (!opts.did || 'string' !== typeof opts.did) {
     throw new TypeError('DID URI must be of type string.')
-  } else if (path && 'string' !== typeof path) {
+  } else if (opts.path && 'string' !== typeof opts.path) {
     throw new TypeError('Path must be of type string.')
   }
 
