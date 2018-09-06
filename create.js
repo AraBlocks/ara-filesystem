@@ -74,14 +74,11 @@ async function create(opts) {
     }
 
     const id = getDocumentKeyHex(ddo)
-    const drives = await _createMultidrive({ did: id, password, storage })
+    const drives = await _createMultidrive({ did: id, password, storage, proxy })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
     
     const opts = { id, key, path }
-    if (proxy) {
-      opts.proxy = proxy
-    }
     afs = await pify(drives.create)(opts)
 
     afs.did = did
@@ -153,7 +150,8 @@ async function create(opts) {
   async function _createMultidrive({
     did,
     password,
-    storage
+    storage,
+    proxy
   } = {}) {
     await pify(mkdirp)(rc.afs.archive.store)
     const nodes = resolve(rc.afs.archive.store, did)
@@ -165,8 +163,7 @@ async function create(opts) {
         const {
           id,
           key,
-          path,
-          proxy
+          path
         } = opts
 
         try {
