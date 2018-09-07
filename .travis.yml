@@ -4,7 +4,9 @@ node_js:
 install:
   - bash ./scripts/travis-install
 script:
-  - bash ./scripts/test
+  - ganache-cli -p 7545 > /dev/null &
+  - sleep 5
+  - ava test/create.js
 cache:
   directories:
     - "node_modules"
