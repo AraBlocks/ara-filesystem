@@ -4,7 +4,7 @@ node_js:
 install:
   - bash ./scripts/travis-install
 script:
-  - ganache-cli -p 7545 > /dev/null &
+  - truffle develop &
   - sleep 5
   - ava test/create.js
 cache:
