@@ -20,6 +20,7 @@ const {
 const {
   getDocumentKeyHex,
   validate,
+  isCorrectPassword,
   web3: { toHex }
 } = require('ara-util')
 
@@ -28,6 +29,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.owner
+ * @param {?Object}  opts.ddo
  * @param {String}   opts.password
  * @param {Function} opts.storage
  * @param {?Object}  opts.keyringOpts
@@ -39,6 +41,8 @@ async function create(opts) {
   } else if (('string' !== typeof opts.owner || !opts.owner)
     && ('string' !== typeof opts.did || !opts.did)) {
     throw new TypeError('Expecting non-empty string.')
+  } else if (opts.ddo && 'object' !== typeof opts.ddo) {
+    throw new TypeError('Expecting opts.ddo to be an object.')
   } else if (opts.password && 'string' !== typeof opts.password) {
     throw TypeError('Expecting non-empty password.')
   } else if (opts.storage && 'function' !== typeof opts.storage) {
@@ -49,7 +53,8 @@ async function create(opts) {
 
   let {
     did,
-    owner
+    owner,
+    ddo
   } = opts
 
   const {
@@ -61,19 +66,21 @@ async function create(opts) {
   let afs
   let mnemonic
   if (did) {
-    let ddo
     try {
-      ({ did, ddo } = await validate({ did, password, label: 'create' }))
+      ({ did, ddo } = await validate({ did, password, label: 'create', ddo }))
     } catch (err) {
       throw err
     }
 
     let proxy
-    if (await proxyExists(did)) {
-      proxy = await getProxyAddress(did)
+    if (!ddo) {
+      if (await proxyExists(did)) {
+        proxy = await getProxyAddress(did)
+      }
     }
 
     const id = getDocumentKeyHex(ddo)
+
     const drives = await _createMultidrive({ did: id, password, storage, proxy })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
@@ -85,7 +92,7 @@ async function create(opts) {
     afs.ddo = ddo
   } else if (owner) {
     try {
-      ({ owner: did } = await validate({ owner, password, label: 'create' }))
+      ({ owner: did } = await validate({ owner, password, label: 'create', ddo }))
     } catch (err) {
       throw err
     }
@@ -124,11 +131,16 @@ async function create(opts) {
       ({ mnemonic } = afsId)
 
       await writeIdentity(afsId)
-      await aid.archive(afsId, keyringOpts)
+      if (!ddo) {
+        await aid.archive(afsId, keyringOpts)
 
-      afsDdo = await aid.resolve(toHex(afsId.publicKey))
-      if (null == afsDdo || 'object' !== typeof afsDdo) {
-        throw new TypeError('AFS identity not successfully resolved.')
+        afsDdo = await aid.resolve(toHex(afsId.publicKey))
+    
+        if (null == afsDdo || 'object' !== typeof afsDdo) {
+          throw new TypeError('AFS identity not successfully resolved.')
+        }
+      } else {
+        afsDdo = JSON.parse(JSON.stringify(afsId.ddo))
       }
     } catch (err) {
       throw err
