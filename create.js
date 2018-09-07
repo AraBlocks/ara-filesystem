@@ -131,7 +131,6 @@ async function create(opts) {
 
       ({ mnemonic } = afsId)
 
-      console.log(createIdentityKeyPath(afsId))
       await writeIdentity(afsId)
       if (!ddo) {
         await aid.archive(afsId, keyringOpts)

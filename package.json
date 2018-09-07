@@ -43,7 +43,7 @@
     "ara-network": "github:arablocks/ara-network",
     "ara-runtime-configuration": "github:arablocks/ara-runtime-configuration",
     "ara-secret-storage": "github:arablocks/ara-secret-storage",
-    "ara-util": "git://github:arablocks/ara-util#ej_tests_integration",
+    "ara-util": "github:arablocks/ara-util#ej_tests_integration",
     "cfsnet": "github:arablocks/cfsnet",
     "cli-width": "^2.2.0",
     "debug": "^3.1.0",
