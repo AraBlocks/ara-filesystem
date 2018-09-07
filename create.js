@@ -1,7 +1,6 @@
 /* eslint-disable no-shadow */
 
 const { writeIdentity } = require('ara-identity/util')
-const { createIdentityKeyPath } = require('ara-identity')
 const { createAFSKeyPath } = require('./key-path')
 const { defaultStorage } = require('./storage')
 const { createCFS } = require('cfsnet/create')
@@ -21,7 +20,6 @@ const {
 const {
   getDocumentKeyHex,
   validate,
-  isCorrectPassword,
   web3: { toHex }
 } = require('ara-util')
 
@@ -54,11 +52,11 @@ async function create(opts) {
 
   let {
     did,
-    owner,
     ddo
   } = opts
 
   const {
+    owner,
     password,
     storage,
     keyringOpts
@@ -68,7 +66,12 @@ async function create(opts) {
   let mnemonic
   if (did) {
     try {
-      ({ did, ddo } = await validate({ did, password, label: 'create', ddo }))
+      ({ did, ddo } = await validate({
+        did,
+        password,
+        label: 'create',
+        ddo
+      }))
     } catch (err) {
       throw err
     }
@@ -82,10 +85,15 @@ async function create(opts) {
 
     const id = getDocumentKeyHex(ddo)
 
-    const drives = await _createMultidrive({ did: id, password, storage, proxy })
+    const drives = await _createMultidrive({
+      did: id,
+      password,
+      storage,
+      proxy
+    })
     const path = createAFSKeyPath(id)
     const key = Buffer.from(id, 'hex')
-    
+
     const opts = { id, key, path }
     afs = await pify(drives.create)(opts)
 
@@ -93,7 +101,12 @@ async function create(opts) {
     afs.ddo = ddo
   } else if (owner) {
     try {
-      ({ owner: did } = await validate({ owner, password, label: 'create', ddo }))
+      ({ owner: did } = await validate({
+        owner,
+        password,
+        label: 'create',
+        ddo
+      }))
     } catch (err) {
       throw err
     }
@@ -136,7 +149,7 @@ async function create(opts) {
         await aid.archive(afsId, keyringOpts)
 
         afsDdo = await aid.resolve(toHex(afsId.publicKey))
-    
+
         if (null == afsDdo || 'object' !== typeof afsDdo) {
           throw new TypeError('AFS identity not successfully resolved.')
         }

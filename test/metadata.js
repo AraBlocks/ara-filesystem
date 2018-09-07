@@ -64,7 +64,7 @@ test('writeKey(opts) invalid opts', async (t) => {
 test('writeKey(opts) valid key write', async (t) => {
   const did = getDid(t)
   const contents = await metadata.writeKey({ did, key: 'my_key', value: 1234 })
-  t.true(contents.hasOwnProperty('my_key') && 1234 === contents.my_key)
+  t.true(Object.prototype.hasOwnProperty.call(contents, 'my_key') && 1234 === contents.my_key)
 })
 
 test('readKey(opts) invalid opts', async (t) => {

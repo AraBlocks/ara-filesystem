@@ -92,7 +92,7 @@ async function readKey(opts = {}) {
 
   const { did, key } = opts
   const contents = await readFile({ did })
-  if (!contents.hasOwnProperty(key)) {
+  if (!Object.prototype.hasOwnProperty.call(contents, key)) {
     throw new Error(`Metadata file does not contain key ${key}.`)
   }
 
@@ -117,7 +117,7 @@ async function delKey(opts) {
 
   const { did, key } = opts
   const contents = await readFile({ did })
-  if (!contents.hasOwnProperty(key)) {
+  if (!Object.prototype.hasOwnProperty.call(contents, key)) {
     throw new Error(`Metadata file does not contain key ${key}.`)
   }
 

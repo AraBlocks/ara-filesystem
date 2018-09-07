@@ -108,19 +108,22 @@ async function commit(opts) {
   const acct = await account.load({ did: owner, password })
 
   const result = await _write({
-      mtData,
-      msData,
-      account: acct,
-      proxy
-    }, estimate, exists)
+    mtData,
+    msData,
+    account: acct,
+    proxy
+  }, estimate, exists)
 
   if (estimate) {
     if (0 < price) {
-      const setPriceGasCost = await estimateSetPriceGasCost({ did, password, price})
+      const setPriceGasCost = await estimateSetPriceGasCost({
+        did,
+        password,
+        price
+      })
       return result + setPriceGasCost
-    } else {
-      return result
     }
+    return result
   }
 
   await _deleteStagedFile(path)

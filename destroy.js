@@ -91,9 +91,8 @@ async function destroy(opts) {
     let owner = getDocumentOwner(afsDdo, true)
     mnemonic = mnemonic.trim()
 
-    let ddo
     try {
-      ({ did, ddo } = await validate({ did, password, label: 'destroy' }))
+      ({ did } = await validate({ did, password, label: 'destroy' }))
     } catch (err) {
       throw err
     }

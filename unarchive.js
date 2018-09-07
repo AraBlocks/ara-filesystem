@@ -54,7 +54,7 @@ async function unarchive(opts) {
   })
 
   // Await end or error
-  const error = await new Promise((resolve, reject) => progress.once('end', resolve).once('error', reject))
+  const error = await new Promise((accept, reject) => progress.once('end', accept).once('error', reject))
   afs.close()
 
   if (error) {

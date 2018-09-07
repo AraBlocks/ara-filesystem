@@ -1,6 +1,5 @@
 const { createIdentityKeyPath } = require('ara-identity')
-const { kAidPrefix } = require('../constants')
-const { resolve, dirname, parse } = require('path')
+const { resolve, parse } = require('path')
 const mirror = require('mirror-folder')
 const { create } = require('../create')
 const crypto = require('ara-crypto')
