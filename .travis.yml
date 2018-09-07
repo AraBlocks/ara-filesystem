@@ -4,7 +4,7 @@ node_js:
 install:
   - bash ./scripts/travis-install
 script:
-  - bash ./scripts/test
+  - bash ava test/create.js
 cache:
   directories:
     - "node_modules"
