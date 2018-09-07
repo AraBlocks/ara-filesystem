@@ -1,6 +1,7 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
 const { kAidPrefix } = require('./constants')
+const { token } = require('ara-contracts')
 
 const {
   proxyExists,
@@ -96,8 +97,8 @@ async function setPrice(opts) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  let { did } = opts
-  const { password, price } = opts
+  let { did, price } = opts
+  const { password } = opts
   let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'price' }))
@@ -118,6 +119,12 @@ async function setPrice(opts) {
   let owner = getDocumentOwner(ddo, true)
   owner = `${kAidPrefix}${owner}`
   const acct = await account.load({ did: owner, password })
+
+  if ('string' !== typeof price) {
+    price = price.toString()
+  }
+
+  price = token.expandTokenValue(price)
 
   try {
     const transaction = await tx.create({
@@ -167,7 +174,8 @@ async function getPrice(opts) {
     functionName: 'price_'
   })
   debug('price for %s: %d', did, result)
-  return result
+  
+  return token.constrainTokenValue(result)
 }
 
 module.exports = {
