@@ -1,7 +1,9 @@
+const { createIdentityKeyPath } = require('ara-identity')
 const { kAidPrefix } = require('../constants')
+const { resolve, dirname } = require('path')
+const mirror = require('mirror-folder')
 const { create } = require('../create')
 const crypto = require('ara-crypto')
-const { resolve } = require('path')
 const { readFile } = require('fs')
 const pify = require('pify')
 const test = require('ava')
@@ -25,9 +27,11 @@ const getDdo = (t) => {
 test.before(async (t) => {
   const publicKey = Buffer.from(kTestOwnerDidNoMethod, 'hex')
   const hash = crypto.blake2b(publicKey).toString('hex')
-  let path = `${__dirname}/fixtures/identities`
-  path = resolve(path, hash, 'ddo.json')
-  const ddo = JSON.parse(await pify(readFile)(path, 'utf8'))
+  const path = `${__dirname}/fixtures/identities`
+  const ddoPath = resolve(path, hash, 'ddo.json')
+  const ddo = JSON.parse(await pify(readFile)(ddoPath, 'utf8'))
+  const identityPath = createIdentityKeyPath(ddo)
+  await pify(mirror)(resolve(path, hash), identityPath)
   t.context = { ddo, did: kTestOwnerDidNoMethod }
 })
 
@@ -37,13 +41,13 @@ test('create() valid id', async (t) => {
   // create AFS
   const { afs } = await create({ owner, password, ddo })
   t.true('object' === typeof afs)
-  // const { did } = afs
+  const { did } = afs
 
-  // // resolve AFS
-  // const { afs: resolvedAfs } = await create({ did, password, ddo: afs.ddo })
-  // t.true('object' === typeof resolvedAfs)
+  // resolve AFS
+  const { afs: resolvedAfs } = await create({ did, password, ddo: afs.ddo })
+  t.true('object' === typeof resolvedAfs)
 
-  // t.true(afs === resolvedAfs)
+  t.true(afs === resolvedAfs)
 })
 
 // test('create() valid id (readonly)', async (t) => {
@@ -69,7 +73,7 @@ test('create() valid id', async (t) => {
 //     password,
 //     ddo: getDdo(t)
 //   }), TypeError, 'Expecting a DID URI with an "ara" method.')
-  
+
 //   await t.throwsAsync(create({
 //     did: idWrongMethod,
 //     password,
