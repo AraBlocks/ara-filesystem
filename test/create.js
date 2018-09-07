@@ -1,10 +1,11 @@
 const { createIdentityKeyPath } = require('ara-identity')
 const { kAidPrefix } = require('../constants')
-const { resolve, dirname } = require('path')
+const { resolve, dirname, parse } = require('path')
 const mirror = require('mirror-folder')
 const { create } = require('../create')
 const crypto = require('ara-crypto')
 const { readFile } = require('fs')
+const mkdirp = require('mkdirp')
 const pify = require('pify')
 const test = require('ava')
 
@@ -31,6 +32,9 @@ test.before(async (t) => {
   const ddoPath = resolve(path, hash, 'ddo.json')
   const ddo = JSON.parse(await pify(readFile)(ddoPath, 'utf8'))
   const identityPath = createIdentityKeyPath(ddo)
+  const parsed = parse(identityPath)
+  console.log(parsed)
+  await pify(mkdirp)(parsed.dir)
   await pify(mirror)(resolve(path, hash), identityPath)
   t.context = { ddo, did: kTestOwnerDidNoMethod }
 })
