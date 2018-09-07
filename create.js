@@ -1,6 +1,7 @@
 /* eslint-disable no-shadow */
 
 const { writeIdentity } = require('ara-identity/util')
+const { createIdentityKeyPath } = require('ara-identity')
 const { createAFSKeyPath } = require('./key-path')
 const { defaultStorage } = require('./storage')
 const { createCFS } = require('cfsnet/create')
@@ -130,6 +131,7 @@ async function create(opts) {
 
       ({ mnemonic } = afsId)
 
+      console.log(createIdentityKeyPath(afsId))
       await writeIdentity(afsId)
       if (!ddo) {
         await aid.archive(afsId, keyringOpts)

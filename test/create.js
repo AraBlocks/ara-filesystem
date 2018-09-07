@@ -46,102 +46,102 @@ test('create() valid id', async (t) => {
   t.true(afs === resolvedAfs)
 })
 
-test('create() valid id (readonly)', async (t) => {
-  const owner = getDid(t)
-  const ddo = getDdo(t)
-  // create AFS
-  const { afs } = await create({ owner, password, ddo })
-  t.true('object' === typeof afs)
-  const { did } = afs
+// test('create() valid id (readonly)', async (t) => {
+//   const owner = getDid(t)
+//   const ddo = getDdo(t)
+//   // create AFS
+//   const { afs } = await create({ owner, password, ddo })
+//   t.true('object' === typeof afs)
+//   const { did } = afs
 
-  // resolve AFS readonly
-  const { afs: resolvedAfs } = await create({ did, ddo: afs.ddo })
-  t.true('object' === typeof resolvedAfs)
+//   // resolve AFS readonly
+//   const { afs: resolvedAfs } = await create({ did, ddo: afs.ddo })
+//   t.true('object' === typeof resolvedAfs)
 
-  t.true(afs === resolvedAfs)
-})
+//   t.true(afs === resolvedAfs)
+// })
 
-test('create() invalid id (wrong method)', async (t) => {
-  const idWrongMethod = `did:littlstar:${getDid(t)}`
+// test('create() invalid id (wrong method)', async (t) => {
+//   const idWrongMethod = `did:littlstar:${getDid(t)}`
 
-  await t.throwsAsync(create({
-    owner: idWrongMethod,
-    password,
-    ddo: getDdo(t)
-  }), TypeError, 'Expecting a DID URI with an "ara" method.')
+//   await t.throwsAsync(create({
+//     owner: idWrongMethod,
+//     password,
+//     ddo: getDdo(t)
+//   }), TypeError, 'Expecting a DID URI with an "ara" method.')
   
-  await t.throwsAsync(create({
-    did: idWrongMethod,
-    password,
-    ddo: getDdo(t)
-  }), TypeError, 'Expecting a DID URI with an "ara" method.')
-})
+//   await t.throwsAsync(create({
+//     did: idWrongMethod,
+//     password,
+//     ddo: getDdo(t)
+//   }), TypeError, 'Expecting a DID URI with an "ara" method.')
+// })
 
-test('create() invalid id (correct method, invalid id)', async (t) => {
-  const idCorrectMethod = 'did:ara:abcd'
+// test('create() invalid id (correct method, invalid id)', async (t) => {
+//   const idCorrectMethod = 'did:ara:abcd'
 
-  await t.throwsAsync(create({
-    owner: idCorrectMethod,
-    password
-  }), Error, 'ara-filesystem.create: Unable to resolve owner DID')
+//   await t.throwsAsync(create({
+//     owner: idCorrectMethod,
+//     password
+//   }), Error, 'ara-filesystem.create: Unable to resolve owner DID')
 
-  await t.throwsAsync(create({
-    did: idCorrectMethod,
-    password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
-})
+//   await t.throwsAsync(create({
+//     did: idCorrectMethod,
+//     password
+//   }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+// })
 
-test('create() invalid id (no method, invalid id)', async (t) => {
-  const idNoMethod = 'abcd'
+// test('create() invalid id (no method, invalid id)', async (t) => {
+//   const idNoMethod = 'abcd'
 
-  await t.throwsAsync(create({
-    owner: idNoMethod,
-    password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve owner DID')
+//   await t.throwsAsync(create({
+//     owner: idNoMethod,
+//     password
+//   }), TypeError, 'ara-filesystem.create: Unable to resolve owner DID')
 
-  await t.throwsAsync(create({
-    did: idNoMethod,
-    password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
-})
+//   await t.throwsAsync(create({
+//     did: idNoMethod,
+//     password
+//   }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+// })
 
-test('create() no id', async (t) => {
-  await t.throwsAsync(create({
-    owner: '',
-    password
-  }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+// test('create() no id', async (t) => {
+//   await t.throwsAsync(create({
+//     owner: '',
+//     password
+//   }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
 
-  await t.throwsAsync(create({
-    did: '',
-    password
-  }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
-})
+//   await t.throwsAsync(create({
+//     did: '',
+//     password
+//   }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+// })
 
-test('create() null id', async (t) => {
-  await t.throwsAsync(create({
-    owner: null,
-    password
-  }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+// test('create() null id', async (t) => {
+//   await t.throwsAsync(create({
+//     owner: null,
+//     password
+//   }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
 
-  await t.throwsAsync(create({
-    did: null,
-    password
-  }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
-})
+//   await t.throwsAsync(create({
+//     did: null,
+//     password
+//   }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+// })
 
-test('create() no password', async (t) => {
-  await t.throwsAsync(create({ owner: kTestOwnerDid }), TypeError, 'ara-filesystem.create: Expecting non-empty password.')
-})
+// test('create() no password', async (t) => {
+//   await t.throwsAsync(create({ owner: kTestOwnerDid }), TypeError, 'ara-filesystem.create: Expecting non-empty password.')
+// })
 
-test('create() incorrect password', async (t) => {
-  const wrongPass = 'abcd'
-  await t.throwsAsync(create({
-    owner: kTestOwnerDid,
-    password: wrongPass
-  }), Error, 'ara-filesystem.create: incorrect password.')
+// test('create() incorrect password', async (t) => {
+//   const wrongPass = 'abcd'
+//   await t.throwsAsync(create({
+//     owner: kTestOwnerDid,
+//     password: wrongPass
+//   }), Error, 'ara-filesystem.create: incorrect password.')
 
-  await t.throwsAsync(create({
-    did: kTestOwnerDid,
-    password: wrongPass
-  }), Error, 'ara-filesystem.create: incorrect password.')
-})
+//   await t.throwsAsync(create({
+//     did: kTestOwnerDid,
+//     password: wrongPass
+//   }), Error, 'ara-filesystem.create: incorrect password.')
+// })
