@@ -77,8 +77,6 @@ test('unarchive() valid unarchive', async (t) => {
   const afs = getAFS(t)
   const { did } = afs
   // create test file and add to test AFS
-  console.log(did)
-  console.log(resolve(kTestFilename))
   await pify(fs.writeFile)(resolve(kTestFilename), 'Hello World!')
   await add({ did, password, paths: [ kTestFilename ] })
 
