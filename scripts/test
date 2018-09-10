@@ -11,3 +11,4 @@ ava test/key-path.js
 ava test/metadata.js
 ava test/util.js
 ava test/storage.js
+ava test/destroy.js
