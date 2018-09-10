@@ -2,8 +2,6 @@
 
 const test = require('ava')
 const util = require('../util')
-const { kTestOwnerDid } = require('./_constants')
-const { kResolverKey } = require('../constants')
 
 test("generateKeypair() invalid password", (t) => {
   t.throws(() => util.generateKeypair(), TypeError, "empty password")
