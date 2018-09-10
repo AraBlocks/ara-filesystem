@@ -4,8 +4,6 @@ node_js:
 install:
   - bash ./scripts/travis-install
 script:
-  # - truffle develop &
-  # - sleep 5
   - bash ./scripts/test
 cache:
   directories:
