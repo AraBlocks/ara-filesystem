@@ -25,3 +25,4 @@
 npm run lint
 #npm run test --verbose
 ava test/create.js
+ava test/add.js
