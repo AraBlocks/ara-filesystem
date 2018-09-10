@@ -1,11 +1,11 @@
 /* eslint quotes: "off" */
 
-const test = require('ava')
-const pify = require('pify')
-const rimraf = require('rimraf')
-const fs = require('fs')
-const { kTestDid } = require('./_constants')
 const { createAFSKeyPath } = require('../key-path')
+const { kTestDid } = require('./_constants')
+const rimraf = require('rimraf')
+const pify = require('pify')
+const test = require('ava')
+const fs = require('fs')
 
 test.before(async () => {
   try {
@@ -22,7 +22,7 @@ test("createAFSKeyPath() invalid id", (t) => {
 
 test("createAFSKeyPath() valid id", async (t) => {
   const path = createAFSKeyPath(kTestDid)
-  await t.notThrows(pify(fs.mkdir)(path))
+  await t.notThrowsAsync(pify(fs.mkdir)(path))
 })
 
 test.after(async () => {

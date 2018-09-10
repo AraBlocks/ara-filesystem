@@ -7,3 +7,5 @@ ava test/create.js
 ava test/add.js
 ava test/remove.js
 ava test/unarchive.js
+ava test/key-path.js
+ava test/metadata.js
