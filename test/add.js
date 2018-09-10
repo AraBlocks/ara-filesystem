@@ -18,8 +18,8 @@ const {
 
 const {
   resolve,
-  join,
-  parse
+  parse,
+  join
 } = require('path')
 
 const getAFS = (t) => {
