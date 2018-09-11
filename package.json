@@ -8,7 +8,7 @@
     "afs": "bin/ara-filesystem"
   },
   "scripts": {
-    "test": "ava test",
+    "test": "./scripts/test",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "start": "node ."
