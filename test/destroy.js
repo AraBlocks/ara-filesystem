@@ -87,35 +87,35 @@ test("destroy() valid params without commit", async (t) => {
   await t.throwsAsync(pify(fs.access)(afsPath))
 })
 
-// test("destroy() valid params with commit", async (t) => {
-//   const { publicKey: owner } = t.context
-//   const { afs, mnemonic } = await create({ owner, password })
-//   const { did } = afs
-//   await commit({ did, password })
+test.skip("destroy() valid params with commit", async (t) => {
+  const { publicKey: owner } = t.context
+  const { afs, mnemonic } = await create({ owner, password })
+  const { did } = afs
+  await commit({ did, password })
 
-//   const { web3 } = context
-//   const deployed = new web3.eth.Contract(abi, kStorageAddress)
-//   const accounts = await web3.eth.getAccounts()
-//   const hIdentity = hashDID(did)
+  const { web3 } = context
+  const deployed = new web3.eth.Contract(abi, kStorageAddress)
+  const accounts = await web3.eth.getAccounts()
+  const hIdentity = hashDID(did)
 
-//   let mtBuf = await deployed.methods.read(hIdentity, 0, 0).call()
-//   let msBuf = await deployed.methods.read(hIdentity, 1, 0).call()
-//   const existsBefore = await deployed.methods.exists(hIdentity).call()
+  let mtBuf = await deployed.methods.read(hIdentity, 0, 0).call()
+  let msBuf = await deployed.methods.read(hIdentity, 1, 0).call()
+  const existsBefore = await deployed.methods.exists(hIdentity).call()
 
-//   await t.notThrows(destroy({ did, password, mnemonic }))
+  await t.notThrows(destroy({ did, password, mnemonic }))
 
-//   // make sure read returns nothing after delete
-//   mtBuf = await deployed.methods.read(hIdentity, 0, 0).call()
-//   t.true(!mtBuf)
+  // make sure read returns nothing after delete
+  mtBuf = await deployed.methods.read(hIdentity, 0, 0).call()
+  t.true(!mtBuf)
 
-//   msBuf = await deployed.methods.read(hIdentity, 1, 0).call()
-//   t.true(!msBuf)
+  msBuf = await deployed.methods.read(hIdentity, 1, 0).call()
+  t.true(!msBuf)
 
-//   // make sure any writes not get reverted
-//   await t.throws(deployed.methods.write(hIdentity, 0, 0, '0x0101', false)
-//     .send({ from: accounts[0], gas: 500000 }), Error, "Writes are disabled after deletion")
+  // make sure any writes not get reverted
+  await t.throws(deployed.methods.write(hIdentity, 0, 0, '0x0101', false)
+    .send({ from: accounts[0], gas: 500000 }), Error, "Writes are disabled after deletion")
 
-//   // make sure exists now is false
-//   const existsAfter = await deployed.methods.exists(hIdentity).call()
-//   t.true(existsBefore !== existsAfter)
-// })
+  // make sure exists now is false
+  const existsAfter = await deployed.methods.exists(hIdentity).call()
+  t.true(existsBefore !== existsAfter)
+})
