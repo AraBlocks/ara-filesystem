@@ -106,49 +106,6 @@ test("commit() staged file successfully deleted", async (t) => {
   t.throws(() => fs.accessSync(path))
 })
 
-// TODO: make test without blockchain dependency
-test.skip("commit() previously cached buffers match blockchain buffers", async (t) => {
-  const file = resolve(__dirname, '../index.js')
-
-  const { publicKey } = t.context
-  const { afs } = await create({ owner: publicKey, password })
-  const { did } = afs
-  await add({ did, paths: [ file ], password })
-  const path = generateStagedPath(did)
-
-  let contents = fs.readFileSync(path, 'utf8')
-  contents = JSON.parse(decryptJSON(contents, password))
-
-  const mTree = contents['metadata/tree']
-  const mSig = contents['metadata/signatures']
-
-  await commit({ did, password })
-
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const hIdentity = blake2b(Buffer.from(did)).toString('hex')
-
-  let buffer = await deployed.methods.read(hIdentity, 0, 0).call()
-  t.is(mTree['0'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 0, 32).call()
-  t.is(mTree['32'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 0, 72).call()
-  t.is(mTree['72'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 0).call()
-  t.is(mSig['0'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 32).call()
-  t.is(mSig['32'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 96).call()
-  t.is(mSig['96'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 160).call()
-  t.is(mSig['160'], buffer.slice(2))
-})
-
 test("retrieve() offset doesn't exist", (t) => {
   const { did } = getAFS(t)
   const result = retrieve({
