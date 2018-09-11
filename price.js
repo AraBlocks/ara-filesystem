@@ -92,7 +92,7 @@ async function setPrice(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if ('string' !== typeof opts.password || !opts.password) {
     throw TypeError('Expecting non-empty password.')
-  } else if ('number' !== typeof opts.price || opts.price < 0) {
+  } else if ('number' !== typeof opts.price || opts.price <= 0) {
     throw new TypeError('Expecting whole number price.')
   }
 
@@ -103,10 +103,6 @@ async function setPrice(opts) {
     ({ did, ddo } = await validate({ did, password, label: 'price' }))
   } catch (err) {
     throw err
-  }
-
-  if (0 > price || 'number' !== typeof price) {
-    throw new TypeError('Price should be 0 or positive whole number.')
   }
 
   if (!(await proxyExists(did))) {
