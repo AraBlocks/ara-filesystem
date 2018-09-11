@@ -1,6 +1,7 @@
 const mirror = require('mirror-folder')
 const crypto = require('ara-crypto')
 const aid = require('ara-identity')
+const rimraf = require('rimraf')
 const mkdirp = require('mkdirp')
 const pify = require('pify')
 const test = require('ava')
@@ -51,7 +52,14 @@ test.beforeEach(async (t) => {
   } catch (err) {
     console.log(err)
   }
-  t.context = { afs }
+  t.context = { afs, idPath: aid.createIdentityKeyPath(afs.ddo) }
+})
+
+test.afterEach(async (t) => {
+  const { idPath } = t.context
+  if (idPath) {
+    await pify(rimraf)(idPath)
+  }
 })
 
 test('unarchive() invalid opts', async (t) => {

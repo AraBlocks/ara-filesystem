@@ -4,6 +4,7 @@ const mirror = require('mirror-folder')
 const { create } = require('../create')
 const crypto = require('ara-crypto')
 const { readFile } = require('fs')
+const rimraf = require('rimraf')
 const mkdirp = require('mkdirp')
 const pify = require('pify')
 const test = require('ava')
@@ -37,6 +38,13 @@ test.before(async (t) => {
   t.context = { ddo, did: kTestOwnerDidNoMethod }
 })
 
+test.afterEach(async (t) => {
+  const { idPath } = t.context
+  if (idPath) {
+    await pify(rimraf)(idPath)
+  }
+})
+
 test('create() valid id', async (t) => {
   const owner = getDid(t)
   const ddo = getDdo(t)
@@ -50,6 +58,7 @@ test('create() valid id', async (t) => {
   t.true('object' === typeof resolvedAfs)
 
   t.true(afs === resolvedAfs)
+  t.context.idPath = createIdentityKeyPath(afs.ddo)
 })
 
 test('create() valid id (readonly)', async (t) => {
@@ -65,6 +74,7 @@ test('create() valid id (readonly)', async (t) => {
   t.true('object' === typeof resolvedAfs)
 
   t.true(afs === resolvedAfs)
+  t.context.idPath = createIdentityKeyPath(afs.ddo)
 })
 
 test('create() invalid id (wrong method)', async (t) => {
