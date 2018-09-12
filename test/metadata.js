@@ -1,15 +1,11 @@
-const { createAFSKeyPath } = require('../key-path')
-const { create } = require('../create')
 const metadata = require('../metadata')
-const aid = require('ara-identity')
 const pify = require('pify')
 const test = require('ava')
 const fs = require('fs')
 
-const { PASSWORD: password } = require('./_constants')
-
 const {
   mirrorIdentity,
+  createAFS,
   cleanup
 } = require('./_util')
 
@@ -19,16 +15,8 @@ const getAFS = (t) => {
 }
 
 test.before(async (t) => {
-  const { did, ddo } = await mirrorIdentity()
-  t.context = { ddo, did }
-  let afs
-  try {
-    // eslint-disable-next-line semi
-    ({ afs } = await create({ owner: did, password, ddo }));
-  } catch (err) {
-    console.log(err)
-  }
-  t.context = { afs, idPath: aid.createIdentityKeyPath(afs.ddo), afsPath: createAFSKeyPath(afs.did) }
+  t.context = await mirrorIdentity()
+  t.context = await createAFS(t)
 })
 
 test.after(async (t) => {

@@ -1,10 +1,7 @@
 /* eslint-disable no-await-in-loop */
 
 const { PASSWORD: password } = require('./_constants')
-const { createAFSKeyPath } = require('../key-path')
 const isDirectory = require('is-directory')
-const { create } = require('../create')
-const aid = require('ara-identity')
 const { add } = require('../add')
 const pify = require('pify')
 const test = require('ava')
@@ -12,6 +9,7 @@ const fs = require('fs')
 
 const {
   mirrorIdentity,
+  createAFS,
   cleanup
 } = require('./_util')
 
@@ -30,15 +28,7 @@ test.before(async (t) => {
 })
 
 test.beforeEach(async (t) => {
-  const { did, ddo } = t.context
-  let afs
-  try {
-    // eslint-disable-next-line semi
-    ({ afs } = await create({ owner: did, password, ddo }));
-  } catch (err) {
-    console.log(err)
-  }
-  t.context = { afs, idPath: aid.createIdentityKeyPath(afs.ddo), afsPath: createAFSKeyPath(afs.did) }
+  t.context = await createAFS(t)
 })
 
 test.afterEach(async (t) => {

@@ -1,11 +1,17 @@
-const { TEST_OWNER_DID_NO_METHOD } = require('./_constants')
 const { createIdentityKeyPath } = require('ara-identity')
+const { createAFSKeyPath } = require('../key-path')
+const { create } = require('../create')
 const mirror = require('mirror-folder')
 const crypto = require('ara-crypto')
 const { readFile } = require('fs')
 const mkdirp = require('mkdirp')
 const rimraf = require('rimraf')
 const pify = require('pify')
+
+const {
+  TEST_OWNER_DID_NO_METHOD,
+  PASSWORD: password
+} = require('./_constants')
 
 const {
   resolve,
@@ -39,6 +45,18 @@ module.exports = {
     await pify(mkdirp)(parsed.dir)
     await pify(mirror)(resolve(path, hash), identityPath)
     return { ddo, did: TEST_OWNER_DID_NO_METHOD }
+  },
+
+  async createAFS({ context }) {
+    const { did, ddo } = context
+    let afs
+    try {
+      // eslint-disable-next-line semi
+      ({ afs } = await create({ owner: did, password, ddo }))
+    } catch (err) {
+      console.log(err)
+    }
+    return { afs, idPath: createIdentityKeyPath(afs.ddo), afsPath: createAFSKeyPath(afs.did) }
   },
 
   async cleanup({ context }) {
