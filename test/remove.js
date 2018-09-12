@@ -14,7 +14,7 @@ const test = require('ava')
 const fs = require('fs')
 
 const {
-  kTestOwnerDidNoMethod,
+  kTestOwnerDIDNoMethod,
   kPassword: password
 } = require('./_constants')
 

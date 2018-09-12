@@ -6,7 +6,7 @@ const RandomAccessFile = require('random-access-file')
 const { createAFSKeyPath } = require('../key-path')
 
 const {
-  kTestDid,
+  kTestDID,
   kPassword: password
 } = require('./_constants')
 

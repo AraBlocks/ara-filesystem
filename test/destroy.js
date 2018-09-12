@@ -17,7 +17,7 @@ const {
 } = require('../key-path')
 
 const {
-  kTestOwnerDidNoMethod,
+  kTestOwnerDIDNoMethod,
   kPassword: password
 } = require('./_constants')
 

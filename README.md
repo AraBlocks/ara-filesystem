@@ -302,6 +302,7 @@ Sets the price in Ara tokens of an `AFS`.
   - `did` - The `DID` of the `AFS` to set the price of
   - `password` - The password of the owner of this `AFS`
   - `price` - The price in Ara tokens to set this `AFS`
+  - `estimate` - optional Flag to check cost of `setPrice`
 
 ```js
 const price = 10

@@ -12,8 +12,8 @@ const fs = require('fs')
 
 const {
   kPassword: password,
-  kTestDid,
-  kTestOwnerDidNoMethod
+  kTestDID,
+  kTestOwnerDIDNoMethod
 } = require('./_constants')
 
 const {

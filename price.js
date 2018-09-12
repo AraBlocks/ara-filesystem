@@ -31,51 +31,12 @@ async function estimateSetPriceGasCost(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if ('string' !== typeof opts.password || !opts.password) {
     throw TypeError('Expecting non-empty password.')
-  } else if ('number' !== typeof opts.price || opts.price < 0) {
+  } else if ('number' !== typeof opts.price || 0 >= opts.price) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  let { did } = opts
-  const { password, price } = opts
-  let ddo
-  try {
-    ({ did, ddo } = await validate({ did, password, label: 'price' }))
-  } catch (err) {
-    throw err
-  }
-
-  if (0 > price || 'number' !== typeof price) {
-    throw new TypeError('Price should be 0 or positive whole number.')
-  }
-
-  if (!(await proxyExists(did))) {
-    throw new Error('This content does not have a valid proxy contract')
-  }
-
-  const proxy = await getProxyAddress(did)
-
-  let owner = getDocumentOwner(ddo, true)
-  owner = `${kAidPrefix}${owner}`
-  const acct = await account.load({ did: owner, password })
-
-  try {
-    const transaction = await tx.create({
-      account: acct,
-      to: proxy,
-      data: {
-        abi,
-        functionName: 'setPrice',
-        values: [
-          price
-        ]
-      }
-    })
-
-    return tx.estimateCost(transaction)
-  } catch (err) {
-    throw new Error(`This AFS has not been committed to the network, 
-      please commit before trying to set a price.`)
-  }
+  opts = Object.assign(opts, { estimate: true })
+  return setPrice(opts)
 }
 
 /**
@@ -84,6 +45,7 @@ async function estimateSetPriceGasCost(opts) {
  * @param {String}   opts.did
  * @param {String}   opts.password
  * @param {Number}   opts.price
+ * @param {Boolean}  opts.estimate
  */
 async function setPrice(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -92,12 +54,17 @@ async function setPrice(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if ('string' !== typeof opts.password || !opts.password) {
     throw TypeError('Expecting non-empty password.')
-  } else if ('number' !== typeof opts.price || opts.price <= 0) {
+  } else if ('number' !== typeof opts.price || 0 >= opts.price) {
     throw new TypeError('Expecting whole number price.')
+  } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
+    throw new TypeError('Expecting boolean.')
   }
 
-  let { did } = opts
+  let { did, estimate } = opts
   const { password, price } = opts
+
+  estimate = estimate || false
+
   let ddo
   try {
     ({ did, ddo } = await validate({ did, password, label: 'price' }))
@@ -127,13 +94,16 @@ async function setPrice(opts) {
         ]
       }
     })
-    await tx.sendSignedTransaction(transaction)
+
+    if (estimate) {
+      return tx.estimateCost(transaction)
+    }
+
+    return tx.sendSignedTransaction(transaction)
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
   }
-
-  debug('price for', did, 'set to', price, 'ARA')
 }
 
 /**

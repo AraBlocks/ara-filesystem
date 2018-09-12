@@ -199,13 +199,8 @@ async function estimateCommitGasCost(opts) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  const { did, password, price } = opts
-  return commit({
-    did,
-    password,
-    estimate: true,
-    price
-  })
+  opts = Object.assign(opts, { estimate: true })
+  return commit(opts)
 }
 
 async function _write(opts, estimate = true, append = false) {

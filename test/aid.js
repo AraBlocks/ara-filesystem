@@ -11,7 +11,7 @@ const {
 } = require('../constants')
 
 const {
-  kTestOwnerDid,
+  kTestOwnerDID,
   kPassword: password
 } = require('./_constants')
 

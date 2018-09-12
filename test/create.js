@@ -10,8 +10,8 @@ const pify = require('pify')
 const test = require('ava')
 
 const {
-  kTestOwnerDid,
-  kTestOwnerDidNoMethod,
+  kTestOwnerDID,
+  kTestOwnerDIDNoMethod,
   kPassword: password
 } = require('./_constants')
 
