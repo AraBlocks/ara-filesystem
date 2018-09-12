@@ -1,4 +1,5 @@
 const { createIdentityKeyPath } = require('ara-identity')
+const { createAFSKeyPath } = require('../key-path')
 const { mirrorIdentity } = require('./_util')
 const { create } = require('../create')
 const rimraf = require('rimraf')
@@ -25,9 +26,10 @@ test.before(async (t) => {
 })
 
 test.afterEach(async (t) => {
-  const { idPath } = t.context
+  const { idPath, afsPath } = t.context
   if (idPath) {
     await pify(rimraf)(idPath)
+    await pify(rimraf)(afsPath)
   }
 })
 
@@ -45,6 +47,7 @@ test('create() valid id', async (t) => {
 
   t.true(afs === resolvedAfs)
   t.context.idPath = createIdentityKeyPath(afs.ddo)
+  t.context.afsPath = createAFSKeyPath(did)
 })
 
 test('create() valid id (readonly)', async (t) => {
@@ -61,6 +64,7 @@ test('create() valid id (readonly)', async (t) => {
 
   t.true(afs === resolvedAfs)
   t.context.idPath = createIdentityKeyPath(afs.ddo)
+  t.context.afsPath = createAFSKeyPath(did)
 })
 
 test('create() invalid id (wrong method)', async (t) => {

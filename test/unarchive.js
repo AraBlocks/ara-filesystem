@@ -1,4 +1,5 @@
 const { PASSWORD: password } = require('./_constants')
+const { createAFSKeyPath } = require('../key-path')
 const { mirrorIdentity } = require('./_util')
 const { resolve } = require('path')
 const aid = require('ara-identity')
@@ -33,13 +34,14 @@ test.beforeEach(async (t) => {
   } catch (err) {
     console.log(err)
   }
-  t.context = { afs, idPath: aid.createIdentityKeyPath(afs.ddo) }
+  t.context = { afs, idPath: aid.createIdentityKeyPath(afs.ddo), afsPath: createAFSKeyPath(afs.did) }
 })
 
 test.afterEach(async (t) => {
-  const { idPath } = t.context
-  if (idPath) {
+  const { idPath, afsPath } = t.context
+  if (idPath && afsPath) {
     await pify(rimraf)(idPath)
+    await pify(rimraf)(afsPath)
   }
 })
 

@@ -1,3 +1,4 @@
+const { createAFSKeyPath } = require('../key-path')
 const { mirrorIdentity } = require('./_util')
 const { create } = require('../create')
 const metadata = require('../metadata')
@@ -24,13 +25,14 @@ test.before(async (t) => {
   } catch (err) {
     console.log(err)
   }
-  t.context = { afs, idPath: aid.createIdentityKeyPath(afs.ddo) }
+  t.context = { afs, idPath: aid.createIdentityKeyPath(afs.ddo), afsPath: createAFSKeyPath(afs.did) }
 })
 
 test.after(async (t) => {
-  const { idPath } = t.context
-  if (idPath) {
+  const { idPath, afsPath } = t.context
+  if (idPath && afsPath) {
     await pify(rimraf)(idPath)
+    await pify(rimraf)(afsPath)
   }
 })
 
