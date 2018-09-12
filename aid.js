@@ -77,7 +77,7 @@ async function archive(identity, opts = {}) {
   try {
     opts = {
       secret: opts.secret || kArchiverSecret,
-      name: opts.name || kArchiverRemote,
+      network: opts.name || kArchiverRemote,
       keyring: opts.keyring || secret.archiver
     }
     await aid.archive(identity, opts)
