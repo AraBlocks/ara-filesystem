@@ -11,9 +11,9 @@ const test = require('ava')
 const fs = require('fs')
 
 const {
-  kPassword: password,
-  kTestDID,
-  kTestOwnerDIDNoMethod
+  PASSWORD: password,
+  TEST_DID,
+  TEST_OWNER_DID_NO_METHOD
 } = require('./_constants')
 
 const {
@@ -46,7 +46,7 @@ const getAFS = (t) => {
 }
 
 test.before(async (t) => {
-  const publicKey = Buffer.from(kTestOwnerDidNoMethod, 'hex')
+  const publicKey = Buffer.from(TEST_OWNER_DID_NO_METHOD, 'hex')
   const hash = blake2b(publicKey).toString('hex')
   const path = `${__dirname}/fixtures/identities`
   const ddoPath = resolve(path, hash, 'ddo.json')
@@ -55,7 +55,7 @@ test.before(async (t) => {
   const parsed = parse(identityPath)
   await pify(mkdirp)(parsed.dir)
   await pify(mirror)(resolve(path, hash), identityPath)
-  t.context = { ddo, did: kTestOwnerDidNoMethod }
+  t.context = { ddo, did: TEST_OWNER_DID_NO_METHOD }
 })
 
 test.beforeEach(async (t) => {
@@ -82,8 +82,8 @@ test("commit() invalid did", async (t) => {
 })
 
 test("commit() invalid password", async (t) => {
-  await t.throwsAsync(commit({ did: kTestDid, password: null }), TypeError, "Expecting password to be non-null")
-  await t.throwsAsync(commit({ did: kTestDid, password: 1234 }), TypeError, "Expecting password to be a string")
+  await t.throwsAsync(commit({ did: TEST_DID, password: null }), TypeError, "Expecting password to be non-null")
+  await t.throwsAsync(commit({ did: TEST_DID, password: 1234 }), TypeError, "Expecting password to be a string")
 })
 
 test("commit() incorrect password", async (t) => {

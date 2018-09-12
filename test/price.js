@@ -14,7 +14,7 @@ const {
 } = require('../price')
 
 const {
-  kPassword: password
+  PASSWORD: password
 } = require('./_constants')
 
 const getDid = (t) => {

@@ -10,8 +10,8 @@ const test = require('ava')
 const fs = require('fs')
 
 const {
-  kTestOwnerDIDNoMethod,
-  kPassword: password
+  TEST_OWNER_DID_NO_METHOD,
+  PASSWORD: password
 } = require('./_constants')
 
 const {
@@ -25,7 +25,7 @@ const getAFS = (t) => {
 }
 
 test.before(async (t) => {
-  const publicKey = Buffer.from(kTestOwnerDidNoMethod, 'hex')
+  const publicKey = Buffer.from(TEST_OWNER_DID_NO_METHOD, 'hex')
   const hash = crypto.blake2b(publicKey).toString('hex')
   const path = `${__dirname}/fixtures/identities`
   const ddoPath = resolve(path, hash, 'ddo.json')
@@ -34,7 +34,7 @@ test.before(async (t) => {
   const parsed = parse(identityPath)
   await pify(mkdirp)(parsed.dir)
   await pify(mirror)(resolve(path, hash), identityPath)
-  const did = kTestOwnerDidNoMethod
+  const did = TEST_OWNER_DID_NO_METHOD
   t.context = { ddo, did }
   let afs
   try {

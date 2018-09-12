@@ -11,8 +11,8 @@ const {
 } = require('../constants')
 
 const {
-  kTestOwnerDID,
-  kPassword: password
+  TEST_OWNER_DID,
+  PASSWORD: password
 } = require('./_constants')
 
 test.serial("create() invalid password", async (t) => {
@@ -22,18 +22,18 @@ test.serial("create() invalid password", async (t) => {
 
 test.serial("create() invalid owner", async (t) => {
   await t.throws(aid.create({ password }), TypeError, "Public key must not be empty")
-  await t.throws(aid.create({ password, owner: kTestOwnerDid.slice(32) }), TypeError, "DID must be 64 chars")
+  await t.throws(aid.create({ password, owner: TEST_OWNER_DID.slice(32) }), TypeError, "DID must be 64 chars")
   await t.throws(aid.create({ password, owner: 111 }), TypeError, "Public key must be of type string")
 })
 
 test.serial("create() valid params", async (t) => {
-  const { did, ddo, mnemonic } = await aid.create({ password, owner: kTestOwnerDid })
+  const { did, ddo, mnemonic } = await aid.create({ password, owner: TEST_OWNER_DID })
   t.true(did && 'object' === typeof did)
   t.true(ddo && 'object' === typeof ddo)
   t.true(mnemonic && 'string' === typeof mnemonic)
 
   const { authenticationKey } = ddo.authentication[0]
-  t.true(authenticationKey.includes(kTestOwnerDid))
+  t.true(authenticationKey.includes(TEST_OWNER_DID))
 })
 
 test.serial("archive() invalid identity", async (t) => {
@@ -42,12 +42,12 @@ test.serial("archive() invalid identity", async (t) => {
 })
 
 test.serial("archive() invalid opts", async (t) => {
-  const afsId = await aid.create({ password, owner: kTestOwnerDid })
+  const afsId = await aid.create({ password, owner: TEST_OWNER_DID })
   await t.throws(aid.archive(afsId, { }), Error, "Expecting options object")
 })
 
 test.serial("archive() valid params", async (t) => {
-  const afsId = await aid.create({ password, owner: kTestOwnerDid })
+  const afsId = await aid.create({ password, owner: TEST_OWNER_DID })
 
   const keystore = await loadSecrets(kArchiverKey)
   await t.notThrows(aid.archive(afsId, { key: kArchiverKey, keystore }))
@@ -60,12 +60,12 @@ test.serial("resolve() invalid did", async (t) => {
 })
 
 test.serial("resolve() invalid opts", async (t) => {
-  const afsId = await aid.create({ password, owner: kTestOwnerDid })
+  const afsId = await aid.create({ password, owner: TEST_OWNER_DID })
   await t.throws(aid.archive(afsId), Error, "Expecting opts object")
 })
 
 test.serial("resolve() valid params", async (t) => {
-  const afsId = await aid.create({ password, owner: kTestOwnerDid })
+  const afsId = await aid.create({ password, owner: TEST_OWNER_DID })
 
   await writeIdentity(afsId)
 

@@ -10,9 +10,9 @@ const pify = require('pify')
 const test = require('ava')
 
 const {
-  kTestOwnerDID,
-  kTestOwnerDIDNoMethod,
-  kPassword: password
+  TEST_OWNER_DID,
+  TEST_OWNER_DID_NO_METHOD,
+  PASSWORD: password
 } = require('./_constants')
 
 const getDid = (t) => {
@@ -26,7 +26,7 @@ const getDdo = (t) => {
 }
 
 test.before(async (t) => {
-  const publicKey = Buffer.from(kTestOwnerDidNoMethod, 'hex')
+  const publicKey = Buffer.from(TEST_OWNER_DID_NO_METHOD, 'hex')
   const hash = crypto.blake2b(publicKey).toString('hex')
   const path = `${__dirname}/fixtures/identities`
   const ddoPath = resolve(path, hash, 'ddo.json')
@@ -35,7 +35,7 @@ test.before(async (t) => {
   const parsed = parse(identityPath)
   await pify(mkdirp)(parsed.dir)
   await pify(mirror)(resolve(path, hash), identityPath)
-  t.context = { ddo, did: kTestOwnerDidNoMethod }
+  t.context = { ddo, did: TEST_OWNER_DID_NO_METHOD }
 })
 
 test.afterEach(async (t) => {
@@ -146,18 +146,18 @@ test('create() null id', async (t) => {
 })
 
 test('create() no password', async (t) => {
-  await t.throwsAsync(create({ owner: kTestOwnerDid }), TypeError, 'ara-filesystem.create: Expecting non-empty password.')
+  await t.throwsAsync(create({ owner: TEST_OWNER_DID }), TypeError, 'ara-filesystem.create: Expecting non-empty password.')
 })
 
 test('create() incorrect password', async (t) => {
   const wrongPass = 'abcd'
   await t.throwsAsync(create({
-    owner: kTestOwnerDid,
+    owner: TEST_OWNER_DID,
     password: wrongPass
   }), Error, 'ara-filesystem.create: incorrect password.')
 
   await t.throwsAsync(create({
-    did: kTestOwnerDid,
+    did: TEST_OWNER_DID,
     password: wrongPass
   }), Error, 'ara-filesystem.create: incorrect password.')
 })
