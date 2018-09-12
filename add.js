@@ -1,12 +1,19 @@
 /* eslint-disable no-await-in-loop */
 
 const debug = require('debug')('ara-filesystem:add')
-const { join, basename } = require('path')
 const mirror = require('mirror-folder')
 const ignored = require('./lib/ignore')
 const { create } = require('./create')
 const isFile = require('is-file')
+const mkdirp = require('mkdirp')
+const { access } = require('fs')
 const pify = require('pify')
+
+const {
+  join,
+  basename,
+  resolve
+} = require('path')
 
 /**
  * Adds one or more files to the AFS
@@ -47,19 +54,22 @@ async function add(opts) {
 
   async function mirrorPaths(p) {
     for (const path of p) {
-      await mirrorPath(path)
+      try {
+        await pify(access)(resolve(path))
+        await mirrorPath(path)
+      } catch (err) {
+        debug('%s does not exist', path)
+      }
     }
   }
 
   async function mirrorPath(path) {
     debug(`copy start: ${path}`)
-    let name = afs.HOME
-
+    const name = join(afs.HOME, basename(path))
     // Check if file
-    if (await pify(isFile)(path)) {
-      name = join(afs.HOME, basename(path))
+    if (!(await pify(isFile)(path))) {
+      await pify(mkdirp)(name, { fs: afs })
     }
-
     // Mirror and log
     const progress = mirror({ name: path }, { name, fs: afs }, { keepExisting: true, ignore })
     progress.on('put', (src, dst) => {
@@ -76,7 +86,7 @@ async function add(opts) {
     })
 
     // Await end or error
-    const error = await new Promise((resolve, reject) => progress.once('end', resolve).once('error', reject))
+    const error = await new Promise((accept, reject) => progress.once('end', accept).once('error', reject))
 
     if (error) {
       debug(`copy error: ${path}: ${error}`)

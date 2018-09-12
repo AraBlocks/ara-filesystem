@@ -77,7 +77,7 @@ async function archive(identity, opts = {}) {
   try {
     opts = {
       secret: opts.secret || kArchiverSecret,
-      name: opts.name || kArchiverRemote,
+      network: opts.name || kArchiverRemote,
       keyring: opts.keyring || secret.archiver
     }
     await aid.archive(identity, opts)
@@ -105,7 +105,7 @@ async function resolve(did, opts = {}) {
   try {
     opts = {
       secret: opts.secret || kResolverSecret,
-      name: opts.name || kResolverRemote,
+      network: opts.name || kResolverRemote,
       keyring: opts.keyring || secret.resolver
     }
     result = await aid.resolve(did, opts)

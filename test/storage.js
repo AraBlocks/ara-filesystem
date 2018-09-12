@@ -6,8 +6,8 @@ const RandomAccessFile = require('random-access-file')
 const { createAFSKeyPath } = require('../key-path')
 
 const {
-  kTestDid,
-  kPassword: password
+  TEST_DID,
+  PASSWORD: password
 } = require('./_constants')
 
 const {
@@ -30,8 +30,8 @@ test("resolveBufferIndex() valid params", (t) => {
 })
 
 test("defaultStorage() validate return values", (t) => {
-  const storage = defaultStorage(kTestDid, password)
-  const path = createAFSKeyPath(kTestDid)
+  const storage = defaultStorage(TEST_DID, password)
+  const path = createAFSKeyPath(TEST_DID)
 
   let result = storage('metadata/tree', null, `${path}/home`)
   t.true(result.constructor === RandomAccessStorage)

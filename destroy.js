@@ -37,7 +37,6 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
- * @param {String}   opts.mnemonic
  */
 async function destroy(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -46,8 +45,6 @@ async function destroy(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if (opts.password && 'string' !== typeof opts.password) {
     throw TypeError('Expecting non-empty password.')
-  } else if (opts.mnemonic && 'string' !== typeof opts.mnemonic) {
-    throw new TypeError('Expecting non-empty mnemonic.')
   }
 
   let { did } = opts
@@ -80,23 +77,21 @@ async function destroy(opts) {
   }
 
   const { password } = opts
-  let { mnemonic } = opts
 
-  if (password && mnemonic) {
+  if (password) {
+    try {
+      ({ did } = await validate({ did, password, label: 'destroy' }))
+    } catch (err) {
+      throw err
+    }
+
     if (!(await proxyExists(did))) {
       debug('This content does not have a valid proxy contract.')
       return
     }
+
     const afsDdo = await resolveDDO(did)
     let owner = getDocumentOwner(afsDdo, true)
-    mnemonic = mnemonic.trim()
-
-    let ddo
-    try {
-      ({ did, ddo } = await validate({ did, password, label: 'destroy' }))
-    } catch (err) {
-      throw err
-    }
 
     owner = `${kAidPrefix}${owner}`
     const acct = await account.load({ did: owner, password })

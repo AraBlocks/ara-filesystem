@@ -1,50 +1,68 @@
-const test = require('ava')
-const context = require('ara-context')()
-const aid = require('ara-identity')
-const fs = require('fs')
+const { PASSWORD: password } = require('./_constants')
+const { resolve } = require('path')
 const pify = require('pify')
-const { create, unarchive, add } = require('../')
-const { writeIdentity } = require('ara-identity/util')
-const { kPassword: password } = require('./_constants')
+const test = require('ava')
+const fs = require('fs')
 
-const getDid = t => t.context.did
+const {
+  mirrorIdentity,
+  createAFS,
+  cleanup
+} = require('./_util')
+
+const {
+  unarchive,
+  add
+} = require('../')
+
 const kTestFilename = 'hello.txt'
 
+const getAFS = (t) => {
+  const { afs } = t.context
+  return afs
+}
+
 test.before(async (t) => {
-  const identity = await aid.create({ context, password })
-  await writeIdentity(identity)
-  let { publicKey } = identity
-  publicKey = publicKey.toString('hex')
-  const { afs } = await create({ owner: publicKey, password })
-  t.context = { did: afs.did }
+  t.context = await mirrorIdentity()
 })
 
-test.serial('unarchive() invalid opts', async (t) => {
-  const did = getDid(t)
+test.beforeEach(async (t) => {
+  t.context = await createAFS(t)
+})
+
+test.afterEach(async (t) => {
+  await cleanup(t)
+})
+
+test('unarchive() invalid opts', async (t) => {
+  const afs = getAFS(t)
+  const { did } = afs
 
   // validate DID
-  await t.throws(unarchive(), TypeError)
-  await t.throws(unarchive({ }), TypeError)
-  await t.throws(unarchive({ did: 1234 }), TypeError)
+  await t.throwsAsync(unarchive(), TypeError)
+  await t.throwsAsync(unarchive({ }), TypeError)
+  await t.throwsAsync(unarchive({ did: 1234 }), TypeError)
 
   // validate path
-  await t.throws(unarchive({ did, path: 123 }), TypeError)
+  await t.throwsAsync(unarchive({ did, path: 123 }), TypeError)
 })
 
-test.serial('unarchive() empty AFS', async (t) => {
-  const did = getDid(t)
-  await t.throws(unarchive({ did }), Error)
+test('unarchive() empty AFS', async (t) => {
+  const afs = getAFS(t)
+  const { did } = afs
+  await t.throwsAsync(unarchive({ did }), Error)
 })
 
-test.serial('unarchive() valid unarchive', async (t) => {
-  const did = getDid(t)
+test('unarchive() valid unarchive', async (t) => {
+  const afs = getAFS(t)
+  const { did } = afs
   // create test file and add to test AFS
-  await pify(fs.writeFile)(kTestFilename, 'Hello World!')
+  await pify(fs.writeFile)(resolve(kTestFilename), 'Hello World!')
   await add({ did, password, paths: [ kTestFilename ] })
 
   // test unarchive to cwd
   await unarchive({ did })
-  await t.notThrows(pify(fs.access)(kTestFilename))
+  await t.notThrowsAsync(pify(fs.access)(kTestFilename))
   const result = await pify(fs.readFile)(kTestFilename, 'utf8')
   t.is(result, 'Hello World!')
 })
