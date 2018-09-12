@@ -1,17 +1,12 @@
 const { createIdentityKeyPath } = require('ara-identity')
-const { resolve, parse } = require('path')
-const mirror = require('mirror-folder')
+const { mirrorIdentity } = require('./_util')
 const { create } = require('../create')
-const crypto = require('ara-crypto')
-const { readFile } = require('fs')
 const rimraf = require('rimraf')
-const mkdirp = require('mkdirp')
 const pify = require('pify')
 const test = require('ava')
 
 const {
   TEST_OWNER_DID,
-  TEST_OWNER_DID_NO_METHOD,
   PASSWORD: password
 } = require('./_constants')
 
@@ -26,16 +21,7 @@ const getDdo = (t) => {
 }
 
 test.before(async (t) => {
-  const publicKey = Buffer.from(TEST_OWNER_DID_NO_METHOD, 'hex')
-  const hash = crypto.blake2b(publicKey).toString('hex')
-  const path = `${__dirname}/fixtures/identities`
-  const ddoPath = resolve(path, hash, 'ddo.json')
-  const ddo = JSON.parse(await pify(readFile)(ddoPath, 'utf8'))
-  const identityPath = createIdentityKeyPath(ddo)
-  const parsed = parse(identityPath)
-  await pify(mkdirp)(parsed.dir)
-  await pify(mirror)(resolve(path, hash), identityPath)
-  t.context = { ddo, did: TEST_OWNER_DID_NO_METHOD }
+  t.context = await mirrorIdentity()
 })
 
 test.afterEach(async (t) => {

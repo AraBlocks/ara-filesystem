@@ -1,4 +1,15 @@
-const { web3 } = require('ara-context')()
+const { TEST_OWNER_DID_NO_METHOD } = require('./_constants')
+const { createIdentityKeyPath } = require('ara-identity')
+const mirror = require('mirror-folder')
+const crypto = require('ara-crypto')
+const { readFile } = require('fs')
+const mkdirp = require('mkdirp')
+const pify = require('pify')
+
+const {
+  resolve,
+  parse
+} = require('path')
 
 module.exports = {
 
@@ -16,22 +27,17 @@ module.exports = {
     return context.account
   },
 
-  async supplyAccount(address, accounts, transferAmount) {
-    let balance = 0
-    let i = 0
-    while (balance < 1) {
-      if (!accounts[i]) {
-        break
-      }
-      // eslint-disable-next-line no-await-in-loop
-      balance = await web3.eth.getBalance(accounts[i])
-      balance = Number(web3.utils.fromWei(balance, 'ether'))
-      i++
-    }
-
-    if (accounts[i]) {
-      await web3.eth.sendTransaction({ from: accounts[i], to: address, value: transferAmount })
-    }
+  async mirrorIdentity() {
+    const publicKey = Buffer.from(TEST_OWNER_DID_NO_METHOD, 'hex')
+    const hash = crypto.blake2b(publicKey).toString('hex')
+    const path = `${__dirname}/fixtures/identities`
+    const ddoPath = resolve(path, hash, 'ddo.json')
+    const ddo = JSON.parse(await pify(readFile)(ddoPath, 'utf8'))
+    const identityPath = createIdentityKeyPath(ddo)
+    const parsed = parse(identityPath)
+    await pify(mkdirp)(parsed.dir)
+    await pify(mirror)(resolve(path, hash), identityPath)
+    return { ddo, did: TEST_OWNER_DID_NO_METHOD }
   }
 
 }
