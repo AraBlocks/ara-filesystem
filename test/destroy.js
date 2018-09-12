@@ -1,11 +1,9 @@
 /* eslint quotes: "off" */
 
 const { PASSWORD: password } = require('./_constants')
-const { mirrorIdentity } = require('./_util')
 const { destroy } = require('../destroy')
 const { create } = require('../create')
 const aid = require('ara-identity')
-const rimraf = require('rimraf')
 const pify = require('pify')
 const test = require('ava')
 const fs = require('fs')
@@ -14,6 +12,11 @@ const {
   createIdentityKeyPathFromPublicKey,
   createAFSKeyPath
 } = require('../key-path')
+
+const {
+  mirrorIdentity,
+  cleanup
+} = require('./_util')
 
 const getAFS = (t) => {
   const { afs } = t.context
@@ -37,11 +40,7 @@ test.beforeEach(async (t) => {
 })
 
 test.afterEach(async (t) => {
-  const { idPath, afsPath } = t.context
-  if (idPath && afsPath) {
-    await pify(rimraf)(idPath)
-    await pify(rimraf)(afsPath)
-  }
+  await cleanup(t)
 })
 
 test("destroy() invalid did", async (t) => {

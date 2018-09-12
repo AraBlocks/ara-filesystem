@@ -1,14 +1,17 @@
 const { createAFSKeyPath } = require('../key-path')
-const { mirrorIdentity } = require('./_util')
 const { create } = require('../create')
 const metadata = require('../metadata')
 const aid = require('ara-identity')
-const rimraf = require('rimraf')
 const pify = require('pify')
 const test = require('ava')
 const fs = require('fs')
 
 const { PASSWORD: password } = require('./_constants')
+
+const {
+  mirrorIdentity,
+  cleanup
+} = require('./_util')
 
 const getAFS = (t) => {
   const { afs } = t.context
@@ -29,11 +32,7 @@ test.before(async (t) => {
 })
 
 test.after(async (t) => {
-  const { idPath, afsPath } = t.context
-  if (idPath && afsPath) {
-    await pify(rimraf)(idPath)
-    await pify(rimraf)(afsPath)
-  }
+  await cleanup(t)
 })
 
 test('writeFile(opts) invalid opts', async (t) => {

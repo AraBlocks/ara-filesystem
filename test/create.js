@@ -1,15 +1,17 @@
 const { createIdentityKeyPath } = require('ara-identity')
 const { createAFSKeyPath } = require('../key-path')
-const { mirrorIdentity } = require('./_util')
 const { create } = require('../create')
-const rimraf = require('rimraf')
-const pify = require('pify')
 const test = require('ava')
 
 const {
   TEST_OWNER_DID,
   PASSWORD: password
 } = require('./_constants')
+
+const {
+  mirrorIdentity,
+  cleanup
+} = require('./_util')
 
 const getDid = (t) => {
   const { did } = t.context
@@ -26,11 +28,7 @@ test.before(async (t) => {
 })
 
 test.afterEach(async (t) => {
-  const { idPath, afsPath } = t.context
-  if (idPath) {
-    await pify(rimraf)(idPath)
-    await pify(rimraf)(afsPath)
-  }
+  await cleanup(t)
 })
 
 test('create() valid id', async (t) => {

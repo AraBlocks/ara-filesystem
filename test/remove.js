@@ -2,16 +2,19 @@
 
 const { PASSWORD: password } = require('./_constants')
 const { createAFSKeyPath } = require('../key-path')
-const { mirrorIdentity } = require('./_util')
 const isDirectory = require('is-directory')
 const { create } = require('../create')
 const { remove } = require('../remove')
 const aid = require('ara-identity')
 const { add } = require('../add')
-const rimraf = require('rimraf')
 const pify = require('pify')
 const test = require('ava')
 const fs = require('fs')
+
+const {
+  mirrorIdentity,
+  cleanup
+} = require('./_util')
 
 const {
   resolve,
@@ -40,11 +43,7 @@ test.beforeEach(async (t) => {
 })
 
 test.afterEach(async (t) => {
-  const { idPath, afsPath } = t.context
-  if (idPath && afsPath) {
-    await pify(rimraf)(idPath)
-    await pify(rimraf)(afsPath)
-  }
+  await cleanup(t)
 })
 
 test('remove() valid did, valid password, no paths', async (t) => {
