@@ -27,8 +27,9 @@ function createIdentityKeyPathFromPublicKey(publicKey) {
     const { publicKeyHex } = publicKey[0]
     publicKey = Buffer.from(publicKeyHex, 'hex')
   }
-  if ('string' === typeof publicKey)
+  if ('string' === typeof publicKey) {
     publicKey = Buffer.from(publicKey, 'hex')
+  }
   const hash = toHex(blake2b(publicKey))
   return resolve(root, hash)
 }

@@ -2,8 +2,6 @@
 
 const test = require('ava')
 const util = require('../util')
-const { kTestOwnerDid } = require('./_constants')
-const { kResolverKey } = require('../constants')
 
 test("generateKeypair() invalid password", (t) => {
   t.throws(() => util.generateKeypair(), TypeError, "empty password")
@@ -59,26 +57,6 @@ test("randomBytes() validate random bytes", (t) => {
   t.true(bufSize === buf.length)
 })
 
-test("loadSecrets() invalid key", async (t) => {
-  await t.throws(util.loadSecrets(), TypeError, "key needs to be a buffer or string")
-})
-
-test("loadSecrets() validate returned secrets", async (t) => {
-  const { crypto } = await util.loadSecrets(kResolverKey)
-  const { ciphertext } = crypto
-  t.true(null !== crypto && null !== ciphertext)
-})
-
-test("normalize() normalize DID cases", (t) => {
-  const shortDid = 'did:ara:1234567890'
-  t.throws(() => util.normalize(shortDid), Error, "DID must be 64 characters")
-
-  const didWithoutPrefix = 'did:1234567890'
-  t.throws(() => util.normalize(didWithoutPrefix), TypeError, "DID is missing ara prefix")
-
-  t.notThrows(() => util.normalize(kTestOwnerDid), Error, "DID is not valid")
-})
-
 test("encryptJSON() decryptJSON() valid params", (t) => {
   const json = { number: 1 }
   const encrypted = util.encryptJSON(json, 'password')
@@ -88,9 +66,3 @@ test("encryptJSON() decryptJSON() valid params", (t) => {
 
   t.deepEqual(json, JSON.parse(decrypted.toString()))
 })
-
-test("hasDIDMethod(key)", (t) => {
-  t.false(util.hasDIDMethod('1234'))
-  t.true(util.hasDIDMethod('did:ara:1234'))
-})
-

@@ -1,23 +1,19 @@
 /* eslint quotes: "off" */
 
+const { blake2b } = require('ara-crypto')
+const mirror = require('mirror-folder')
+const { create } = require('../create')
+const aid = require('ara-identity')
+const { add } = require('../add')
+const mkdirp = require('mkdirp')
+const pify = require('pify')
 const test = require('ava')
 const fs = require('fs')
-const { writeIdentity } = require('ara-identity/util')
-const aid = require('ara-identity')
-const context = require('ara-context')()
-const { resolve } = require('path')
-const { create } = require('../create')
-const { add } = require('../add')
-const { decryptJSON } = require('../util')
-const { blake2b } = require('ara-crypto')
-const { web3 } = require('ara-context')()
-const { abi } = require('ara-contracts/build/contracts/AFS.json')
-const { kStorageAddress } = require('../constants')
 
 const {
-  kPassword: password,
-  kTestDid,
-  kTestOwnerDid
+  PASSWORD: password,
+  TEST_DID,
+  TEST_OWNER_DID_NO_METHOD
 } = require('./_constants')
 
 const {
@@ -28,13 +24,13 @@ const {
   estimateCommitGasCost
 } = require('../commit')
 
-const getDid = (t) => {
-  const { did } = t.context
-  return did
-}
+const {
+  resolve,
+  parse
+} = require('path')
 
 const runValidCommit = async (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
   await commit({ did, password })
   return did
 }
@@ -44,47 +40,64 @@ const isHex = (input) => {
   return regexp.test(input)
 }
 
-test.before(async (t) => {
-  // create owner identity
-  const identity = await aid.create({ context, password })
-  await writeIdentity(identity)
-  let { publicKey } = identity
-  publicKey = publicKey.toString('hex')
+const getAFS = (t) => {
+  const { afs } = t.context
+  return afs
+}
 
-  // create afs
-  const { afs } = await create({ owner: kTestOwnerDid, password })
-  const { did } = afs
-  t.context = { did, publicKey }
+test.before(async (t) => {
+  const publicKey = Buffer.from(TEST_OWNER_DID_NO_METHOD, 'hex')
+  const hash = blake2b(publicKey).toString('hex')
+  const path = `${__dirname}/fixtures/identities`
+  const ddoPath = resolve(path, hash, 'ddo.json')
+  const ddo = JSON.parse(await pify(fs.readFile)(ddoPath, 'utf8'))
+  const identityPath = aid.createIdentityKeyPath(ddo)
+  const parsed = parse(identityPath)
+  await pify(mkdirp)(parsed.dir)
+  await pify(mirror)(resolve(path, hash), identityPath)
+  t.context = { ddo, did: TEST_OWNER_DID_NO_METHOD }
+})
+
+test.beforeEach(async (t) => {
+  const { did, ddo } = t.context
+  let afs
+  try {
+    // eslint-disable-next-line semi
+    ({ afs } = await create({ owner: did, password, ddo }));
+  } catch (err) {
+    console.log(err)
+  }
+  t.context = { afs }
 })
 
 test("generateStagedPath() valid did", (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
   const path = generateStagedPath(did)
   t.notThrows(() => fs.accessSync(path))
 })
 
 test("commit() invalid did", async (t) => {
-  await t.throws(commit({ did: 'did:ara:1234' }), Error, "Expecting a valid DID URI")
-  await t.throws(commit({ did: 1234 }), TypeError, "Expecting DID to be a string")
+  await t.throwsAsync(commit({ did: 'did:ara:1234' }), Error, "Expecting a valid DID URI")
+  await t.throwsAsync(commit({ did: 1234 }), TypeError, "Expecting DID to be a string")
 })
 
 test("commit() invalid password", async (t) => {
-  await t.throws(commit({ did: kTestDid, password: null }), TypeError, "Expecting password to be non-null")
-  await t.throws(commit({ did: kTestDid, password: 1234 }), TypeError, "Expecting password to be a string")
+  await t.throwsAsync(commit({ did: TEST_DID, password: null }), TypeError, "Expecting password to be non-null")
+  await t.throwsAsync(commit({ did: TEST_DID, password: 1234 }), TypeError, "Expecting password to be a string")
 })
 
 test("commit() incorrect password", async (t) => {
-  const did = getDid(t)
-  await t.throws(commit({ did, password: 'wrong_password' }), Error, "Incorrect password")
+  const { did } = getAFS(t)
+  await t.throwsAsync(commit({ did, password: 'wrong_password' }), Error, "Incorrect password")
 })
 
 test("commit() no changes to commit", async (t) => {
   const did = await runValidCommit(t)
-  await t.throws(commit({ did, password }), Error, "No staged commits ready to be pushed")
+  await t.throwsAsync(commit({ did, password }), Error, "No staged commits ready to be pushed")
 })
 
 test("commit() staged file successfully deleted", async (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
   const file = resolve(__dirname, 'commit.js')
   await add({ did, paths: [ file ], password })
 
@@ -93,50 +106,8 @@ test("commit() staged file successfully deleted", async (t) => {
   t.throws(() => fs.accessSync(path))
 })
 
-test("commit() previously cached buffers match blockchain buffers", async (t) => {
-  const file = resolve(__dirname, '../index.js')
-
-  const { publicKey } = t.context
-  const { afs } = await create({ owner: publicKey, password })
-  const { did } = afs
-  await add({ did, paths: [ file ], password })
-  const path = generateStagedPath(did)
-
-  let contents = fs.readFileSync(path, 'utf8')
-  contents = JSON.parse(decryptJSON(contents, password))
-
-  const mTree = contents['metadata/tree']
-  const mSig = contents['metadata/signatures']
-
-  await commit({ did, password })
-
-  const deployed = new web3.eth.Contract(abi, kStorageAddress)
-  const hIdentity = blake2b(Buffer.from(did)).toString('hex')
-
-  let buffer = await deployed.methods.read(hIdentity, 0, 0).call()
-  t.is(mTree['0'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 0, 32).call()
-  t.is(mTree['32'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 0, 72).call()
-  t.is(mTree['72'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 0).call()
-  t.is(mSig['0'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 32).call()
-  t.is(mSig['32'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 96).call()
-  t.is(mSig['96'], buffer.slice(2))
-
-  buffer = await deployed.methods.read(hIdentity, 1, 160).call()
-  t.is(mSig['160'], buffer.slice(2))
-})
-
 test("retrieve() offset doesn't exist", (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
   const result = retrieve({
     did,
     fileIndex: 0,
@@ -147,7 +118,7 @@ test("retrieve() offset doesn't exist", (t) => {
 })
 
 test("retrieve() valid params", (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
 
   // validate metadata/tree
   const mtHeader = retrieve({ did, fileIndex: 0, password })
@@ -159,7 +130,7 @@ test("retrieve() valid params", (t) => {
 })
 
 test("append() valid params", (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
   const data = Buffer.from('0x0101')
   append({
     did,
@@ -184,18 +155,18 @@ test("estimateCommitGasCost() invalid did", async (t) => {
 })
 
 test("estimateCommitGasCost() invalid password", async (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
   await t.throws(estimateCommitGasCost({ did }), TypeError, "Expecting non-empty string for password")
   await t.throws(estimateCommitGasCost({ did, password: 123 }), TypeError, "Expecting non-empty string for password")
 })
 
 test("estimateCommitGasCost() incorrect password", async (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
   await t.throws(estimateCommitGasCost({ did, password: 'wrongPassword' }), Error, "Incorrect password")
 })
 
 test("estimateCommitGasCost() valid params", async (t) => {
-  const did = getDid(t)
+  const { did } = getAFS(t)
   const cost = await estimateCommitGasCost({ did, password })
   t.true('number' === typeof cost && 0 <= cost)
 })

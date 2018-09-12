@@ -80,6 +80,7 @@ async function commit(opts) {
   } catch (err) {
     throw err
   }
+
   let proxy
   if (await proxyExists(did)) {
     proxy = await getProxyAddress(did)
@@ -108,19 +109,22 @@ async function commit(opts) {
   const acct = await account.load({ did: owner, password })
 
   const result = await _write({
-      mtData,
-      msData,
-      account: acct,
-      proxy
-    }, estimate, exists)
+    mtData,
+    msData,
+    account: acct,
+    proxy
+  }, estimate, exists)
 
   if (estimate) {
     if (0 < price) {
-      const setPriceGasCost = await estimateSetPriceGasCost({ did, password, price})
+      const setPriceGasCost = await estimateSetPriceGasCost({
+        did,
+        password,
+        price
+      })
       return result + setPriceGasCost
-    } else {
-      return result
     }
+    return result
   }
 
   await _deleteStagedFile(path)
@@ -195,13 +199,8 @@ async function estimateCommitGasCost(opts) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  const { did, password, price } = opts
-  return commit({
-    did,
-    password,
-    estimate: true,
-    price
-  })
+  opts = Object.assign(opts, { estimate: true })
+  return commit(opts)
 }
 
 async function _write(opts, estimate = true, append = false) {
