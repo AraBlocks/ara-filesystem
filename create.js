@@ -65,6 +65,13 @@ async function create(opts) {
   let afs
   let mnemonic
   if (did) {
+    let proxy
+    if (!ddo) {
+      if (await proxyExists(did)) {
+        proxy = await getProxyAddress(did)
+      }
+    }
+
     try {
       ({ did, ddo } = await validate({
         did,
@@ -74,13 +81,6 @@ async function create(opts) {
       }))
     } catch (err) {
       throw err
-    }
-
-    let proxy
-    if (!ddo) {
-      if (await proxyExists(did)) {
-        proxy = await getProxyAddress(did)
-      }
     }
 
     const id = getDocumentKeyHex(ddo)
