@@ -61,8 +61,8 @@ async function setPrice(opts) {
     throw new TypeError('Expecting boolean.')
   }
 
-  let { did, estimate } = opts
-  const { password, price } = opts
+  let { did, estimate, price } = opts
+  const { password } = opts
 
   estimate = estimate || false
 
@@ -140,7 +140,7 @@ async function getPrice(opts) {
     functionName: 'price_'
   })
   debug('price for %s: %d', did, result)
-  
+
   return token.constrainTokenValue(result)
 }
 
