@@ -1,11 +1,12 @@
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const debug = require('debug')('ara-filesystem:aid')
-const context = require('ara-context')()
 const hasDIDMethod = require('has-did-method')
-const { normalize } = require('ara-util')
+const context = require('ara-context')()
 const { secret } = require('./rc')()
 const aid = require('ara-identity')
+const util = require('ara-util')
 
+const { normalize } = util
 const {
   kKeyLength,
   kAidPrefix,
@@ -116,8 +117,38 @@ async function resolve(did, opts = {}) {
   return result
 }
 
+/**
+ * Validate an Ara Identity. Wraps ara-util.validate.
+ * @param {Object} opts
+ * @return {Object}
+ * @throws {Error,TypeError}
+ */
+async function validate(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts to be of type object.')
+  }
+
+  if (!opts.keyringOpts || 'object' !== typeof opts.keyringOpts) {
+    opts.keyringOpts = {
+      secret: kResolverSecret,
+      name: kResolverRemote,
+      keyring: secret.resolver
+    }
+  }
+
+  let result
+  try {
+    result = await util.validate(opts)
+  } catch (err) {
+    throw err
+  }
+
+  return result
+}
+
 module.exports = {
   archive,
   create,
-  resolve
+  resolve,
+  validate
 }

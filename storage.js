@@ -3,6 +3,7 @@ const debug = require('debug')('ara-filesystem:storage')
 const ras = require('random-access-storage')
 const raf = require('random-access-file')
 const unixify = require('unixify')
+const aid = require('./aid')
 
 const {
   writeToStaged,
@@ -17,7 +18,6 @@ const {
 } = require('./constants')
 
 const {
-  validate,
   getDocumentOwner,
   web3: {
     tx,
@@ -103,7 +103,7 @@ function create({
 
     async del(req) {
       if (writable && proxy) {
-        const { ddo } = await validate({ identity, password, label: 'storage' })
+        const { ddo } = await aid.validate({ identity, password, label: 'storage' })
         const owner = getDocumentOwner(ddo, true)
         const acct = await account.load({ did: owner, password })
 
