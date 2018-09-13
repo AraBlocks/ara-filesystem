@@ -8,7 +8,7 @@ The Ara FileSystem, isolated and secure file systems backed by ARA identities.
 
 This project is still in alpha development.
 
-> **Important**: While this project is under active development, run `npm link` in `ara-filesystem` directory with `ara-identity`, `ara-util`, `ara-contracts`, `ara-network`, `ara-network-node-identity-archiver`, and `ara-network-node-identity-resolver` cloned locally. 
+> **Important**: While this project is under active development, run `npm link` in `ara-filesystem` directory with `ara-identity`, `ara-util`, `ara-contracts`, `ara-network`, `ara-network-node-identity-archiver`, and `ara-network-node-identity-resolver` cloned locally.
 
 ## Dependencies
 
@@ -23,9 +23,7 @@ $ npm install --save ara-filesystem
 
 ## Usage
 
-The follow section lists the prerequisites for running the project as well as the available commands. 
-
->**Important**: Each CLI command requires the password of the owner identity (the one created with `aid create`). Do not forget this password, as it's the only way to interact with your AFS.
+>**Important**: Each CLI command requires the password of the owner identity (the one created with `aid create`). Do not forget this password, as it's the only way to interact with the AFS.
 
 ### Prerequisites
 
@@ -58,9 +56,9 @@ The follow section lists the prerequisites for running the project as well as th
       ```
 - To communicate with the [Ara privatenet blockchain](https://github.com/AraBlocks/ara-privatenet) and deploy an AFS proxy, you must be running a local geth node.
 
-### Creating an ARA Identity
+### Create an ARA Identity
 
-Run the create command found in ARA identity.
+Run the create command found in [aid](https://github.com/AraBlocks/ara-identity).
 
 ```sh
 $ aid create
@@ -68,31 +66,30 @@ $ aid create
 
 > **Important**: Do not lose your password and mnemonic as your account cannot be recovered without them.
 
-Then, archive the identity.
+Archive the identity.
 
 ```sh
 $ aid archive <did> -s ara-archiver -n remote1 -k ~/.ara/keyrings/ara-archiver.pub
 ```
 
-If you successfully archived the identity, you should be able to resolve it:
+Once successfully archived, resolve the identity:
 
 ```sh
 $ aid resolve <did> -s ara-resolver -n remote2 -k ~/.ara/keyrings/ara-resolver.pub --cache==false
 ```
 
-### Creating an AFS
+### Create an AFS
 
-To create an AFS, you can run the create command along with providing a valid owner identity.
+Run the create command with a valid owner identity.
 
 ```sh
 $ afs create did:ara:df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 ```
-
-Upon successful creation, a new identity will be outputted for this AFS. Store the mnemonic phrase in a safe place as it is the only recovery mechanism for your AFS.
+Store the mnemonic phrase in a safe place as it is the only recovery mechanism for your AFS.
 
 > **Note**: The `did:ara:` prefix is optional for all commands.
 
-### Adding to an AFS
+### Add a file to an AFS
 
 Adding files and/or directories can be done with the `add` command.
 
@@ -106,9 +103,7 @@ Example:
 $ afs add df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my_video.mp4
 ```
 
-### Removing from an AFS
-
-Removing files and/or directories if very similar to adding them.
+### Remove a file from an AFS
 
 ```sh
 $ afs remove <did> <pathspec...>
@@ -120,23 +115,23 @@ Example:
 $ afs remove df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my_video.mp4
 ```
 
-### Committing an AFS
+### Commit file(s) to an AFS
 
-Every change you make is saved to a local file on disc, you can think of these as staged commits. Before your changes are published to the ARA network and become discoverable, you have to commit them. You can commit with the `commit` command.
+Every change in the AFS saved to a local file on disc, much like staged commits. Changes must be commited before they are discoverable and published to the Ara network.
 
 ```sh
 $ afs commit df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 ```
 
-### Pricing an AFS
+### Price an AFS
 
-To set the price of an AFS, run the `set-price` command with the AFS identity.
+Set the price of an AFS by passing in an AFS identity and price in ara tokens. For example, this sets the price of the AFS to 10 ara tokens:
 
 ```sh
-$ afs set-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 10 // sets the price of the AFS to 10 ara tokens
+$ afs set-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 10
 ```
 
-To verify that the price was set:
+To verify set price:
 
 ```sh
 $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
@@ -161,7 +156,8 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 * [async metadata.clear(opts)](#clear)
 * [async metadata.readFile(opts)](#readfile)
 
-### `async create(opts)` <a name="create"></a>
+<a name="create"></a>
+### `async create(opts)`
 
 > **Stability: 2** Stable
 
@@ -190,7 +186,8 @@ const did = did:ara:df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90
 const { afs } = await create({ did, password })
 ```
 
-### `async destroy(opts)` <a name="destroy"></a>
+<a name="destroy"></a>
+### `async destroy(opts)`
 
 > **Stability: 2** Stable
 
@@ -211,7 +208,8 @@ await destroy({
 })
 ```
 
-### `async add(opts)` <a name="add"></a>
+<a name="add"></a>
+### `async add(opts)`
 
 > **Stability: 2** Stable
 
@@ -234,7 +232,8 @@ afs = await add({
 })
 ```
 
-### `async remove(opts)` <a name="remove"></a>
+<a name="remove"></a>
+### `async remove(opts)`
 
 > **Stability: 2** Stable
 
@@ -253,7 +252,8 @@ const afs = remove({
 })
 ```
 
-### `async commit(opts)` <a name="commit"></a>
+<a name="commit"></a>
+### `async commit(opts)`
 
 > **Stability: 2** Stable
 
@@ -263,7 +263,7 @@ Commits any changes to an `AFS` to the blockchain.
   - `did` - The `DID` of the `AFS` to commit
   - `password` - The password of the owner of this `AFS`
   - `estimate` - optional Flag to check cost of `commit`
-  - `price` - optional Price in Ara tokens to set this `AFS` 
+  - `price` - optional Price in Ara tokens to set this `AFS`
 
 ```js
 const result = await commit({
@@ -273,7 +273,8 @@ const result = await commit({
 })
 ```
 
-### `async estimateCommitGasCost(opts)` <a name="estimatecommit"></a>
+<a name="estimatecommit"></a>
+### `async estimateCommitGasCost(opts)`
 
 > **Stability: 2** Stable
 
@@ -292,7 +293,8 @@ const cost = await estimateCommitGasCost({
 })
 ```
 
-### `async setPrice(opts)` <a name="setprice"></a>
+<a name="setprice"></a>
+### `async setPrice(opts)`
 
 > **Stability: 2** Stable
 
@@ -313,7 +315,8 @@ await setPrice({
 })
 ```
 
-### `async getPrice(opts)` <a name="getprice"></a>
+<a name="getprice"></a>
+### `async getPrice(opts)`
 
 > **Stability: 2** Stable
 
@@ -326,7 +329,8 @@ Gets the price in Ara tokens of an `AFS`.
 const price = await getPrice({ did })
 ```
 
-### `async estimateSetPriceGasCost(opts)` <a name="estimateprice"></a>
+<a name="estimateprice"></a>
+### `async estimateSetPriceGasCost(opts)`
 
 > **Stability: 2** Stable
 
@@ -341,7 +345,8 @@ Estimates the cost (in ETH) of setting the price of an `AFS`.
 const cost = await estimateSetPriceGasCost({ did, password, price })
 ```
 
-### `async unarchive(opts)` <a name="unarchive"></a>
+<a name="unarchive"></a>
+### `async unarchive(opts)`
 
 > **Stability: 2** Stable
 
@@ -358,7 +363,8 @@ await unarchive({
 })
 ```
 
-### `async metadata.writeFile(opts)` <a name="writefile"></a>
+<a name="writefile"></a>
+### `async metadata.writeFile(opts)`
 
 > **Stability: 2** Stable
 
@@ -375,7 +381,8 @@ const result = await metadata.writeFile({
 })
 ```
 
-### `async metadata.writeKey(opts)` <a name="writekey"></a>
+<a name="writekey"></a>
+### `async metadata.writeKey(opts)`
 
 > **Stability: 2** Stable
 
@@ -396,7 +403,8 @@ const result = await metadata.writeKey({
 })
 ```
 
-### `async metadata.readKey(opts)` <a name="readkey"></a>
+<a name="readkey"></a>
+### `async metadata.readKey(opts)`
 
 > **Stability: 2** Stable
 
@@ -413,7 +421,8 @@ const result = await metadata.readKey({
 })
 ```
 
-### `async metadata.delKey(opts)` <a name="delkey"></a>
+<a name="delkey"></a>
+### `async metadata.delKey(opts)`
 
 > **Stability: 2** Stable
 
@@ -430,7 +439,8 @@ await metadata.delKey({
 })
 ```
 
-### `async metadata.clear(opts)` <a name="clear"></a>
+<a name="clear"></a>
+### `async metadata.clear(opts)`
 
 > **Stability: 2** Stable
 
@@ -443,7 +453,8 @@ Empties all metadata contents of an `AFS`.
 await afs.metadata.clear({ did })
 ```
 
-### `async metadata.readFile(opts)` <a name="readfile"></a>
+<a name="readfile"></a>
+### `async metadata.readFile(opts)`
 
 > **Stability: 2** Stable
 
