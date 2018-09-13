@@ -19,7 +19,6 @@ const {
 
 const {
   getDocumentKeyHex,
-  validate,
   web3: { toHex }
 } = require('ara-util')
 
@@ -73,11 +72,12 @@ async function create(opts) {
     }
 
     try {
-      ({ did, ddo } = await validate({
+      ({ did, ddo } = await aid.validate({
         did,
         password,
         label: 'create',
-        ddo
+        ddo,
+        keyringOpts
       }))
     } catch (err) {
       throw err
@@ -101,11 +101,12 @@ async function create(opts) {
     afs.ddo = ddo
   } else if (owner) {
     try {
-      ({ owner: did } = await validate({
+      ({ owner: did } = await aid.validate({
         owner,
         password,
         label: 'create',
-        ddo
+        ddo,
+        keyringOpts
       }))
     } catch (err) {
       throw err

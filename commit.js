@@ -4,6 +4,7 @@ const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
 const pify = require('pify')
+const aid = require('./aid')
 const fs = require('fs')
 
 const {
@@ -22,7 +23,6 @@ const {
 } = require('./constants')
 
 const {
-  validate,
   getDocumentOwner,
   web3: {
     tx,
@@ -76,7 +76,7 @@ async function commit(opts) {
 
   let ddo
   try {
-    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await aid.validate({ did, password, label: 'commit' }))
   } catch (err) {
     throw err
   }

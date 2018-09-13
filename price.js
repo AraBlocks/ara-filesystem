@@ -2,6 +2,7 @@ const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
 const { kAidPrefix } = require('./constants')
 const { token } = require('ara-contracts')
+const aid = require('./aid')
 
 const {
   proxyExists,
@@ -9,7 +10,6 @@ const {
 } = require('ara-contracts/registry')
 
 const {
-  validate,
   getDocumentOwner,
   web3: {
     tx,
@@ -68,7 +68,7 @@ async function setPrice(opts) {
 
   let ddo
   try {
-    ({ did, ddo } = await validate({ did, password, label: 'price' }))
+    ({ did, ddo } = await aid.validate({ did, password, label: 'price' }))
   } catch (err) {
     throw err
   }

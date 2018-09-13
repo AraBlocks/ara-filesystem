@@ -4,6 +4,7 @@ const { kAidPrefix } = require('./constants')
 const { access } = require('fs')
 const rimraf = require('rimraf')
 const pify = require('pify')
+const aid = require('./aid')
 const rc = require('./rc')()
 
 const {
@@ -17,9 +18,7 @@ const {
 } = require('./key-path')
 
 const {
-  validate,
   normalize,
-  resolveDDO,
   getDocumentOwner,
   web3: {
     tx,
@@ -80,7 +79,7 @@ async function destroy(opts) {
 
   if (password) {
     try {
-      ({ did } = await validate({ did, password, label: 'destroy' }))
+      ({ did } = await aid.validate({ did, password, label: 'destroy' }))
     } catch (err) {
       throw err
     }
@@ -90,7 +89,7 @@ async function destroy(opts) {
       return
     }
 
-    const afsDdo = await resolveDDO(did)
+    const afsDdo = await aid.resolve(did)
     let owner = getDocumentOwner(afsDdo, true)
 
     owner = `${kAidPrefix}${owner}`
