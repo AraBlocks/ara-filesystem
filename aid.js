@@ -118,15 +118,17 @@ async function resolve(did, opts = {}) {
 }
 
 /**
- * Validate a Ara Identity. Wraps ara-util.validate.
- * @param {Object} opts 
+ * Validate an Ara Identity. Wraps ara-util.validate.
+ * @param {Object} opts
+ * @return {Object}
+ * @throws {Error,TypeError}
  */
-async function validate(opts){
+async function validate(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
   }
 
-  if (!opts.keyringOpts || 'object' !== typeof opts.keyringOpts){
+  if (!opts.keyringOpts || 'object' !== typeof opts.keyringOpts) {
     opts.keyringOpts = {
       secret: kResolverSecret,
       name: kResolverRemote,
