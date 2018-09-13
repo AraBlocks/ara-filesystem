@@ -1,6 +1,6 @@
 <img src="https://github.com/AraBlocks/docs/blob/master/ara.png" width="30" height="30" /> ara-filesystem
 ========
-[![Build Status](https://travis-ci.com/AraBlocks/ara-filesystem.svg?token=34qxpAeMHQ3yJvunfTbQ&branch=develop)](https://travis-ci.com/AraBlocks/ara-filesystem)
+[![Build Status](https://travis-ci.com/AraBlocks/ara-filesystem.svg?token=34qxpAeMHQ3yJvunfTbQ&branch=master)](https://travis-ci.com/AraBlocks/ara-filesystem)
 
 The Ara FileSystem, isolated and secure file systems backed by ARA identities.
 
