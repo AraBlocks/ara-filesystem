@@ -1,6 +1,6 @@
 {
   "name": "ara-filesystem",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "The Ara FileSystem, isolated and secure file systems backed by Ara identities.",
   "main": "index.js",
   "bin": {
