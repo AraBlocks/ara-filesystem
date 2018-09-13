@@ -2,7 +2,7 @@
 ========
 [![Build Status](https://travis-ci.com/AraBlocks/ara-filesystem.svg?token=34qxpAeMHQ3yJvunfTbQ&branch=master)](https://travis-ci.com/AraBlocks/ara-filesystem)
 
-The Ara FileSystem, isolated and secure file systems backed by ARA identities.
+The Ara FileSystem, isolated and secure file systems backed by Ara identities.
 
 ## Status
 
@@ -56,7 +56,7 @@ $ npm install --save ara-filesystem
       ```
 - To communicate with the [Ara privatenet blockchain](https://github.com/AraBlocks/ara-privatenet) and deploy an AFS proxy, you must be running a local geth node.
 
-### Create an ARA Identity
+### Create an Ara Identity
 
 Run the create command found in [aid](https://github.com/AraBlocks/ara-identity).
 
@@ -477,7 +477,7 @@ Releases follow [Semantic Versioning](https://semver.org/)
 ## See Also
 
 - [Truffle](https://github.com/trufflesuite/truffle)
-- [ARA Identity](https://github.com/AraBlocks/ara-identity)
+- [ara-identity](https://github.com/AraBlocks/ara-identity)
 
 ## License
 LGPL-3.0
