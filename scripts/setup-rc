@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cp ./test/fixtures/.ararc ~/.ararc
+

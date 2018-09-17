@@ -1,8 +1,12 @@
 #!/bin/bash
 
-# lint and ava
+# lint
 npm run lint
-#npm run test --verbose
+
+# run local truffle node
+ganache-cli &
+sleep 5
+
 ava test/create.js --verbose
 ava test/add.js --verbose
 ava test/remove.js --verbose
@@ -13,3 +17,6 @@ ava test/util.js --verbose
 ava test/storage.js --verbose
 ava test/destroy.js --verbose
 # TODO: aid.js, commit.js, price.js
+
+# cleanup
+pkill -f ganache 
