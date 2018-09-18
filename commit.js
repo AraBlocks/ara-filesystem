@@ -204,8 +204,8 @@ async function estimateCommitGasCost(opts) {
 }
 
 async function _write(opts, estimate = true, append = false) {
-  const { buffer: mtBuffer } = opts.mtData
-  const { buffer: msBuffer } = opts.msData
+  let { buffer: mtBuffer } = opts.mtData
+  let { buffer: msBuffer } = opts.msData
 
   if (append) {
     const treeBuf = await call({
@@ -221,7 +221,7 @@ async function _write(opts, estimate = true, append = false) {
       functionName: 'read',
       arguments: [ 1 ]
     })
-    
+
     mtBuffer = mtBuffer.slice(treeBuf.length)
     msBuffer = msBuffer.slice(sigBuf.length)
   }
