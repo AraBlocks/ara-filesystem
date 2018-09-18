@@ -1,105 +1,100 @@
 /* eslint quotes: "off" */
 
-const test = require('ava')
-const aid = require('ara-identity')
-const { writeIdentity } = require('ara-identity/util')
-const context = require('ara-context')()
-const { create } = require('../create')
 const { commit } = require('../commit')
+const test = require('ava')
+
+const {
+  mirrorIdentity,
+  createAFS,
+  cleanup
+} = require('./_util')
 
 const {
   setPrice,
   getPrice,
-  estimateSetPriceGasCost
 } = require('../price')
 
 const {
   PASSWORD: password
 } = require('./_constants')
 
-const getDid = (t) => {
-  const { did } = t.context
-  return did
+const getAFS = (t) => {
+  const { afs } = t.context
+  return afs
 }
 
 test.before(async (t) => {
-  // create owner identity
-  const identity = await aid.create({ context, password })
-  await writeIdentity(identity)
-  let { publicKey } = identity
-  publicKey = publicKey.toString('hex')
-
-  const { afs } = await create({ owner: publicKey, password })
-  const { did } = afs
-  t.context = { did }
+  t.context = await mirrorIdentity()
 })
 
-test("setPrice() invalid DID", async (t) => {
-  await t.throws(setPrice(), TypeError, "Expecting non-empty string as DID")
-  await t.throws(setPrice({ did: 111 }), TypeError, "Expecting non-empty string as DID")
+test.beforeEach(async (t) => {
+  t.context = await createAFS(t)
 })
 
-test("setPrice() invalid password", async (t) => {
-  const did = getDid(t)
-  await t.throws(setPrice({ did, password: 111 }), TypeError, "Expecting non-empty string for password")
-  await t.throws(setPrice({ did }), TypeError, "Expecting non-empty string for password")
+test.afterEach(async t => cleanup(t))
+
+test("setPrice(opts) invalid opts", async (t) => {
+  const { did } = getAFS(t)
+
+  // opts
+  await t.throwsAsync(setPrice(), TypeError)
+  await t.throwsAsync(setPrice([]), TypeError)
+  await t.throwsAsync(setPrice(123), TypeError)
+
+  // did
+  await t.throwsAsync(setPrice({ did: 123 }), TypeError)
+  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), TypeError)
+
+  // password
+  await t.throwsAsync(setPrice({ did }), TypeError)
+  await t.throwsAsync(setPrice({ did, password: 111 }), TypeError)
+  await t.throwsAsync(setPrice({ did, password: null }), TypeError)
+
+  // estimate
+  await t.throwsAsync(setPrice({ did, password, estimate: 'true' }), TypeError)
+
+  // price
+  await t.throwsAsync(setPrice({ did, password }), TypeError)
+  await t.throwsAsync(setPrice({ did, password, price: '100' }), TypeError)
+  await t.throwsAsync(setPrice({ did, password, price: 0 }), TypeError)
+  await t.throwsAsync(setPrice({ did, password, price: -10 }), TypeError)
 })
 
-test("setPrice() invalid price", async (t) => {
-  const did = getDid(t)
-  await t.throws(setPrice({
+test("setPrice(opts) incorrect password", async (t) => {
+  const { did } = getAFS(t)
+  await t.throwsAsync(setPrice({ did, password: 'wrong_pass', price: 100 }))
+})
+
+test("setPrice(opts) no committed proxy", async (t) => {
+  const { did } = getAFS(t)
+  await t.throwsAsync(setPrice({ did, password, price: 100 }), Error)
+})
+
+test.serial("setPrice(opts) estimate", async (t) => {
+  const { did } = getAFS(t)
+  await commit({ did, password })
+  const estimation = await setPrice({
     did,
     password,
-    price: '10'
-  }), TypeError, "Price should be 0 or positive whole number")
-
-  await t.throws(setPrice({
-    did,
-    password,
-    price: -1
-  }), TypeError, "Price should be 0 or positive whole number")
+    estimate: true,
+    price: 100
+  })
+  t.true(0 < Number(estimation))
 })
 
-test("setPrice() incorrect password", async (t) => {
-  const did = getDid(t)
-  await t.throws(setPrice({ did, password: 'wrongPassword', price: 10 }), Error, "Incorrect password")
+test("getPrice(opts) invalid opts", async (t) => {
+  // opts
+  await t.throwsAsync(getPrice(), TypeError)
+  await t.throwsAsync(getPrice([]), TypeError)
+  await t.throwsAsync(getPrice(123), TypeError)
+
+  // did
+  await t.throwsAsync(setPrice({ did: 123 }), TypeError)
+  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), TypeError)
 })
 
-test("setPrice() not committed yet", async (t) => {
-  const did = getDid(t)
-  await t.throws(setPrice({
-    did,
-    password,
-    price: 111
-  }), Error, `AFS has not been committed yet so the 
-    transaction has been reverted. Please commit
-    the AFS prior to setting price.`)
-})
-
-test("getPrice() invalid DID", async (t) => {
-  await t.throws(getPrice(), TypeError, "Expecting non-empty string as DID")
-  await t.throws(getPrice({ did: 111 }), TypeError, "Expecting non-empty string as DID")
-})
-
-test("getPrice() invalid password", async (t) => {
-  const did = getDid(t)
-  await t.throws(getPrice({ did, password: 111 }), TypeError, "Expecting non-empty string for password")
-  await t.throws(getPrice({ did }), TypeError, "Expecting non-empty string for password")
-})
-
-test("getPrice() incorrect password", async (t) => {
-  const did = getDid(t)
-  await t.throws(getPrice({ did, password: 'wrongPassword', price: 10 }), Error, "Incorrect password")
-})
-
-test.serial("getPrice() not committed yet", async (t) => {
-  const did = getDid(t)
-  const price = await getPrice({ did, password })
-  t.is(Number(price), 0)
-})
-
-test("setPrice() getPrice() valid params", async (t) => {
-  const did = getDid(t)
+test.serial("setPrice()/getPrice()", async (t) => {
+  const { did } = getAFS(t)
   await commit({ did, password })
 
   const price = 25
@@ -107,39 +102,5 @@ test("setPrice() getPrice() valid params", async (t) => {
 
   const retrievedPrice = await getPrice({ did, password })
   t.is(price, Number(retrievedPrice))
-})
-
-test("estimateSetPriceGasCost() invalid did", async (t) => {
-  await t.throws(estimateSetPriceGasCost(), TypeError, "Expecting non-empty string for DID URI")
-  await t.throws(estimateSetPriceGasCost({ did: 123 }), TypeError, "Expecting non-empty string for DID URI")
-})
-
-test("estimateSetPriceGasCost() invalid password", async (t) => {
-  const did = getDid(t)
-  await t.throws(estimateSetPriceGasCost({ did }), TypeError, "Expecting non-empty string for password")
-  await t.throws(estimateSetPriceGasCost({ did, password: 123 }), TypeError, "Expecting non-empty string for password")
-})
-
-test("estimateSetPriceGasCost() invalid price", async (t) => {
-  const did = getDid(t)
-  await t.throws(estimateSetPriceGasCost({ did, password, price: -1 }), TypeError, "Price should be positive whole number")
-  await t.throws(estimateSetPriceGasCost({ did, password, price: '1' }), TypeError, "Price should be positive whole number")
-})
-
-test("estimateSetPriceGasCost() incorrect password", async (t) => {
-  const did = getDid(t)
-  await t.throws(estimateSetPriceGasCost({ did, password: 'wrongPassword', price: 10 }), Error, "Incorrect password")
-})
-
-test("estimateSetPriceGasCost() not committed", async (t) => {
-  const did = getDid(t)
-  await t.throws(estimateSetPriceGasCost({ did, password, price: 60 }), Error, "AFS has not been committed yet")
-})
-
-test("estimateSetPriceGasCost() valid params", async (t) => {
-  const did = getDid(t)
-  await commit({ did, password })
-  const cost = await estimateSetPriceGasCost({ did, password, price: 60 })
-  t.true('number' === typeof cost && 0 <= cost)
 })
 
