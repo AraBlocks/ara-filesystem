@@ -1,8 +1,12 @@
 /* eslint quotes: "off" */
 
-const { blake2b } = require('ara-crypto')
+const { blake2b, randomBytes } = require('ara-crypto')
+const { web3: { account } } = require('ara-util')
+const { web3 } = require('ara-context')()
+const { getPrice } = require('../price')
 const mirror = require('mirror-folder')
 const { create } = require('../create')
+const { cleanup } = require('./_util')
 const aid = require('ara-identity')
 const { add } = require('../add')
 const mkdirp = require('mkdirp')
@@ -11,17 +15,19 @@ const test = require('ava')
 const fs = require('fs')
 
 const {
+  TEST_OWNER_DID_NO_METHOD,
+  TEST_OWNER_ADDRESS,
   PASSWORD: password,
-  TEST_DID,
-  TEST_OWNER_DID_NO_METHOD
+  TEST_OWNER_DID,
+  TEST_OWNER_PK,
+  TEST_DID
 } = require('./_constants')
 
 const {
-  commit,
-  append,
-  retrieve,
   generateStagedPath,
-  estimateCommitGasCost
+  readFromStaged,
+  writeToStaged,
+  commit
 } = require('../commit')
 
 const {
@@ -70,33 +76,53 @@ test.beforeEach(async (t) => {
   t.context = { afs }
 })
 
+test.afterEach(async (t) => await cleanup(t))
+
 test("generateStagedPath() valid did", (t) => {
   const { did } = getAFS(t)
   const path = generateStagedPath(did)
   t.notThrows(() => fs.accessSync(path))
 })
 
-test("commit() invalid did", async (t) => {
-  await t.throwsAsync(commit({ did: 'did:ara:1234' }), Error, "Expecting a valid DID URI")
-  await t.throwsAsync(commit({ did: 1234 }), TypeError, "Expecting DID to be a string")
+test('commit() invalid opts', async (t) => {
+  const { did } = t.context
+
+  // opts
+  await t.throwsAsync(commit(), TypeError)
+  await t.throwsAsync(commit('opts'), TypeError)
+  await t.throwsAsync(commit({ }), TypeError)
+
+  // did
+  await t.throwsAsync(commit({ did: 'did:ara:1234' }), TypeError)
+  await t.throwsAsync(commit({ did: 0x123 }), TypeError)
+  await t.throwsAsync(commit({ did: 123 }), TypeError)
+  await t.throwsAsync(commit({ did: null }), TypeError)
+
+  // password
+  await t.throwsAsync(commit({ did }), TypeError)
+  await t.throwsAsync(commit({ did, password: '' }))
+  await t.throwsAsync(commit({ did, password: 123 }))
+
+  // estimate
+  await t.throwsAsync(commit({ did, password, estimate: 'false' }))
+
+  // price
+  await t.throwsAsync(commit({ did, password, estimate: false, price: '100' }))
+  await t.throwsAsync(commit({ did, password, estimate: false, price: 0 }))
+  await t.throwsAsync(commit({ did, password, estimate: false, price: -10 }))
 })
 
-test("commit() invalid password", async (t) => {
-  await t.throwsAsync(commit({ did: TEST_DID, password: null }), TypeError, "Expecting password to be non-null")
-  await t.throwsAsync(commit({ did: TEST_DID, password: 1234 }), TypeError, "Expecting password to be a string")
+test('commit() incorrect password', async (t) => {
+  const { did } = t.context
+  await t.throwsAsync(commit({ did, password: 'wrong_pass' }), Error)
 })
 
-test("commit() incorrect password", async (t) => {
-  const { did } = getAFS(t)
-  await t.throwsAsync(commit({ did, password: 'wrong_password' }), Error, "Incorrect password")
-})
-
-test("commit() no changes to commit", async (t) => {
+test.serial("commit() no changes to commit", async (t) => {
   const did = await runValidCommit(t)
-  await t.throwsAsync(commit({ did, password }), Error, "No staged commits ready to be pushed")
+  await t.throwsAsync(commit({ did, password }), Error)
 })
 
-test("commit() staged file successfully deleted", async (t) => {
+test.serial("commit() staged file successfully deleted", async (t) => {
   const { did } = getAFS(t)
   const file = resolve(__dirname, 'commit.js')
   await add({ did, paths: [ file ], password })
@@ -106,67 +132,49 @@ test("commit() staged file successfully deleted", async (t) => {
   t.throws(() => fs.accessSync(path))
 })
 
-test("retrieve() offset doesn't exist", (t) => {
+test.serial("commit() commit with price", async (t) => {
   const { did } = getAFS(t)
-  const result = retrieve({
-    did,
-    fileIndex: 0,
-    offset: 10000000,
-    password
-  })
-  t.is(result, undefined)
+  const price = 100
+  const receipt = await commit({ did, password, price })
+  const queriedPrice = await getPrice({ did })
+  t.is(price, Number(queriedPrice))
+  t.true('object' === typeof receipt)
 })
 
-test("retrieve() valid params", (t) => {
+test.serial("commit() estimate gas cost without setPrice", async (t) => {
   const { did } = getAFS(t)
-
-  // validate metadata/tree
-  const mtHeader = retrieve({ did, fileIndex: 0, password })
-  t.true(isHex(mtHeader) && 64 === mtHeader.length)
-
-  // validate metadata/signatures
-  const msHeader = retrieve({ did, fileIndex: 1, password })
-  t.true(isHex(msHeader) && 64 === msHeader.length)
+  const result = await commit({ did, password, estimate: true })
+  t.true(0 < Number(result))
 })
 
-test("append() valid params", (t) => {
+test.serial("commit() estimate gas cost with setPrice", async (t) => {
   const { did } = getAFS(t)
-  const data = Buffer.from('0x0101')
-  append({
+  const result = await commit({ did, password, estimate: true, price: 100 })
+  t.true(0 < Number(result))
+})
+
+test("writeToStaged()/readFromStaged()", async (t) => {
+  const data = randomBytes(32).toString('hex')
+  const path = resolve(__dirname, 'staged.json')
+  console.log('path', path)
+  const { did } = getAFS(t)
+
+  // ensure does not exist
+  await t.throwsAsync(pify(fs.access)(path), Error)
+  
+  writeToStaged({
     did,
-    fileIndex: 0,
-    offset: 96,
+    password,
     data,
-    password
-  })
-
-  const result = retrieve({
-    did,
     fileIndex: 0,
-    offset: 96,
-    password
+    offset: 0
   })
-  t.is(data.toString('hex'), result.toString('hex'))
-})
 
-test("estimateCommitGasCost() invalid did", async (t) => {
-  await t.throws(estimateCommitGasCost(), TypeError, "Expecting non-empty string for DID URI")
-  await t.throws(estimateCommitGasCost({ did: 123 }), TypeError, "Expecting non-empty string for DID URI")
-})
+  const buffer = readFromStaged({
+    did,
+    password,
+    fileIndex: 0
+  })
 
-test("estimateCommitGasCost() invalid password", async (t) => {
-  const { did } = getAFS(t)
-  await t.throws(estimateCommitGasCost({ did }), TypeError, "Expecting non-empty string for password")
-  await t.throws(estimateCommitGasCost({ did, password: 123 }), TypeError, "Expecting non-empty string for password")
-})
-
-test("estimateCommitGasCost() incorrect password", async (t) => {
-  const { did } = getAFS(t)
-  await t.throws(estimateCommitGasCost({ did, password: 'wrongPassword' }), Error, "Incorrect password")
-})
-
-test("estimateCommitGasCost() valid params", async (t) => {
-  const { did } = getAFS(t)
-  const cost = await estimateCommitGasCost({ did, password })
-  t.true('number' === typeof cost && 0 <= cost)
+  t.is(data, buffer)
 })
