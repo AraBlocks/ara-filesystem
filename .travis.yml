@@ -3,6 +3,7 @@ node_js:
   - "8.9.4"
 install:
   - bash ./scripts/travis-install
+  - npm link
 script:
   - bash ./scripts/setup-rc
   - bash ./scripts/test
