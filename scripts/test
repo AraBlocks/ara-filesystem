@@ -7,16 +7,6 @@ npm run lint
 ganache-cli &
 sleep 5
 
-# ava test/create.js --verbose
-# ava test/add.js --verbose
-# ava test/remove.js --verbose
-# ava test/unarchive.js --verbose
-# ava test/key-path.js --verbose
-# ava test/metadata.js --verbose
-# ava test/util.js --verbose
-# ava test/storage.js --verbose
-# ava test/destroy.js --verbose
-
 cd node_modules/ara-contracts
 truffle migrate --network local
 
@@ -28,8 +18,19 @@ sleep 15
 
 cd ../..
 
+ava test/create.js --verbose
+ava test/add.js --verbose
+ava test/remove.js --verbose
+ava test/unarchive.js --verbose
+ava test/key-path.js --verbose
+ava test/metadata.js --verbose
+ava test/util.js --verbose
+ava test/storage.js --verbose
+ava test/destroy.js --verbose
 ava test/commit.js --verbose
-# TODO: aid.js, price.js
+ava test/price.js --verbose
+
+# TODO: aid.js
 
 # cleanup
 pkill -f ganache 
