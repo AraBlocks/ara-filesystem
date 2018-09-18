@@ -108,7 +108,7 @@ async function commit(opts) {
   owner = `${kAidPrefix}${owner}`
   const acct = await account.load({ did: owner, password })
 
-  const result = await _write({
+  let result = await _write({
     mtData,
     msData,
     account: acct,
@@ -122,9 +122,9 @@ async function commit(opts) {
         password,
         price
       })
-      return result + setPriceGasCost
+      result = Number(result) + Number(setPriceGasCost)
     }
-    return result
+    return result.toString()
   }
 
   await _deleteStagedFile(path)

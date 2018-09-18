@@ -1,8 +1,0 @@
-;; Ethereum conf
-[web3]
-;provider = http://34.229.98.210:9151 ;; remote geth http
-;provider = ws://34.229.98.210:9152 ;; remote geth ws
-provider = ws://127.0.0.1:8546 ;; truffle ws
-
-;; Identity network configuration
-[network.identity]
