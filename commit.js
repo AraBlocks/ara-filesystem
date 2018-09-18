@@ -207,9 +207,6 @@ async function _write(opts, estimate = true, append = false) {
   const { buffer: mtBuffer } = opts.mtData
   const { buffer: msBuffer } = opts.msData
 
-  console.log('mtBuffer', mtBuffer)
-  console.log('msBuffer', msBuffer)
-
   if (append) {
     const treeBuf = await call({
       abi,
