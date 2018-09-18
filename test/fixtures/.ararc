@@ -1,0 +1,6 @@
+;; Ethereum conf
+[web3]
+provider = ws://127.0.0.1:8545 ;; ganache ws
+
+;; Identity network configuration
+[network.identity]
