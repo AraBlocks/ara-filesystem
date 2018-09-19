@@ -61,8 +61,13 @@ const { argv } = program
         type: 'string',
         describe: 'key filename. Default: kArchiverSecret in constants.js',
       })
-      .option('name', {
-        alias: 'n',
+      .option('archiverNetwork', {
+        type: 'string',
+        required: true,
+        default: 'archiver',
+        describe: 'Network name of the key for the DID archiver in the keyring',
+      })
+      .option('resolverNetwork', {
         type: 'string',
         describe: 'Keyring name. Default: kArchiverRemote in constants.js',
       })
@@ -117,6 +122,26 @@ const { argv } = program
         type: 'boolean',
         describe: 'Force commit operation',
       })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: 'resolver',
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
+      })
   }, oncommit)
   .command('set-price <did> [price]', "Publish price for the given AFS", (program) => {
     program
@@ -151,6 +176,26 @@ const { argv } = program
         alias: 'f',
         type: 'boolean',
         describe: 'Force destroy operation',
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: 'resolver',
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
       })
   }, ondestroy)
   .command('unarchive <did> [pathspec]', "Unarchive an AFS to a directory", (program) => {

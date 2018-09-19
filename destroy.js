@@ -44,6 +44,12 @@ async function destroy(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if (opts.password && 'string' !== typeof opts.password) {
     throw TypeError('Expecting non-empty password.')
+  } else if (!opts.secret) {
+    throw new Error('Missing `opts.secret`')
+  } else if (!opts.network && !rc.network.identity.resolver) {
+    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+  } else if (!opts.keyring && !rc.network.identity.keyring) {
+    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
   }
 
   let { did } = opts
@@ -79,7 +85,14 @@ async function destroy(opts) {
 
   if (password) {
     try {
-      ({ did } = await aid.validate({ did, password, label: 'destroy' }))
+      ({ did } = await aid.validate({ 
+        did, 
+        password, 
+        label: 'destroy',
+        secret: opts.secret,
+        network: opts.network || rc.network.identity.resolver,
+        keyring: opts.keyring || rc.network.identity.keyring
+      }))
     } catch (err) {
       throw err
     }
