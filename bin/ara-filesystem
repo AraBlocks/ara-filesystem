@@ -412,7 +412,7 @@ async function oncommit({ did, price }) {
     if (result instanceof Error) {
       onfatal(result)
     } else {
-      info("file(s) successfully committed")
+      info(`file(s) successfully committed using ${result.gasUsed} gas`)
     }
   } else {
     onfatal() // exit
