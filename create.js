@@ -115,9 +115,8 @@ async function create(opts) {
         owner,
         password,
         label: 'create',
-        ddo,
-        keyringOpts
-      }))
+        ddo
+      }, keyringOpts.resolver))
     } catch (err) {
       throw err
     }
