@@ -7,13 +7,13 @@ npm run lint
 ganache-cli &
 sleep 5
 
-cd node_modules/ara-contracts
-truffle migrate --network local
-
-# add act to PATH
+# add act to PATHnpm
 echo "path before $PATH"
 PATH=$PATH:node_modules/ara-contracts/bin
 echo "path after $PATH"
+
+cd node_modules/ara-contracts
+truffle migrate --network local
 
 DEBUG=ara* act deploy -S -d 8a98c8305035dcbb1e8fa0826965200269e232e45ac572d26a45db9581986e67 -f -p pass \
 -v 1 ./contracts/AFS.sol ./contracts/Library.sol ./contracts/Registry.sol ./contracts/Proxy.sol ./contracts/AraToken.sol &
