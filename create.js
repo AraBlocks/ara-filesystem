@@ -53,7 +53,7 @@ async function create(opts) {
     ddo
   } = opts
 
-  let {
+  const {
     owner,
     password,
     storage,
@@ -115,7 +115,7 @@ async function create(opts) {
         owner,
         password,
         label: 'create',
-        ddo,
+        ddo
       }, keyringOpts.resolver)))
     } catch (err) {
       throw err
@@ -139,7 +139,7 @@ async function create(opts) {
         secretKey,
         path,
         storage: defaultStorage(afsDid, password, storage)
-      })  
+      })
 
       const etcPath = resolve(path, 'etc')
       // metadata partition publicKey

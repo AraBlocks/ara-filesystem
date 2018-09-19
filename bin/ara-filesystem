@@ -55,7 +55,6 @@ const { argv } = program
     program
       .positional('owner', {
         type: 'string',
-        default: rc.network.identity.whoami,
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
       .option('secret', {
