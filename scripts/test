@@ -11,7 +11,7 @@ sleep 5
 PATH=$(npm bin):$PATH
 
 # move deploy identity to home dir
-mkdir -p ~/.ara/identties
+mkdir -p ~/.ara/identities
 cp test/fixtures/identities ~/.ara/identities
 echo "identities directory $(ls ~/.ara/identities)"
 
