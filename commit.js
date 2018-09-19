@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 
+const { MissingOptionError } = require('ara-util/errors')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
@@ -69,11 +70,11 @@ async function commit(opts) {
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
   } else if (!opts.secret) {
-    throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.secret', expectedKey: opts })
   } else if (!opts.network && !rc.network.resolver) {
-    throw new Error(`Expecting \`opts.network\` or \`rc.network.resolver\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.network', expectedKey: opts, suggestion: 'setting `rc.network.resolver`' })
   } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.keyring', expectedKey: opts, suggestion: 'setting `rc.network.identity.keyring`' })
   }
 
   let { did, estimate } = opts

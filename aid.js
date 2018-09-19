@@ -1,4 +1,5 @@
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
+const { MissingOptionError } = require('ara-util/errors')
 const { normalize } = require('ara-util')
 const hasDIDMethod = require('has-did-method')
 const context = require('ara-context')()
@@ -74,11 +75,11 @@ async function archive(identity, opts = {}) {
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
   } else if (!opts.secret) {
-    throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.secret', expectedKey: opts })
   } else if (!opts.network && !rc.network.archiver) {
-    throw new Error(`Expecting \`opts.network\` or \`rc.network.archiver\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.network', expectedKey: opts, suggestion: 'setting `rc.network.archiver`' })
   } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.keyring', expectedKey: opts, suggestion: 'setting `rc.network.identity.keyring`' })
   }
 
   try {
@@ -104,11 +105,11 @@ async function resolve(did, opts = {}) {
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
   } else if (!opts.secret) {
-    throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.secret', expectedKey: opts })
   } else if (!opts.network && !rc.network.resolver) {
-    throw new Error(`Expecting \`opts.network\` or \`rc.network.resolver\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.network', expectedKey: opts, suggestion: 'setting `rc.network.resolver`' })
   } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.keyring', expectedKey: opts, suggestion: 'setting `rc.network.identity.keyring`' })
   }
 
   did = normalize(did)
