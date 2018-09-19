@@ -16,6 +16,7 @@ const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
 const table = require('table')
 const prettyjson = require('prettyjson')
+const rc = require('../rc')()
 
 const isDirectory = require('is-directory')
 const isFile = require('is-file')
@@ -54,22 +55,35 @@ const { argv } = program
     program
       .positional('owner', {
         type: 'string',
+        default: rc.network.identity.whoami,
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
       .option('secret', {
         alias: 's',
         type: 'string',
-        describe: 'key filename. Default: kArchiverSecret in constants.js',
+        required: true,
+        describe: 'Shared secret for the keyring',
       })
-      .option('name', {
-        alias: 'n',
+      .option('archiverNetwork', {
+        alias: 'an',
         type: 'string',
-        describe: 'Keyring name. Default: kArchiverRemote in constants.js',
+        required: true,
+        default: 'archiver',
+        describe: 'Network name of the key for the DID archiver in the keyring',
+      })
+      .option('resolverNetwork', {
+        alias: 'rn',
+        type: 'string',
+        default: 'resolver',
+        required: true,
+        describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        describe: 'Keyring path. Default: kSecretsDir = \'secret\' in rc.js',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
       })
   }, oncreate)
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
@@ -117,6 +131,26 @@ const { argv } = program
         type: 'boolean',
         describe: 'Force commit operation',
       })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: 'archiver',
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
+      })
   }, oncommit)
   .command('set-price <did> [price]', "Publish price for the given AFS", (program) => {
     program
@@ -151,6 +185,26 @@ const { argv } = program
         alias: 'f',
         type: 'boolean',
         describe: 'Force destroy operation',
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: 'archiver',
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
       })
   }, ondestroy)
   .command('unarchive <did> [pathspec]', "Unarchive an AFS to a directory", (program) => {
@@ -258,8 +312,8 @@ async function oncreate(argv) {
     owner = `${kAidPrefix}${owner}`
   }
 
-  const { secret, name, keyring } = argv
-  const keyringOpts = { secret, name, keyring }
+  const { secret, archiverNetwork, resolverNetwork, keyring } = argv
+  const keyringOpts = { secret, archiverNetwork, resolverNetwork, keyring }
 
   const { password } = await promptForPassword()
 
@@ -390,7 +444,7 @@ async function onremove(argv) {
   instance.close()
 }
 
-async function oncommit({ did, price }) {
+async function oncommit({ did, price, network, keyring, secret }) {
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
 
   const { password } = await promptForPassword()
@@ -408,7 +462,7 @@ async function oncommit({ did, price }) {
 
   if (result) {
     info("committing with identity: %s", did)
-    const result = await afs.commit({ did, password, price })
+    const result = await afs.commit({ did, password, price, network, keyring, secret })
     if (result instanceof Error) {
       onfatal(result)
     } else {
@@ -466,7 +520,7 @@ async function promptCostConfirmation(cost) {
   })
 }
 
-async function ondestroy({ did, force }) {
+async function ondestroy({ did, force, network, secret, keyring }) {
 
   info("attempting destroying AFS %s", did)
 
@@ -483,7 +537,7 @@ async function ondestroy({ did, force }) {
 
   if (result) {
     try {
-      await afs.destroy({ did, mnemonic, password })
+      await afs.destroy({ did, mnemonic, password, secret, network, keyring  })
     } catch (err) {
       onfatal(err)
     }

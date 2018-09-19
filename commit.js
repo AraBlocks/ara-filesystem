@@ -70,13 +70,13 @@ async function commit(opts) {
   }
 
   let { did, estimate } = opts
-  const { password, price } = opts
+  const { password, price, secret, network, keyring } = opts
 
   estimate = estimate || false
 
   let ddo
   try {
-    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'commit', secret, network, keyring }))
   } catch (err) {
     throw err
   }

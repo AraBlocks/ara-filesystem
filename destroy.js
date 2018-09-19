@@ -80,7 +80,14 @@ async function destroy(opts) {
 
   if (password) {
     try {
-      ({ did } = await validate({ did, password, label: 'destroy' }))
+      ({ did } = await aid.validate({ 
+        did, 
+        password, 
+        label: 'destroy',
+        secret: opts.secret,
+        network: opts.network,
+        keyring: opts.keyring
+      }))
     } catch (err) {
       throw err
     }
@@ -90,7 +97,7 @@ async function destroy(opts) {
       return
     }
 
-    const afsDdo = await resolveDDO(did)
+    const afsDdo = await resolveDDO(did, { secret: opts.secret, network: opts.network, keyring: opts.keyring })
     let owner = getDocumentOwner(afsDdo, true)
 
     owner = `${kAidPrefix}${owner}`

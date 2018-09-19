@@ -19,10 +19,6 @@ const defaults = () => ({
     archive: {
       root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
     },
-  },
-  secret: {
-    archiver: resolve(os.homedir(), kAraDir, kSecretsDir, 'ara-archiver.pub'),
-    resolver: resolve(os.homedir(), kAraDir, kSecretsDir, 'ara-resolver.pub')
   }
 })
 

@@ -2,18 +2,14 @@ const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const debug = require('debug')('ara-filesystem:aid')
 const context = require('ara-context')()
 const hasDIDMethod = require('has-did-method')
-const { normalize } = require('ara-util')
-const { secret } = require('./rc')()
 const aid = require('ara-identity')
+const util = require('ara-util')
+const rc = require('./rc')()
 
 const {
   kKeyLength,
   kAidPrefix,
   kOwnerSuffix,
-  kArchiverSecret,
-  kResolverSecret,
-  kArchiverRemote,
-  kResolverRemote
 } = require('./constants')
 
 async function create({
@@ -76,9 +72,9 @@ async function archive(identity, opts = {}) {
 
   try {
     opts = {
-      secret: opts.secret || kArchiverSecret,
-      network: opts.name || kArchiverRemote,
-      keyring: opts.keyring || secret.archiver
+      secret: opts.secret,
+      network: opts.network || rc.network.identity.archiver,
+      keyring: opts.keyring || rc.network.identity.keyring
     }
     await aid.archive(identity, opts)
   } catch (err) {
@@ -104,11 +100,40 @@ async function resolve(did, opts = {}) {
   let result
   try {
     opts = {
-      secret: opts.secret || kResolverSecret,
-      network: opts.name || kResolverRemote,
-      keyring: opts.keyring || secret.resolver
+      secret: opts.secret,
+      network: opts.network || rc.network.identity.resolver,
+      keyring: opts.keyring || rc.network.identity.keyring
     }
     result = await aid.resolve(did, opts)
+  } catch (err) {
+    throw err
+  }
+
+  return result
+}
+
+/**
+ * Validate an Ara Identity. Wraps ara-util.validate.
+ * @param {Object} opts
+ * @return {Object}
+ * @throws {Error,TypeError}
+ */
+async function validate(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts to be of type object.')
+  }
+
+  if (!opts.keyringOpts || 'object' !== typeof opts.keyringOpts) {
+    opts.keyringOpts = {
+      secret: opts.secret,
+      name: opts.network || rc.network.identity.resolver,
+      keyring: opts.keyring || rc.network.identity.keyring
+    }
+  }
+
+  let result
+  try {
+    result = await util.validate(opts)
   } catch (err) {
     throw err
   }

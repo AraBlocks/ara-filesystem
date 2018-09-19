@@ -62,13 +62,13 @@ async function setPrice(opts) {
   }
 
   let { did, estimate, price } = opts
-  const { password } = opts
+  const { password, secret, network, keyring } = opts
 
   estimate = estimate || false
 
   let ddo
   try {
-    ({ did, ddo } = await validate({ did, password, label: 'price' }))
+    ({ did, ddo } = await aid.validate({ did, password, label: 'price', secret, network, keyring }))
   } catch (err) {
     throw err
   }

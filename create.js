@@ -55,12 +55,17 @@ async function create(opts) {
     ddo
   } = opts
 
-  const {
+  let {
     owner,
     password,
     storage,
     keyringOpts
   } = opts
+
+  keyringOpts = {
+    archiver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring }, keyringOpts.archiver),
+    resolver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring }, keyringOpts.resolver)
+  }
 
   let afs
   let mnemonic
@@ -73,12 +78,12 @@ async function create(opts) {
     }
 
     try {
-      ({ did, ddo } = await validate({
+      ({ did, ddo } = await validate(Object.assign({
         did,
         password,
         label: 'create',
         ddo
-      }))
+      }, keyringOpts.resolver))
     } catch (err) {
       throw err
     }
@@ -101,12 +106,12 @@ async function create(opts) {
     afs.ddo = ddo
   } else if (owner) {
     try {
-      ({ owner: did } = await validate({
+      ({ owner: did } = await validate(Object.assign({
         owner,
         password,
         label: 'create',
-        ddo
-      }))
+        ddo,
+      }, keyringOpts.resolver)))
     } catch (err) {
       throw err
     }
@@ -127,7 +132,7 @@ async function create(opts) {
         secretKey,
         path,
         storage: defaultStorage(afsDid, password, storage)
-      })
+      })  
 
       const etcPath = resolve(path, 'etc')
       // metadata partition publicKey
@@ -140,15 +145,15 @@ async function create(opts) {
         mnemonic,
         owner,
         metadataPublicKey
-      });
+      })
 
       ({ mnemonic } = afsId)
 
       await writeIdentity(afsId)
       if (!ddo) {
-        await aid.archive(afsId, keyringOpts)
+        await aid.archive(afsId, keyringOpts.archiver)
 
-        afsDdo = await aid.resolve(toHex(afsId.publicKey))
+        afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts.resolver)
 
         if (null == afsDdo || 'object' !== typeof afsDdo) {
           throw new TypeError('AFS identity not successfully resolved.')
