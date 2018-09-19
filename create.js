@@ -63,8 +63,8 @@ async function create(opts) {
   } = opts
 
   keyringOpts = {
-    archiver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring }, keyringOpts.archiver),
-    resolver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring }, keyringOpts.resolver)
+    archiver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring, network: keyringOpts.archiverNetwork }, keyringOpts.archiver),
+    resolver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring, network: keyringOpts.resolverNetwork }, keyringOpts.resolver)
   }
 
   let afs
@@ -83,7 +83,7 @@ async function create(opts) {
         password,
         label: 'create',
         ddo
-      }, keyringOpts.resolver))
+      }, keyringOpts.resolver)))
     } catch (err) {
       throw err
     }
@@ -145,12 +145,13 @@ async function create(opts) {
         mnemonic,
         owner,
         metadataPublicKey
-      })
+      });
 
       ({ mnemonic } = afsId)
 
       await writeIdentity(afsId)
       if (!ddo) {
+        console.log("ARCHI:", keyringOpts.archiver)
         await aid.archive(afsId, keyringOpts.archiver)
 
         afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts.resolver)

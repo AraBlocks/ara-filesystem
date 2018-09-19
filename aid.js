@@ -94,7 +94,7 @@ async function resolve(did, opts = {}) {
     throw new TypeError('Expecting opts to be of type object.')
   }
 
-  did = normalize(did)
+  did = util.normalize(did)
   did = `${kAidPrefix}${did}`
 
   let result
