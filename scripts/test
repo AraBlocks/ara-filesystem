@@ -7,12 +7,16 @@ npm run lint
 ganache-cli &
 sleep 5
 
-# add act to PATH
-echo "path before $PATH"
-PATH=$PATH:./node_modules/ara-contracts/bin
-echo "path after $PATH"
+# link ara-contracts
+BIN_DIR="$(npm bin)"
+echo "bin directory ${BIN_DIR}"
+echo "$(ls $BIN_DIR)"
+PATH=$(npm bin):$PATH
+echo "PWD $(pwd)"
+echo "path after adding node_modules/.bin $PATH"
 
 cd node_modules/ara-contracts
+echo "PWD AFTER CD $(pwd)"
 truffle migrate --network local
 
 DEBUG=ara* act deploy -S -d 8a98c8305035dcbb1e8fa0826965200269e232e45ac572d26a45db9581986e67 -f -p pass \
