@@ -61,6 +61,11 @@ async function create(opts) {
     keyringOpts
   } = opts
 
+  keyringOpts = {
+    archiver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring, network: keyringOpts.archiverNetwork }, keyringOpts.archiver),
+    resolver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring, network: keyringOpts.resolverNetwork }, keyringOpts.resolver)
+  }
+
   let afs
   let mnemonic
   if (did) {
@@ -77,7 +82,7 @@ async function create(opts) {
         password,
         label: 'create',
         ddo,
-        keyringOpts
+        keyringOpts: keyringOpts.resolver
       }))
     } catch (err) {
       throw err
@@ -147,7 +152,8 @@ async function create(opts) {
 
       await writeIdentity(afsId)
       if (!ddo) {
-        await aid.archive(afsId, keyringOpts)
+        console.log("ARCHI:", keyringOpts.archiver)
+        await aid.archive(afsId, keyringOpts.archiver)
 
         afsDdo = await aid.resolve(toHex(afsId.publicKey))
 
