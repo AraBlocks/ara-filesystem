@@ -1,3 +1,4 @@
+const { MissingOptionError } = require('ara-util/errors')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
 const { kAidPrefix } = require('./constants')
@@ -61,11 +62,11 @@ async function setPrice(opts) {
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
   } else if (!opts.secret) {
-    throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.secret', expectedKey: opts })
   } else if (!opts.network && !rc.network.resolver) {
-    throw new Error(`Expecting \`opts.network\` or \`rc.network.resolver\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.network', expectedKey: opts, suggestion: 'setting `rc.network.resolver`' })
   } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.keyring', expectedKey: opts, suggestion: 'setting `rc.network.identity.keyring`' })
   }
 
   let { did, estimate, price } = opts
