@@ -74,11 +74,11 @@ async function archive(identity, opts = {}) {
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
   } else if (!opts.secret) {
-    throw new Error('Missing `opts.secret`')
+    throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
   } else if (!opts.network && !rc.network.identity.resolver) {
-    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+    throw new Error(`Expecting \`opts.network\` or \`rc.network.identity.resolver\` to be defined, got ${JSON.stringify(opts)}`)
   } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
+    throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
   }
 
   try {
@@ -104,11 +104,11 @@ async function resolve(did, opts = {}) {
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
   } else if (!opts.secret) {
-    throw new Error('Missing `opts.secret`')
+    throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
   } else if (!opts.network && !rc.network.identity.resolver) {
-    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+    throw new Error(`Expecting \`opts.network\` or \`rc.network.identity.resolver\` to be defined, got ${JSON.stringify(opts)}`)
   } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
+    throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
   }
 
   did = util.normalize(did)
@@ -139,11 +139,11 @@ async function validate(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
   } else if (!opts.secret) {
-    throw new Error('Missing `opts.secret`')
+    throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
   } else if (!opts.network && !rc.network.identity.resolver) {
-    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+    throw new Error(`Expecting \`opts.network\` or \`rc.network.identity.resolver\` to be defined, got ${JSON.stringify(opts)}`)
   } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
+    throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
   }
 
   if (!opts.keyringOpts || 'object' !== typeof opts.keyringOpts) {
