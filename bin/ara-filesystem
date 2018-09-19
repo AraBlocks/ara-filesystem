@@ -64,12 +64,14 @@ const { argv } = program
       .option('archiverNetwork', {
         type: 'string',
         required: true,
-        default: 'archiver',
+        default: rc.network.archiver,
         describe: 'Network name of the key for the DID archiver in the keyring',
       })
       .option('resolverNetwork', {
         type: 'string',
-        describe: 'Keyring name. Default: kArchiverRemote in constants.js',
+        default: rc.network.resolver,
+        required: true,
+        describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
@@ -132,7 +134,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: 'resolver',
+        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
@@ -187,7 +189,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: 'resolver',
+        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {

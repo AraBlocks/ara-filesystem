@@ -45,8 +45,6 @@ async function create(opts) {
     throw TypeError('Expecting non-empty password.')
   } else if (opts.storage && 'function' !== typeof opts.storage) {
     throw new TypeError('Expecting storage to be a function.')
-  } else if (opts.keyringOpts && 'object' !== typeof opts.keyringOpts) {
-    throw new TypeError('Expecting opts.keyringOpts to be an object.')
   }
 
   let {
@@ -58,12 +56,19 @@ async function create(opts) {
     owner,
     password,
     storage,
-    keyringOpts
   } = opts
 
-  keyringOpts = {
-    archiver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring, network: keyringOpts.archiverNetwork }, keyringOpts.archiver),
-    resolver: Object.assign({}, { secret: keyringOpts.secret, keyring: keyringOpts.keyring, network: keyringOpts.resolverNetwork }, keyringOpts.resolver)
+  const keyringOpts = {
+    archiver: {
+      secret: opts.secret || opts.archiverSecret,
+      keyring: opts.keyring || opts.archiverKeyring || rc.network.identity.keyring,
+      network: opts.archiverNetwork || rc.network.archiver
+    },
+    resolver: {
+      secret: opts.secret || opts.resolverSecret,
+      keyring: opts.keyring || opts.resolverKeyring || rc.network.identity.keyring,
+      network: opts.resolverNetwork || rc.network.resolver
+    }
   }
 
   let afs
