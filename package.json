@@ -40,7 +40,7 @@
     "ara-context": "github:arablocks/ara-context",
     "ara-contracts": "github:arablocks/ara-contracts#0.2.1",
     "ara-crypto": "github:arablocks/ara-crypto",
-    "ara-identity": "github:arablocks/ara-identity",
+    "ara-identity": "github:arablocks/ara-identity#0.15.1",
     "ara-network": "github:arablocks/ara-network",
     "ara-runtime-configuration": "github:arablocks/ara-runtime-configuration",
     "ara-secret-storage": "github:arablocks/ara-secret-storage",
