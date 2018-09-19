@@ -7,6 +7,3 @@ script:
   - bash ./scripts/setup-rc
   - bash ./scripts/test
   - bash ./scripts/remove-rc
-cache:
-  directories:
-    - "node_modules"
