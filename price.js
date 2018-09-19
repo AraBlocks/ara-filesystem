@@ -2,6 +2,7 @@ const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
 const { kAidPrefix } = require('./constants')
 const { token } = require('ara-contracts')
+const rc = require('./rc')()
 
 const {
   proxyExists,
@@ -59,10 +60,21 @@ async function setPrice(opts) {
     throw new TypeError('Expecting whole number price.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
+  } else if (!opts.secret) {
+    throw new Error('Missing `opts.secret`')
+  } else if (!opts.network && !rc.network.identity.resolver) {
+    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+  } else if (!opts.keyring && !rc.network.identity.keyring) {
+    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
   }
 
   let { did, estimate, price } = opts
-  const { password, secret, network, keyring } = opts
+  const {
+    password,
+    secret,
+    network = rc.network.identity.resolver,
+    keyring = rc.network.identity.keyring
+  } = opts
 
   estimate = estimate || false
 

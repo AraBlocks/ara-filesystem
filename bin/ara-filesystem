@@ -65,14 +65,12 @@ const { argv } = program
         describe: 'Shared secret for the keyring',
       })
       .option('archiverNetwork', {
-        alias: 'an',
         type: 'string',
         required: true,
         default: 'archiver',
         describe: 'Network name of the key for the DID archiver in the keyring',
       })
       .option('resolverNetwork', {
-        alias: 'rn',
         type: 'string',
         default: 'resolver',
         required: true,
@@ -141,7 +139,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: 'archiver',
+        default: 'resolver',
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
@@ -196,7 +194,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: 'archiver',
+        default: 'resolver',
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {

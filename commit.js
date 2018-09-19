@@ -5,6 +5,7 @@ const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
 const pify = require('pify')
 const fs = require('fs')
+const rc = require('./rc')()
 
 const {
   proxyExists,
@@ -67,10 +68,22 @@ async function commit(opts) {
     throw new TypeError('Expecting boolean.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
+  } else if (!opts.secret) {
+    throw new Error('Missing `opts.secret`')
+  } else if (!opts.network && !rc.network.identity.resolver) {
+    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+  } else if (!opts.keyring && !rc.network.identity.keyring) {
+    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
   }
 
   let { did, estimate } = opts
-  const { password, price, secret, network, keyring } = opts
+  const {
+    password,
+    price,
+    secret,
+    network = rc.network.identity.resolver,
+    keyring = rc.network.identity.keyring
+  } = opts
 
   estimate = estimate || false
 

@@ -68,6 +68,12 @@ async function archive(identity, opts = {}) {
     throw new TypeError('Identity to archive must be valid identity object')
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
+  } else if (!opts.secret) {
+    throw new Error('Missing `opts.secret`')
+  } else if (!opts.network && !rc.network.identity.resolver) {
+    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+  } else if (!opts.keyring && !rc.network.identity.keyring) {
+    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
   }
 
   try {
@@ -92,6 +98,12 @@ async function resolve(did, opts = {}) {
     throw new TypeError('DID to resolve must be non-empty string.')
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
+  } else if (!opts.secret) {
+    throw new Error('Missing `opts.secret`')
+  } else if (!opts.network && !rc.network.identity.resolver) {
+    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+  } else if (!opts.keyring && !rc.network.identity.keyring) {
+    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
   }
 
   did = util.normalize(did)
@@ -121,6 +133,12 @@ async function resolve(did, opts = {}) {
 async function validate(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
+  } else if (!opts.secret) {
+    throw new Error('Missing `opts.secret`')
+  } else if (!opts.network && !rc.network.identity.resolver) {
+    throw new Error('Expecting `opts.network` or `rc.network.identity.resolver` to be defined')
+  } else if (!opts.keyring && !rc.network.identity.keyring) {
+    throw new Error('Expecting `opts.keyring` or `rc.network.identity.keyring` to be defined')
   }
 
   if (!opts.keyringOpts || 'object' !== typeof opts.keyringOpts) {
