@@ -13,6 +13,7 @@ PATH=$(npm bin):$PATH
 # move deploy identity to home dir
 mkdir -p ~/.ara/identities/
 cp -r test/fixtures/identities/ ~/.ara/identities/
+echo "identities directory $(ls -l ~/.ara/identities/)"
 
 cd node_modules/ara-contracts
 truffle migrate --network local
