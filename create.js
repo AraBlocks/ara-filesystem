@@ -116,8 +116,10 @@ async function create(opts) {
       throw err
     }
 
-    let afsId = await aid.create({ password, owner });
-    ({ mnemonic } = afsId)
+    const afsId = await aid.create({ password, owner })
+
+    // Note: Do not change this `({ mnemonic } = afsId)`, it causes a weird scoping issue.
+    mnemonic = afsId.mnemonic
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
@@ -140,18 +142,15 @@ async function create(opts) {
       const metadataPublicKey = toHex(key)
 
       // recreate identity with additional publicKey
-      afsId = await aid.create({
+      const afsId = await aid.create({
         password,
         mnemonic,
         owner,
         metadataPublicKey
-      });
-
-      ({ mnemonic } = afsId)
+      })
 
       await writeIdentity(afsId)
       if (!ddo) {
-        console.log("ARCHI:", keyringOpts.archiver)
         await aid.archive(afsId, keyringOpts.archiver)
 
         afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts.resolver)
