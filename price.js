@@ -62,8 +62,8 @@ async function setPrice(opts) {
     throw new TypeError('Expecting boolean.')
   } else if (!opts.secret) {
     throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
-  } else if (!opts.network && !rc.network.identity.resolver) {
-    throw new Error(`Expecting \`opts.network\` or \`rc.network.identity.resolver\` to be defined, got ${JSON.stringify(opts)}`)
+  } else if (!opts.network && !rc.network.resolver) {
+    throw new Error(`Expecting \`opts.network\` or \`rc.network.resolver\` to be defined, got ${JSON.stringify(opts)}`)
   } else if (!opts.keyring && !rc.network.identity.keyring) {
     throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
   }
@@ -72,7 +72,7 @@ async function setPrice(opts) {
   const {
     password,
     secret,
-    network = rc.network.identity.resolver,
+    network = rc.network.resolver,
     keyring = rc.network.identity.keyring
   } = opts
 

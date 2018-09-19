@@ -70,7 +70,7 @@ async function archive(identity, opts = {}) {
     throw new TypeError('Expecting opts to be of type object.')
   } else if (!opts.secret) {
     throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
-  } else if (!opts.network && !rc.network.identity.resolver) {
+  } else if (!opts.network && !rc.network.resolver) {
     throw new Error(`Expecting \`opts.network\` or \`rc.network.archiver\` to be defined, got ${JSON.stringify(opts)}`)
   } else if (!opts.keyring && !rc.network.identity.keyring) {
     throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
@@ -100,7 +100,7 @@ async function resolve(did, opts = {}) {
     throw new TypeError('Expecting opts to be of type object.')
   } else if (!opts.secret) {
     throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
-  } else if (!opts.network && !rc.network.identity.resolver) {
+  } else if (!opts.network && !rc.network.resolver) {
     throw new Error(`Expecting \`opts.network\` or \`rc.network.resolver\` to be defined, got ${JSON.stringify(opts)}`)
   } else if (!opts.keyring && !rc.network.identity.keyring) {
     throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
