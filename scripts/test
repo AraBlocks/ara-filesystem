@@ -15,7 +15,7 @@ mkdir -p ~/.ara/identities/
 chmod +r ~/.ara/identities/
 echo "identities dir $(ls ~/.ara/identities/)"
 echo "fixtures dir $(ls test/fixtures/identities/)"
-cp -r test/fixtures/identities/ ~/.ara/identities/
+mv -r test/fixtures/identities/* ~/.ara/identities/
 echo "identities directory $(ls ~/.ara/identities/)"
 
 cd node_modules/ara-contracts
