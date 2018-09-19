@@ -19,6 +19,13 @@ const defaults = () => ({
     archive: {
       root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
     },
+  },
+  network: {
+    archiver: 'archiver',
+    resolver: 'resolver',
+    identity: {
+      keyring: resolve(os.homedir(), '.ara', 'keyrings', 'keyring')
+    }
   }
 })
 
