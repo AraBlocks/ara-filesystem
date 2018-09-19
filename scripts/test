@@ -7,9 +7,9 @@ npm run lint
 ganache-cli &
 sleep 5
 
-# add act to PATHnpm
+# add act to PATH
 echo "path before $PATH"
-PATH=$PATH:node_modules/ara-contracts/bin
+PATH=$PATH:./node_modules/ara-contracts/bin
 echo "path after $PATH"
 
 cd node_modules/ara-contracts
