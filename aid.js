@@ -1,10 +1,10 @@
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
-const debug = require('debug')('ara-filesystem:aid')
+const { normalize } = require('ara-util')
 const hasDIDMethod = require('has-did-method')
 const context = require('ara-context')()
-const { secret } = require('./rc')()
+const debug = require('debug')('ara-filesystem:aid')
 const aid = require('ara-identity')
-const util = require('ara-util')
+const rc = require('./rc')()
 
 const { normalize } = util
 const {
@@ -111,7 +111,7 @@ async function resolve(did, opts = {}) {
     throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
   }
 
-  did = util.normalize(did)
+  did = normalize(did)
   did = `${kAidPrefix}${did}`
 
   let result
