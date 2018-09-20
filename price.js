@@ -61,27 +61,29 @@ async function setPrice(opts) {
     throw new TypeError('Expecting whole number price.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
-  } else if (!opts.secret) {
-    throw new MissingOptionError({ expectedKey: 'opts.secret', expectedKey: opts })
-  } else if (!opts.network && !rc.network.resolver) {
-    throw new MissingOptionError({ expectedKey: 'opts.network', expectedKey: opts, suggestion: 'setting `rc.network.resolver`' })
-  } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new MissingOptionError({ expectedKey: 'opts.keyring', expectedKey: opts, suggestion: 'setting `rc.network.identity.keyring`' })
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network && !rc.network.resolver) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.network or rc.network.resolver', actualValue: { keyringOpts: opts.keyringOpts, rc } })
+  } else if (!opts.keyringOpts.keyring && !rc.network.identity.keyring) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.keyring or rc.network.identity.keyring', actualValue: { keyringOpts: opts.keyringOpts, rc } })
   }
 
-  let { did, estimate, price } = opts
+  let { did, estimate, price, keyringOpts } = opts
   const {
     password,
-    secret,
-    network = rc.network.resolver,
-    keyring = rc.network.identity.keyring
   } = opts
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  keyringOpts = extend(true, { network: rc.network.resolver, keyring: rc.network.identity.keyring }, keyringOpts)
 
   estimate = estimate || false
 
   let ddo
   try {
-    ({ did, ddo } = await aid.validate({ did, password, label: 'price', secret, network, keyring }))
+    ({ did, ddo } = await aid.validate({ did, password, label: 'price', keyringOpts }))
   } catch (err) {
     throw err
   }
