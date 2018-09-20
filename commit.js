@@ -206,6 +206,7 @@ async function estimateCommitGasCost(opts) {
 async function _write(opts, estimate = true, append = false) {
   let { buffer: mtBuffer } = opts.mtData
   let { buffer: msBuffer } = opts.msData
+  const { account: acct, proxy } = opts
 
   if (append) {
     const treeBuf = await call({
@@ -226,7 +227,6 @@ async function _write(opts, estimate = true, append = false) {
     msBuffer = msBuffer.slice(sigBuf.length)
   }
 
-  const { account: acct, proxy } = opts
   const transaction = await tx.create({
     account: acct,
     to: proxy,
