@@ -89,6 +89,26 @@ const { argv } = program
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
       })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
+      })
   }, onadd)
   .command('remove <did> <pathspec...>', "Remove files or directories from an AFS", (program) => {
     program
@@ -100,12 +120,52 @@ const { argv } = program
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
       })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
+      })
   }, onremove)
   .command('history <did>', "Retrieve the revision history of this AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
       })
   }, onhistory)
   .command('commit <did>', "Push local staged AFS changes to the Ethereum blockchain and DCDN", (program) => {
@@ -209,6 +269,26 @@ const { argv } = program
       .positional('pathspec', {
         type: 'string',
         describe: "The path where the AFS should be extracted."
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring,
+        describe: 'Path to the keyring',
       })
   }, onunarchive)
   // metadata commands
@@ -354,10 +434,14 @@ async function onhistory(argv) {
     ]
   }
 
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
   try {
     const arafs = await afs.create({
       did,
-      password
+      password,
+      keyringOpts
     })
     const stream = table.createStream(tableOpts)
 
@@ -396,6 +480,9 @@ async function onadd(argv) {
   info("id: %s", did)
   info("paths: ", paths)
 
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
   const { password } = await promptForPassword()
 
   let instance
@@ -403,7 +490,9 @@ async function onadd(argv) {
     instance = await afs.add({
       did,
       paths,
-      password })
+      password,
+      keyringOpts
+    })
     info("file(s) successfully added")
   } catch (err) {
     onfatal(err)
@@ -423,13 +512,18 @@ async function onremove(argv) {
   info("id: %s", did)
   info("paths: ", paths)
 
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
   const { password } = await promptForPassword()
   let instance
   try {
     instance = await afs.remove({
       did,
       paths,
-      password })
+      password,
+      keyringOpts
+    })
     info("file(s) successfully removed")
   } catch (err) {
     onfatal(err)
@@ -453,9 +547,11 @@ async function oncommit({ did, price }) {
     }
   }
 
+  const keyringOpts = { secret, network, keyring }
+
   if (result) {
     info("committing with identity: %s", did)
-    const result = await afs.commit({ did, password, price })
+    const result = await afs.commit({ did, password, price, keyringOpts })
     if (result instanceof Error) {
       onfatal(result)
     } else {
@@ -528,9 +624,10 @@ async function ondestroy({ did, force }) {
     result = answer
   }
 
+  const keyringOpts = { secret, network, keyring }
   if (result) {
     try {
-      await afs.destroy({ did, mnemonic, password })
+      await afs.destroy({ did, mnemonic, password, keyringOpts  })
     } catch (err) {
       onfatal(err)
     }
@@ -540,14 +637,17 @@ async function ondestroy({ did, force }) {
   process.exit(1)
 }
 
-async function onunarchive({ did, pathspec }) {
+async function onunarchive({ did, pathspec: path, secret, network, keyring }) {
 
   info("unarchiving AFS with DID %s", did)
+
+  const keyringOpts = { secret, network, keyring }
 
   try {
     await afs.unarchive({
       did,
-      path: pathspec
+      path,
+      keyringOpts
     })
   } catch (err) {
     onfatal(err)
