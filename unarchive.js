@@ -1,6 +1,7 @@
 const debug = require('debug')('ara-filesystem:unarchive')
 const mirror = require('mirror-folder')
 const { create } = require('./create')
+const rc = require('./rc')
 
 const {
   resolve,
@@ -21,10 +22,23 @@ async function unarchive(opts) {
     throw new TypeError('DID URI must be of type string.')
   } else if (opts.path && 'string' !== typeof opts.path) {
     throw new TypeError('Path must be of type string.')
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network && !rc.network.resolver) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.network or rc.network.resolver', actualValue: { keyringOpts: opts.keyringOpts, rc } })
+  } else if (!opts.keyringOpts.keyring && !rc.network.identity.keyring) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.keyring or rc.network.identity.keyring', actualValue: { keyringOpts: opts.keyringOpts, rc } })
   }
 
+  let { keyringOpts } = opts
   const { did } = opts
-  const { afs } = await create({ did })
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  keyringOpts = extend(true, { network: rc.network.resolver, keyring: rc.network.identity.keyring }, keyringOpts)
+
+  const { afs } = await create({ did, keyringOpts })
 
   try {
     const result = await afs.readdir(afs.HOME)

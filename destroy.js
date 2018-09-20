@@ -45,16 +45,23 @@ async function destroy(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if (opts.password && 'string' !== typeof opts.password) {
     throw TypeError('Expecting non-empty password.')
-  } else if (!opts.secret) {
-    throw new MissingOptionError({ expectedKey: 'opts.secret', expectedKey: opts })
-  } else if (!opts.network && !rc.network.resolver) {
-    throw new MissingOptionError({ expectedKey: 'opts.network', expectedKey: opts, suggestion: 'setting `rc.network.resolver`' })
-  } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new MissingOptionError({ expectedKey: 'opts.keyring', expectedKey: opts, suggestion: 'setting `rc.network.identity.keyring`' })
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network && !rc.network.resolver) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.network or rc.network.resolver', actualValue: { keyringOpts: opts.keyringOpts, rc } })
+  } else if (!opts.keyringOpts.keyring && !rc.network.identity.keyring) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.keyring or rc.network.identity.keyring', actualValue: { keyringOpts: opts.keyringOpts, rc } })
   }
 
-  let { did } = opts
+
+  let { did, keyringOpts } = opts
   did = normalize(did)
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  keyringOpts = extend(true, { network: rc.network.resolver, keyring: rc.network.identity.keyring }, keyringOpts)
+
   let path
 
   try {
@@ -90,9 +97,7 @@ async function destroy(opts) {
         did, 
         password, 
         label: 'destroy',
-        secret: opts.secret,
-        network: opts.network || rc.network.resolver,
-        keyring: opts.keyring || rc.network.identity.keyring
+        keyringOpts
       }))
     } catch (err) {
       throw err
@@ -103,7 +108,7 @@ async function destroy(opts) {
       return
     }
 
-    const afsDdo = await aid.resolve(did)
+    const afsDdo = await resolveDDO(did, keyringOpts)
     let owner = getDocumentOwner(afsDdo, true)
 
     owner = `${kAidPrefix}${owner}`

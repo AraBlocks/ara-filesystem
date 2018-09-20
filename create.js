@@ -49,7 +49,8 @@ async function create(opts) {
 
   let {
     did,
-    ddo
+    ddo,
+    keyringOpts
   } = opts
 
   const {
@@ -58,16 +59,16 @@ async function create(opts) {
     storage,
   } = opts
 
-  const keyringOpts = {
+  keyringOpts = {
     archiver: {
-      secret: opts.secret || opts.archiverSecret,
-      keyring: opts.keyring || opts.archiverKeyring || rc.network.identity.keyring,
-      network: opts.archiverNetwork || rc.network.archiver
+      secret: keyringOpts.secret || keyringOpts.archiverSecret,
+      keyring: keyringOpts.keyring || keyringOpts.archiverKeyring || rc.network.identity.keyring,
+      network: keyringOpts.network || keyringOpts.archiverNetwork || rc.network.archiver
     },
     resolver: {
-      secret: opts.secret || opts.resolverSecret,
-      keyring: opts.keyring || opts.resolverKeyring || rc.network.identity.keyring,
-      network: opts.resolverNetwork || rc.network.resolver
+      secret: keyringOpts.secret || keyringOpts.resolverSecret,
+      keyring: keyringOpts.keyring || keyringOpts.resolverKeyring || rc.network.identity.keyring,
+      network: keyringOpts.network || keyringOpts.resolverNetwork || rc.network.resolver
     }
   }
 
@@ -82,7 +83,7 @@ async function create(opts) {
     }
 
     try {
-      ({ did, ddo } = await aid.validate({
+      ({ did, ddo } = await validate({
         did,
         password,
         label: 'create',
@@ -111,12 +112,13 @@ async function create(opts) {
     afs.ddo = ddo
   } else if (owner) {
     try {
-      ({ owner: did } = await aid.validate({
+      ({ owner: did } = await validate({
         owner,
         password,
         label: 'create',
-        ddo
-      }, keyringOpts.resolver))
+        ddo,
+        keyringOpts: keyringOpts.resolver
+      }))
     } catch (err) {
       throw err
     }
