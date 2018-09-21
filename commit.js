@@ -204,37 +204,20 @@ async function estimateCommitGasCost(opts) {
 }
 
 async function _write(opts, estimate = true, append = false) {
-  let { buffer: mtBuffer } = opts.mtData
-  let { buffer: msBuffer } = opts.msData
-
-  if (append) {
-    const treeBuf = await call({
-      abi,
-      address: proxy,
-      functionName: 'read',
-      arguments: [ 0 ]
-    })
-
-    const sigBuf = await call({
-      abi,
-      address: proxy,
-      functionName: 'read',
-      arguments: [ 1 ]
-    })
-
-    mtBuffer = mtBuffer.slice(treeBuf.length)
-    msBuffer = msBuffer.slice(sigBuf.length)
-  }
+  const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
+  const { offsets: msOffsets, buffer: msBuffer } = opts.msData
 
   const { account: acct, proxy } = opts
   const transaction = await tx.create({
     account: acct,
     to: proxy,
-    gasLimit: 4000000,
+    gasLimit: 1000000,
     data: {
       abi,
-      functionName: 'write',
+      functionName: append ? 'append' : 'write',
       values: [
+        mtOffsets,
+        msOffsets,
         mtBuffer,
         msBuffer
       ]
@@ -338,7 +321,11 @@ async function _hasBeenCommitted(contents, proxy) {
     abi,
     address: proxy,
     functionName: 'hasBuffer',
-    arguments: [ buf ]
+    arguments: [ 
+      0,
+      0,
+      buf
+    ]
   })
 }
 
