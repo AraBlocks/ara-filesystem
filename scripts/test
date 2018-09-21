@@ -14,7 +14,6 @@ PATH=$(npm bin):$PATH
 mkdir -p ~/.ara/identities/
 chmod +r ~/.ara/identities/
 cp -a test/fixtures/identities/. ~/.ara/identities/
-cp ./test/fixtures/.ararc ~/.ararc
 
 cd node_modules/ara-contracts
 truffle migrate --network local
@@ -42,5 +41,4 @@ ava test/price.js --verbose
 # TODO: aid.js
 
 # cleanup
-pkill -f ganache 
-rm -f ~/.ararc
+pkill -f ganache
