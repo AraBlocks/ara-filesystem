@@ -211,7 +211,7 @@ async function _write(opts, estimate = true, append = false) {
   const transaction = await tx.create({
     account: acct,
     to: proxy,
-    gasLimit: 1000000,
+    gasLimit: 4000000,
     data: {
       abi,
       functionName: append ? 'append' : 'write',
