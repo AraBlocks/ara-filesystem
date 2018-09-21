@@ -60,7 +60,6 @@ const {
  * @return {Object}
  */
 async function commit(opts) {
-  console.log("OPTS:", opts)
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts object.')
   } else if ('string' !== typeof opts.did || !opts.did) {
