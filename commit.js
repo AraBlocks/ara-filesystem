@@ -321,7 +321,7 @@ async function _hasBeenCommitted(contents, proxy) {
     abi,
     address: proxy,
     functionName: 'hasBuffer',
-    arguments: [ 
+    arguments: [
       0,
       0,
       buf
