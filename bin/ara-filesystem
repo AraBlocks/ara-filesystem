@@ -112,13 +112,13 @@ const { argv } = program
   }, onadd)
   .command('remove <did> <pathspec...>', "Remove files or directories from an AFS", (program) => {
     program
-      .positional('pathspec', {
-        type: 'string',
-        describe: "The file(s) you wish to remove from AFS"
-      })
       .positional('did', {
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .positional('pathspec', {
+        type: 'string',
+        describe: "The file(s) you wish to remove from AFS"
       })
       .option('secret', {
         alias: 's',
@@ -536,10 +536,12 @@ async function oncommit({ did, price }) {
 
   const { password } = await promptForPassword()
 
+  const keyringOpts = { secret, network, keyring }
+
   let result = argv.force
   if (!result) {
     try {
-      const cost = await afs.estimateCommitGasCost({ did, password, price })
+      const cost = await afs.estimateCommitGasCost({ did, password, price, keyringOpts })
       const { answer } = await promptCostConfirmation(cost)
       result = answer
     } catch (err) {
@@ -547,10 +549,9 @@ async function oncommit({ did, price }) {
     }
   }
 
-  const keyringOpts = { secret, network, keyring }
-
   if (result) {
     info("committing with identity: %s", did)
+    console.log("OPTS:", keyringOpts)
     const result = await afs.commit({ did, password, price, keyringOpts })
     if (result instanceof Error) {
       onfatal(result)

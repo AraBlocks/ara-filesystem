@@ -3,12 +3,14 @@
 const { MissingOptionError } = require('ara-util/errors')
 const debug = require('debug')('ara-filesystem:add')
 const mirror = require('mirror-folder')
+const extend = require('extend')
 const ignored = require('./lib/ignore')
 const { create } = require('./create')
 const isFile = require('is-file')
 const mkdirp = require('mkdirp')
 const { access } = require('fs')
 const pify = require('pify')
+const rc = require('./rc')()
 
 const {
   join,
@@ -52,7 +54,7 @@ async function add(opts) {
   } = opts
 
   // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, { network: rc.network.resolver, keyring: rc.network.identity.keyring }, keyringOpts)
+  keyringOpts = extend(true, { network: rc.network && rc.network.resolver, keyring: rc.network && rc.network.identity && rc.network.identity.keyring }, keyringOpts)
 
   let afs
   try {

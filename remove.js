@@ -2,7 +2,8 @@
 
 const debug = require('debug')('ara-filesystem:remove')
 const { create } = require('./create')
-const rc = require('./rc')
+const extend = require('extend')
+const rc = require('./rc')()
 
 const {
   join,
