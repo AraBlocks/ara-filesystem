@@ -14,15 +14,16 @@ PATH=$(npm bin):$PATH
 mkdir -p ~/.ara/identities/
 chmod +r ~/.ara/identities/
 cp -a test/fixtures/identities/. ~/.ara/identities/
+cp ./test/fixtures/.ararc ~/.ararc
 
 cd node_modules/ara-contracts
 truffle migrate --network local
 
-DEBUG=ara* act deploy -S -d 8a98c8305035dcbb1e8fa0826965200269e232e45ac572d26a45db9581986e67 -f -p pass \
--v 1 ./contracts/AFS.sol ./contracts/Library.sol ./contracts/Registry.sol ./contracts/Proxy.sol ./contracts/AraToken.sol &
+DEBUG=ara* act deploy standard 8a98c8305035dcbb1e8fa0826965200269e232e45ac572d26a45db9581986e67 -f -p pass \
+1 ./contracts/AFS.sol ./contracts/Library.sol ./contracts/Registry.sol ./contracts/Proxy.sol ./contracts/AraToken.sol &
 
 # deploy process doesn't close on its own, must sleep
-sleep 15
+sleep 20
 
 cd ../..
 
@@ -42,3 +43,4 @@ ava test/price.js --verbose
 
 # cleanup
 pkill -f ganache 
+rm -f ~/.ararc
