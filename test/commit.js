@@ -118,7 +118,7 @@ test.serial("commit() commit with price", async (t) => {
   const receipt = await commit({ did, password, price })
   const queriedPrice = await getPrice({ did })
   t.is(price, Number(queriedPrice))
-  t.true('object' === typeof receipt)
+  t.true(receipt.status)
 })
 
 test.serial("commit() estimate gas cost without setPrice", async (t) => {

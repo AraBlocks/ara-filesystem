@@ -61,8 +61,10 @@ module.exports = {
 
   async cleanup({ context }) {
     const { idPath, afsPath } = context
-    if (idPath && afsPath) {
+    if (idPath) {
       await pify(rimraf)(idPath)
+    }
+    if (afsPath) {
       await pify(rimraf)(afsPath)
     }
   }
