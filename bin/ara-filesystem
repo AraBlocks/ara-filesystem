@@ -555,7 +555,6 @@ async function oncommit({ did, price, network, keyring, secret }) {
 
   if (result) {
     info("committing with identity: %s", did)
-    console.log("OPTS:", keyringOpts)
     const result = await afs.commit({ did, password, price, keyringOpts })
     if (result instanceof Error) {
       onfatal(result)
