@@ -108,7 +108,7 @@ async function destroy(opts) {
       return
     }
 
-    const afsDdo = await resolveDDO(did, keyringOpts)
+    const afsDdo = await aid.resolve(did, keyringOpts)
     let owner = getDocumentOwner(afsDdo, true)
 
     owner = `${kAidPrefix}${owner}`
