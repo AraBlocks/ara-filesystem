@@ -39,10 +39,10 @@ async function add(opts) {
     throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
   } else if (!opts.keyringOpts.secret) {
     throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
-  } else if (!opts.keyringOpts.network && !rc.network.resolver) {
-    throw new MissingOptionError({ expectedKey: 'keyringOpts.network or rc.network.resolver', actualValue: { keyringOpts: opts.keyringOpts, rc } })
-  } else if (!opts.keyringOpts.keyring && !rc.network.identity.keyring) {
-    throw new MissingOptionError({ expectedKey: 'keyringOpts.keyring or rc.network.identity.keyring', actualValue: { keyringOpts: opts.keyringOpts, rc } })
+  } else if (!opts.keyringOpts.network && (!rc.network || !rc.network.resolver)) {
+    throw new MissingOptionError({ expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ], actualValue: { keyringOpts: opts.keyringOpts, rc }, suggestion: 'setting `rc.network.resolver`' })
+  } else if (!opts.keyringOpts.keyring && (!rc.network || !rc.network.identity || !rc.network.identity.keyring)) {
+    throw new MissingOptionError({ expectedKey: [ 'keyringOpts.keyring', 'rc.network.identity.keyring' ], actualValue: { keyringOpts: opts.keyringOpts, rc }, suggestion: 'setting `rc.network.identity.keyring`' })
   }
 
   const {
