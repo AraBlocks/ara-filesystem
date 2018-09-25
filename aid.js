@@ -140,11 +140,11 @@ async function validate(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
   } else if (!opts.secret) {
-    throw new Error(`Missing \`opts.secret\`, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: 'opts.secret', expectedKey: opts })
   } else if (!opts.network && !rc.network.identity.resolver) {
-    throw new Error(`Expecting \`opts.network\` or \`rc.network.identity.resolver\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: [ 'opts.network', 'rc.network.identity.resolver' ], expectedKey: opts })
   } else if (!opts.keyring && !rc.network.identity.keyring) {
-    throw new Error(`Expecting \`opts.keyring\` or \`rc.network.identity.keyring\` to be defined, got ${JSON.stringify(opts)}`)
+    throw new MissingOptionError({ expectedKey: [ 'opts.keyring', 'rc.network.identity.keyring' ], expectedKey: opts })
   }
 
   if (!opts.keyringOpts || 'object' !== typeof opts.keyringOpts) {
