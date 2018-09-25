@@ -4,7 +4,7 @@ const test = require('ava')
 const { isAddress } = require('ara-util/web3')
 
 const {
-  TEST_OWNER_DID,
+  TEST_DID: contentDid,
   PASSWORD: password
 } = require('./_constants')
 
@@ -19,11 +19,6 @@ const getDid = (t) => {
   return did
 }
 
-const getDdo = (t) => {
-  const { ddo } = t.context
-  return ddo
-}
-
 test.before(async (t) => {
   t.context = await mirrorIdentity()
 })
@@ -32,7 +27,7 @@ test.afterEach(async (t) => {
   await cleanup(t)
 })
 
-test.serial('deploy() valid standard', async (t) => {
+test.serial('deployNewStandard()', async (t) => {
   const owner = getDid(t)
   const paths = [ 'node_modules/ara-contracts/contracts/AFS.sol', 'node_modules/ara-contracts/contracts/Library.sol', 'node_modules/ara-contracts/contracts/Registry.sol', 'node_modules/ara-contracts/contracts/Proxy.sol', 'node_modules/ara-contracts/contracts/AraToken.sol' ]
   const version = '2'
@@ -49,7 +44,7 @@ test.serial('deploy() valid standard', async (t) => {
   t.is(address, standard)
 })
 
-test.serial('deploy() uncompilable standard', async (t) => {
+test.serial('deployNewStandard() uncompilable standard', async (t) => {
   const owner = getDid(t)
   const paths = []
   const version = '3'
@@ -61,7 +56,7 @@ test.serial('deploy() uncompilable standard', async (t) => {
   }), Error, 'Failed to compile standard.')
 })
 
-test.serial('deploy() standard version exists', async (t) => {
+test.serial('deployNewStandard() standard version exists', async (t) => {
   const owner = getDid(t)
   const paths = [ 'node_modules/ara-contracts/contracts/AFS.sol', 'node_modules/ara-contracts/contracts/Library.sol', 'node_modules/ara-contracts/contracts/Registry.sol', 'node_modules/ara-contracts/contracts/Proxy.sol', 'node_modules/ara-contracts/contracts/AraToken.sol' ]
   const version = '2'
@@ -73,7 +68,62 @@ test.serial('deploy() standard version exists', async (t) => {
   }), Error, 'Standard version already exists.')
 })
 
-test.serial('deploy() proxy', async (t) => {
+test.serial('deployNewStandard() invalid opts', async (t) => {
+  const owner = getDid(t)
+
+  await t.throwsAsync(registry.deployNewStandard(), TypeError)
+  await t.throwsAsync(registry.deployNewStandard('opts'), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({ }), TypeError)
+
+  await t.throwsAsync(registry.deployNewStandard({ requesterDid: '' }), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({ requesterDid: 'did:ara:invalid' }), TypeError)
+
+  await t.throwsAsync(registry.deployNewStandard({ requesterDid: owner, password: '' }), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({ requesterDid: owner, password: 18 }), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({ requesterDid: owner, password: 'notright' }), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({ requesterDid: owner, password }), TypeError)
+
+  await t.throwsAsync(registry.deployNewStandard({ requesterDid: owner, password, paths: [] }), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({ requesterDid: owner, password, paths: [ './path' ] }), TypeError)
+
+  await t.throwsAsync(registry.deployNewStandard({
+    requesterDid: owner,
+    password,
+    paths: [ './path' ],
+    version: null
+  }), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({
+    requesterDid: owner,
+    password,
+    paths: [ './path' ],
+    version: false
+  }), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({
+    requesterDid: 'did:ara:invalid',
+    password,
+    paths: [ './path' ],
+    version: '1'
+  }), Error)
+  await t.throwsAsync(registry.deployNewStandard({
+    requesterDid: owner,
+    password: '',
+    paths: [ './path' ],
+    version: '1'
+  }), TypeError)
+  await t.throwsAsync(registry.deployNewStandard({
+    requesterDid: owner,
+    password: '',
+    paths: [ ],
+    version: '1'
+  }), TypeError)
+})
+
+test.serial('proxyExists() does not exist', async (t) => {
+  const exists = await registry.proxyExists(contentDid)
+  t.false(exists)
+})
+
+test.serial('deployProxy()', async (t) => {
   const { afs } = await createAFS(t)
   const { did } = afs
 
@@ -88,13 +138,21 @@ test.serial('deploy() proxy', async (t) => {
   t.is(gotAddress, deployedAddress)
 })
 
-test.serial('upgrade() proxy', async (t) => {
+test.serial('upgradeProxy()', async (t) => {
   const { afs } = await createAFS(t)
   const { did } = afs
 
-  const deployedAddress = await registry.deployProxy({
+  await registry.deployProxy({
+    contentDid: did,
+    password,
+    version: '1'
+  })
+  const upgraded = await registry.upgradeProxy({
     contentDid: did,
     password,
     version: '2'
   })
+  t.true(upgraded)
+  const version = await registry.getProxyVersion(did)
+  t.is(version, '2')
 })
