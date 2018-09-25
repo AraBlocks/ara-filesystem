@@ -83,7 +83,7 @@ async function create(opts) {
     }
 
     try {
-      ({ did, ddo } = await validate({
+      ({ did, ddo } = await aid.validate({
         did,
         password,
         label: 'create',
@@ -112,7 +112,7 @@ async function create(opts) {
     afs.ddo = ddo
   } else if (owner) {
     try {
-      ({ owner: did } = await validate({
+      ({ owner: did } = await aid.validate({
         owner,
         password,
         label: 'create',
@@ -160,7 +160,7 @@ async function create(opts) {
       if (!ddo) {
         await aid.archive(afsId, keyringOpts.archiver)
 
-        afsDdo = await aid.resolve(toHex(afsId.publicKey))
+        afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts.resolver)
 
         if (null == afsDdo || 'object' !== typeof afsDdo) {
           throw new TypeError('AFS identity not successfully resolved.')
