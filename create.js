@@ -46,21 +46,32 @@ async function create(opts) {
     throw TypeError('Expecting non-empty password.')
   } else if (opts.storage && 'function' !== typeof opts.storage) {
     throw new TypeError('Expecting storage to be a function.')
-  } else if (opts.keyringOpts && 'object' !== typeof opts.keyringOpts) {
-    throw new TypeError('Expecting opts.keyringOpts to be an object.')
   }
 
   let {
     did,
-    ddo
+    ddo,
+    keyringOpts
   } = opts
 
   const {
     owner,
     password,
     storage,
-    keyringOpts
   } = opts
+
+  keyringOpts = {
+    archiver: {
+      secret: keyringOpts.secret || keyringOpts.archiverSecret,
+      keyring: keyringOpts.keyring || keyringOpts.archiverKeyring || rc.network.identity.keyring,
+      network: keyringOpts.network || keyringOpts.archiverNetwork || rc.network.archiver
+    },
+    resolver: {
+      secret: keyringOpts.secret || keyringOpts.resolverSecret,
+      keyring: keyringOpts.keyring || keyringOpts.resolverKeyring || rc.network.identity.keyring,
+      network: keyringOpts.network || keyringOpts.resolverNetwork || rc.network.resolver
+    }
+  }
 
   let afs
   let mnemonic
@@ -77,7 +88,8 @@ async function create(opts) {
         did,
         password,
         label: 'create',
-        ddo
+        ddo,
+        keyringOpts: keyringOpts.resolver
       }))
     } catch (err) {
       throw err
@@ -105,14 +117,17 @@ async function create(opts) {
         owner,
         password,
         label: 'create',
-        ddo
+        ddo,
+        keyringOpts: keyringOpts.resolver
       }))
     } catch (err) {
       throw err
     }
 
-    let afsId = await aid.create({ password, owner });
-    ({ mnemonic } = afsId)
+    const afsId = await aid.create({ password, owner })
+
+    // Note: Do not change this `({ mnemonic } = afsId)`, it causes a weird scoping issue.
+    mnemonic = afsId.mnemonic
 
     const { publicKey, secretKey } = afsId
     const afsDid = toHex(publicKey)
@@ -135,20 +150,18 @@ async function create(opts) {
       const metadataPublicKey = toHex(key)
 
       // recreate identity with additional publicKey
-      afsId = await aid.create({
+      const afsId = await aid.create({
         password,
         mnemonic,
         owner,
         metadataPublicKey
-      });
-
-      ({ mnemonic } = afsId)
+      })
 
       await writeIdentity(afsId)
       if (!ddo) {
-        await aid.archive(afsId, keyringOpts)
+        await aid.archive(afsId, keyringOpts.archiver)
 
-        afsDdo = await aid.resolve(toHex(afsId.publicKey))
+        afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts.resolver)
 
         if (null == afsDdo || 'object' !== typeof afsDdo) {
           throw new TypeError('AFS identity not successfully resolved.')

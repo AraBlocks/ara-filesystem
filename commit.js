@@ -1,10 +1,13 @@
 /* eslint-disable no-await-in-loop */
 
+const { MissingOptionError } = require('ara-util/errors')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
+const extend = require('extend')
 const pify = require('pify')
 const fs = require('fs')
+const rc = require('./rc')()
 
 const {
   proxyExists,
@@ -67,16 +70,30 @@ async function commit(opts) {
     throw new TypeError('Expecting boolean.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network && !rc.network.resolver) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.network or rc.network.resolver', actualValue: { keyringOpts: opts.keyringOpts, rc } })
+  } else if (!opts.keyringOpts.keyring && !rc.network.identity.keyring) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.keyring or rc.network.identity.keyring', actualValue: { keyringOpts: opts.keyringOpts, rc } })
   }
 
-  let { did, estimate } = opts
-  const { password, price } = opts
+  let { did, estimate, keyringOpts } = opts
+  const {
+    password,
+    price
+  } = opts
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  keyringOpts = extend(true, { network: rc.network.resolver, keyring: rc.network.identity.keyring }, keyringOpts)
 
   estimate = estimate || false
 
   let ddo
   try {
-    ({ did, ddo } = await validate({ did, password, label: 'commit' }))
+    ({ did, ddo } = await validate({ did, password, label: 'commit', keyringOpts }))
   } catch (err) {
     throw err
   }
@@ -85,7 +102,7 @@ async function commit(opts) {
   if (await proxyExists(did)) {
     proxy = await getProxyAddress(did)
   } else {
-    proxy = await deployProxy({ contentDid: did, password })
+    proxy = await deployProxy({ contentDid: did, password, keyringOpts })
   }
 
   debug('proxy address', proxy)
@@ -120,7 +137,8 @@ async function commit(opts) {
       const setPriceGasCost = await estimateSetPriceGasCost({
         did,
         password,
-        price
+        price,
+        keyringOpts
       })
       return result + setPriceGasCost
     }
@@ -197,6 +215,14 @@ async function estimateCommitGasCost(opts) {
     throw TypeError('Expecting non-empty password.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network && !rc.network.resolver) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.network or rc.network.resolver', actualValue: { keyringOpts: opts.keyringOpts, rc } })
+  } else if (!opts.keyringOpts.keyring && !rc.network.identity.keyring) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.keyring or rc.network.identity.keyring', actualValue: { keyringOpts: opts.keyringOpts, rc } })
   }
 
   opts = Object.assign(opts, { estimate: true })
