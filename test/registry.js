@@ -119,7 +119,9 @@ test.serial('deployNewStandard() invalid opts', async (t) => {
 })
 
 test.serial('proxyExists() does not exist', async (t) => {
-  const exists = await registry.proxyExists(contentDid)
+  let exists = await registry.proxyExists('')
+  t.false(exists)
+  exists = await registry.proxyExists(contentDid)
   t.false(exists)
 })
 
@@ -136,6 +138,27 @@ test.serial('deployProxy()', async (t) => {
   t.true(exists)
   const gotAddress = await registry.getProxyAddress(did)
   t.is(gotAddress, deployedAddress)
+})
+
+test.serial('deployProxy() invalid opts', async (t) => {
+  const { afs } = await createAFS(t)
+  const { did } = afs
+
+  await t.throwsAsync(registry.deployProxy(), TypeError)
+  await t.throwsAsync(registry.deployProxy('opts'), TypeError)
+  await t.throwsAsync(registry.deployProxy({ }), TypeError)
+
+  await t.throwsAsync(registry.deployProxy({ did: '' }), TypeError)
+  await t.throwsAsync(registry.deployProxy({ did: 'did:ara:invalid' }), TypeError)
+
+  await t.throwsAsync(registry.deployProxy({ did, password: '' }), TypeError)
+  await t.throwsAsync(registry.deployProxy({ did, password: 18 }), TypeError)
+  await t.throwsAsync(registry.deployProxy({ did, password: 'notright' }), Error)
+
+  await t.throwsAsync(registry.deployProxy({ did, password, version: true }), Error)
+  await t.throwsAsync(registry.deployProxy({ did, password, version: { } }), Error)
+  await t.throwsAsync(registry.deployProxy({ did: 'did:ara:invalid', password, version: '1' }))
+  await t.throwsAsync(registry.deployProxy({ did, password: 'invalid', version: '1' }))
 })
 
 test.serial('upgradeProxy()', async (t) => {
@@ -155,4 +178,26 @@ test.serial('upgradeProxy()', async (t) => {
   t.true(upgraded)
   const version = await registry.getProxyVersion(did)
   t.is(version, '2')
+})
+
+test.serial('upgradeProxy() invalid opts', async (t) => {
+  await t.throwsAsync(registry.upgradeProxy(), TypeError)
+  await t.throwsAsync(registry.upgradeProxy('opts'), TypeError)
+  await t.throwsAsync(registry.upgradeProxy({ }), TypeError)
+
+  await t.throwsAsync(registry.upgradeProxy({ did: '' }), TypeError)
+  await t.throwsAsync(registry.upgradeProxy({ did: 'did:ara:invalid' }), TypeError)
+
+  const { afs } = await createAFS(t)
+  const { did } = afs
+
+  await t.throwsAsync(registry.upgradeProxy({ did, password: '' }), TypeError)
+  await t.throwsAsync(registry.upgradeProxy({ did, password: 18 }), TypeError)
+  await t.throwsAsync(registry.upgradeProxy({ did, password: 'notright' }), Error)
+
+  await t.throwsAsync(registry.upgradeProxy({ did, password, version: true }), Error)
+  await t.throwsAsync(registry.upgradeProxy({ did, password, version: { } }), Error)
+  await t.throwsAsync(registry.upgradeProxy({ did: 'did:ara:invalid', password, version: '1' }))
+  await t.throwsAsync(registry.upgradeProxy({ did, password: 'invalid', version: '1' }))
+  await t.throwsAsync(registry.upgradeProxy({ did, password, version: '10000' }))
 })
