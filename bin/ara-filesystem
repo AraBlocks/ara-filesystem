@@ -16,6 +16,7 @@ const ProgressBar = require('progress')
 const bytes = require('pretty-bytes')
 const table = require('table')
 const prettyjson = require('prettyjson')
+const rc = require('../rc')()
 
 const isDirectory = require('is-directory')
 const isFile = require('is-file')
@@ -59,7 +60,7 @@ const { argv } = program
       .option('secret', {
         alias: 's',
         type: 'string',
-        describe: 'key filename. Default: kArchiverSecret in constants.js',
+        describe: 'Shared secret for the keyring',
       })
       .option('archiverNetwork', {
         type: 'string',
@@ -76,18 +77,19 @@ const { argv } = program
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        describe: 'Keyring path. Default: kSecretsDir = \'secret\' in rc.js',
+        default: rc.network.identity.keyring + ".pub",
+        describe: 'Path to the keyring',
       })
   }, oncreate)
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
     program
-      .positional('pathspec', {
-        type: 'string',
-        describe: "The file(s) you wish to add to AFS"
-      })
       .positional('did', {
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .positional('pathspec', {
+        type: 'string',
+        describe: "The file(s) you wish to add to AFS"
       })
       .option('secret', {
         alias: 's',
@@ -106,7 +108,7 @@ const { argv } = program
         alias: 'k',
         type: 'string',
         required: true,
-        default: rc.network.identity.keyring,
+        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onadd)
@@ -137,7 +139,7 @@ const { argv } = program
         alias: 'k',
         type: 'string',
         required: true,
-        default: rc.network.identity.keyring,
+        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onremove)
@@ -164,7 +166,7 @@ const { argv } = program
         alias: 'k',
         type: 'string',
         required: true,
-        default: rc.network.identity.keyring,
+        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onhistory)
@@ -201,7 +203,7 @@ const { argv } = program
         alias: 'k',
         type: 'string',
         required: true,
-        default: rc.network.identity.keyring,
+        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, oncommit)
@@ -256,7 +258,7 @@ const { argv } = program
         alias: 'k',
         type: 'string',
         required: true,
-        default: rc.network.identity.keyring,
+        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, ondestroy)
@@ -287,7 +289,7 @@ const { argv } = program
         alias: 'k',
         type: 'string',
         required: true,
-        default: rc.network.identity.keyring,
+        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onunarchive)
@@ -531,7 +533,7 @@ async function onremove(argv) {
   instance.close()
 }
 
-async function oncommit({ did, price }) {
+async function oncommit({ did, price, secret, network, keyring }) {
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
 
   const { password } = await promptForPassword()
