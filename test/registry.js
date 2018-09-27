@@ -68,6 +68,47 @@ test.serial('deployNewStandard() standard version exists', async (t) => {
   }), Error, 'Standard version already exists.')
 })
 
+test.serial('proxyExists() does not exist', async (t) => {
+  let exists = await registry.proxyExists('')
+  t.false(exists)
+  exists = await registry.proxyExists(contentDid)
+  t.false(exists)
+})
+
+test.serial('deployProxy()', async (t) => {
+  const { afs } = await createAFS(t)
+  const { did } = afs
+
+  const deployedAddress = await registry.deployProxy({
+    contentDid: did,
+    password,
+    version: '2'
+  })
+  const exists = await registry.proxyExists(did)
+  t.true(exists)
+  const gotAddress = await registry.getProxyAddress(did)
+  t.is(gotAddress, deployedAddress)
+})
+
+test.serial('upgradeProxy()', async (t) => {
+  const { afs } = await createAFS(t)
+  const { did } = afs
+
+  await registry.deployProxy({
+    contentDid: did,
+    password,
+    version: '1'
+  })
+  const upgraded = await registry.upgradeProxy({
+    contentDid: did,
+    password,
+    version: '2'
+  })
+  t.true(upgraded)
+  const version = await registry.getProxyVersion(did)
+  t.is(version, '2')
+})
+
 test.serial('deployNewStandard() invalid opts', async (t) => {
   const owner = getDid(t)
 
@@ -118,28 +159,6 @@ test.serial('deployNewStandard() invalid opts', async (t) => {
   }), TypeError)
 })
 
-test.serial('proxyExists() does not exist', async (t) => {
-  let exists = await registry.proxyExists('')
-  t.false(exists)
-  exists = await registry.proxyExists(contentDid)
-  t.false(exists)
-})
-
-test.serial('deployProxy()', async (t) => {
-  const { afs } = await createAFS(t)
-  const { did } = afs
-
-  const deployedAddress = await registry.deployProxy({
-    contentDid: did,
-    password,
-    version: '2'
-  })
-  const exists = await registry.proxyExists(did)
-  t.true(exists)
-  const gotAddress = await registry.getProxyAddress(did)
-  t.is(gotAddress, deployedAddress)
-})
-
 test.serial('deployProxy() invalid opts', async (t) => {
   const { afs } = await createAFS(t)
   const { did } = afs
@@ -159,25 +178,6 @@ test.serial('deployProxy() invalid opts', async (t) => {
   await t.throwsAsync(registry.deployProxy({ did, password, version: { } }), Error)
   await t.throwsAsync(registry.deployProxy({ did: 'did:ara:invalid', password, version: '1' }))
   await t.throwsAsync(registry.deployProxy({ did, password: 'invalid', version: '1' }))
-})
-
-test.serial('upgradeProxy()', async (t) => {
-  const { afs } = await createAFS(t)
-  const { did } = afs
-
-  await registry.deployProxy({
-    contentDid: did,
-    password,
-    version: '1'
-  })
-  const upgraded = await registry.upgradeProxy({
-    contentDid: did,
-    password,
-    version: '2'
-  })
-  t.true(upgraded)
-  const version = await registry.getProxyVersion(did)
-  t.is(version, '2')
 })
 
 test.serial('upgradeProxy() invalid opts', async (t) => {

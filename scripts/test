@@ -37,7 +37,8 @@ cd ../..
 # ava test/destroy.js --verbose
 # ava test/commit.js --verbose
 # ava test/price.js --verbose
-ava test/registry.js --verbose
+# ava test/registry.js --verbose
+ava test/purchase.js --verbose
 
 # TODO: aid.js
 
