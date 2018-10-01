@@ -125,7 +125,8 @@ async function create(opts) {
 
     const afsId = await aid.create({ password, owner })
 
-    // Note: Do not change this `({ mnemonic } = afsId)`, it causes a weird scoping issue.
+    // Note: Do not change this to `({ mnemonic } = afsId)`, it causes a weird scoping issue.
+    // eslint-disable-next-line prefer-destructuring
     mnemonic = afsId.mnemonic
 
     const { publicKey, secretKey } = afsId

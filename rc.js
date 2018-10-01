@@ -6,7 +6,6 @@ const os = require('os')
 const kAraDir = '.ara'
 const kAfsDir = 'afs'
 const kIdentitiesDir = 'identities'
-const kSecretsDir = 'keyrings'
 
 const defaults = () => ({
   afs: {
