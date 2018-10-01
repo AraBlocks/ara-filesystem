@@ -74,22 +74,21 @@ async function commit(opts) {
     throw new MissingOptionError({ expectedKey: 'opts.keyringOpts', actualValue: opts })
   } else if (!opts.keyringOpts.secret) {
     throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
-  } else if (!opts.keyringOpts.network && 
+  } else if (!opts.keyringOpts.network &&
       !(rc.network && rc.network.resolver)) {
-    throw new MissingOptionError({ 
-      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ], 
-      actualValue: { keyringOpts: opts.keyringOpts, rc }, 
-      suggestion: 'setting `rc.network.resolver`' 
+    throw new MissingOptionError({
+      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.resolver`'
     })
-  } else if (!opts.keyringOpts.keyring && 
+  } else if (!opts.keyringOpts.keyring &&
       !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({ 
-      expectedKey: [ 'opts.keyringOpts.keyring', 'rc.network.identity.keyring' ], 
-      actualValue: { keyringOpts: opts.keyringOpts, rc }, 
-      suggestion: 'setting `rc.network.identity.keyring`' 
+    throw new MissingOptionError({
+      expectedKey: [ 'opts.keyringOpts.keyring', 'rc.network.identity.keyring' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.identity.keyring`'
     })
   }
-
 
   let { did, estimate, keyringOpts } = opts
   const {
@@ -98,16 +97,18 @@ async function commit(opts) {
   } = opts
 
   // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, { 
-    network: rc.network && rc.network.resolver, 
-    keyring: rc.network && rc.network.identity && rc.network.identity.keyring 
+  keyringOpts = extend(true, {
+    network: rc.network && rc.network.resolver,
+    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
   }, keyringOpts)
 
   estimate = estimate || false
 
   let ddo
   try {
-    ({ did, ddo } = await aid.validate({ did, password, label: 'commit', keyringOpts }))
+    ({ did, ddo } = await aid.validate({
+      did, password, label: 'commit', keyringOpts
+    }))
   } catch (err) {
     throw err
   }
@@ -233,19 +234,19 @@ async function estimateCommitGasCost(opts) {
     throw new MissingOptionError({ expectedKey: 'opts.keyringOpts', actualValue: opts })
   } else if (!opts.keyringOpts.secret) {
     throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
-  } else if (!opts.keyringOpts.network && 
+  } else if (!opts.keyringOpts.network &&
       !(rc.network && rc.network.resolver)) {
-    throw new MissingOptionError({ 
-      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ], 
-      actualValue: { keyringOpts: opts.keyringOpts, rc }, 
-      suggestion: 'setting `rc.network.resolver`' 
+    throw new MissingOptionError({
+      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.resolver`'
     })
-  } else if (!opts.keyringOpts.keyring && 
+  } else if (!opts.keyringOpts.keyring &&
      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({ 
+    throw new MissingOptionError({
       expectedKey: [ 'opts.keyringOpts.keyring', 'rc.network.identity.keyring' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc }, 
-      suggestion: 'setting `rc.network.identity.keyring`' 
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.identity.keyring`'
     })
   }
 
