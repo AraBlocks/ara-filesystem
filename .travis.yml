@@ -6,6 +6,7 @@ install:
 before_script:
  - bash ./scripts/setup-rc
 script:
+ - npm run lint
  - bash ./scripts/test
 after_script:
  - bash ./scripts/remove-rc
