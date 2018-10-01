@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# lint
-npm run lint
-
 # run local truffle node
 ganache-cli &
 sleep 5
