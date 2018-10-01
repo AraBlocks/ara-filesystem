@@ -43,14 +43,14 @@ async function add(opts) {
       actualValue: opts.keyringOpts 
     })
   } else if (!opts.keyringOpts.network && 
-      (!rc.network || !rc.network.resolver)) {
+      !(rc.network && rc.network.resolver)) {
     throw new MissingOptionError({ 
       expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ], 
       actualValue: { keyringOpts: opts.keyringOpts, rc }, 
       suggestion: 'setting `rc.network.resolver`' 
     })
   } else if (!opts.keyringOpts.keyring && 
-      (!rc.network || !rc.network.identity || !rc.network.identity.keyring)) {
+      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
     throw new MissingOptionError({ 
       expectedKey: [ 'keyringOpts.keyring', 'rc.network.identity.keyring' ], 
       actualValue: { keyringOpts: opts.keyringOpts, rc }, 
