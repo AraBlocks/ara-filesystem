@@ -65,12 +65,12 @@ const { argv } = program
       .option('archiverNetwork', {
         type: 'string',
         required: true,
-        default: rc.network.archiver,
+        default: rc.network.identity.archive,
         describe: 'Network name of the key for the DID archiver in the keyring',
       })
       .option('resolverNetwork', {
         type: 'string',
-        default: rc.network.resolver,
+        default: rc.network.identity.resolver,
         required: true,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
@@ -101,7 +101,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: rc.network.resolver,
+        default: rc.network.identity.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
@@ -132,7 +132,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: rc.network.resolver,
+        default: rc.network.identity.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
@@ -159,7 +159,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: rc.network.resolver,
+        default: rc.network.identity.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
@@ -196,7 +196,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: rc.network.resolver,
+        default: rc.network.identity.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
@@ -251,7 +251,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: rc.network.resolver,
+        default: rc.network.identity.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
@@ -282,7 +282,7 @@ const { argv } = program
         alias: 'n',
         type: 'string',
         required: true,
-        default: rc.network.resolver,
+        default: rc.network.identity.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {

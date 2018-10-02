@@ -2,6 +2,7 @@ const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const { MissingOptionError } = require('ara-util/errors')
 const hasDIDMethod = require('has-did-method')
 const context = require('ara-context')()
+const extend = require('extend')
 const debug = require('debug')('ara-filesystem:aid')
 const util = require('ara-util')
 const aid = require('ara-identity')
@@ -72,11 +73,11 @@ async function archive(identity, opts = {}) {
   } else if (!opts.secret) {
     throw new MissingOptionError({ expectedKey: 'opts.secret', actualValue: opts })
   } else if (!opts.network &&
-      !(rc.network && rc.network.archiver)) {
+      !(rc.network && rc.network.identity && rc.network.identity.archive)) {
     throw new MissingOptionError({
       expectedKey: 'opts.network',
       actualValue: { keyringOpts: opts, rc },
-      suggestion: 'setting `rc.network.archiver`'
+      suggestion: 'setting `rc.network.identity.archive`'
     })
   } else if (!opts.keyring &&
       !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
@@ -90,7 +91,7 @@ async function archive(identity, opts = {}) {
   try {
     opts = {
       secret: opts.secret,
-      network: opts.network || rc.network.archiver,
+      network: opts.network || rc.network.identity.archive,
       keyring: opts.keyring || rc.network.identity.keyring
     }
     await aid.archive(identity, opts)
@@ -112,11 +113,11 @@ async function resolve(did, opts = {}) {
   } else if (!opts.secret) {
     throw new MissingOptionError({ expectedKey: 'opts.secret', actualValue: opts })
   } else if (!opts.network &&
-      !(rc.network && rc.network.resolver)) {
+      !(rc.network && rc.network.identity && rc.network.identity.resolver)) {
     throw new MissingOptionError({
       expectedKey: 'opts.network',
       actualValue: { keyringOpts: opts, rc },
-      suggestion: 'setting `rc.network.resolver`'
+      suggestion: 'setting `rc.network.identity.resolver`'
     })
   } else if (!opts.keyring &&
       !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
@@ -134,7 +135,7 @@ async function resolve(did, opts = {}) {
   try {
     opts = {
       secret: opts.secret,
-      network: opts.network || rc.network.resolver,
+      network: opts.network || rc.network.identity.resolver,
       keyring: opts.keyring || rc.network.identity.keyring
     }
     result = await aid.resolve(did, opts)
@@ -159,11 +160,11 @@ async function validate(opts) {
   } else if (!opts.keyringOpts.secret) {
     throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
   } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.identity.resolver)) {
+      !(rc.network && rc.network.identity && rc.network.identity.resolver)) {
     throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
+      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.identity.resolver' ],
       actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
+      suggestion: 'setting `rc.network.identity.resolver`'
     })
   } else if (!opts.keyringOpts.keyring &&
       !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
@@ -173,6 +174,12 @@ async function validate(opts) {
       suggestion: 'setting `rc.network.identity.keyring`'
     })
   }
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  opts.keyringOpts = extend(true, {
+    network: rc.network && rc.network.identity && rc.network.identity.resolver,
+    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
+  }, opts.keyringOpts)
 
   let result
   try {

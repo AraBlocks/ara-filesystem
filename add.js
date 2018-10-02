@@ -43,11 +43,11 @@ async function add(opts) {
       actualValue: opts.keyringOpts
     })
   } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.resolver)) {
+      !(rc.network && rc.network.identity && rc.network.identity.resolver)) {
     throw new MissingOptionError({
-      expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ],
+      expectedKey: [ 'keyringOpts.network', 'rc.network.identity.resolver' ],
       actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
+      suggestion: 'setting `rc.network.identity.resolver`'
     })
   } else if (!opts.keyringOpts.keyring &&
       !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
@@ -68,7 +68,7 @@ async function add(opts) {
 
   // Replace everything in the first object with the second. This method will allow us to have defaults.
   keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
+    network: rc.network && rc.network.identity && rc.network.identity.resolver,
     keyring: rc.network && rc.network.identity && rc.network.identity.keyring
   }, keyringOpts)
 
