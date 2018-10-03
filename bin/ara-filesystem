@@ -387,9 +387,8 @@ async function oncreate(argv) {
     owner = `${kAidPrefix}${owner}`
   }
 
-  const { secret, network, keyring } = argv
-  const keyringOpts = { secret, network, keyring }
-
+  const { secret, resolverNetwork, archiverNetwork, keyring } = argv
+  const keyringOpts = { secret, resolverNetwork, archiverNetwork, keyring }
   const { password } = await promptForPassword()
 
   let arafs
