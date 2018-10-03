@@ -63,12 +63,12 @@ async function create(opts) {
     archiver: {
       secret: keyringOpts.secret || keyringOpts.archiverSecret,
       keyring: keyringOpts.keyring || keyringOpts.archiverKeyring || rc.network.identity.keyring,
-      network: keyringOpts.network || keyringOpts.archiverNetwork || rc.network.archiver
+      network: keyringOpts.network || keyringOpts.archiverNetwork || rc.network.identity.archive
     },
     resolver: {
       secret: keyringOpts.secret || keyringOpts.resolverSecret,
       keyring: keyringOpts.keyring || keyringOpts.resolverKeyring || rc.network.identity.keyring,
-      network: keyringOpts.network || keyringOpts.resolverNetwork || rc.network.resolver
+      network: keyringOpts.network || keyringOpts.resolverNetwork || rc.network.identity.resolver
     }
   }
 

@@ -75,11 +75,11 @@ async function commit(opts) {
   } else if (!opts.keyringOpts.secret) {
     throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
   } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.resolver)) {
+      !(rc.network && rc.network.identity && rc.network.identity.resolver)) {
     throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
+      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.identity.resolver' ],
       actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
+      suggestion: 'setting `rc.network.identity.resolver`'
     })
   } else if (!opts.keyringOpts.keyring &&
       !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
@@ -98,7 +98,7 @@ async function commit(opts) {
 
   // Replace everything in the first object with the second. This method will allow us to have defaults.
   keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
+    network: rc.network && rc.network.identity && rc.network.identity.resolver,
     keyring: rc.network && rc.network.identity && rc.network.identity.keyring
   }, keyringOpts)
 
@@ -235,11 +235,11 @@ async function estimateCommitGasCost(opts) {
   } else if (!opts.keyringOpts.secret) {
     throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
   } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.resolver)) {
+      !(rc.network && rc.network.identity && rc.network.identity.resolver)) {
     throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
+      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.identity.resolver' ],
       actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
+      suggestion: 'setting `rc.network.identity.resolver`'
     })
   } else if (!opts.keyringOpts.keyring &&
      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
@@ -249,6 +249,13 @@ async function estimateCommitGasCost(opts) {
       suggestion: 'setting `rc.network.identity.keyring`'
     })
   }
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  opts.keyringOpts = extend(true, {
+    network: rc.network && rc.network.identity && rc.network.identity.resolver,
+    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
+  }, opts.keyringOpts)
+
 
   opts = Object.assign(opts, { estimate: true })
   return commit(opts)

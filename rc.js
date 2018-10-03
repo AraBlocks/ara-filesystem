@@ -20,10 +20,10 @@ const defaults = () => ({
     },
   },
   network: {
-    archiver: 'lara.archiver',
-    resolver: 'lara.resolver',
     identity: {
-      keyring: resolve(os.homedir(), '.ara', 'keyrings', 'keyring')
+      keyring: resolve(os.homedir(), '.ara', 'keyrings', 'keyring'),
+      archive: 'lara.archiver',
+      resolver: 'lara.resolver',
     }
   }
 })
