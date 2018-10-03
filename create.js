@@ -142,7 +142,6 @@ async function create(opts) {
         owner,
         metadataPublicKey
       });
-
       ({ mnemonic } = afsId)
 
       await writeIdentity(afsId)

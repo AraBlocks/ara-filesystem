@@ -1,4 +1,5 @@
 const { unarchive } = require('./unarchive')
+const ownership = require('./ownership')
 const { destroy } = require('./destroy')
 const { create } = require('./create')
 const { remove } = require('./remove')
@@ -27,5 +28,6 @@ module.exports = {
   estimateSetPriceGasCost,
   estimateCommitGasCost,
   unarchive,
-  metadata
+  metadata,
+  ownership
 }

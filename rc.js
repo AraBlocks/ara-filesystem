@@ -21,8 +21,8 @@ const defaults = () => ({
     },
   },
   secret: {
-    archiver: resolve(os.homedir(), kAraDir, kSecretsDir, 'ara-archiver.pub'),
-    resolver: resolve(os.homedir(), kAraDir, kSecretsDir, 'ara-resolver.pub')
+    archiver: resolve(os.homedir(), kAraDir, kSecretsDir, 'aws-test.pub'),
+    resolver: resolve(os.homedir(), kAraDir, kSecretsDir, 'aws-test.pub')
   }
 })
 

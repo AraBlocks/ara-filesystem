@@ -78,7 +78,7 @@ async function setPrice(opts) {
   }
 
   const proxy = await getProxyAddress(did)
-
+  console.log('AFS DDO', ddo)
   let owner = getDocumentOwner(ddo, true)
   owner = `${kAidPrefix}${owner}`
   const acct = await account.load({ did: owner, password })
