@@ -1,7 +1,10 @@
 /* eslint-disable no-await-in-loop */
 
-const debug = require('debug')('ara-filesystem:remove')
+const { MissingOptionError } = require('ara-util/errors')
 const { create } = require('./create')
+const extend = require('extend')
+const debug = require('debug')('ara-filesystem:remove')
+const rc = require('./rc')()
 
 const {
   join,
@@ -26,13 +29,38 @@ async function remove(opts) {
   } else if (null === opts.paths || (!(opts.paths instanceof Array)
     && 'string' !== typeof opts.paths) || 0 === opts.paths.length) {
     throw new TypeError('Expecting one or more filepaths to add.')
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network &&
+    !(rc.network && rc.network.resolver)) {
+    throw new MissingOptionError({
+      expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.resolver`'
+    })
+  } else if (!opts.keyringOpts.keyring &&
+      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
+    throw new MissingOptionError({
+      expectedKey: [ 'keyringOpts.keyring', 'rc.network.identity.keyring' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.identity.keyring`'
+    })
   }
 
   const { did, password, paths } = opts
+  let { keyringOpts } = opts
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  keyringOpts = extend(true, {
+    network: rc.network && rc.network.resolver,
+    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
+  }, keyringOpts)
 
   let afs
   try {
-    ({ afs } = await create({ did, password }))
+    ({ afs } = await create({ did, password, keyringOpts }))
   } catch (err) {
     throw err
   }

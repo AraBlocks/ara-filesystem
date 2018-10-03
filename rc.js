@@ -6,7 +6,6 @@ const os = require('os')
 const kAraDir = '.ara'
 const kAfsDir = 'afs'
 const kIdentitiesDir = 'identities'
-const kSecretsDir = 'keyrings'
 
 const defaults = () => ({
   afs: {
@@ -20,9 +19,12 @@ const defaults = () => ({
       root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
     },
   },
-  secret: {
-    archiver: resolve(os.homedir(), kAraDir, kSecretsDir, 'aws-test.pub'),
-    resolver: resolve(os.homedir(), kAraDir, kSecretsDir, 'aws-test.pub')
+  network: {
+    archiver: 'lara.archiver',
+    resolver: 'lara.resolver',
+    identity: {
+      keyring: resolve(os.homedir(), '.ara', 'keyrings', 'keyring')
+    }
   }
 })
 

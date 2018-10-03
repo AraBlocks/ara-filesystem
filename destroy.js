@@ -1,8 +1,10 @@
+const { MissingOptionError } = require('ara-util/errors')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:destroy')
 const { kAidPrefix } = require('./constants')
 const { access } = require('fs')
 const rimraf = require('rimraf')
+const extend = require('extend')
 const pify = require('pify')
 const aid = require('./aid')
 const rc = require('./rc')()
@@ -44,10 +46,35 @@ async function destroy(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if (opts.password && 'string' !== typeof opts.password) {
     throw TypeError('Expecting non-empty password.')
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network &&
+      !(rc.network && rc.network.resolver)) {
+    throw new MissingOptionError({
+      expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.resolver`'
+    })
+  } else if (!opts.keyringOpts.keyring &&
+      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
+    throw new MissingOptionError({
+      expectedKey: [ 'keyringOpts.keyring', 'rc.network.identity.keyring' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.identity.keyring`'
+    })
   }
 
-  let { did } = opts
+  let { did, keyringOpts } = opts
   did = normalize(did)
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  keyringOpts = extend(true, {
+    network: rc.network && rc.network.resolver,
+    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
+  }, keyringOpts)
+
   let path
 
   try {
@@ -79,7 +106,12 @@ async function destroy(opts) {
 
   if (password) {
     try {
-      ({ did } = await aid.validate({ did, password, label: 'destroy' }))
+      ({ did } = await aid.validate({
+        did,
+        password,
+        label: 'destroy',
+        keyringOpts
+      }))
     } catch (err) {
       throw err
     }
@@ -89,7 +121,7 @@ async function destroy(opts) {
       return
     }
 
-    const afsDdo = await aid.resolve(did)
+    const afsDdo = await aid.resolve(did, keyringOpts)
     let owner = getDocumentOwner(afsDdo, true)
 
     owner = `${kAidPrefix}${owner}`

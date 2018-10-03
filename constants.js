@@ -1,10 +1,4 @@
 module.exports = {
-
-  kArchiverSecret: 'test-node',
-  kResolverSecret: 'test-node',
-  kArchiverRemote: 'archiver',
-  kResolverRemote: 'resolver',
-
   kDidPrefix: 'did:',
   kAidPrefix: 'did:ara:',
   kOwnerSuffix: '#owner',

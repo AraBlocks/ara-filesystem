@@ -1,9 +1,12 @@
 language: node_js
 node_js:
-  - "8.9.4"
+ - "8.9.4"
 install:
-  - bash ./scripts/travis-install
+ - bash ./scripts/travis-install
+before_script:
+ - bash ./scripts/setup-rc
 script:
-  - bash ./scripts/setup-rc
-  - bash ./scripts/test
-  - bash ./scripts/remove-rc
+ - npm run lint
+ - bash ./scripts/test
+after_script:
+ - bash ./scripts/remove-rc

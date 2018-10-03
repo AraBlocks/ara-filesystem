@@ -1,20 +1,16 @@
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
-const debug = require('debug')('ara-filesystem:aid')
+const { MissingOptionError } = require('ara-util/errors')
 const hasDIDMethod = require('has-did-method')
 const context = require('ara-context')()
-const { secret } = require('./rc')()
-const aid = require('ara-identity')
+const debug = require('debug')('ara-filesystem:aid')
 const util = require('ara-util')
+const aid = require('ara-identity')
+const rc = require('./rc')()
 
-const { normalize } = util
 const {
   kKeyLength,
   kAidPrefix,
-  kOwnerSuffix,
-  kArchiverSecret,
-  kResolverSecret,
-  kArchiverRemote,
-  kResolverRemote
+  kOwnerSuffix
 } = require('./constants')
 
 async function create({
@@ -39,7 +35,7 @@ async function create({
   owner += kOwnerSuffix
 
   const publicKeys = metadataPublicKey
-    ? [{ id: 'metadata', value: metadataPublicKey }]
+    ? [ { id: 'metadata', value: metadataPublicKey } ]
     : null
 
   let identity
@@ -73,13 +69,29 @@ async function archive(identity, opts = {}) {
     throw new TypeError('Identity to archive must be valid identity object')
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
+  } else if (!opts.secret) {
+    throw new MissingOptionError({ expectedKey: 'opts.secret', actualValue: opts })
+  } else if (!opts.network &&
+      !(rc.network && rc.network.archiver)) {
+    throw new MissingOptionError({
+      expectedKey: 'opts.network',
+      actualValue: { keyringOpts: opts, rc },
+      suggestion: 'setting `rc.network.archiver`'
+    })
+  } else if (!opts.keyring &&
+      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
+    throw new MissingOptionError({
+      expectedKey: 'opts.keyring',
+      actualValue: { keyringOpts: opts, rc },
+      suggestion: 'setting `rc.network.identity.keyring`'
+    })
   }
 
   try {
     opts = {
-      secret: opts.secret || kArchiverSecret,
-      network: opts.name || kArchiverRemote,
-      keyring: opts.keyring || secret.archiver
+      secret: opts.secret,
+      network: opts.network || rc.network.archiver,
+      keyring: opts.keyring || rc.network.identity.keyring
     }
     await aid.archive(identity, opts)
   } catch (err) {
@@ -97,17 +109,33 @@ async function resolve(did, opts = {}) {
     throw new TypeError('DID to resolve must be non-empty string.')
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
+  } else if (!opts.secret) {
+    throw new MissingOptionError({ expectedKey: 'opts.secret', actualValue: opts })
+  } else if (!opts.network &&
+      !(rc.network && rc.network.resolver)) {
+    throw new MissingOptionError({
+      expectedKey: 'opts.network',
+      actualValue: { keyringOpts: opts, rc },
+      suggestion: 'setting `rc.network.resolver`'
+    })
+  } else if (!opts.keyring &&
+      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
+    throw new MissingOptionError({
+      expectedKey: 'opts.keyring',
+      actualValue: { keyringOpts: opts, rc },
+      suggestion: 'setting `rc.network.identity.keyring`'
+    })
   }
 
-  did = normalize(did)
+  did = util.normalize(did)
   did = `${kAidPrefix}${did}`
 
   let result
   try {
     opts = {
-      secret: opts.secret || kResolverSecret,
-      network: opts.name || kResolverRemote,
-      keyring: opts.keyring || secret.resolver
+      secret: opts.secret,
+      network: opts.network || rc.network.resolver,
+      keyring: opts.keyring || rc.network.identity.keyring
     }
     result = await aid.resolve(did, opts)
   } catch (err) {
@@ -126,14 +154,24 @@ async function resolve(did, opts = {}) {
 async function validate(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
-  }
-
-  if (!opts.keyringOpts || 'object' !== typeof opts.keyringOpts) {
-    opts.keyringOpts = {
-      secret: kResolverSecret,
-      name: kResolverRemote,
-      keyring: secret.resolver
-    }
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network &&
+      !(rc.network && rc.network.identity.resolver)) {
+    throw new MissingOptionError({
+      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.resolver`'
+    })
+  } else if (!opts.keyringOpts.keyring &&
+      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
+    throw new MissingOptionError({
+      expectedKey: [ 'opts.keyringOpts.keyring', 'rc.network.identity.keyring' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.identity.keyring`'
+    })
   }
 
   let result

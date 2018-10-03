@@ -1,8 +1,11 @@
+const { MissingOptionError } = require('ara-util/errors')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
 const { kAidPrefix } = require('./constants')
 const { token } = require('ara-contracts')
+const extend = require('extend')
 const aid = require('./aid')
+const rc = require('./rc')()
 
 const {
   proxyExists,
@@ -59,16 +62,44 @@ async function setPrice(opts) {
     throw new TypeError('Expecting whole number price.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
+  } else if (!opts.keyringOpts) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
+  } else if (!opts.keyringOpts.secret) {
+    throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
+  } else if (!opts.keyringOpts.network &&
+      !(rc.network && rc.network.resolver)) {
+    throw new MissingOptionError({
+      expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.resolver`'
+    })
+  } else if (!opts.keyringOpts.keyring &&
+      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
+    throw new MissingOptionError({
+      expectedKey: [ 'keyringOpts.keyring', 'rc.network.identity.keyring' ],
+      actualValue: { keyringOpts: opts.keyringOpts, rc },
+      suggestion: 'setting `rc.network.identity.keyring`'
+    })
   }
 
-  let { did, estimate, price } = opts
+  let {
+    did, estimate, price, keyringOpts
+  } = opts
   const { password } = opts
+
+  // Replace everything in the first object with the second. This method will allow us to have defaults.
+  keyringOpts = extend(true, {
+    network: rc.network && rc.network.resolver,
+    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
+  }, keyringOpts)
 
   estimate = estimate || false
 
   let ddo
   try {
-    ({ did, ddo } = await aid.validate({ did, password, label: 'price' }))
+    ({ did, ddo } = await aid.validate({
+      did, password, label: 'price', keyringOpts
+    }))
   } catch (err) {
     throw err
   }
