@@ -77,7 +77,7 @@ const { argv } = program
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        default: rc.network.identity.keyring + ".pub",
+        default: rc.network.identity.keyring ,
         describe: 'Path to the keyring',
       })
   }, oncreate)

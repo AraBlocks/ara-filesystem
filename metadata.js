@@ -166,7 +166,8 @@ async function readFile(opts) {
   try {
     file = await cfs.readFile(kMetadataFile)
   } catch (err) {
-    throw new Error('Metadata file doesn\'t exist.')
+    debug('No metadata for %s', did)
+    return null
   }
   return JSON.parse(file.toString())
 }
