@@ -279,8 +279,7 @@ async function _write(opts, estimate = true, append = false) {
     return tx.estimateCost(transaction)
   }
 
-  const result = tx.sendSignedTransaction(transaction)
-  return result
+  return tx.sendSignedTransaction(transaction)
 }
 
 function _getWriteData(index, contents, append) {

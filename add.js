@@ -86,10 +86,6 @@ async function add(opts) {
 
   return afs
 
-  fs.access('pathtofile', () => {
-    console.log('done!')
-  })
-
   async function mirrorPaths(p) {
     for (const path of p) {
       try {

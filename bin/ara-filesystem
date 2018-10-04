@@ -364,6 +364,55 @@ const { argv } = program
             describe: 'Print full metadata after write'
           })
         }, onmetadatawritefile)
+  }).command('ownership', "Commands for ownership management of an AFS", (program) => {
+    program
+      .command('request <did> <contentDid>', "Requests ownership of an AFS", (program) => {
+        program
+          .positional('requesterDid', {
+            type: 'string',
+            describe: "DID of the requester"
+          })
+          .positional('contentDid', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('estimate', {
+            alias: 'e',
+            default: false,
+            type: 'boolean',
+            describe: 'Should the transaction be sent or just gas estimation'
+          })
+      }, onrequestownership)
+      .command('revoke <did> <contentDid>', "Revokes a previous request for ownership of an AFS", (program) => {
+        program
+          .positional('requesterDid', {
+            type: 'string',
+            describe: "DID of the requester"
+          })
+          .positional('contentDid', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('estimate', {
+            alias: 'e',
+            default: false,
+            type: 'boolean',
+            describe: 'Should the transaction be sent or just gas estimation'
+          })
+      }, onrevokerequest)
+      .command('approve <did>', "Approves an ownership transfer", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('estimate', {
+            alias: 'e',
+            default: false,
+            type: 'boolean',
+            describe: 'Should the transaction be sent or just gas estimation'
+          })
+      }, onapprovetransfer)
   })
 
 void async function main() {
@@ -742,6 +791,60 @@ async function onmetadatawritefile({ did, filepath, print }) {
 
   if (result) {
     console.log(prettyjson.render(result))
+  }
+}
+
+async function onrequestownership({ requesterDid, contentDid, estimate }) {
+  const { password } = await promptForPassword()
+
+  let result
+  try {
+    result = await afs.ownership.request({
+      requesterDid,
+      contentDid,
+      password,
+      estimate
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  if (estimate) {
+    info("Request ownership cost in ETH:", cost)
+  } else {
+    info("Ownership successfully requested")
+  }
+}
+
+async function onrevokerequest({ requesterDid, contentDid, estimate }) {
+  const { password } = await promptForPassword()
+
+  let result
+  try {
+    result = await afs.ownership.revokeRequest({
+      requesterDid,
+      contentDid,
+      password,
+      estimate
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  if (estimate) {
+    info("Revoke ownership request cost in ETH:", cost)
+  } else {
+    info("Ownership request successfully revoked")
+  }
+}
+
+async function onapprovetransfer(argv) {
+  const { password } = await promptForPassword()
+  const { mnemonic } = await promptForMnemonic()
+  try {
+
+  } catch (err) {
+    onfatal(err)
   }
 }
 
