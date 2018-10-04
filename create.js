@@ -1,16 +1,26 @@
 /* eslint-disable no-shadow */
 
-const { writeIdentity } = require('ara-identity/util')
+const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
 const { createAFSKeyPath } = require('./key-path')
 const { defaultStorage } = require('./storage')
+const hasDIDMethod = require('has-did-method')
 const { createCFS } = require('cfsnet/create')
 const multidrive = require('multidrive')
+const context = require('ara-context')()
 const { resolve } = require('path')
+const aid = require('ara-identity')
 const toilet = require('toiletdb')
 const mkdirp = require('mkdirp')
-const aid = require('./aid')
 const pify = require('pify')
 const rc = require('./rc')()
+
+const debug = require('debug')('ara-filesystem:create')
+
+const {
+  kKeyLength,
+  kAidPrefix,
+  kOwnerSuffix
+} = require('./constants')
 
 const {
   proxyExists,
@@ -19,6 +29,7 @@ const {
 
 const {
   getDocumentKeyHex,
+  validate,
   web3: { toHex }
 } = require('ara-util')
 
@@ -49,28 +60,19 @@ async function create(opts) {
 
   let {
     did,
-    ddo,
-    keyringOpts
+    ddo
   } = opts
 
   const {
     owner,
     password,
     storage,
+    keyringOpts = {}
   } = opts
 
-  keyringOpts = {
-    archiver: {
-      secret: keyringOpts.secret || keyringOpts.archiverSecret,
-      keyring: keyringOpts.keyring || keyringOpts.archiverKeyring || rc.network.identity.keyring,
-      network: keyringOpts.network || keyringOpts.archiverNetwork || rc.network.archiver
-    },
-    resolver: {
-      secret: keyringOpts.secret || keyringOpts.resolverSecret,
-      keyring: keyringOpts.keyring || keyringOpts.resolverKeyring || rc.network.identity.keyring,
-      network: keyringOpts.network || keyringOpts.resolverNetwork || rc.network.resolver
-    }
-  }
+  let { archiver, resolver } = keyringOpts
+  archiver = archiver || keyringOpts
+  resolver = resolver || keyringOpts
 
   let afs
   let mnemonic
@@ -83,12 +85,12 @@ async function create(opts) {
     }
 
     try {
-      ({ did, ddo } = await aid.validate({
+      ({ did, ddo } = await validate({
         did,
         password,
         label: 'create',
         ddo,
-        keyringOpts: keyringOpts.resolver
+        keyringOpts: resolver
       }))
     } catch (err) {
       throw err
@@ -112,18 +114,18 @@ async function create(opts) {
     afs.ddo = ddo
   } else if (owner) {
     try {
-      ({ owner: did } = await aid.validate({
+      ({ owner: did } = await validate({
         owner,
         password,
         label: 'create',
         ddo,
-        keyringOpts: keyringOpts.resolver
+        keyringOpts: resolver
       }))
     } catch (err) {
       throw err
     }
 
-    const afsId = await aid.create({ password, owner })
+    const afsId = await _createIdentity({ password, owner })
 
     // Note: Do not change this to `({ mnemonic } = afsId)`, it causes a weird scoping issue.
     // eslint-disable-next-line prefer-destructuring
@@ -150,18 +152,18 @@ async function create(opts) {
       const metadataPublicKey = toHex(key)
 
       // recreate identity with additional publicKey
-      const afsId = await aid.create({
+      const afsId = await _createIdentity({
         password,
         mnemonic,
         owner,
         metadataPublicKey
       })
 
-      await writeIdentity(afsId)
+      await aid.util.writeIdentity(afsId)
       if (!ddo) {
-        await aid.archive(afsId, keyringOpts.archiver)
+        await aid.archive(afsId, archiver)
 
-        afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts.resolver)
+        afsDdo = await aid.resolve(toHex(afsId.publicKey), resolver)
 
         if (null == afsDdo || 'object' !== typeof afsDdo) {
           throw new TypeError('AFS identity not successfully resolved.')
@@ -229,6 +231,51 @@ async function create(opts) {
       }
     )
     return drives
+  }
+
+  async function _createIdentity({
+    password = '',
+    owner = '',
+    metadataPublicKey = '',
+    mnemonic
+  } = {}) {
+    if (null == password || 'string' !== typeof password) {
+      throw new TypeError('Expecting password to be non-empty string.')
+    }
+
+    if (null == owner || 'string' !== typeof owner) {
+      throw new TypeError('Expecting non-empty string.')
+    }
+
+    if ((hasDIDMethod(owner) && kKeyLength !== owner.slice(kAidPrefix.length).length)
+      || (!hasDIDMethod(owner) && kKeyLength !== owner.length)) {
+      throw new TypeError('Owner identifier must be 64 chars.')
+    }
+
+    owner += kOwnerSuffix
+
+    const publicKeys = metadataPublicKey
+      ? [ { id: 'metadata', value: metadataPublicKey } ]
+      : null
+
+    let identity
+    try {
+      const ddo = {
+        authentication: {
+          type: kEd25519VerificationKey2018,
+          publicKey: owner
+        },
+        publicKeys
+      }
+      identity = await aid.create({
+        context,
+        password,
+        ddo,
+        mnemonic
+      })
+    } catch (err) { debug(err.stack || err) }
+
+    return identity
   }
 }
 
