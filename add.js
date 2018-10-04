@@ -1,16 +1,13 @@
 /* eslint-disable no-await-in-loop */
 
-const { MissingOptionError } = require('ara-util/errors')
 const debug = require('debug')('ara-filesystem:add')
 const mirror = require('mirror-folder')
-const extend = require('extend')
 const ignored = require('./lib/ignore')
 const { create } = require('./create')
 const isFile = require('is-file')
 const mkdirp = require('mkdirp')
 const { access } = require('fs')
 const pify = require('pify')
-const rc = require('./rc')()
 
 const {
   join,
@@ -23,6 +20,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {Object}   opts.keyringOpts
  * @param {Boolean}  opts.force
  * @param {Array}    opts.paths
  * @return {Object}
@@ -35,42 +33,11 @@ async function add(opts) {
   } else if (null === opts.paths || (!(opts.paths instanceof Array)
     && 'string' !== typeof opts.paths) || 0 === opts.paths.length) {
     throw new TypeError('Expecting one or more filepaths to add.')
-  } else if (!opts.keyringOpts) {
-    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
-  } else if (!opts.keyringOpts.secret) {
-    throw new MissingOptionError({
-      expectedKey: 'keyringOpts.secret',
-      actualValue: opts.keyringOpts
-    })
-  } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.resolver)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
-    })
-  } else if (!opts.keyringOpts.keyring &&
-      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'keyringOpts.keyring', 'rc.network.identity.keyring' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.identity.keyring`'
-    })
   }
 
   const {
-    did, paths, password, force
+    did, paths, password, force, keyringOpts
   } = opts
-
-  let {
-    keyringOpts
-  } = opts
-
-  // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
-    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
-  }, keyringOpts)
 
   let afs
   try {

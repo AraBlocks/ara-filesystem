@@ -1,9 +1,6 @@
-const { MissingOptionError } = require('ara-util/errors')
 const { create } = require('./create')
 const mirror = require('mirror-folder')
-const extend = require('extend')
 const debug = require('debug')('ara-filesystem:unarchive')
-const rc = require('./rc')
 
 const {
   resolve,
@@ -15,6 +12,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.path
+ * @param {Object}   opts.keyringOpts
  * @return {Object}
  */
 async function unarchive(opts) {
@@ -24,32 +22,9 @@ async function unarchive(opts) {
     throw new TypeError('DID URI must be of type string.')
   } else if (opts.path && 'string' !== typeof opts.path) {
     throw new TypeError('Path must be of type string.')
-  } else if (!opts.keyringOpts) {
-    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
-  } else if (!opts.keyringOpts.secret) {
-    throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
-  } else if (!opts.keyringOpts.network &&
-    !(rc.network && rc.network.resolver)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc }
-    })
-  } else if (!opts.keyringOpts.keyring &&
-      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'keyringOpts.keyring', 'rc.network.identity.keyring' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc }
-    })
   }
 
-  let { keyringOpts } = opts
-  const { did } = opts
-
-  // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
-    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
-  }, keyringOpts)
+  const { did, keyringOpts } = opts
 
   const { afs } = await create({ did, keyringOpts })
 
