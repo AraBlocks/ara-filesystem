@@ -26,6 +26,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {Number}   opts.quantity
  * @param {Number}   opts.price
  */
 async function estimateSetPriceGasCost(opts) {
@@ -38,7 +39,7 @@ async function estimateSetPriceGasCost(opts) {
   } else if ('number' !== typeof opts.price || 0 >= opts.price) {
     throw new TypeError('Expecting whole number price.')
   }
-
+  
   opts = Object.assign(opts, { estimate: true })
   return setPrice(opts)
 }
@@ -48,6 +49,7 @@ async function estimateSetPriceGasCost(opts) {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {Number}   opts.quantity
  * @param {Number}   opts.price
  * @param {Boolean}  opts.estimate
  */
@@ -80,6 +82,12 @@ async function setPrice(opts) {
       actualValue: { keyringOpts: opts.keyringOpts, rc },
       suggestion: 'setting `rc.network.identity.keyring`'
     })
+  }
+
+  const quantity = Number(opts.quantity) || 1
+
+  if (!Number.isInteger(quantity)) {
+    throw new Error(`Expecting quantity to be a whole number. Got ${quantity}. Try passing 'opts.quantity' as a whole number.`)
   }
 
   let {
@@ -128,6 +136,7 @@ async function setPrice(opts) {
         abi,
         functionName: 'setPrice',
         values: [
+          quantity,
           price
         ]
       }
@@ -148,6 +157,7 @@ async function setPrice(opts) {
  * Gets the price of the given Ara identity
  * @param {Object}   opts
  * @param {String}   opts.did
+ * @param {Number}   opts.quantity
  * @return {Number}
  */
 async function getPrice(opts) {
@@ -155,6 +165,12 @@ async function getPrice(opts) {
     throw new TypeError('Expecting opts object.')
   } else if ('string' !== typeof opts.did || !opts.did) {
     throw new TypeError('Expecting non-empty string.')
+  }
+
+  const quantity = Number(opts.quantity) || 1
+
+  if (!Number.isInteger(quantity)) {
+    throw new Error(`Expecting quantity to be a whole number. Got ${quantity}. Try passing 'opts.quantity' as a whole number.`)
   }
 
   const { did } = opts
@@ -168,7 +184,10 @@ async function getPrice(opts) {
   const result = await call({
     abi,
     address: proxy,
-    functionName: 'price_'
+    functionName: 'getPrice',
+    arguments: [
+      quantity
+    ]
   })
   debug('price for %s: %d', did, result)
 

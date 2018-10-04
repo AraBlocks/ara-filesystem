@@ -112,7 +112,6 @@ async function commit(opts) {
   } catch (err) {
     throw err
   }
-
   let proxy
   if (await proxyExists(did)) {
     proxy = await getProxyAddress(did)
