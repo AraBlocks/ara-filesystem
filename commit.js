@@ -138,7 +138,7 @@ async function commit(opts) {
   await _deleteStagedFile(path)
 
   if (0 < price) {
-    await setPrice({ did, password, price })
+    await setPrice({ did, password, price, keyringOpts })
   }
 
   return result
