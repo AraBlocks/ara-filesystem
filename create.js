@@ -244,54 +244,54 @@ async function create(opts) {
     )
     return drives
   }
+}
 
-  async function createIdentity({
-    password = '',
-    owner = '',
-    metadataPublicKey = '',
-    mnemonic
-  } = {}) {
-    if (null == password || 'string' !== typeof password) {
-      throw new TypeError('Expecting password to be non-empty string.')
-    }
-
-    if (null == owner || 'string' !== typeof owner) {
-      throw new TypeError('Expecting non-empty string.')
-    }
-
-    if ((hasDIDMethod(owner) && kKeyLength !== owner.slice(kAidPrefix.length).length)
-      || (!hasDIDMethod(owner) && kKeyLength !== owner.length)) {
-      throw new TypeError('Owner identifier must be 64 chars.')
-    }
-
-    owner += kOwnerSuffix
-    if (!hasDIDMethod(owner)) {
-      owner = `${kAidPrefix}${owner}`
-    }
-
-    const publicKeys = metadataPublicKey
-      ? [ { id: 'metadata', value: metadataPublicKey } ]
-      : null
-
-    let identity
-    try {
-      const ddo = {
-        authentication: {
-          type: kEd25519VerificationKey2018,
-          publicKey: owner
-        },
-        publicKeys
-      }
-      identity = await aid.create({
-        context,
-        password,
-        ddo,
-        mnemonic
-      })
-    } catch (err) { debug(err.stack || err) }
-
-    return identity
+async function createIdentity({
+  password = '',
+  owner = '',
+  metadataPublicKey = '',
+  mnemonic
+} = {}) {
+  if (null == password || 'string' !== typeof password) {
+    throw new TypeError('Expecting password to be non-empty string.')
   }
+
+  if (null == owner || 'string' !== typeof owner) {
+    throw new TypeError('Expecting non-empty string.')
+  }
+
+  if ((hasDIDMethod(owner) && kKeyLength !== owner.slice(kAidPrefix.length).length)
+    || (!hasDIDMethod(owner) && kKeyLength !== owner.length)) {
+    throw new TypeError('Owner identifier must be 64 chars.')
+  }
+
+  owner += kOwnerSuffix
+  if (!hasDIDMethod(owner)) {
+    owner = `${kAidPrefix}${owner}`
+  }
+
+  const publicKeys = metadataPublicKey
+    ? [ { id: 'metadata', value: metadataPublicKey } ]
+    : null
+
+  let identity
+  try {
+    const ddo = {
+      authentication: {
+        type: kEd25519VerificationKey2018,
+        publicKey: owner
+      },
+      publicKeys
+    }
+    identity = await aid.create({
+      context,
+      password,
+      ddo,
+      mnemonic
+    })
+  } catch (err) { debug(err.stack || err) }
+
+  return identity
 }
 
 module.exports = {
