@@ -13,7 +13,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
- * @param {?Object}   opts.keyringOpts
+ * @param {Object}   [opts.keyringOpts]
  * @param {Array}    opts.paths
  * @return {Object}
  */

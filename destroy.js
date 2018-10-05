@@ -37,7 +37,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
- * @param {?Object}   opts.keyringOpts
+ * @param {Object}   [opts.keyringOpts]
  */
 async function destroy(opts) {
   if (!opts || 'object' !== typeof opts) {

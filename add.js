@@ -20,7 +20,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
- * @param {Object}   opts.keyringOpts
+ * @param {Object}   [opts.keyringOpts]
  * @param {Boolean}  opts.force
  * @param {Array}    opts.paths
  * @return {Object}
