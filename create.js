@@ -67,12 +67,11 @@ async function create(opts) {
     owner,
     password,
     storage,
-    keyringOpts = {}
+    keyringOpts
   } = opts
 
-  let { archiver, resolver } = keyringOpts
-  archiver = archiver || keyringOpts
-  resolver = resolver || keyringOpts
+  const archiver = (keyringOpts && keyringOpts.archiver) || {}
+  const resolver = (keyringOpts && keyringOpts.resolver) || {}
 
   let afs
   let mnemonic
