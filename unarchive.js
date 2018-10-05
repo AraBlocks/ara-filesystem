@@ -3,7 +3,7 @@ const { create } = require('./create')
 const mirror = require('mirror-folder')
 const extend = require('extend')
 const debug = require('debug')('ara-filesystem:unarchive')
-const rc = require('./rc')
+const rc = require('./rc')()
 
 const {
   resolve,
