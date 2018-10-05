@@ -265,6 +265,9 @@ async function create(opts) {
     }
 
     owner += kOwnerSuffix
+    if (!hasDIDMethod(owner)) {
+      owner = `${kAidPrefix}${owner}`
+    }
 
     const publicKeys = metadataPublicKey
       ? [ { id: 'metadata', value: metadataPublicKey } ]
