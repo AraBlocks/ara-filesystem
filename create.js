@@ -137,7 +137,7 @@ async function create(opts) {
       throw err
     }
 
-    const afsId = await _createIdentity({ password, owner })
+    const afsId = await createIdentity({ password, owner })
 
     // Note: Do not change this to `({ mnemonic } = afsId)`, it causes a weird scoping issue.
     // eslint-disable-next-line prefer-destructuring
@@ -164,7 +164,7 @@ async function create(opts) {
       const metadataPublicKey = toHex(key)
 
       // recreate identity with additional publicKey
-      const afsId = await _createIdentity({
+      const afsId = await createIdentity({
         password,
         mnemonic,
         owner,
@@ -245,7 +245,7 @@ async function create(opts) {
     return drives
   }
 
-  async function _createIdentity({
+  async function createIdentity({
     password = '',
     owner = '',
     metadataPublicKey = '',
@@ -295,5 +295,6 @@ async function create(opts) {
 }
 
 module.exports = {
-  create
+  create,
+  createIdentity
 }
