@@ -52,7 +52,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
- * @param {Object}   opts.keyringOpts
+ * @param {Object}   [opts.keyringOpts]
  * @param {Boolean}  opts.estimate
  * @param {Number}   opts.price
  * @return {Object}
@@ -138,7 +138,9 @@ async function commit(opts) {
   await _deleteStagedFile(path)
 
   if (0 < price) {
-    await setPrice({ did, password, price, keyringOpts })
+    await setPrice({
+      did, password, price, keyringOpts
+    })
   }
 
   return result

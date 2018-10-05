@@ -10,6 +10,7 @@ const context = require('ara-context')()
 const { resolve } = require('path')
 const aid = require('ara-identity')
 const toilet = require('toiletdb')
+const extend = require('extend')
 const mkdirp = require('mkdirp')
 const pify = require('pify')
 const rc = require('./rc')()
@@ -41,7 +42,9 @@ const {
  * @param {?Object}  opts.ddo
  * @param {String}   opts.password
  * @param {Function} opts.storage
- * @param {?Object}  opts.keyringOpts
+ * @param {Object}   [opts.keyringOpts]
+ * @param {Object}   [opts.keyringOpts.archiver]
+ * @param {Object}   [opts.keyringOpts.resolver]
  * @return {Object}
  */
 async function create(opts) {
@@ -60,18 +63,28 @@ async function create(opts) {
 
   let {
     did,
-    ddo
+    ddo,
+    keyringOpts = {}
   } = opts
 
   const {
     owner,
     password,
-    storage,
-    keyringOpts
+    storage
   } = opts
 
-  const archiver = (keyringOpts && keyringOpts.archiver) || {}
-  const resolver = (keyringOpts && keyringOpts.resolver) || {}
+  keyringOpts = extend(true, {
+    archiver: {
+      network: (keyringOpts.archiver && keyringOpts.archiver.network) || keyringOpts.network,
+      secret: (keyringOpts.archiver && keyringOpts.archiver.secret) || keyringOpts.secret,
+      keyring: (keyringOpts.archiver && keyringOpts.archiver.keyring) || keyringOpts.keyring
+    },
+    resolver: {
+      network: (keyringOpts.resolver && keyringOpts.resolver.network) || keyringOpts.network,
+      secret: (keyringOpts.resolver && keyringOpts.resolver.secret) || keyringOpts.secret,
+      keyring: (keyringOpts.resolver && keyringOpts.resolver.keyring) || keyringOpts.keyring
+    }
+  }, keyringOpts)
 
   let afs
   let mnemonic
@@ -89,7 +102,7 @@ async function create(opts) {
         password,
         label: 'create',
         ddo,
-        keyringOpts: resolver
+        keyringOpts: keyringOpts.resolver
       }))
     } catch (err) {
       throw err
@@ -118,7 +131,7 @@ async function create(opts) {
         password,
         label: 'create',
         ddo,
-        keyringOpts: resolver
+        keyringOpts: keyringOpts.resolver
       }))
     } catch (err) {
       throw err
@@ -160,9 +173,9 @@ async function create(opts) {
 
       await aid.util.writeIdentity(afsId)
       if (!ddo) {
-        await aid.archive(afsId, archiver)
+        await aid.archive(afsId, keyringOpts.archiver)
 
-        afsDdo = await aid.resolve(toHex(afsId.publicKey), resolver)
+        afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts.resolver)
 
         if (null == afsDdo || 'object' !== typeof afsDdo) {
           throw new TypeError('AFS identity not successfully resolved.')

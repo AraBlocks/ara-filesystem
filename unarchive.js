@@ -12,7 +12,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.path
- * @param {Object}   opts.keyringOpts
+ * @param {Object}   [opts.keyringOpts]
  * @return {Object}
  */
 async function unarchive(opts) {
