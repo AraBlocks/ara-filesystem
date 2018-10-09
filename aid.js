@@ -69,22 +69,6 @@ async function archive(identity, opts = {}) {
     throw new TypeError('Identity to archive must be valid identity object')
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
-  } else if (!opts.secret) {
-    throw new MissingOptionError({ expectedKey: 'opts.secret', actualValue: opts })
-  } else if (!opts.network &&
-      !(rc.network && rc.network.archiver)) {
-    throw new MissingOptionError({
-      expectedKey: 'opts.network',
-      actualValue: { keyringOpts: opts, rc },
-      suggestion: 'setting `rc.network.archiver`'
-    })
-  } else if (!opts.keyring &&
-      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({
-      expectedKey: 'opts.keyring',
-      actualValue: { keyringOpts: opts, rc },
-      suggestion: 'setting `rc.network.identity.keyring`'
-    })
   }
 
   try {
@@ -109,22 +93,6 @@ async function resolve(did, opts = {}) {
     throw new TypeError('DID to resolve must be non-empty string.')
   } else if (opts && 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
-  } else if (!opts.secret) {
-    throw new MissingOptionError({ expectedKey: 'opts.secret', actualValue: opts })
-  } else if (!opts.network &&
-      !(rc.network && rc.network.resolver)) {
-    throw new MissingOptionError({
-      expectedKey: 'opts.network',
-      actualValue: { keyringOpts: opts, rc },
-      suggestion: 'setting `rc.network.resolver`'
-    })
-  } else if (!opts.keyring &&
-      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({
-      expectedKey: 'opts.keyring',
-      actualValue: { keyringOpts: opts, rc },
-      suggestion: 'setting `rc.network.identity.keyring`'
-    })
   }
 
   did = util.normalize(did)
@@ -154,24 +122,6 @@ async function resolve(did, opts = {}) {
 async function validate(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts to be of type object.')
-  } else if (!opts.keyringOpts) {
-    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts', actualValue: opts })
-  } else if (!opts.keyringOpts.secret) {
-    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
-  } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.identity.resolver)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
-    })
-  } else if (!opts.keyringOpts.keyring &&
-      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.keyring', 'rc.network.identity.keyring' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.identity.keyring`'
-    })
   }
 
   let result

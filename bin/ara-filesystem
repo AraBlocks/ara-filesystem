@@ -64,20 +64,15 @@ const { argv } = program
       })
       .option('archiverNetwork', {
         type: 'string',
-        required: true,
-        default: rc.network.archiver,
         describe: 'Network name of the key for the DID archiver in the keyring',
       })
       .option('resolverNetwork', {
         type: 'string',
-        default: rc.network.resolver,
-        required: true,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, oncreate)
@@ -93,22 +88,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onadd)
@@ -124,22 +114,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onremove)
@@ -151,22 +136,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onhistory)
@@ -188,26 +168,21 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, oncommit)
-  .command('set-price <did> [price]', "Publish price for the given AFS", (program) => {
+  .command('set-price <did> <price> [options]', "Publish price for the given AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
@@ -217,17 +192,40 @@ const { argv } = program
         type: 'number',
         describe: "Cost associated with an AFS (in ARA)"
       })
+      .option('quantity', {
+        type: 'number',
+        describe: "The quantity to set the price for"
+      })
       .option('force', {
         alias: 'f',
         type: 'boolean',
         describe: 'Force set price operation',
       })
+      .option('secret', {
+        alias: 's',
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        describe: 'Path to the keyring',
+      })
   }, onsetprice)
-  .command('get-price <did>', "Return the price for a given AFS", (program) => {
+  .command('get-price <did> [--quantity]', "Return the price for a given AFS", (program) => {
     program
       .positional('did', {
         type: 'string',
         describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .option('quantity', {
+        type: 'number',
+        describe: "The quantity to get the price for"
       })
   }, ongetprice)
   .command('destroy <did>', "Destroy AFS locally and remotely", (program) => {
@@ -243,22 +241,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, ondestroy)
@@ -274,22 +267,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onunarchive)
@@ -315,6 +303,21 @@ const { argv } = program
             type: 'boolean',
             describe: 'Print full metadata after write'
           })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Path to the keyring',
+          })
         }, onmetadatawritekey)
       .command('read-key <did> <key>', "Read a key's value from AFS metadata", (program) => {
         program
@@ -337,12 +340,42 @@ const { argv } = program
             type: 'string',
             describe: "The key to write"
           })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Path to the keyring',
+          })
         }, onmetadatadeletekey)
       .command('clear <did>', "Clears all metadata from an AFS", (program) => {
         program
           .positional('did', {
             type: 'string',
             describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Path to the keyring',
           })
         }, onmetadataclear)
       .command('print <did>', "Prints current metadata for an AFS", (program) => {
@@ -362,6 +395,21 @@ const { argv } = program
             alias: 'p',
             type: 'boolean',
             describe: 'Print full metadata after write'
+          })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Path to the keyring',
           })
         }, onmetadatawritefile)
   })
@@ -563,15 +611,19 @@ async function oncommit({ did, price, secret, network, keyring }) {
   }
 }
 
-async function onsetprice({ did, price }) {
+async function onsetprice(argv) {
+  let { price, did, quantity } = argv
   price = price || 0
-  info("setting price of AFS identity %s to %d", did, price)
+  quantity = quantity || 1
+  info("setting price of AFS %s to %d for %d copies", did, price, quantity)
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
   const { password } = await promptForPassword()
 
   let result = argv.force
   if (!result) {
     try {
-      const cost = await afs.estimateSetPriceGasCost({ did, password, price })
+      const cost = await afs.estimateSetPriceGasCost({ did, password, quantity, price, keyringOpts })
       const { answer } = await promptCostConfirmation(cost)
       result = answer
     } catch (err) {
@@ -580,24 +632,26 @@ async function onsetprice({ did, price }) {
   }
 
   if (result) {
-    await afs.setPrice({ did, password, price })
-    info("price has been set to", price)
+    await afs.setPrice({ did, password, quantity, price, keyringOpts })
+    info(`price for ${quantity} copies of ${did} set to ${price}.`)
   } else {
     onfatal() // exit
   }
 }
 
-async function ongetprice({did}) {
-  info("getting price of AFS identity %s", did)
+async function ongetprice(argv) {
+  let { did, quantity } = argv
+  quantity = quantity || 1
+  info("getting price of AFS %s", did)
 
   let price
   try {
-    price = await afs.getPrice({ did })
+    price = await afs.getPrice({ did, quantity })
   } catch (err) {
     onfatal(err)
   }
 
-  info("price of", did, "is", price)
+  info(`price of ${quantity} copies of ${did} is ${price}.`)
 }
 
 async function promptCostConfirmation(cost) {
@@ -610,8 +664,8 @@ async function promptCostConfirmation(cost) {
   })
 }
 
-async function ondestroy({ did, force }) {
-
+async function ondestroy(argv) {
+  let { did, force } = argv
   info("attempting destroying AFS %s", did)
 
   const { password } = await promptForPassword()
@@ -625,10 +679,11 @@ async function ondestroy({ did, force }) {
     result = answer
   }
 
+  const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
   if (result) {
     try {
-      await afs.destroy({ did, mnemonic, password, keyringOpts  })
+      await afs.destroy({ did, mnemonic, password, keyringOpts })
     } catch (err) {
       onfatal(err)
     }
@@ -638,8 +693,8 @@ async function ondestroy({ did, force }) {
   process.exit(1)
 }
 
-async function onunarchive({ did, pathspec: path, secret, network, keyring }) {
-
+async function onunarchive(argv) {
+  let { did, pathspec: path, secret, network, keyring } = argv
   info("unarchiving AFS with DID %s", did)
 
   const keyringOpts = { secret, network, keyring }
@@ -658,15 +713,20 @@ async function onunarchive({ did, pathspec: path, secret, network, keyring }) {
 }
 
 
-async function onmetadatawritekey({ did, key, value, print }) {
+async function onmetadatawritekey(argv) {
+  let { did, key, value, print } = argv
   info("writing key %s with value %s to AFS metadata", key, value)
+
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
 
   let result
   try {
     result = await afs.metadata.writeKey({
       did,
       key,
-      value
+      value,
+      keyringOpts
     })
   } catch (err) {
     onfatal(err)
@@ -695,13 +755,18 @@ async function onmetadatareadkey({ did, key }) {
   console.log(prettyjson.render(result))
 }
 
-async function onmetadatadeletekey({ did, key }) {
+async function onmetadatadeletekey(argv) {
+  let { did, key } = argv
   info("deleting %s from AFS metadata", key)
+
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
 
   try {
     await afs.metadata.delKey({
       did,
-      key
+      key,
+      keyringOpts
     })
   } catch (err) {
     onfatal(err)
@@ -710,11 +775,15 @@ async function onmetadatadeletekey({ did, key }) {
   info("deleted %s from AFS metadata", key)
 }
 
-async function onmetadataclear({ did }) {
+async function onmetadataclear(argv) {
+  let { did } = argv
   info("clearing AFS metadata")
 
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
   try {
-    await afs.metadata.clear({ did })
+    await afs.metadata.clear({ did, keyringOpts })
   } catch (err) {
     onfatal(err)
   }
@@ -727,14 +796,19 @@ async function onmetadataprint({ did }) {
   console.log(prettyjson.render(contents))
 }
 
-async function onmetadatawritefile({ did, filepath, print }) {
+async function onmetadatawritefile(argv) {
+  let { did, filepath, print } = argv
   info("writing contents of %s to AFS metadata", filepath)
+
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
 
   let result
   try {
     result = await afs.metadata.writeFile({
       did,
-      filepath
+      filepath,
+      keyringOpts
     })
   } catch (err) {
     onfatal(err)

@@ -64,29 +64,11 @@ async function setPrice(opts) {
     throw new TypeError('Expecting whole number price.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
-  } else if (!opts.keyringOpts) {
-    throw new MissingOptionError({ expectedKey: 'keyringOpts', actualValue: opts })
-  } else if (!opts.keyringOpts.secret) {
-    throw new MissingOptionError({ expectedKey: 'keyringOpts.secret', actualValue: opts.keyringOpts })
-  } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.resolver)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'keyringOpts.network', 'rc.network.resolver' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
-    })
-  } else if (!opts.keyringOpts.keyring &&
-      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'keyringOpts.keyring', 'rc.network.identity.keyring' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.identity.keyring`'
-    })
   }
 
   const quantity = Number(opts.quantity) || 1
 
-  if (!Number.isInteger(quantity)) {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
     throw new Error(`Expecting quantity to be a whole number. Got ${quantity}. Try passing 'opts.quantity' as a whole number.`)
   }
 
@@ -169,7 +151,7 @@ async function getPrice(opts) {
 
   const quantity = Number(opts.quantity) || 1
 
-  if (!Number.isInteger(quantity)) {
+  if (!Number.isInteger(quantity) || quantity <= 0) {
     throw new Error(`Expecting quantity to be a whole number. Got ${quantity}. Try passing 'opts.quantity' as a whole number.`)
   }
 
@@ -189,7 +171,7 @@ async function getPrice(opts) {
       quantity
     ]
   })
-  debug('price for %s: %d', did, result)
+  debug('price for %d copies of %s: %d', quantity, did, result)
 
   return token.constrainTokenValue(result)
 }

@@ -70,24 +70,6 @@ async function commit(opts) {
     throw new TypeError('Expecting boolean.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
-  } else if (!opts.keyringOpts) {
-    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts', actualValue: opts })
-  } else if (!opts.keyringOpts.secret) {
-    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
-  } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.resolver)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
-    })
-  } else if (!opts.keyringOpts.keyring &&
-      !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.keyring', 'rc.network.identity.keyring' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.identity.keyring`'
-    })
   }
 
   let { did, estimate, keyringOpts } = opts
@@ -229,24 +211,6 @@ async function estimateCommitGasCost(opts) {
     throw TypeError('Expecting non-empty password.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
-  } else if (!opts.keyringOpts) {
-    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts', actualValue: opts })
-  } else if (!opts.keyringOpts.secret) {
-    throw new MissingOptionError({ expectedKey: 'opts.keyringOpts.secret', actualValue: opts.keyringOpts })
-  } else if (!opts.keyringOpts.network &&
-      !(rc.network && rc.network.resolver)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.network', 'rc.network.resolver' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.resolver`'
-    })
-  } else if (!opts.keyringOpts.keyring &&
-     !(rc.network && rc.network.identity && rc.network.identity.keyring)) {
-    throw new MissingOptionError({
-      expectedKey: [ 'opts.keyringOpts.keyring', 'rc.network.identity.keyring' ],
-      actualValue: { keyringOpts: opts.keyringOpts, rc },
-      suggestion: 'setting `rc.network.identity.keyring`'
-    })
   }
 
   opts = Object.assign(opts, { estimate: true })
