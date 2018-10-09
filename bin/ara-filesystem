@@ -64,20 +64,17 @@ const { argv } = program
       })
       .option('archiverNetwork', {
         type: 'string',
-        required: true,
-        default: rc.network.archiver,
+        alias: 'an',
         describe: 'Network name of the key for the DID archiver in the keyring',
       })
       .option('resolverNetwork', {
         type: 'string',
-        default: rc.network.resolver,
-        required: true,
+        alias: 'rn',
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, oncreate)
@@ -93,22 +90,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onadd)
@@ -124,22 +116,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onremove)
@@ -151,22 +138,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onhistory)
@@ -188,7 +170,6 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         default: rc.network.secret,
         describe: 'Shared secret for the keyring',
@@ -196,15 +177,11 @@ const { argv } = program
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, oncommit)
@@ -244,22 +221,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, ondestroy)
@@ -275,22 +247,17 @@ const { argv } = program
       })
       .option('secret', {
         alias: 's',
-        required: true,
         type: 'string',
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
         alias: 'n',
         type: 'string',
-        required: true,
-        default: rc.network.resolver,
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
         alias: 'k',
         type: 'string',
-        required: true,
-        default: rc.network.identity.keyring + ".pub",
         describe: 'Path to the keyring',
       })
   }, onunarchive)
@@ -521,9 +488,19 @@ async function oncreate(argv) {
   }
 
   const { secret, resolverNetwork, archiverNetwork, keyring } = argv
-  const keyringOpts = { secret, resolverNetwork, archiverNetwork, keyring }
+  const keyringOpts = { 
+    archiver: {
+      secret,
+      network: archiverNetwork,
+      keyring
+    },
+    resolver: {
+      secret,
+      network: resolverNetwork,
+      keyring
+    }
+  }
   const { password } = await promptForPassword()
-
   let arafs
   try {
     arafs = await afs.create({ owner, password, keyringOpts })
