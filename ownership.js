@@ -1,10 +1,8 @@
-const debug = require('debug')('ara-filesystem:ownership')
 const { writeIdentity } = require('ara-identity/util')
 const passGenerator = require('generate-password')
 const { kMetadataSuffix } = require('./constants')
 const { createIdentity } = require('./create')
 const { archive } = require('ara-identity')
-const context = require('ara-context')()
 
 const {
   getDocumentOwner,
@@ -44,15 +42,17 @@ async function approveTransfer(opts) {
   let result
   let randomPassword
   try {
-    let identity = await validate({ did, password })
+    const identity = await validate({ did, password, keyringOpts })
     const { ddo } = identity
     const metadataPublicKey = _getMetadataPublicKey(ddo)
 
     randomPassword = passGenerator.generate({ length: PASSWORD_LENGTH, numbers: true })
-    let newIdentity = await aid.create({ mnemonic, owner: newOwnerDid, password: randomPassword, metadataPublicKey })
+    const newIdentity = await createIdentity({
+      mnemonic, owner: newOwnerDid, password: randomPassword, metadataPublicKey
+    })
     const { publicKey } = newIdentity
     if (identity.did !== publicKey.toString('hex')) {
-      throw new Error(`Mnemonic is incorrect, please confirm it is the AFS owner's mnemonic.`)
+      throw new Error('Mnemonic is incorrect, please confirm it is the AFS owner\'s mnemonic.')
     }
 
     result = await approveOwnershipTransfer(opts)
@@ -94,7 +94,9 @@ async function claim(opts) {
     const { ddo } = await validate({ did: contentDid, password: currentPassword, keyringOpts })
     const owner = getDocumentOwner(ddo, true)
     const metadataPublicKey = _getMetadataPublicKey(ddo)
-    const claimedIdentity = await createIdentity({ mnemonic, owner, password: newPassword, metadataPublicKey })
+    const claimedIdentity = await createIdentity({
+      mnemonic, owner, password: newPassword, metadataPublicKey
+    })
     await _archiveNewIdentity(claimedIdentity)
   } catch (err) {
     throw err
