@@ -50,6 +50,7 @@
     "debug": "^3.1.0",
     "did-document": "github:arablocks/did-document",
     "extend": "^3.0.2",
+    "generate-password": "^1.4.0",
     "has-did-method": "^0.1.0",
     "hypercore": "^6.18.1",
     "hyperdrive": "^9.14.0",

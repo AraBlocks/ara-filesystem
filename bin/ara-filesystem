@@ -190,6 +190,7 @@ const { argv } = program
         alias: 's',
         required: true,
         type: 'string',
+        default: rc.network.secret,
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
@@ -366,7 +367,7 @@ const { argv } = program
         }, onmetadatawritefile)
   }).command('ownership', "Commands for ownership management of an AFS", (program) => {
     program
-      .command('request <did> <contentDid>', "Requests ownership of an AFS", (program) => {
+      .command('request <requesterDid> <contentDid>', "Requests ownership of an AFS", (program) => {
         program
           .positional('requesterDid', {
             type: 'string',
@@ -381,9 +382,27 @@ const { argv } = program
             default: false,
             type: 'boolean',
             describe: 'Should the transaction be sent or just gas estimation'
+          })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            default: rc.network.secret,
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            default: rc.network.resolver,
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            default: rc.network.identity.keyring + ".pub",
+            describe: 'Path to the keyring',
           })
       }, onrequestownership)
-      .command('revoke <did> <contentDid>', "Revokes a previous request for ownership of an AFS", (program) => {
+      .command('revoke <requesterDid> <contentDid>', "Revokes a previous request for ownership of an AFS", (program) => {
         program
           .positional('requesterDid', {
             type: 'string',
@@ -399,20 +418,85 @@ const { argv } = program
             type: 'boolean',
             describe: 'Should the transaction be sent or just gas estimation'
           })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            default: rc.network.secret,
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            default: rc.network.resolver,
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            default: rc.network.identity.keyring + ".pub",
+            describe: 'Path to the keyring',
+          })
       }, onrevokerequest)
-      .command('approve <did>', "Approves an ownership transfer", (program) => {
+      .command('approve <did> <newOwnerDid>', "Approves an ownership transfer", (program) => {
         program
           .positional('did', {
             type: 'string',
             describe: "An AFS ARA decentralized identity (did) URI"
           })
+          .positional('newOwnerDid', {
+            type: 'string',
+            describe: "DID to transfer ownership to"
+          })
           .option('estimate', {
             alias: 'e',
             default: false,
             type: 'boolean',
             describe: 'Should the transaction be sent or just gas estimation'
           })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            default: rc.network.secret,
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            default: rc.network.resolver,
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            default: rc.network.identity.keyring + ".pub",
+            describe: 'Path to the keyring',
+          })
       }, onapprovetransfer)
+      .command('claim <contentDid>', "Claim an AFS' identity", (program) => {
+        program
+          .positional('contentDid', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            default: rc.network.secret,
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            default: rc.network.resolver,
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            default: rc.network.identity.keyring + ".pub",
+            describe: 'Path to the keyring',
+          })
+      }, onclaimownership)
   })
 
 void async function main() {
@@ -794,13 +878,15 @@ async function onmetadatawritefile({ did, filepath, print }) {
   }
 }
 
-async function onrequestownership({ requesterDid, contentDid, estimate }) {
+async function onrequestownership({ requesterDid, contentDid, estimate, secret, network, keyring }) {
   const { password } = await promptForPassword()
+  const keyringOpts = { secret, network, keyring }
 
   let result
   try {
     result = await afs.ownership.request({
       requesterDid,
+      keyringOpts,
       contentDid,
       password,
       estimate
@@ -810,19 +896,21 @@ async function onrequestownership({ requesterDid, contentDid, estimate }) {
   }
 
   if (estimate) {
-    info("Request ownership cost in ETH:", cost)
+    info("Request ownership cost in ETH", result)
   } else {
     info("Ownership successfully requested")
   }
 }
 
-async function onrevokerequest({ requesterDid, contentDid, estimate }) {
+async function onrevokerequest({ requesterDid, contentDid, estimate, secret, network, keyring }) {
   const { password } = await promptForPassword()
+  const keyringOpts = { secret, network, keyring }
 
   let result
   try {
     result = await afs.ownership.revokeRequest({
       requesterDid,
+      keyringOpts,
       contentDid,
       password,
       estimate
@@ -832,30 +920,76 @@ async function onrevokerequest({ requesterDid, contentDid, estimate }) {
   }
 
   if (estimate) {
-    info("Revoke ownership request cost in ETH:", cost)
+    info("Revoke ownership request cost in ETH", result)
   } else {
     info("Ownership request successfully revoked")
   }
 }
 
-async function onapprovetransfer(argv) {
+async function onapprovetransfer({ did, newOwnerDid, estimate, secret, network, keyring }) {
   const { password } = await promptForPassword()
   const { mnemonic } = await promptForMnemonic()
-  try {
+  const keyringOpts = { secret, network, keyring }
 
+  let result
+  try {
+    result = await afs.ownership.approveTransfer({
+      newOwnerDid,
+      keyringOpts,
+      mnemonic,
+      password,
+      estimate,
+      did
+    })
   } catch (err) {
     onfatal(err)
   }
+
+  if (estimate) {
+    info("Ownership transfer cost in ETH", result)
+  } else {
+    info("Ownership successfully transferred to", newOwnerDid)
+    info(`Please provide the AFS mnmonic and the password %s to 
+      %s to complete the transfer`, result.password, newOwnerDid)
+  }
 }
 
-async function promptForPassword() {
+async function onclaimownership({ contentDid }) {
+  // get current password
+  let prompt = `Please provide the random password generated for this AFS identity.
+    Passphrase:`
+  const { password: currentPassword } = await promptForPassword(prompt)
+
+  // get new password
+  prompt = `Please provide the new password for this identity.
+    Passphrase:`
+  const { password: newPassword} = await promptForPassword(prompt)
+
+  // query for mnemonic
+  const { mnemonic } = await promptForMnemonic()
+
+  try {
+    await afs.ownership.claim({
+      currentPassword,
+      newPassword,
+      contentDid,
+      mnemonic
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("Ownership successfully claimed")
+}
+
+async function promptForPassword(message) {
+  message = message || "Please provide the passphrase for your identity. This is needed to " +
+    "complete this action.\n" +
+    "Passphrase:"
   return await inquirer.prompt([{
     type: 'password',
     name: 'password',
-    message:
-    "Please provide the passphrase for your identity. This is needed to " +
-    "complete this action.\n" +
-    "Passphrase:"
+    message
   }])
 }
 
