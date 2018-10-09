@@ -1,4 +1,3 @@
-const { MissingOptionError } = require('ara-util/errors')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
 const { kAidPrefix } = require('./constants')
@@ -39,7 +38,7 @@ async function estimateSetPriceGasCost(opts) {
   } else if ('number' !== typeof opts.price || 0 >= opts.price) {
     throw new TypeError('Expecting whole number price.')
   }
-  
+
   opts = Object.assign(opts, { estimate: true })
   return setPrice(opts)
 }

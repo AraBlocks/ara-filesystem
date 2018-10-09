@@ -1,5 +1,4 @@
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
-const { MissingOptionError } = require('ara-util/errors')
 const hasDIDMethod = require('has-did-method')
 const context = require('ara-context')()
 const debug = require('debug')('ara-filesystem:aid')

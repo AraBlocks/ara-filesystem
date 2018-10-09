@@ -1,6 +1,5 @@
 /* eslint-disable no-await-in-loop */
 
-const { MissingOptionError } = require('ara-util/errors')
 const debug = require('debug')('ara-filesystem:add')
 const mirror = require('mirror-folder')
 const extend = require('extend')

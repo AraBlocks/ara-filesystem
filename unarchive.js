@@ -1,8 +1,7 @@
-const { MissingOptionError } = require('ara-util/errors')
-const { create } = require('./create')
-const mirror = require('mirror-folder')
-const extend = require('extend')
 const debug = require('debug')('ara-filesystem:unarchive')
+const mirror = require('mirror-folder')
+const { create } = require('./create')
+const extend = require('extend')
 const rc = require('./rc')
 
 const {

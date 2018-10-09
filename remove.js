@@ -1,9 +1,8 @@
 /* eslint-disable no-await-in-loop */
 
-const { MissingOptionError } = require('ara-util/errors')
+const debug = require('debug')('ara-filesystem:remove')
 const { create } = require('./create')
 const extend = require('extend')
-const debug = require('debug')('ara-filesystem:remove')
 const rc = require('./rc')()
 
 const {

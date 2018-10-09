@@ -1,4 +1,3 @@
-const { MissingOptionError } = require('ara-util/errors')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:destroy')
 const { kAidPrefix } = require('./constants')

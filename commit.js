@@ -1,6 +1,5 @@
 /* eslint-disable no-await-in-loop */
 
-const { MissingOptionError } = require('ara-util/errors')
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
