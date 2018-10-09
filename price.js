@@ -2,9 +2,6 @@ const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
 const { kAidPrefix } = require('./constants')
 const { token } = require('ara-contracts')
-const extend = require('extend')
-const aid = require('./aid')
-const rc = require('./rc')()
 
 const {
   proxyExists,
@@ -13,6 +10,7 @@ const {
 
 const {
   getDocumentOwner,
+  validate,
   web3: {
     tx,
     call,
@@ -49,6 +47,7 @@ async function estimateSetPriceGasCost(opts) {
  * @param {String}   opts.did
  * @param {String}   opts.password
  * @param {Number}   opts.quantity
+ * @param {Object}   [opts.keyringOpts]
  * @param {Number}   opts.price
  * @param {Boolean}  opts.estimate
  */
@@ -72,21 +71,15 @@ async function setPrice(opts) {
   }
 
   let {
-    did, estimate, price, keyringOpts
+    did, estimate, price
   } = opts
-  const { password } = opts
-
-  // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
-    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
-  }, keyringOpts)
+  const { password, keyringOpts } = opts
 
   estimate = estimate || false
 
   let ddo
   try {
-    ({ did, ddo } = await aid.validate({
+    ({ did, ddo } = await validate({
       did, password, label: 'price', keyringOpts
     }))
   } catch (err) {

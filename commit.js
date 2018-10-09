@@ -3,11 +3,8 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
-const extend = require('extend')
 const pify = require('pify')
-const aid = require('./aid')
 const fs = require('fs')
-const rc = require('./rc')()
 
 const {
   proxyExists,
@@ -26,6 +23,7 @@ const {
 
 const {
   getDocumentOwner,
+  validate,
   web3: {
     tx,
     call,
@@ -54,6 +52,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {Object}   [opts.keyringOpts]
  * @param {Boolean}  opts.estimate
  * @param {Number}   opts.price
  * @return {Object}
@@ -71,23 +70,18 @@ async function commit(opts) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  let { did, estimate, keyringOpts } = opts
+  let { did, estimate } = opts
   const {
     password,
-    price
+    price,
+    keyringOpts
   } = opts
-
-  // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
-    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
-  }, keyringOpts)
 
   estimate = estimate || false
 
   let ddo
   try {
-    ({ did, ddo } = await aid.validate({
+    ({ did, ddo } = await validate({
       did, password, label: 'commit', keyringOpts
     }))
   } catch (err) {
@@ -143,7 +137,9 @@ async function commit(opts) {
   await _deleteStagedFile(path)
 
   if (0 < price) {
-    await setPrice({ did, password, price })
+    await setPrice({
+      did, password, price, keyringOpts
+    })
   }
 
   return result

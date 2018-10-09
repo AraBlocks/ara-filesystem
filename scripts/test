@@ -35,7 +35,5 @@ ava test/destroy.js --verbose
 ava test/commit.js --verbose
 ava test/price.js --verbose
 
-# TODO: aid.js
-
 # cleanup
 pkill -f ganache

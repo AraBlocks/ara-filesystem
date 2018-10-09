@@ -64,10 +64,12 @@ const { argv } = program
       })
       .option('archiverNetwork', {
         type: 'string',
+        alias: 'an',
         describe: 'Network name of the key for the DID archiver in the keyring',
       })
       .option('resolverNetwork', {
         type: 'string',
+        alias: 'rn',
         describe: 'Network name of the key for the DID resolver in the keyring',
       })
       .option('keyring', {
@@ -436,9 +438,19 @@ async function oncreate(argv) {
   }
 
   const { secret, resolverNetwork, archiverNetwork, keyring } = argv
-  const keyringOpts = { secret, resolverNetwork, archiverNetwork, keyring }
+  const keyringOpts = { 
+    archiver: {
+      secret,
+      network: archiverNetwork,
+      keyring
+    },
+    resolver: {
+      secret,
+      network: resolverNetwork,
+      keyring
+    }
+  }
   const { password } = await promptForPassword()
-
   let arafs
   try {
     arafs = await afs.create({ owner, password, keyringOpts })

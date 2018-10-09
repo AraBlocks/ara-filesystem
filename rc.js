@@ -17,7 +17,7 @@ const defaults = () => ({
   araId: {
     archive: {
       root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
-    },
+    }
   }
 })
 

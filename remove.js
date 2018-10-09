@@ -15,6 +15,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {Object}   [opts.keyringOpts]
  * @param {Array}    opts.paths
  * @return {Object}
  */
@@ -30,14 +31,9 @@ async function remove(opts) {
     throw new TypeError('Expecting one or more filepaths to add.')
   }
 
-  const { did, password, paths } = opts
-  let { keyringOpts } = opts
-
-  // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
-    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
-  }, keyringOpts)
+  const {
+    did, password, paths, keyringOpts
+  } = opts
 
   let afs
   try {

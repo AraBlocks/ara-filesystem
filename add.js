@@ -2,14 +2,12 @@
 
 const debug = require('debug')('ara-filesystem:add')
 const mirror = require('mirror-folder')
-const extend = require('extend')
 const ignored = require('./lib/ignore')
 const { create } = require('./create')
 const isFile = require('is-file')
 const mkdirp = require('mkdirp')
 const { access } = require('fs')
 const pify = require('pify')
-const rc = require('./rc')()
 
 const {
   join,
@@ -22,6 +20,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {Object}   [opts.keyringOpts]
  * @param {Boolean}  opts.force
  * @param {Array}    opts.paths
  * @return {Object}
@@ -37,18 +36,8 @@ async function add(opts) {
   }
 
   const {
-    did, paths, password, force
+    did, paths, password, force, keyringOpts
   } = opts
-
-  let {
-    keyringOpts
-  } = opts
-
-  // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
-    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
-  }, keyringOpts)
 
   let afs
   try {

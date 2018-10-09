@@ -1,11 +1,10 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:destroy')
 const { kAidPrefix } = require('./constants')
+const aid = require('ara-identity')
 const { access } = require('fs')
 const rimraf = require('rimraf')
-const extend = require('extend')
 const pify = require('pify')
-const aid = require('./aid')
 const rc = require('./rc')()
 
 const {
@@ -21,6 +20,7 @@ const {
 const {
   normalize,
   getDocumentOwner,
+  validate,
   web3: {
     tx,
     account
@@ -37,6 +37,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {Object}   [opts.keyringOpts]
  */
 async function destroy(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -47,14 +48,9 @@ async function destroy(opts) {
     throw TypeError('Expecting non-empty password.')
   }
 
-  let { did, keyringOpts } = opts
+  const { keyringOpts } = opts
+  let { did } = opts
   did = normalize(did)
-
-  // Replace everything in the first object with the second. This method will allow us to have defaults.
-  keyringOpts = extend(true, {
-    network: rc.network && rc.network.resolver,
-    keyring: rc.network && rc.network.identity && rc.network.identity.keyring
-  }, keyringOpts)
 
   let path
 
@@ -87,7 +83,7 @@ async function destroy(opts) {
 
   if (password) {
     try {
-      ({ did } = await aid.validate({
+      ({ did } = await validate({
         did,
         password,
         label: 'destroy',
