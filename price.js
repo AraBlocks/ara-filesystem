@@ -26,16 +26,6 @@ const {
  * @param {Number}   opts.price
  */
 async function estimateSetPriceGasCost(opts) {
-  if (!opts || 'object' !== typeof opts) {
-    throw new TypeError('Expecting opts object.')
-  } else if ('string' !== typeof opts.did || !opts.did) {
-    throw new TypeError('Expecting non-empty string.')
-  } else if ('string' !== typeof opts.password || !opts.password) {
-    throw TypeError('Expecting non-empty password.')
-  } else if ('number' !== typeof opts.price || 0 >= opts.price) {
-    throw new TypeError('Expecting whole number price.')
-  }
-
   opts = Object.assign(opts, { estimate: true })
   return setPrice(opts)
 }

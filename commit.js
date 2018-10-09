@@ -199,16 +199,6 @@ function generateStagedPath(did) {
  * @return {Object}
  */
 async function estimateCommitGasCost(opts) {
-  if (!opts || 'object' !== typeof opts) {
-    throw new TypeError('Expecting opts object.')
-  } else if ('string' !== typeof opts.did || !opts.did) {
-    throw new TypeError('Expecting non-empty string.')
-  } else if ('string' !== typeof opts.password || !opts.password) {
-    throw TypeError('Expecting non-empty password.')
-  } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
-    throw new TypeError('Expecting whole number price.')
-  }
-
   opts = Object.assign(opts, { estimate: true })
   return commit(opts)
 }

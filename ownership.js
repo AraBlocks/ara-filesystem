@@ -17,6 +17,21 @@ const {
 
 const PASSWORD_LENGTH = 12
 
+async function estimateRequestGasCost(opts) {
+  opts = Object.assign(opts, { estimate: true })
+  return request(opts)
+}
+
+async function estimateRevokeGasCost(opts) {
+  opts = Object.assign(opts, { estimate: true })
+  return revokeRequest(opts)
+}
+
+async function estiamteApproveGasCost(opts) {
+  opts = Object.assign(opts, { estimate: true })
+  return approveTransfer(opts)
+}
+
 async function request(opts) {
   return requestOwnership(opts)
 }
@@ -120,6 +135,9 @@ function _getMetadataPublicKey(ddo) {
 }
 
 module.exports = {
+  estimateRequestGasCost,
+  estiamteApproveGasCost,
+  estimateRevokeGasCost,
   approveTransfer,
   revokeRequest,
   request,
