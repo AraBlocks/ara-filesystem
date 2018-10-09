@@ -2,9 +2,9 @@ const debug = require('debug')('ara-filesystem:ownership')
 const { writeIdentity } = require('ara-identity/util')
 const passGenerator = require('generate-password')
 const { kMetadataSuffix } = require('./constants')
+const { createIdentity } = require('./create')
 const { archive } = require('ara-identity')
 const context = require('ara-context')()
-const aid = require('./aid')
 
 const {
   getDocumentOwner,
@@ -85,15 +85,16 @@ async function claim(opts) {
   const {
     currentPassword,
     newPassword,
+    keyringOpts,
     contentDid,
     mnemonic
   } = opts
 
   try {
-    const { ddo } = await validate({ did: contentDid, password: currentPassword })
+    const { ddo } = await validate({ did: contentDid, password: currentPassword, keyringOpts })
     const owner = getDocumentOwner(ddo, true)
     const metadataPublicKey = _getMetadataPublicKey(ddo)
-    const claimedIdentity = await aid.create({ mnemonic, owner, password: newPassword, metadataPublicKey })
+    const claimedIdentity = await createIdentity({ mnemonic, owner, password: newPassword, metadataPublicKey })
     await _archiveNewIdentity(claimedIdentity)
   } catch (err) {
     throw err

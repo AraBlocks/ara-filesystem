@@ -353,21 +353,17 @@ const { argv } = program
           .option('secret', {
             alias: 's',
             type: 'string',
-            default: rc.network.secret,
             describe: 'Shared secret for the keyring',
           })
           .option('network', {
             alias: 'n',
             type: 'string',
-            default: rc.network.resolver,
             describe: 'Network name of the key for the DID resolver in the keyring',
           })
           .option('keyring', {
             alias: 'k',
             type: 'string',
-            default: rc.network.identity.keyring + ".pub",
             describe: 'Path to the keyring',
-          })
       }, onrequestownership)
       .command('revoke <requesterDid> <contentDid>', "Revokes a previous request for ownership of an AFS", (program) => {
         program
@@ -388,21 +384,17 @@ const { argv } = program
           .option('secret', {
             alias: 's',
             type: 'string',
-            default: rc.network.secret,
             describe: 'Shared secret for the keyring',
           })
           .option('network', {
             alias: 'n',
             type: 'string',
-            default: rc.network.resolver,
             describe: 'Network name of the key for the DID resolver in the keyring',
           })
           .option('keyring', {
             alias: 'k',
             type: 'string',
-            default: rc.network.identity.keyring + ".pub",
             describe: 'Path to the keyring',
-          })
       }, onrevokerequest)
       .command('approve <did> <newOwnerDid>', "Approves an ownership transfer", (program) => {
         program
@@ -423,21 +415,17 @@ const { argv } = program
           .option('secret', {
             alias: 's',
             type: 'string',
-            default: rc.network.secret,
             describe: 'Shared secret for the keyring',
           })
           .option('network', {
             alias: 'n',
             type: 'string',
-            default: rc.network.resolver,
             describe: 'Network name of the key for the DID resolver in the keyring',
           })
           .option('keyring', {
             alias: 'k',
             type: 'string',
-            default: rc.network.identity.keyring + ".pub",
             describe: 'Path to the keyring',
-          })
       }, onapprovetransfer)
       .command('claim <contentDid>', "Claim an AFS' identity", (program) => {
         program
@@ -448,21 +436,17 @@ const { argv } = program
           .option('secret', {
             alias: 's',
             type: 'string',
-            default: rc.network.secret,
             describe: 'Shared secret for the keyring',
           })
           .option('network', {
             alias: 'n',
             type: 'string',
-            default: rc.network.resolver,
             describe: 'Network name of the key for the DID resolver in the keyring',
           })
           .option('keyring', {
             alias: 'k',
             type: 'string',
-            default: rc.network.identity.keyring + ".pub",
             describe: 'Path to the keyring',
-          })
       }, onclaimownership)
   })
 
@@ -931,7 +915,7 @@ async function onapprovetransfer({ did, newOwnerDid, estimate, secret, network, 
   }
 }
 
-async function onclaimownership({ contentDid }) {
+async function onclaimownership({ contentDid, secret, network, keyring }) {
   // get current password
   let prompt = `Please provide the random password generated for this AFS identity.
     Passphrase:`
@@ -944,11 +928,13 @@ async function onclaimownership({ contentDid }) {
 
   // query for mnemonic
   const { mnemonic } = await promptForMnemonic()
+  const keyringOpts = { secret, network, keyring }
 
   try {
     await afs.ownership.claim({
       currentPassword,
       newPassword,
+      keyringOpts,
       contentDid,
       mnemonic
     })
