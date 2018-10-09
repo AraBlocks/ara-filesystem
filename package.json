@@ -38,7 +38,7 @@
     "ansi-diff-stream": "^1.2.0",
     "ara-console": "github:arablocks/ara-console",
     "ara-context": "github:arablocks/ara-context",
-    "ara-contracts": "github:arablocks/ara-contracts#0.2.5",
+    "ara-contracts": "github:arablocks/ara-contracts#0.2.6",
     "ara-crypto": "github:arablocks/ara-crypto",
     "ara-identity": "github:arablocks/ara-identity#0.24.0",
     "ara-network": "github:arablocks/ara-network",
