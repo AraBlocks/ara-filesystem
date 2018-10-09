@@ -171,7 +171,6 @@ const { argv } = program
       .option('secret', {
         alias: 's',
         type: 'string',
-        default: rc.network.secret,
         describe: 'Shared secret for the keyring',
       })
       .option('network', {
@@ -332,7 +331,8 @@ const { argv } = program
             describe: 'Print full metadata after write'
           })
         }, onmetadatawritefile)
-  }).command('ownership', "Commands for ownership management of an AFS", (program) => {
+      })
+  .command('ownership', "Commands for ownership management of an AFS", (program) => {
     program
       .command('request <requesterDid> <contentDid>', "Requests ownership of an AFS", (program) => {
         program
@@ -363,8 +363,9 @@ const { argv } = program
           .option('keyring', {
             alias: 'k',
             type: 'string',
-            describe: 'Path to the keyring',
-      }, onrequestownership)
+            describe: 'Path to the keyring'
+          })
+        }, onrequestownership)
       .command('revoke <requesterDid> <contentDid>', "Revokes a previous request for ownership of an AFS", (program) => {
         program
           .positional('requesterDid', {
@@ -395,7 +396,8 @@ const { argv } = program
             alias: 'k',
             type: 'string',
             describe: 'Path to the keyring',
-      }, onrevokerequest)
+          })
+        }, onrevokerequest)
       .command('approve <did> <newOwnerDid>', "Approves an ownership transfer", (program) => {
         program
           .positional('did', {
@@ -426,7 +428,9 @@ const { argv } = program
             alias: 'k',
             type: 'string',
             describe: 'Path to the keyring',
+          })
       }, onapprovetransfer)
+      
       .command('claim <contentDid>', "Claim an AFS' identity", (program) => {
         program
           .positional('contentDid', {
@@ -447,8 +451,9 @@ const { argv } = program
             alias: 'k',
             type: 'string',
             describe: 'Path to the keyring',
+          })
       }, onclaimownership)
-  })
+    })
 
 void async function main() {
   if (argv.debug) {

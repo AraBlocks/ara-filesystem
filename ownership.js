@@ -111,7 +111,11 @@ async function _archiveNewIdentity(identity) {
 // expose in ara-util if this functionality is needed elsewhere
 // cckelly
 function _getMetadataPublicKey(ddo) {
-  const { publicKeyHex } = ddo.publicKey.find(({ id }) => id.includes(kMetadataSuffix))
+  const result = ddo.publicKey.find(({ id }) => id.includes(kMetadataSuffix))
+  if (!result) {
+    throw new Error('Could not parse DDO, please make sure the provided DIDs are correct.')
+  }
+  const { publicKeyHex } = result
   return publicKeyHex
 }
 
