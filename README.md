@@ -155,6 +155,13 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 * [async metadata.delKey(opts)](#delkey)
 * [async metadata.clear(opts)](#clear)
 * [async metadata.readFile(opts)](#readfile)
+* [async ownership.estimateRequestGasCost(opts)](#estimaterequest)
+* [async ownership.estimateRevokeGasCost(opts)](#estimaterevoke)
+* [async ownership.estimateApproveGasCost(ops)](#estimateapprove)
+* [async ownership.request(opts)](#requestownership)
+* [async ownership.revokeRequest(opts)](#revokerequest)
+* [async ownership.approveTransfer(opts)](#approvetransfer)
+* [async ownership.claim(opts)](#claim)
 
 <a name="create"></a>
 ### `async create(opts)`
@@ -466,6 +473,105 @@ Reads all metadata from an `AFS`.
 ```js
 const contents = await metadata.readFile({ did })
 ```
+
+<a name="estimaterequest"></a>
+### `ownership.estimateRequestGasCost(opts)`
+
+Gets the estimated gas cost of requesting ownership of an AFS.
+
+>**Note**: This function takes the same arguments as `ownership.request(opts)`
+
+```js
+const cost = await ownership.estimateRequestGasCost(opts) // 0.015 ETH
+```
+
+<a name="estimaterevoke"></a>
+### `ownership.estimateRevokeGasCost(opts)`
+
+Gets the estimated gas cost of revoking a previous ownership request.
+
+>**Note**: This function takes the same arguments as `ownership.revokeRequest(opts)`
+
+```js
+const cost = await ownership.estimateRevokeGasCost(opts) // 0.015 ETH
+```
+
+<a name="estimateapprove"></a>
+### `ownership.estimateApproveGasCost(opts)`
+
+Gets the estimated gas cost of approving an ownership request.
+
+>**Note**: This function takes the same arguments as `ownership.approveTransfer(opts)`
+
+```js
+const cost = await ownership.estimateApproveGasCost(opts) // 0.015 ETH
+```
+
+<a name="requestownership"></a>
+### `ownership.request(opts)`
+
+Requests the transfer of ownership of an AFS to `requesterDid`. Must be approved by the current owner. This transaction will revert if a request is already active.
+
+- `opts`
+  - `requesterDid` - `DID` of the requester
+  - `contentDid` - `DID` of the AFS to request ownership for
+  - `password` - password of the requester
+  - `estimate` - optional Flag to check cost of `request`
+
+```js
+const requesterDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
+const password = 'pass'
+const contentDid = 'did:ara:114045f3883a21735188bb02de024a4e1451cb96c5dcc80bdfa1b801ecf81b85'
+const receipt = await ownership.request({ requesterDid, password, contentDid })
+```
+
+<a name="revokerequest"></a>
+### `ownership.revokeRequest(opts)`
+
+Revokes a previous request for AFS ownership transfer. This transaction will revert if there isn't an active request.
+
+- `opts`
+  - `requesterDid` - `DID` of the requester
+  - `contentDid` - `DID` of the AFS to revoke ownership reequest for
+  - `password` - password of the requester
+  - `estimate` - optional Flag to check cost of `revokeRequest`
+
+```js
+const requesterDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
+const password = 'pass'
+const contentDid = 'did:ara:114045f3883a21735188bb02de024a4e1451cb96c5dcc80bdfa1b801ecf81b85'
+const receipt = await ownership.revokeRequest({ requesterDid, password, contentDid })
+```
+
+<a name="approvetransfer"></a>
+### `ownership.approveTransfer(opts)`
+
+Approves a pending transfer request, this officially transfers ownership for the given AFS. If not an estimate, this function will return an object containing a random password to be delivered to the identity claiming ownership, along with the transaction receipt.
+
+- `opts`
+  - `did` - `DID` of the content to change ownership for
+  - `password` - Password of the staged owner
+  - `newOwnerDid` - `DID` of the owner to transfer ownership to
+  - `mnemonic` - mnemonic associated with the AFS
+  - `estimate` - optional Flag to check cost of `approveTransfer`
+
+```js
+const did = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
+const password = 'pass'
+const newOwnerDid = 'did:ara:7dc039cfb220029c371d0f4aabf4a956ed0062d66c447df7b4595d7e11187271'
+const result = await ownership.approveOwnershipTransfer({ did, password, newOwnerDid })
+```
+
+<a name="claim"></a>
+### `ownership.claim(opts)`
+
+Fully claims ownership of an AFS after it has been transferred by the previous owner.
+
+- `opts`
+  - `currentPassword` - random password generated from the previous owner
+  - `newPassword` - new password for this AFS identity
+  - `contentDid` - `DID` of the content to claim ownership for
+  - `mnemonic` - mnemonic associated with the AFS to claim
 
 ## Contributing
 - [Commit message format](/.github/COMMIT_FORMAT.md)

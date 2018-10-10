@@ -344,12 +344,6 @@ const { argv } = program
             type: 'string',
             describe: "An AFS ARA decentralized identity (did) URI"
           })
-          .option('estimate', {
-            alias: 'e',
-            default: false,
-            type: 'boolean',
-            describe: 'Should the transaction be sent or just gas estimation'
-          })
           .option('secret', {
             alias: 's',
             type: 'string',
@@ -376,12 +370,6 @@ const { argv } = program
             type: 'string',
             describe: "An AFS ARA decentralized identity (did) URI"
           })
-          .option('estimate', {
-            alias: 'e',
-            default: false,
-            type: 'boolean',
-            describe: 'Should the transaction be sent or just gas estimation'
-          })
           .option('secret', {
             alias: 's',
             type: 'string',
@@ -407,12 +395,6 @@ const { argv } = program
           .positional('newOwnerDid', {
             type: 'string',
             describe: "DID to transfer ownership to"
-          })
-          .option('estimate', {
-            alias: 'e',
-            default: false,
-            type: 'boolean',
-            describe: 'Should the transaction be sent or just gas estimation'
           })
           .option('secret', {
             alias: 's',
@@ -844,79 +826,63 @@ async function onmetadatawritefile({ did, filepath, print }) {
   }
 }
 
-async function onrequestownership({ requesterDid, contentDid, estimate, secret, network, keyring }) {
+async function onrequestownership({ requesterDid, contentDid, secret, network, keyring }) {
   const { password } = await promptForPassword()
   const keyringOpts = { secret, network, keyring }
+  let opts = { requesterDid, contentDid, password, keyringOpts }
 
-  let result
   try {
-    result = await afs.ownership.request({
-      requesterDid,
-      keyringOpts,
-      contentDid,
-      password,
-      estimate
-    })
+    const cost = await afs.ownership.estimateRequestGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      await afs.ownership.request(Object.assign(opts, { estimate: false }))
+      info("Ownership successfully requested")
+    } else {
+      onfatal()
+    }
   } catch (err) {
     onfatal(err)
   }
-
-  if (estimate) {
-    info("Request ownership cost in ETH", result)
-  } else {
-    info("Ownership successfully requested")
-  }
 }
 
-async function onrevokerequest({ requesterDid, contentDid, estimate, secret, network, keyring }) {
+async function onrevokerequest({ requesterDid, contentDid, secret, network, keyring }) {
   const { password } = await promptForPassword()
   const keyringOpts = { secret, network, keyring }
+  let opts = { requesterDid, contentDid, password, keyringOpts }
 
-  let result
   try {
-    result = await afs.ownership.revokeRequest({
-      requesterDid,
-      keyringOpts,
-      contentDid,
-      password,
-      estimate
-    })
+    const cost = await afs.ownership.estimateRevokeGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      await afs.ownership.revokeRequest(Object.assign(opts, { estimate: false }))
+      info("Ownership request successfully revoked")
+    } else {
+      onfatal()
+    }
   } catch (err) {
     onfatal(err)
   }
-
-  if (estimate) {
-    info("Revoke ownership request cost in ETH", result)
-  } else {
-    info("Ownership request successfully revoked")
-  }
 }
 
-async function onapprovetransfer({ did, newOwnerDid, estimate, secret, network, keyring }) {
+async function onapprovetransfer({ did, newOwnerDid, secret, network, keyring }) {
   const { password } = await promptForPassword()
   const { mnemonic } = await promptForMnemonic()
   const keyringOpts = { secret, network, keyring }
+  const opts = { did, newOwnerDid, password, mnemonic, keyringOpts }
 
-  let result
   try {
-    result = await afs.ownership.approveTransfer({
-      newOwnerDid,
-      keyringOpts,
-      mnemonic,
-      password,
-      estimate,
-      did
-    })
+    const cost = await afs.ownership.estimateApproveGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      const result = await afs.ownership.approveTransfer(Object.assign(opts, { estimate: false }))
+      info("Ownership successfully transferred to", newOwnerDid)
+      info(`Please provide the AFS mnmonic and the password %s to 
+        %s to complete the transfer`, result.password, newOwnerDid)
+    } else {
+      onfatal()
+    }
   } catch (err) {
     onfatal(err)
-  }
-
-  if (estimate) {
-    info("Ownership transfer cost in ETH", result)
-  } else {
-    info("Ownership successfully transferred to", newOwnerDid)
-    info(`Please provide the AFS mnmonic and the password %s to 
-      %s to complete the transfer`, result.password, newOwnerDid)
   }
 }
 

@@ -17,32 +17,85 @@ const {
 
 const PASSWORD_LENGTH = 12
 
+/**
+ * Estimates the gas cost for requesting ownership.
+ * @param  {Object}
+ * @return {String}
+ */
 async function estimateRequestGasCost(opts) {
-  opts = Object.assign(opts, { estimate: true })
-  return request(opts)
+  return request(Object.assign(opts, { estimate: true }))
 }
 
+/**
+ * Estimates the gas cost for revoking an ownership request.
+ * @param  {Object} opts
+ * @return {String}
+ */
 async function estimateRevokeGasCost(opts) {
-  opts = Object.assign(opts, { estimate: true })
-  return revokeRequest(opts)
+  return revokeRequest(Object.assign(opts, { estimate: true }))
 }
 
-async function estiamteApproveGasCost(opts) {
-  opts = Object.assign(opts, { estimate: true })
-  return approveTransfer(opts)
+/**
+ * Estimates the gas cost for approving an ownership transfer.      
+ * @param  {Object} opts
+ * @return {String}
+ */
+async function estimateApproveGasCost(opts) {
+  return approveTransfer(Object.assign(opts, { estimate: true }))
 }
 
+/**
+ * Requests ownership of an AFS.
+ * @param  {Object} opts
+ * @param  {String} opts.requesterDid
+ * @param  {String} opts.contentDid
+ * @param  {String} opts.password
+ * @param  {String} [opts.estimate]
+ * @throws {Error|TypeError}
+ * @return {Object}
+ */
 async function request(opts) {
   return requestOwnership(opts)
 }
 
+/**
+ * Revokes a previous ownership request of an AFS.
+ * @param  {Object} opts
+ * @param  {String} opts.requesterDid
+ * @param  {String} opts.contentDid
+ * @param  {String} opts.password
+ * @param  {String} [opts.estimate]
+ * @throws {Error|TypeError}
+ * @return {Object}
+ */
 async function revokeRequest(opts) {
   return revokeOwnershipRequest(opts)
 }
 
+/**
+ * Approves and transfers an ownership request.
+ * @param  {Object} opts
+ * @param  {String} opts.newOwnerDid
+ * @param  {String} opts.mnemonic
+ * @param  {String} opts.did
+ * @param  {String} opts.password
+ * @param  {Boolean} [opts.estimate]
+ * @throws {Error|TypeError} 
+ * @return {String|Object}
+ */
 async function approveTransfer(opts) {
   if (!opts.mnemonic || 'string' !== typeof opts.mnemonic) {
     throw new TypeError('Mnemonic must be non-empty string')
+  } else if (!opts.newOwnerDid || 'string' !== typeof opts.newOwnerDid) {
+    throw new TypeError('New owner DID must be non-empty string')
+  } else if (!opts.mnemonic || 'string' !== typeof opts.mnemonic) {
+    throw new TypeError('Mnemonic must be non-empty string')
+  } else if (!opts.did || 'string' !== typeof opts.did) {
+    throw new TypeError('AFS DID must be non-empty string')
+  } else if (!opts.password || 'string' !== typeof opts.password) {
+    throw new TypeError('Password must be non-empty string')
+  } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
+    throw new TypeError('Estimate must be of type boolean')
   }
 
   const {
@@ -73,6 +126,8 @@ async function approveTransfer(opts) {
     result = await approveOwnershipTransfer(opts)
     if (!estimate && result.status) {
       await _archiveNewIdentity(newIdentity)
+    } else {
+      return result
     }
   } catch (err) {
     throw err
@@ -84,6 +139,16 @@ async function approveTransfer(opts) {
   }
 }
 
+/**
+ * Claims a transferred ownership, updating 
+ * the password used to encrypt the keystore.
+ * @param  {Object} opts
+ * @param  {String} opts.currentPassword
+ * @param  {String} opts.newPassword
+ * @param  {String} opts.contentDid
+ * @param  {String} opts.Mnemonic
+ * @throws {Error|TypeError} 
+ */
 async function claim(opts) {
   if (!opts || 'object' !== typeof opts) {
     throw new TypeError('Expecting opts object')
@@ -136,7 +201,7 @@ function _getMetadataPublicKey(ddo) {
 
 module.exports = {
   estimateRequestGasCost,
-  estiamteApproveGasCost,
+  estimateApproveGasCost,
   estimateRevokeGasCost,
   approveTransfer,
   revokeRequest,
