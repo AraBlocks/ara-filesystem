@@ -1,3 +1,17 @@
+<a name="0.2.0"></a>
+# [0.2.0](https://github.com/AraBlocks/ara-filesystem/compare/0.1.1...0.2.0) (2018-10-11)
+
+
+### Bug Fixes
+
+* **bin/ara-filesystem:** name => network ([96aea86](https://github.com/AraBlocks/ara-filesystem/commit/96aea86))
+* **create:** Fix scoping issue ([c1edcd3](https://github.com/AraBlocks/ara-filesystem/commit/c1edcd3))
+* cli destructure ([18bc576](https://github.com/AraBlocks/ara-filesystem/commit/18bc576))
+* Fix issue with afs creation ([dfeecdb](https://github.com/AraBlocks/ara-filesystem/commit/dfeecdb))
+* Get create and add working again ([746652b](https://github.com/AraBlocks/ara-filesystem/commit/746652b))
+
+
+
 <a name="0.1.1"></a>
 ## [0.1.1](https://github.com/AraBlocks/ara-filesystem/compare/0.1.0...0.1.1) (2018-09-21)
 
