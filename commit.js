@@ -82,6 +82,7 @@ async function commit(opts) {
   } = opts
 
   estimate = estimate || false
+  list = list || false
 
   let ddo
   try {
