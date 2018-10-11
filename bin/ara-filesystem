@@ -331,7 +331,111 @@ const { argv } = program
             describe: 'Print full metadata after write'
           })
         }, onmetadatawritefile)
-  })
+      })
+  .command('ownership', "Commands for ownership management of an AFS", (program) => {
+    program
+      .command('request <requesterDid> <contentDid>', "Requests ownership of an AFS", (program) => {
+        program
+          .positional('requesterDid', {
+            type: 'string',
+            describe: "DID of the requester"
+          })
+          .positional('contentDid', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Path to the keyring'
+          })
+        }, onrequestownership)
+      .command('revoke <requesterDid> <contentDid>', "Revokes a previous request for ownership of an AFS", (program) => {
+        program
+          .positional('requesterDid', {
+            type: 'string',
+            describe: "DID of the requester"
+          })
+          .positional('contentDid', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Path to the keyring',
+          })
+        }, onrevokerequest)
+      .command('approve <did> <newOwnerDid>', "Approves an ownership transfer", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .positional('newOwnerDid', {
+            type: 'string',
+            describe: "DID to transfer ownership to"
+          })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Path to the keyring',
+          })
+      }, onapprovetransfer)
+      
+      .command('claim <contentDid>', "Claim an AFS' identity", (program) => {
+        program
+          .positional('contentDid', {
+            type: 'string',
+            describe: "An AFS ARA decentralized identity (did) URI"
+          })
+          .option('secret', {
+            alias: 's',
+            type: 'string',
+            describe: 'Shared secret for the keyring',
+          })
+          .option('network', {
+            alias: 'n',
+            type: 'string',
+            describe: 'Network name of the key for the DID resolver in the keyring',
+          })
+          .option('keyring', {
+            alias: 'k',
+            type: 'string',
+            describe: 'Path to the keyring',
+          })
+      }, onclaimownership)
+    })
 
 void async function main() {
   if (argv.debug) {
@@ -722,14 +826,104 @@ async function onmetadatawritefile({ did, filepath, print }) {
   }
 }
 
-async function promptForPassword() {
+async function onrequestownership({ requesterDid, contentDid, secret, network, keyring }) {
+  const { password } = await promptForPassword()
+  const keyringOpts = { secret, network, keyring }
+  let opts = { requesterDid, contentDid, password, keyringOpts }
+
+  try {
+    const cost = await afs.ownership.estimateRequestGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      await afs.ownership.request(Object.assign(opts, { estimate: false }))
+      info("Ownership successfully requested")
+    } else {
+      onfatal()
+    }
+  } catch (err) {
+    onfatal(err)
+  }
+}
+
+async function onrevokerequest({ requesterDid, contentDid, secret, network, keyring }) {
+  const { password } = await promptForPassword()
+  const keyringOpts = { secret, network, keyring }
+  let opts = { requesterDid, contentDid, password, keyringOpts }
+
+  try {
+    const cost = await afs.ownership.estimateRevokeGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      await afs.ownership.revokeRequest(Object.assign(opts, { estimate: false }))
+      info("Ownership request successfully revoked")
+    } else {
+      onfatal()
+    }
+  } catch (err) {
+    onfatal(err)
+  }
+}
+
+async function onapprovetransfer({ did, newOwnerDid, secret, network, keyring }) {
+  const { password } = await promptForPassword()
+  const { mnemonic } = await promptForMnemonic()
+  const keyringOpts = { secret, network, keyring }
+  const opts = { did, newOwnerDid, password, mnemonic, keyringOpts }
+
+  try {
+    const cost = await afs.ownership.estimateApproveGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      const result = await afs.ownership.approveTransfer(Object.assign(opts, { estimate: false }))
+      info("Ownership successfully transferred to", newOwnerDid)
+      info(`Please provide the AFS mnmonic and the password %s to 
+        %s to complete the transfer`, result.password, newOwnerDid)
+    } else {
+      onfatal()
+    }
+  } catch (err) {
+    onfatal(err)
+  }
+}
+
+async function onclaimownership({ contentDid, secret, network, keyring }) {
+  // get current password
+  let prompt = `Please provide the random password generated for this AFS identity.
+    Passphrase:`
+  const { password: currentPassword } = await promptForPassword(prompt)
+
+  // get new password
+  prompt = `Please provide the new password for this identity.
+    Passphrase:`
+  const { password: newPassword} = await promptForPassword(prompt)
+
+  // query for mnemonic
+  const { mnemonic } = await promptForMnemonic()
+  const keyringOpts = { secret, network, keyring }
+
+  try {
+    await afs.ownership.claim({
+      currentPassword,
+      newPassword,
+      keyringOpts,
+      contentDid,
+      mnemonic
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("Ownership successfully claimed")
+}
+
+async function promptForPassword(message) {
+  message = message || "Please provide the passphrase for your identity. This is needed to " +
+    "complete this action.\n" +
+    "Passphrase:"
   return await inquirer.prompt([{
     type: 'password',
     name: 'password',
-    message:
-    "Please provide the passphrase for your identity. This is needed to " +
-    "complete this action.\n" +
-    "Passphrase:"
+    message
   }])
 }
 

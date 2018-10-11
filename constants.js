@@ -2,6 +2,7 @@ module.exports = {
   kDidPrefix: 'did:',
   kAidPrefix: 'did:ara:',
   kOwnerSuffix: '#owner',
+  kMetadataSuffix: '#metadata',
   kKeyLength: 64,
   kMetadataRegister: 'metadata',
   kContentRegister: 'content',

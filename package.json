@@ -1,6 +1,6 @@
 {
   "name": "ara-filesystem",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "The Ara FileSystem, isolated and secure file systems backed by Ara identities.",
   "main": "index.js",
   "bin": {
@@ -38,7 +38,7 @@
     "ansi-diff-stream": "^1.2.0",
     "ara-console": "github:arablocks/ara-console",
     "ara-context": "github:arablocks/ara-context",
-    "ara-contracts": "github:arablocks/ara-contracts#0.2.5",
+    "ara-contracts": "github:arablocks/ara-contracts#0.2.6",
     "ara-crypto": "github:arablocks/ara-crypto",
     "ara-identity": "github:arablocks/ara-identity#0.24.0",
     "ara-network": "github:arablocks/ara-network",
@@ -50,6 +50,7 @@
     "debug": "^3.1.0",
     "did-document": "github:arablocks/did-document",
     "extend": "^3.0.2",
+    "generate-password": "^1.4.0",
     "has-did-method": "^0.1.0",
     "hypercore": "^6.18.1",
     "hyperdrive": "^9.14.0",
