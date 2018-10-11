@@ -36,7 +36,7 @@ async function estimateRevokeGasCost(opts) {
 }
 
 /**
- * Estimates the gas cost for approving an ownership transfer.      
+ * Estimates the gas cost for approving an ownership transfer.
  * @param  {Object} opts
  * @return {String}
  */
@@ -80,7 +80,7 @@ async function revokeRequest(opts) {
  * @param  {String} opts.did
  * @param  {String} opts.password
  * @param  {Boolean} [opts.estimate]
- * @throws {Error|TypeError} 
+ * @throws {Error|TypeError}
  * @return {String|Object}
  */
 async function approveTransfer(opts) {
@@ -140,14 +140,14 @@ async function approveTransfer(opts) {
 }
 
 /**
- * Claims a transferred ownership, updating 
+ * Claims a transferred ownership, updating
  * the password used to encrypt the keystore.
  * @param  {Object} opts
  * @param  {String} opts.currentPassword
  * @param  {String} opts.newPassword
  * @param  {String} opts.contentDid
  * @param  {String} opts.Mnemonic
- * @throws {Error|TypeError} 
+ * @throws {Error|TypeError}
  */
 async function claim(opts) {
   if (!opts || 'object' !== typeof opts) {
