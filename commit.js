@@ -52,9 +52,10 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
- * @param {Object}   [opts.keyringOpts]
  * @param {Boolean}  opts.estimate
  * @param {Number}   opts.price
+ * @param {Boolean}  opts.list
+ * @param {Object}   [opts.keyringOpts]
  * @return {Object}
  */
 async function commit(opts) {
@@ -68,13 +69,16 @@ async function commit(opts) {
     throw new TypeError('Expecting boolean.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
+  } else if (opts.list && 'boolean' !== typeof opts.list) {
+    throw new TypeError('Expecting opts.list to be a boolean.')
   }
 
   let { did, estimate } = opts
   const {
     password,
     price,
-    keyringOpts
+    keyringOpts,
+    list
   } = opts
 
   estimate = estimate || false
@@ -119,7 +123,7 @@ async function commit(opts) {
     msData,
     account: acct,
     proxy
-  }, estimate, exists)
+  }, estimate, list, exists)
 
   if (estimate) {
     if (0 < price) {
@@ -212,7 +216,7 @@ async function estimateCommitGasCost(opts) {
   return commit(opts)
 }
 
-async function _write(opts, estimate = true, append = false) {
+async function _write(opts, estimate = true, list = false, append = false) {
   const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
   const { offsets: msOffsets, buffer: msBuffer } = opts.msData
 
@@ -228,7 +232,8 @@ async function _write(opts, estimate = true, append = false) {
         mtOffsets,
         msOffsets,
         mtBuffer,
-        msBuffer
+        msBuffer,
+        list
       ]
     }
   })

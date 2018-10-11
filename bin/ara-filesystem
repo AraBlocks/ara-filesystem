@@ -183,6 +183,11 @@ const { argv } = program
         type: 'string',
         describe: 'Path to the keyring',
       })
+      .option('list', {
+        alias: 'l',
+        type: 'boolean'
+        describe: 'Flag to list the AFS'
+      })
   }, oncommit)
   .command('set-price <did> <price> [options]', "Publish price for the given AFS", (program) => {
     program
@@ -592,7 +597,8 @@ async function onremove(argv) {
   instance.close()
 }
 
-async function oncommit({ did, price, secret, network, keyring }) {
+async function oncommit(argv) {
+  let { did, price, secret, network, keyring, list } = argv
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
 
   const { password } = await promptForPassword()
@@ -611,8 +617,12 @@ async function oncommit({ did, price, secret, network, keyring }) {
   }
 
   if (result) {
-    info("committing with identity: %s", did)
-    const result = await afs.commit({ did, password, price, keyringOpts })
+    if (list) {
+      info(`committing and listing AFS ${did}...`)
+    } else {
+      info(`committing AFS ${did}...`)
+    }
+    const result = await afs.commit({ did, password, price, list, keyringOpts })
     if (result instanceof Error) {
       onfatal(result)
     } else {

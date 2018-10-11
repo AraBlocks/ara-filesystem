@@ -101,7 +101,6 @@ async function setPrice(opts) {
   }
 
   price = token.expandTokenValue(price)
-
   try {
     const transaction = await tx.create({
       account: acct,
@@ -122,8 +121,7 @@ async function setPrice(opts) {
 
     return tx.sendSignedTransaction(transaction)
   } catch (err) {
-    throw new Error(`This AFS has not been committed to the network, 
-      please commit before trying to set a price.`)
+    throw err
   }
 }
 
