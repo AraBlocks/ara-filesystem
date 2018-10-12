@@ -5,7 +5,8 @@
   "main": "index.js",
   "bin": {
     "afs": "./bin/afs",
-    "afs-create": "./bin/afs-create"
+    "afs-create": "./bin/afs-create",
+    "afs-add": "./bin/afs-add"
   },
   "scripts": {
     "test": "bash ./scripts/test",

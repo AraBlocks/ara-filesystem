@@ -21,6 +21,7 @@ usage: afs: [-hDV] [--help] [--version]
 Below are some useful afs commands:
 
   afs create    Create a new AFS
+  afs add       Adds file(s) and/or directories to an existing AFS
 `
 })
 
