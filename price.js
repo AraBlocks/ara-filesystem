@@ -1,6 +1,6 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
-const { kAidPrefix } = require('./constants')
+const { AID_PREFIX } = require('./constants')
 const { token } = require('ara-contracts')
 
 const {
@@ -74,7 +74,7 @@ async function setPrice(opts) {
 
   const proxy = await getProxyAddress(did)
   let owner = getDocumentOwner(ddo, true)
-  owner = `${kAidPrefix}${owner}`
+  owner = `${AID_PREFIX}${owner}`
   const acct = await account.load({ did: owner, password })
 
   if ('string' !== typeof price) {

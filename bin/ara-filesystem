@@ -23,7 +23,7 @@ const isFile = require('is-file')
 const isSymlink = require('is-symlink')
 
 const ignored = require('../lib/ignore')
-const { kAidPrefix } = require('../constants')
+const { AID_PREFIX } = require('../constants')
 
 const toLower = (x) => String(x).toLowerCase()
 const $0 = basename(process.argv[1] || package.name)
@@ -51,33 +51,6 @@ const { argv } = program
     type: 'boolean',
     describe: 'Force operation',
   })
-  .command('create <owner>', "Create AFS with given identity", (program) => {
-    program
-      .positional('owner', {
-        type: 'string',
-        describe: "This AFS owner's ARA decentralized identity (did) URI"
-      })
-      .option('secret', {
-        alias: 's',
-        type: 'string',
-        describe: 'Shared secret for the keyring',
-      })
-      .option('archiverNetwork', {
-        type: 'string',
-        alias: 'an',
-        describe: 'Network name of the key for the DID archiver in the keyring',
-      })
-      .option('resolverNetwork', {
-        type: 'string',
-        alias: 'rn',
-        describe: 'Network name of the key for the DID resolver in the keyring',
-      })
-      .option('keyring', {
-        alias: 'k',
-        type: 'string',
-        describe: 'Path to the keyring',
-      })
-  }, oncreate)
   .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
     program
       .positional('did', {
@@ -442,48 +415,6 @@ void async function main() {
     require('debug').enable('ara-filesystem*')
   }
 }()
-
-async function oncreate(argv) {
-  let owner = argv.owner
-
-  if (null == owner) {
-    onfatal(new Error("Missing AFS owner DID. See 'afs create --help'."))
-  }
-
-  if (0 == owner.indexOf('did:') && 0 != owner.indexOf('did:ara:')) {
-    onfatal(new Error("Expecting a DID URI with an 'ara' method."))
-  }
-
-  if (0 != owner.indexOf('did:ara:')) {
-    owner = `${kAidPrefix}${owner}`
-  }
-
-  const { secret, resolverNetwork, archiverNetwork, keyring } = argv
-  const keyringOpts = { 
-    archiver: {
-      secret,
-      network: archiverNetwork,
-      keyring
-    },
-    resolver: {
-      secret,
-      network: resolverNetwork,
-      keyring
-    }
-  }
-  const { password } = await promptForPassword()
-  let arafs
-  try {
-    arafs = await afs.create({ owner, password, keyringOpts })
-  } catch (err) { onfatal(err) }
-
-  info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
-  info('Please safely store the following 12 word mnemonic phrase for this AFS.' +
-    ' This phrase will be required to restore and delete this AFS.'+
-    ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
-
-  arafs.afs.close()
-}
 
 async function onhistory(argv) {
   let did = argv.did

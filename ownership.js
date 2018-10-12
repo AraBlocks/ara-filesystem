@@ -1,6 +1,6 @@
 const { writeIdentity } = require('ara-identity/util')
 const passGenerator = require('generate-password')
-const { kMetadataSuffix } = require('./constants')
+const { METADATA_SUFFIX } = require('./constants')
 const { createIdentity } = require('./create')
 const { archive } = require('ara-identity')
 
@@ -191,7 +191,7 @@ async function _archiveNewIdentity(identity) {
 // expose in ara-util if this functionality is needed elsewhere
 // cckelly
 function _getMetadataPublicKey(ddo) {
-  const result = ddo.publicKey.find(({ id }) => id.includes(kMetadataSuffix))
+  const result = ddo.publicKey.find(({ id }) => id.includes(METADATA_SUFFIX))
   if (!result) {
     throw new Error('Could not parse DDO, please make sure the provided DIDs are correct.')
   }

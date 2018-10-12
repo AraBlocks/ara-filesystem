@@ -1,22 +1,15 @@
 module.exports = {
-  kDidPrefix: 'did:',
-  kAidPrefix: 'did:ara:',
-  kOwnerSuffix: '#owner',
-  kMetadataSuffix: '#metadata',
-  kKeyLength: 64,
-  kMetadataRegister: 'metadata',
-  kContentRegister: 'content',
-  kTreeFile: 'tree',
-  kSignaturesFile: 'signatures',
-  kStagingFile: './staged.json',
+  AID_PREFIX: 'did:ara:',
+  OWNER_SUFFIX: '#owner',
+  METADATA_SUFFIX: '#metadata',
+  KEY_LENGTH: 64,
+  STAGED_FILE: './staged.json',
 
   // metadata/tree constants
-  kMetadataTreeName: 'metadata/tree',
-  kMetadataTreeIndex: 0,
-  kMetadataTreeBufferSize: 40,
+  METADATA_TREE_NAME: 'metadata/tree',
+  METADATA_TREE_INDEX: 0,
 
   // metadata/signatures constants
-  kMetadataSignaturesName: 'metadata/signatures',
-  kMetadataSignaturesIndex: 1,
-  kMetadataSignaturesBufferSize: 64
+  METADATA_SIGNATURES_NAME: 'metadata/signatures',
+  METADATA_SIGNATURES_INDEX: 1,
 }
