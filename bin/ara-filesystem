@@ -235,6 +235,37 @@ const { argv } = program
         describe: "The quantity to get the price for"
       })
   }, ongetprice)
+  .command('remove-price-tier <did> <quantity> [options]', "Remove a price tier from a given AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .positional('quantity', {
+        type: 'number',
+        describe: "The quantity to remove the price for"
+      })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force remove price tier operation',
+      })
+      .option('secret', {
+        alias: 's',
+        type: 'string',
+        describe: 'Shared secret for the keyring',
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        describe: 'Path to the keyring',
+      })
+  }, onremoveprice)
   .command('destroy <did>', "Destroy AFS locally and remotely", (program) => {
     program
       .positional('did', {
@@ -674,6 +705,32 @@ async function ongetprice(argv) {
   }
 
   info(`price of ${quantity} copies of ${did} is ${price}.`)
+}
+
+async function onremoveprice(argv) {
+  let { did, quantity } = argv
+  info("removing price tier in AFS %s for quantity %d", did, quantity)
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+  const { password } = await promptForPassword()
+
+  let result = argv.force
+  if (!result) {
+    try {
+      const cost = await afs.removePriceTier({ did, password, quantity, keyringOpts, estimate: true })
+      const { answer } = await promptCostConfirmation(cost)
+      result = answer
+    } catch (err) {
+      onfatal(err)
+    }
+  }
+
+  if (result) {
+    await afs.removePriceTier({ did, password, quantity, keyringOpts, estimate: false })
+    info(`removed price tier from AFS ${did} for quantity ${quantity}.`)
+  } else {
+    onfatal() // exit
+  }
 }
 
 async function promptCostConfirmation(cost) {
