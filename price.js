@@ -166,8 +166,78 @@ async function getPrice(opts) {
   return token.constrainTokenValue(result)
 }
 
+/**
+ * Removes a price tier
+ * @param {Object}   opts
+ * @param {String}   opts.did
+ * @param {String}   opts.password
+ * @param {Number}   opts.quantity
+ * @param {Object}   [opts.keyringOpts]
+ * @param {Boolean}  opts.estimate
+ */
+async function removePriceTier(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object.')
+  } else if ('string' !== typeof opts.did || !opts.did) {
+    throw new TypeError('Expecting non-empty string.')
+  } else if ('string' !== typeof opts.password || !opts.password) {
+    throw TypeError('Expecting non-empty password.')
+  } else if ('number' !== typeof opts.quantity || 0 >= opts.quantity) {
+    throw new TypeError('Expecting quantity to be a whole number.')
+  } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
+    throw new TypeError('Expecting boolean.')
+  }
+
+  let { did, estimate } = opts
+  const { password, keyringOpts, quantity } = opts
+
+  estimate = estimate || false
+
+  let ddo
+  try {
+    ({ did, ddo } = await validate({
+      did, password, label: 'removePriceTier', keyringOpts
+    }))
+  } catch (err) {
+    throw err
+  }
+
+  if (!(await proxyExists(did))) {
+    throw new Error('This content does not have a valid proxy contract')
+  }
+
+  const proxy = await getProxyAddress(did)
+
+  let owner = getDocumentOwner(ddo, true)
+  owner = `${kAidPrefix}${owner}`
+  const acct = await account.load({ did: owner, password })
+
+  try {
+    const transaction = await tx.create({
+      account: acct,
+      to: proxy,
+      data: {
+        abi,
+        functionName: 'removePriceTier',
+        values: [
+          quantity
+        ]
+      }
+    })
+
+    if (estimate) {
+      return tx.estimateCost(transaction)
+    }
+
+    return tx.sendSignedTransaction(transaction)
+  } catch (err) {
+    throw err
+  }
+}
+
 module.exports = {
   estimateSetPriceGasCost,
+  removePriceTier,
   setPrice,
   getPrice
 }
