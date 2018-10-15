@@ -12,7 +12,8 @@
     "afs-history": "./bin/afs-history",
     "afs-price": "./bin/afs-price",
     "afs-destroy": "./bin/afs-destroy",
-    "afs-unarchive": "./bin/afs-unarchive"
+    "afs-unarchive": "./bin/afs-unarchive",
+    "afs-metadata": "./bin/afs-metadata"
   },
   "scripts": {
     "test": "bash ./scripts/test",

@@ -28,6 +28,7 @@ Below are some useful afs commands:
   afs price      Sets, gets the price (in ARA) of an AFS
   afs destroy    Removes an AFS from the network
   afs unarchive  Unarchive an AFS to a directory
+  afs metadata   CRUD operation interface for an AFS' metadata
 `
 })
 
