@@ -13,7 +13,8 @@
     "afs-price": "./bin/afs-price",
     "afs-destroy": "./bin/afs-destroy",
     "afs-unarchive": "./bin/afs-unarchive",
-    "afs-metadata": "./bin/afs-metadata"
+    "afs-metadata": "./bin/afs-metadata",
+    "afs-ownership": "./bin/afs-ownership"
   },
   "scripts": {
     "test": "bash ./scripts/test",
