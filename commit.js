@@ -73,12 +73,11 @@ async function commit(opts) {
     throw new TypeError('Expecting opts.list to be a boolean.')
   }
 
-  let { did, estimate } = opts
+  let { did, estimate, list } = opts
   const {
     password,
     price,
-    keyringOpts,
-    list
+    keyringOpts
   } = opts
 
   estimate = estimate || false

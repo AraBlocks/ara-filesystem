@@ -185,7 +185,7 @@ const { argv } = program
       })
       .option('list', {
         alias: 'l',
-        type: 'boolean'
+        type: 'boolean',
         describe: 'Flag to list the AFS'
       })
   }, oncommit)
