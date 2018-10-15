@@ -36,7 +36,7 @@ Below are some useful afs commands:
 const { argv } = program
   .option('debug', {
     alias: 'D',
-    describe: 'Enable debug output (Sets \'DEBUG+=ara-filesystem:*\')'
+    describe: 'Enable debug output (Sets \'DEBUG=ara-filesystem:*\')'
   })
   .option('secret', {
     alias: 's',
