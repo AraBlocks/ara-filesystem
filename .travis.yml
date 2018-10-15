@@ -10,3 +10,5 @@ script:
  - bash ./scripts/test
 after_script:
  - bash ./scripts/remove-rc
+after_failure:
+ - cp /home/travis/.npm/_logs/*-debug.log ./scripts/
