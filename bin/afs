@@ -20,8 +20,14 @@ usage: afs: [-hDV] [--help] [--version]
 
 Below are some useful afs commands:
 
-  afs create    Create a new AFS
-  afs add       Adds file(s) and/or directories to an existing AFS
+  afs create     Create a new AFS
+  afs add        Adds file(s) and/or directories to an AFS
+  afs remove     Removes file(s) and/or directores from an AFS
+  afs commit     Publishes an AFS to the network
+  afs history    Prints AFS history
+  afs price      Sets, gets the price (in ARA) of an AFS
+  afs destroy    Removes an AFS from the network
+  afs unarchive  Unarchive an AFS to a directory
 `
 })
 

@@ -1,0 +1,82 @@
+#!/usr/bin/env node
+
+const { createProgram } = require('../lib/program')
+const { info } = require('ara-console')
+const afs = require('../')
+
+const {
+	promptCostConfirmation,
+	promptForPassword,
+	onfatal
+} = require('../lib/util')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs price: [-h] [--help] [options] [--] <command>
+`
+})
+
+const { argv } = program
+  .command('set <did> [price]', "Publish price for the given AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+      .positional('price', {
+        type: 'number',
+        describe: "Cost associated with an AFS (in ARA)"
+      })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force set price operation',
+      })
+  }, onsetprice)
+  .command('get <did>', "Return the price for a given AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: "An AFS ARA decentralized identity (did) URI"
+      })
+  }, ongetprice)
+
+async function onsetprice(argv) {
+	const { did, price } = argv
+  price = price || 0
+  info("setting price of AFS identity %s to %d", did, price)
+  const { password } = await promptForPassword()
+
+  let result = argv.force
+  if (!result) {
+    try {
+      const cost = await afs.estimateSetPriceGasCost({ did, password, price })
+      const { answer } = await promptCostConfirmation(cost)
+      result = answer
+    } catch (err) {
+      onfatal(err)
+    }
+  }
+
+  if (result) {
+    await afs.setPrice({ did, password, price })
+    info("price has been set to", price)
+  } else {
+    onfatal() // exit
+  }
+}
+
+async function ongetprice(argv) {
+	const { did } = argv
+  info("getting price of AFS identity %s", did)
+
+  let price
+  try {
+    price = await afs.getPrice({ did })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info("price of", did, "is", price)
+}

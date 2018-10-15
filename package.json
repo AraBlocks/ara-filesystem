@@ -6,7 +6,13 @@
   "bin": {
     "afs": "./bin/afs",
     "afs-create": "./bin/afs-create",
-    "afs-add": "./bin/afs-add"
+    "afs-add": "./bin/afs-add",
+    "afs-remove": "./bin/afs-remove",
+    "afs-commit": "./bin/afs-commit",
+    "afs-history": "./bin/afs-history",
+    "afs-price": "./bin/afs-price",
+    "afs-destroy": "./bin/afs-destroy",
+    "afs-unarchive": "./bin/afs-unarchive"
   },
   "scripts": {
     "test": "bash ./scripts/test",
