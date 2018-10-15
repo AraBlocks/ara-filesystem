@@ -43,10 +43,12 @@ const { argv } = program
   }, ongetprice)
 
 async function onsetprice(argv) {
-	const { did, price } = argv
+	const { did } = argv
+  let { price } = argv
   price = price || 0
-  info("setting price of AFS identity %s to %d", did, price)
+
   const { password } = await promptForPassword()
+  info("setting price of AFS identity %s to %d", did, price)
 
   let result = argv.force
   if (!result) {

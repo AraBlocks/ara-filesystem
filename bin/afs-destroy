@@ -5,6 +5,7 @@ const { info } = require('ara-console')
 const afs = require('../')
 
 const {
+  displayConfirmationPrompt,
 	promptForMnemonic,
 	promptForPassword,
 	onfatal
@@ -38,7 +39,7 @@ if (0 == argv._.length && argv.help) {
 }
 
 async function ondestroy(argv) {
-	const { did, force } = argv
+	const { did, force, secret, network, keyring } = argv
   info("attempting destroying AFS %s", did)
 
   const { password } = await promptForPassword()
