@@ -16,12 +16,6 @@ usage: afs ownership: [-h] [--help] [options] [--] <command>
 `
 })
 
-// Emit program usage help
-if (0 == argv._.length && argv.help) {
-  program.showHelp()
-  process.exit(0)
-}
-
 const { argv } = program
 	.command('request <requesterDid> <contentDid>', "Requests ownership of an AFS", (program) => {
 	  program
@@ -63,6 +57,12 @@ const { argv } = program
 	      describe: "An AFS ARA decentralized identity (did) URI"
 	    })
 	}, onclaimownership)
+
+// Emit program usage help
+if (0 == argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
 
 async function onrequestownership(argv) {
 	const { requesterDid, contentDid, secret, network, keyring } = argv

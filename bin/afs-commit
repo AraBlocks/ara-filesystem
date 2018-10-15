@@ -43,6 +43,7 @@ if (0 == argv._.length && argv.help) {
 }
 
 async function oncommit(argv) {
+  console.log('ONCOMMIT')
 	const { did, price, secret, network, keyring } = argv
   if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
 

@@ -13,12 +13,6 @@ usage: afs metadata: [-h] [--help] [options] [--] <command>
 `
 })
 
-// Emit program usage help
-if (0 == argv._.length && argv.help) {
-  program.showHelp()
-  process.exit(0)
-}
-
 const { argv } = program
 	.command('write-key <did> <key> <value>', "Write a key-value pair to the AFS' metadata file", (program) => {
 	  program
@@ -89,6 +83,12 @@ const { argv } = program
 	    })
 	  }, onmetadatawritefile)
 
+// Emit program usage help
+if (0 == argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
 async function onmetadatawritekey(argv) {
 	const { did, key, value, print } = argv
   info("writing key %s with value %s to AFS metadata", key, value)
@@ -158,6 +158,7 @@ async function onmetadataclear(argv) {
 }
 
 async function onmetadataprint(argv) {
+  const { did } = argv
   const contents = await afs.metadata.readFile({ did })
   console.log(prettyjson.render(contents))
 }

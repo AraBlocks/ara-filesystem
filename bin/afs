@@ -113,7 +113,7 @@ void (async function main() {
       }),
     }
   )
-
+  
   child.on('exit', (code, signal) => {
     process.nextTick(() => process.exit(code))
   })

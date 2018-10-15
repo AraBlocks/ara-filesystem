@@ -3,7 +3,8 @@
 const { promptForPassword, onfatal } = require('../lib/util')
 const { createProgram } = require('../lib/program')
 const { AID_PREFIX } = require('../constants')
-const { create } = require('../create')
+const { info } = require('ara-console')
+const afs = require('../')
 
 // yargs program command line interface instance
 const program = createProgram({
@@ -48,13 +49,6 @@ if (0 == argv._.length && argv.help) {
   process.exit(0)
 }
 
-// Main program entry
-module.exports = (async function main() {
-  if (argv.debug) {
-    require('debug').enable('ara-filesystem*')
-  }
-}())
-
 async function oncreate(argv) {
   let owner = argv.owner
 
@@ -79,7 +73,7 @@ async function oncreate(argv) {
   const { password } = await promptForPassword()
   let arafs
   try {
-    arafs = await create({ owner, password, keyringOpts })
+    arafs = await afs.create({ owner, password, keyringOpts })
   } catch (err) { onfatal(err) }
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
