@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
 const { createProgram } = require('../lib/program')
 const { info } = require('ara-console')
 const afs = require('../')
 
 const {
-	promptCostConfirmation,
-	promptForPassword,
-	onfatal
+  promptCostConfirmation,
+  promptForPassword,
+  onfatal
 } = require('../lib/util')
 
 // yargs program command line interface instance
@@ -18,16 +20,16 @@ usage: afs commit: [-h] [--help] [options]
 })
 
 const { argv } = program
-  .command('$0 <did>', "Push local staged AFS changes to the Ethereum blockchain and DCDN", (program) => {
-    program
+  .command('$0 <did>', 'Push local staged AFS changes to the Ethereum blockchain and DCDN', (_) => {
+    _
       .positional('did', {
         type: 'string',
-        describe: "An AFS ARA decentralized identity (did) URI"
+        describe: 'An AFS ARA decentralized identity (did) URI'
       })
       .option('price', {
         alias: 'P',
         type: 'number',
-        describe: "Price (in ARA) to set the cost of the AFS"
+        describe: 'Price (in ARA) to set the cost of the AFS'
       })
       .option('force', {
         alias: 'f',
@@ -37,21 +39,25 @@ const { argv } = program
   }, oncommit)
 
 // Emit program usage help
-if (0 == argv._.length && argv.help) {
+if (0 === argv._.length && argv.help) {
   program.showHelp()
   process.exit(0)
 }
 
 async function oncommit(argv) {
-	const { did, price, secret, network, keyring } = argv
+  const {
+    did, price, secret, network, keyring, force
+  } = argv
   const { password } = await promptForPassword()
 
   const keyringOpts = { secret, network, keyring }
 
-  let result = argv.force
+  let result = force
   if (!result) {
     try {
-      const cost = await afs.estimateCommitGasCost({ did, password, price, keyringOpts })
+      const cost = await afs.estimateCommitGasCost({
+        did, password, price, keyringOpts
+      })
       const { answer } = await promptCostConfirmation(cost)
       result = answer
     } catch (err) {
@@ -60,14 +66,17 @@ async function oncommit(argv) {
   }
 
   if (result) {
-    info("committing with identity: %s", did)
-    const result = await afs.commit({ did, password, price, keyringOpts })
+    info('committing with identity: %s', did)
+    result = await afs.commit({
+      did, password, price, keyringOpts
+    })
     if (result instanceof Error) {
       onfatal(result)
     } else {
       info(`file(s) successfully committed using ${result.gasUsed} gas`)
     }
   } else {
-    onfatal() // exit
+    // exit
+    onfatal()
   }
 }

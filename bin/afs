@@ -113,8 +113,8 @@ void (async function main() {
       }),
     }
   )
-  
-  child.on('exit', (code, signal) => {
+
+  child.on('exit', (code) => {
     process.nextTick(() => process.exit(code))
   })
 
@@ -127,10 +127,9 @@ void (async function main() {
   })
 }())
 
-
 function onfatal(err) {
   if (err) {
-    error("fatal: %s", err.message)
+    error('fatal: %s', err.message)
   }
   process.exit(1)
 }

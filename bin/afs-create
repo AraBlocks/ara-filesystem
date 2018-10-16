@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
 const { promptForPassword, onfatal } = require('../lib/util')
 const { createProgram } = require('../lib/program')
 const { AID_PREFIX } = require('../constants')
@@ -15,8 +17,8 @@ usage: afs create: [-h] [--help] [options] [--] <owner>
 
 // Parse program arguments based on yargs spec
 const { argv } = program
-  .command('$0 <owner>', "Create AFS with given identity", (program) => {
-    program
+  .command('$0 <owner>', 'Create AFS with given identity', (_) => {
+    _
       .positional('owner', {
         type: 'string',
         describe: "This AFS owner's ARA decentralized identity (did) URI"
@@ -44,20 +46,22 @@ const { argv } = program
   }, oncreate)
 
 // Emit program usage help
-if (0 == argv._.length && argv.help) {
+if (0 === argv._.length && argv.help) {
   program.showHelp()
   process.exit(0)
 }
 
 async function oncreate(argv) {
-  let owner = argv.owner
+  let { owner } = argv
 
   if (0 != owner.indexOf(AID_PREFIX)) {
     owner = `${AID_PREFIX}${owner}`
   }
 
-  const { secret, resolverNetwork, archiverNetwork, keyring } = argv
-  const keyringOpts = { 
+  const {
+    secret, resolverNetwork, archiverNetwork, keyring
+  } = argv
+  const keyringOpts = {
     archiver: {
       secret,
       network: archiverNetwork,
@@ -78,7 +82,7 @@ async function oncreate(argv) {
 
   info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
   info('Please safely store the following 12 word mnemonic phrase for this AFS.' +
-    ' This phrase will be required to restore and delete this AFS.'+
+    ' This phrase will be required to restore and delete this AFS.' +
     ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
 
   arafs.afs.close()

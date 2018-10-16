@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
 const { promptForPassword, onfatal } = require('../lib/util')
 const { createProgram } = require('../lib/program')
 const { AID_PREFIX } = require('../constants')
@@ -16,16 +18,22 @@ usage: afs history: [-h] [--help] [options]
 })
 
 const { argv } = program
-  .command('$0 <did>', "Retrieve the revision history of this AFS", (program) => {
-    program
+  .command('$0 <did>', 'Retrieve the revision history of this AFS', (_) => {
+    _
       .positional('did', {
         type: 'string',
-        describe: "An AFS ARA decentralized identity (did) URI"
+        describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onhistory)
 
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
 async function onhistory(argv) {
-	let did = argv.did
+  let { did } = argv
   if (null == did) {
     onfatal(new Error("Missing AFS DID. See 'afs history --help'."))
   }
@@ -42,7 +50,7 @@ async function onhistory(argv) {
     columnDefault: {
       paddingLeft: 1,
       paddingRight: 1,
-      width: parseInt(((cliWidth() || 30) - 10)/3),
+      width: parseInt(((cliWidth() || 30) - 10) / 3, 10),
     },
     columns: [
       { width: 4 },
@@ -66,8 +74,9 @@ async function onhistory(argv) {
       .on('error', onfatal)
       .on('end', () => process.exit(0))
       .on('data', (log) => {
-        if (true != argv['border']) {
-          info('%s\t%s\t%s',
+        if (true != argv.border) {
+          info(
+            '%s\t%s\t%s',
             log.version,
             log.type.toUpperCase(),
             log.name
