@@ -17,6 +17,8 @@ const bytes = require('pretty-bytes')
 const table = require('table')
 const prettyjson = require('prettyjson')
 const rc = require('../rc')()
+// TODO : need to revisit where this is happening
+const { commerce } = require('ara-contracts')
 
 const isDirectory = require('is-directory')
 const isFile = require('is-file')
@@ -451,6 +453,20 @@ const { argv } = program
           })
         }, onmetadatawritefile)
   })
+  .command('list <did>', "Lists an AFS for sale", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+  }, onlist)
+  .command('unlist <did>', "Unlists an AFS from being sold", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+  }, onunlist)
 
 void async function main() {
   if (argv.debug) {
@@ -733,16 +749,6 @@ async function onremoveprice(argv) {
   }
 }
 
-async function promptCostConfirmation(cost) {
-  return await inquirer.prompt({
-    type: 'confirm',
-    name: 'answer',
-    message: 
-    `This operation will cost ${cost} ETH. Are you sure you
-    want to proceed?`
-  })
-}
-
 async function ondestroy(argv) {
   let { did, force } = argv
   info("attempting destroying AFS %s", did)
@@ -898,6 +904,38 @@ async function onmetadatawritefile(argv) {
   }
 }
 
+async function onlist(argv) {
+  const { did } = argv
+  const { password } = await promptForPassword()
+
+  try {
+    info(`Listing AFS ${did} for sale...`)
+    await commerce.listAFS({
+      contentDid: did,
+      password
+    })
+    info(`AFS ${did} listed for sale.`)
+  } catch (err) {
+    onfatal(err)
+  }
+}
+
+async function onunlist(argv) {
+  const { did } = argv
+  const { password } = await promptForPassword()
+
+  try {
+    info(`Unlisting AFS ${did} from sale...`)
+    await commerce.unlistAFS({
+      contentDid: did,
+      password
+    })
+    info(`AFS ${did} unlisted.`)
+  } catch (err) {
+    onfatal(err)
+  }
+}
+
 async function promptForPassword() {
   return await inquirer.prompt([{
     type: 'password',
@@ -914,6 +952,16 @@ async function promptForMnemonic() {
     name: 'mnemonic',
     message: "Please provide the mnemonic associated with your AFS identity."
   }])
+}
+
+async function promptCostConfirmation(cost) {
+  return await inquirer.prompt({
+    type: 'confirm',
+    name: 'answer',
+    message: 
+    `This operation will cost ${cost} ETH. Are you sure you
+    want to proceed?`
+  })
 }
 
 async function displayConfirmationPrompt({
