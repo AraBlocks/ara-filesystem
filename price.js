@@ -1,7 +1,7 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:price')
 const { kAidPrefix } = require('./constants')
-const { token } = require('ara-contracts')
+const { token, price } = require('ara-contracts')
 
 const {
   proxyExists,
@@ -236,8 +236,8 @@ async function removePriceTier(opts) {
 }
 
 module.exports = {
-  estimateSetPriceGasCost,
-  removePriceTier,
-  setPrice,
-  getPrice
+  estimateSetPriceGasCost: util.deprecate(async (opts) => { await price.estimateSetPriceGasCost(opts) }, 'afs.estimateSetPriceGasCost() is deprecated. Use act.estimateSetPriceGasCost() instead.'),
+  removePriceTier: util.deprecate(async (opts) => { await price.removePriceTier(opts) }, 'afs.removePriceTier() is deprecated. Use act.removePriceTier() instead.'),
+  setPrice: util.deprecate(async (opts) => { await price.setPrice(opts) }, 'afs.setPrice() is deprecated. Use act.setPrice() instead.'),
+  getPrice: util.deprecate(async (opts) => { await price.getPrice(opts) }, 'afs.getPrice() is deprecated. Use act.getPrice() instead.')
 }

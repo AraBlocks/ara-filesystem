@@ -10,21 +10,12 @@ const {
   estimateCommitGasCost
 } = require('./commit')
 
-const {
-  setPrice,
-  getPrice,
-  estimateSetPriceGasCost
-} = require('./price')
-
 module.exports = {
   create,
   destroy,
   add,
   remove,
   commit,
-  setPrice,
-  getPrice,
-  estimateSetPriceGasCost,
   estimateCommitGasCost,
   unarchive,
   metadata

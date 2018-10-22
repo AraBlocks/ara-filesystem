@@ -749,6 +749,16 @@ async function onremoveprice(argv) {
   }
 }
 
+async function promptCostConfirmation(cost) {
+  return await inquirer.prompt({
+    type: 'confirm',
+    name: 'answer',
+    message: 
+    `This operation will cost ${cost} ETH. Are you sure you
+    want to proceed?`
+  })
+}
+
 async function ondestroy(argv) {
   let { did, force } = argv
   info("attempting destroying AFS %s", did)
@@ -952,16 +962,6 @@ async function promptForMnemonic() {
     name: 'mnemonic',
     message: "Please provide the mnemonic associated with your AFS identity."
   }])
-}
-
-async function promptCostConfirmation(cost) {
-  return await inquirer.prompt({
-    type: 'confirm',
-    name: 'answer',
-    message: 
-    `This operation will cost ${cost} ETH. Are you sure you
-    want to proceed?`
-  })
 }
 
 async function displayConfirmationPrompt({

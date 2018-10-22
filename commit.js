@@ -40,7 +40,7 @@ const {
 const {
   setPrice,
   estimateSetPriceGasCost
-} = require('./price')
+} = require('ara-contracts/price')
 
 const {
   resolve,
