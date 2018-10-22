@@ -681,6 +681,7 @@ async function oncommit(argv) {
 }
 
 async function onsetprice(argv) {
+  warn(`afs set-price is deprecated and will be removed on version 0.3.0. Use act set-price instead.`)
   let { price, did, quantity } = argv
   price = price || 0
   quantity = quantity || 1
@@ -709,6 +710,7 @@ async function onsetprice(argv) {
 }
 
 async function ongetprice(argv) {
+  warn(`afs set-price is deprecated and will be removed on version 0.3.0. Use act get-price instead.`)
   let { did, quantity } = argv
   quantity = quantity || 1
   info("getting price of AFS %s", did)
@@ -724,6 +726,7 @@ async function ongetprice(argv) {
 }
 
 async function onremoveprice(argv) {
+  warn(`afs remove-price-tier is deprecated and will be removed on version 0.3.0. Use act remove-price-tier instead.`)
   let { did, quantity } = argv
   info("removing price tier in AFS %s for quantity %d", did, quantity)
   const { secret, network, keyring } = argv
