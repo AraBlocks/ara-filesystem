@@ -1,14 +1,20 @@
-<a name="0.2.0"></a>
-# [0.2.0](https://github.com/AraBlocks/ara-filesystem/compare/0.1.1...0.2.0) (2018-10-11)
+<a name="0.2.3"></a>
+## [0.2.3](https://github.com/AraBlocks/ara-filesystem/compare/0.2.2...0.2.3) (2018-10-23)
+
+
+
+<a name="0.2.2"></a>
+## [0.2.2](https://github.com/AraBlocks/ara-filesystem/compare/0.1.1...0.2.2) (2018-10-17)
 
 
 ### Bug Fixes
 
-* **bin/ara-filesystem:** name => network ([96aea86](https://github.com/AraBlocks/ara-filesystem/commit/96aea86))
-* **create:** Fix scoping issue ([c1edcd3](https://github.com/AraBlocks/ara-filesystem/commit/c1edcd3))
 * cli destructure ([18bc576](https://github.com/AraBlocks/ara-filesystem/commit/18bc576))
 * Fix issue with afs creation ([dfeecdb](https://github.com/AraBlocks/ara-filesystem/commit/dfeecdb))
 * Get create and add working again ([746652b](https://github.com/AraBlocks/ara-filesystem/commit/746652b))
+* **.travis.yml:** Cat npm debug logs instead of cp ([0ccf23d](https://github.com/AraBlocks/ara-filesystem/commit/0ccf23d))
+* **bin/ara-filesystem:** name => network ([96aea86](https://github.com/AraBlocks/ara-filesystem/commit/96aea86))
+* **create:** Fix scoping issue ([c1edcd3](https://github.com/AraBlocks/ara-filesystem/commit/c1edcd3))
 
 
 
