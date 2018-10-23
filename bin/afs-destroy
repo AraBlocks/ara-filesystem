@@ -4,10 +4,10 @@
 
 const { createProgram } = require('../lib/program')
 const { info } = require('ara-console')
+const inquirer = require('inquirer')
 const afs = require('../')
 
 const {
-  displayConfirmationPrompt,
   promptForMnemonic,
   promptForPassword,
   onfatal
@@ -51,10 +51,8 @@ async function ondestroy(argv) {
 
   let result = force
   if (!result) {
-    const { answer } = await displayConfirmationPrompt({
-      message: 'Destroy will remove this AFS from the entire Ara network. Continue?'
-    })
-    result = answer
+    const { answer } = await displayDeletionPrompt()
+    result = answer === did
   }
 
   const keyringOpts = { secret, network, keyring }
@@ -67,7 +65,18 @@ async function ondestroy(argv) {
       onfatal(err)
     }
     info('destroyed AFS %s', did)
+  } else {
+    onfatal(new Error(`AFS DID is not correct`))
   }
 
   process.exit(1)
+}
+
+async function displayDeletionPrompt() {
+  return inquirer.prompt({
+    name: 'answer',
+    type: 'input',
+    message: `Destroy will remove this AFS from the entire Ara network. Please enter the DID
+      of the AFS to confirm deletion.`
+  })
 }

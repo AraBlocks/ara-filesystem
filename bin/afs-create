@@ -23,11 +23,6 @@ const { argv } = program
         type: 'string',
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
-      .option('secret', {
-        alias: 's',
-        type: 'string',
-        describe: 'Shared secret for the keyring',
-      })
       .option('archiverNetwork', {
         type: 'string',
         alias: 'an',
@@ -37,11 +32,6 @@ const { argv } = program
         type: 'string',
         alias: 'rn',
         describe: 'Network name of the key for the DID resolver in the keyring',
-      })
-      .option('keyring', {
-        alias: 'k',
-        type: 'string',
-        describe: 'Path to the keyring',
       })
   }, oncreate)
 
