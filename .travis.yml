@@ -11,4 +11,4 @@ script:
 after_script:
  - bash ./scripts/remove-rc
 after_failure:
- - cp /home/travis/.npm/_logs/*-debug.log ./scripts/
+ - cat /home/travis/.npm/_logs/*-debug.log
