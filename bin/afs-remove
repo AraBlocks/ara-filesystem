@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
+const { promptForPassword, onfatal } = require('../lib/util')
+const { createProgram } = require('../lib/program')
+const { info } = require('ara-console')
+const afs = require('../')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs remove: [-h] [--help] [options]
+`
+})
+
+const { argv } = program
+  .command('$0 <did> <pathspec...>', 'Remove files or directories from an AFS', (_) => {
+    _
+      .positional('did', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+      .positional('pathspec', {
+        type: 'string',
+        describe: 'The file(s) you wish to remove from AFS'
+      })
+  }, onremove)
+
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
+async function onremove(argv) {
+  const [ ...paths ] = argv.pathspec
+  const { did } = argv
+
+  if (!did) { onfatal(new Error("Missing AFS DID. See 'afs remove --help'.")) }
+  if (!paths || !paths.length) {
+    onfatal(new Error("Missing local file paths. See 'afs remove --help'."))
+  }
+
+  info('id: %s', did)
+  info('paths: ', paths)
+
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
+  const { password } = await promptForPassword()
+  let instance
+  try {
+    instance = await afs.remove({
+      did,
+      paths,
+      password,
+      keyringOpts
+    })
+    info('file(s) successfully removed')
+  } catch (err) {
+    onfatal(err)
+  }
+  instance.close()
+}

@@ -1,0 +1,89 @@
+#!/usr/bin/env node
+
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
+const { createProgram } = require('../lib/program')
+const { info } = require('ara-console')
+const inquirer = require('inquirer')
+const afs = require('../')
+
+const {
+  promptCostConfirmation,
+  promptForMnemonic,
+  promptForPassword,
+  onfatal
+} = require('../lib/util')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs destroy: [-h] [--help] [options]
+`
+})
+
+const { argv } = program
+  .command('$0 <did>', 'Destroy AFS locally and remotely', (_) => {
+    _
+      .positional('did', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force destroy operation',
+      })
+  }, ondestroy)
+
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
+async function ondestroy(argv) {
+  const {
+    did, force, secret, network, keyring
+  } = argv
+  info('attempting destroying AFS %s', did)
+
+  const { password } = await promptForPassword()
+  const { mnemonic } = await promptForMnemonic()
+
+  let result = force
+  if (!result) {
+    const { answer } = await displayDeletionPrompt()
+    result = answer === did
+  }
+
+  const keyringOpts = { secret, network, keyring }
+  if (result) {
+    try {
+      const cost = await afs.destroy({
+        did, password, mnemonic, keyringOpts, estimate: true
+      })
+      const { answer } = await promptCostConfirmation(cost)
+      if (answer) {
+        await afs.destroy({
+          did, mnemonic, password, keyringOpts
+        })
+        info('destroyed AFS %s', did)
+      }
+    } catch (err) {
+      onfatal(err)
+    }
+  } else {
+    onfatal(new Error('AFS DID is not correct'))
+  }
+
+  process.exit(1)
+}
+
+async function displayDeletionPrompt() {
+  return inquirer.prompt({
+    name: 'answer',
+    type: 'input',
+    message: `Destroy will remove this AFS from the entire Ara network. Please enter the DID
+      of the AFS to confirm deletion.`
+  })
+}

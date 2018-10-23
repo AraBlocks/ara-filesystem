@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
+const { promptForPassword, onfatal } = require('../lib/util')
+const { createProgram } = require('../lib/program')
+const { info } = require('ara-console')
+const afs = require('../')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs add: [-h] [--help] [options]
+`
+})
+
+const { argv } = program
+  .command('$0 <did> <pathspec...>', 'Add files or directories to an AFS', (_) => {
+    _
+      .positional('did', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+      .positional('pathspec', {
+        type: 'string',
+        describe: 'The file(s) you wish to add to AFS'
+      })
+  }, onadd)
+
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
+async function onadd(argv) {
+  const [ ...paths ] = argv.pathspec
+  const { did } = argv
+
+  info('id: %s', did)
+  info('paths: ', paths)
+
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
+  const { password } = await promptForPassword()
+
+  let instance
+  try {
+    instance = await afs.add({
+      did,
+      paths,
+      password,
+      keyringOpts
+    })
+    info('file(s) successfully added')
+  } catch (err) {
+    onfatal(err)
+  }
+  instance.close()
+}

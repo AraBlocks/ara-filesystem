@@ -1,0 +1,177 @@
+#!/usr/bin/env node
+
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
+const { createProgram } = require('../lib/program')
+const { info } = require('ara-console')
+const afs = require('../')
+
+const {
+  promptCostConfirmation,
+  promptForMnemonic,
+  promptForPassword,
+  onfatal
+} = require('../lib/util')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs ownership: [-h] [--help] [options] [--] <command>
+`
+})
+
+const { argv } = program
+  .command('request <requesterDid> <contentDid>', 'Requests ownership of an AFS', (_) => {
+    _
+      .positional('requesterDid', {
+        type: 'string',
+        describe: 'DID of the requester'
+      })
+      .positional('contentDid', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+  }, onrequestownership)
+  .command('revoke <requesterDid> <contentDid>', 'Revokes a previous request for ownership of an AFS', (_) => {
+    _
+      .positional('requesterDid', {
+        type: 'string',
+        describe: 'DID of the requester'
+      })
+      .positional('contentDid', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+  }, onrevokerequest)
+  .command('approve <contentDid> <newOwnerDid>', 'Approves an ownership transfer', (_) => {
+    _
+      .positional('contentDid', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+      .positional('newOwnerDid', {
+        type: 'string',
+        describe: 'DID to transfer ownership to'
+      })
+  }, onapprovetransfer)
+  .command('claim <contentDid>', "Claim an AFS' identity", (_) => {
+    _
+      .positional('contentDid', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+  }, onclaimownership)
+
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
+async function onrequestownership(argv) {
+  const {
+    requesterDid, contentDid, secret, network, keyring
+  } = argv
+  const { password } = await promptForPassword()
+  const keyringOpts = { secret, network, keyring }
+  const opts = {
+    requesterDid, contentDid, password, keyringOpts
+  }
+
+  try {
+    const cost = await afs.ownership.estimateRequestGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      await afs.ownership.request(Object.assign(opts, { estimate: false }))
+      info('Ownership successfully requested')
+    } else {
+      onfatal()
+    }
+  } catch (err) {
+    onfatal(err)
+  }
+}
+
+async function onrevokerequest(argv) {
+  const {
+    requesterDid, contentDid, secret, network, keyring
+  } = argv
+  const { password } = await promptForPassword()
+  const keyringOpts = { secret, network, keyring }
+  const opts = {
+    requesterDid, contentDid, password, keyringOpts
+  }
+
+  try {
+    const cost = await afs.ownership.estimateRevokeGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      await afs.ownership.revokeRequest(Object.assign(opts, { estimate: false }))
+      info('Ownership request successfully revoked')
+    } else {
+      onfatal()
+    }
+  } catch (err) {
+    onfatal(err)
+  }
+}
+
+async function onapprovetransfer(argv) {
+  const {
+    contentDid: did, newOwnerDid, secret, network, keyring
+  } = argv
+  const { password } = await promptForPassword()
+  const { mnemonic } = await promptForMnemonic()
+  const keyringOpts = { secret, network, keyring }
+  const opts = {
+    did, newOwnerDid, password, mnemonic, keyringOpts
+  }
+
+  try {
+    const cost = await afs.ownership.estimateApproveGasCost(opts)
+    const { answer } = await promptCostConfirmation(cost)
+    if (answer) {
+      const result = await afs.ownership.approveTransfer(Object.assign(opts, { estimate: false }))
+      info('Ownership successfully transferred to', newOwnerDid)
+      info(`Please provide the AFS mnmonic and the password %s to 
+        %s to complete the transfer`, result.password, newOwnerDid)
+    } else {
+      onfatal()
+    }
+  } catch (err) {
+    onfatal(err)
+  }
+}
+
+async function onclaimownership(argv) {
+  const {
+    contentDid, secret, network, keyring
+  } = argv
+  // get current password
+  let prompt = `Please provide the random password generated for this AFS identity.
+    Passphrase:`
+  const { password: currentPassword } = await promptForPassword(prompt)
+
+  // get new password
+  prompt = `Please provide the new password for this identity.
+    Passphrase:`
+  const { password: newPassword } = await promptForPassword(prompt)
+
+  // query for mnemonic
+  const { mnemonic } = await promptForMnemonic()
+  const keyringOpts = { secret, network, keyring }
+
+  try {
+    await afs.ownership.claim({
+      currentPassword,
+      newPassword,
+      keyringOpts,
+      contentDid,
+      mnemonic
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info('Ownership successfully claimed')
+}

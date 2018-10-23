@@ -1,0 +1,54 @@
+#!/usr/bin/env node
+
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
+const { createProgram } = require('../lib/program')
+const { onfatal } = require('../lib/util')
+const { info } = require('ara-console')
+const afs = require('../')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs unarchive: [-h] [--help] [options]
+`
+})
+
+const { argv } = program
+  .command('$0 <did> [pathspec]', 'Unarchive an AFS to a directory', (_) => {
+    _
+      .positional('did', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+      .positional('pathspec', {
+        type: 'string',
+        describe: 'The path where the AFS should be extracted.'
+      })
+  }, onunarchive)
+
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
+async function onunarchive(argv) {
+  const {
+    did, pathspec: path, secret, network, keyring
+  } = argv
+  info('unarchiving AFS with DID %s', did)
+  const keyringOpts = { secret, network, keyring }
+
+  try {
+    await afs.unarchive({
+      did,
+      path,
+      keyringOpts
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  info('successfully unarchived AFS %s', did)
+}

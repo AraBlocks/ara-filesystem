@@ -13,12 +13,12 @@ const {
 } = require('ara-contracts/registry')
 
 const {
-  kAidPrefix,
-  kStagingFile,
-  kMetadataTreeName,
-  kMetadataTreeIndex,
-  kMetadataSignaturesName,
-  kMetadataSignaturesIndex
+  AID_PREFIX,
+  STAGED_FILE,
+  METADATA_TREE_NAME,
+  METADATA_TREE_INDEX,
+  METADATA_SIGNATURES_NAME,
+  METADATA_SIGNATURES_INDEX
 } = require('./constants')
 
 const {
@@ -112,7 +112,7 @@ async function commit(opts) {
   const msData = _getWriteData(1, contents, exists)
 
   let owner = getDocumentOwner(ddo, true)
-  owner = `${kAidPrefix}${owner}`
+  owner = `${AID_PREFIX}${owner}`
   const acct = await account.load({ did: owner, password })
 
   let result = await _write({
@@ -181,7 +181,7 @@ function readFromStaged({
 }
 
 function generateStagedPath(did) {
-  const path = resolve(createAFSKeyPath(did), kStagingFile)
+  const path = resolve(createAFSKeyPath(did), STAGED_FILE)
   try {
     fs.accessSync(path)
   } catch (err) {
@@ -335,10 +335,10 @@ function _getBufferFromStaged(contents, index, offset) {
 }
 
 function _getFilenameByIndex(index) {
-  if (index === kMetadataTreeIndex) {
-    return kMetadataTreeName
-  } else if (index === kMetadataSignaturesIndex) {
-    return kMetadataSignaturesName
+  if (index === METADATA_TREE_INDEX) {
+    return METADATA_TREE_NAME
+  } else if (index === METADATA_SIGNATURES_INDEX) {
+    return METADATA_SIGNATURES_NAME
   }
   debug('index not recognized', index)
   return null

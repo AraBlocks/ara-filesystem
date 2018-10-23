@@ -10,10 +10,10 @@ const {
 } = require('./commit')
 
 const {
-  kMetadataTreeIndex,
-  kMetadataSignaturesIndex,
-  kMetadataTreeName: mTreeName,
-  kMetadataSignaturesName: mSigName
+  METADATA_TREE_INDEX,
+  METADATA_SIGNATURES_INDEX,
+  METADATA_TREE_NAME: mTreeName,
+  METADATA_SIGNATURES_NAME: mSigName
 } = require('./constants')
 
 const {
@@ -120,9 +120,9 @@ function resolveBufferIndex(path) {
 
   let index = -1
   if (mTreeName === path) {
-    index = kMetadataTreeIndex
+    index = METADATA_TREE_INDEX
   } else if (mSigName === path) {
-    index = kMetadataSignaturesIndex
+    index = METADATA_SIGNATURES_INDEX
   }
   return index
 }

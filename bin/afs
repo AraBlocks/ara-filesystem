@@ -1,0 +1,135 @@
+#!/usr/bin/env node
+
+const { FROM_AFS_PARENT_FLAG, createProgram } = require('../lib/program')
+const debug = require('debug')('ara-filesystem:cli')
+const { error } = require('ara-console')
+const spawn = require('cross-spawn')
+const which = require('which')
+const pify = require('pify')
+
+const ORIGINAL_PROGRAM_ARGS = Object.freeze(Object.seal(Object.assign([], process.argv.slice(2))))
+
+process.on('unhandledRejection', onfatal)
+process.on('uncaughtExeption', onfatal)
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs: [-hDV] [--help] [--version]
+            [--debug] <command> [<args>]
+
+Below are some useful afs commands:
+
+  afs create     Create a new AFS
+  afs add        Adds file(s) and/or directories to an AFS
+  afs remove     Removes file(s) and/or directores from an AFS
+  afs commit     Publishes an AFS to the network
+  afs history    Prints AFS history
+  afs price      Sets, gets the price (in ARA) of an AFS
+  afs destroy    Removes an AFS from the network
+  afs unarchive  Unarchive an AFS to a directory
+  afs metadata   CRUD operation interface for an AFS' metadata
+  afs ownership  Ownership management of an AFS
+`
+})
+
+const { argv } = program
+  .option('debug', {
+    alias: 'D',
+    describe: 'Enable debug output (Sets \'DEBUG=ara-filesystem:*\')'
+  })
+  .option('secret', {
+    alias: 's',
+    type: 'string',
+    describe: 'Shared secret for the keyring'
+  })
+  .option('network', {
+    alias: 'n',
+    type: 'string',
+    describe: 'Network name of the key for the DID resolver in the keyring'
+  })
+  .option('keyring', {
+    alias: 'k',
+    type: 'string',
+    describe: 'Path to the keyring'
+  })
+
+// Emit program version
+if (0 == argv._.length && argv.version) {
+  process.exit(0)
+}
+
+// Emit program usage help
+if ((0 == argv._.length && argv.help) || 0 == ORIGINAL_PROGRAM_ARGS.length) {
+  program.showHelp()
+  process.exit(0)
+}
+
+// if debug given, but nothing else show help and bail
+if (true == argv.debug && 0 == argv._.length) {
+  program.showHelp()
+  process.exit(1)
+}
+
+void (async function main() {
+  // The program command name sits in head position with the rest of its
+  // arguments following after
+  const shortCommandName = (argv._[0] || argv.debug).split(' ')
+
+  if (null == shortCommandName) {
+    if ('-' == ORIGINAL_PROGRAM_ARGS[0][0]) {
+      console.error('Unknown option: %s', ORIGINAL_PROGRAM_ARGS[0])
+    }
+
+    program.showHelp()
+    process.exit(1)
+  }
+
+  const canonicalCommandName = `afs-${shortCommandName[0]}`
+  debug('canonicalCommandName', canonicalCommandName)
+
+  // Determine if child canonical command program name is in
+  // user path (PATH or PATHEXT)
+  debug("Searching for command afs command '%s'", canonicalCommandName)
+
+  try { await pify(which)(canonicalCommandName) } catch (err) {
+    console.log(err)
+    error(
+      "'%s' is not an afs command. See 'afs --help'.",
+      shortCommandName
+    )
+  }
+
+  // Spawn child program with command line arguments given inheriting
+  // this processes stdio (stdin, stdout, stderr)
+  const child = spawn(
+    canonicalCommandName,
+    // Flags to pass to child process
+    [ FROM_AFS_PARENT_FLAG ].concat(shortCommandName.slice(1), ORIGINAL_PROGRAM_ARGS.slice(1)),
+    {
+      stdio: 'inherit',
+      env: Object.assign({}, process.env, {
+        DEBUG: String(process.env.DEBUG) + (argv.debug ? ',ara-filesystem*' : '')
+      }),
+    }
+  )
+
+  child.on('exit', (code) => {
+    process.nextTick(() => process.exit(code))
+  })
+
+  // Emit child program error and exit
+  child.on('error', () => {
+    error(
+      "An error occured when invoking '%s' command. See 'afs --help'.",
+      shortCommandName
+    )
+  })
+}())
+
+function onfatal(err) {
+  if (err) {
+    error('fatal: %s', err.message)
+  }
+  process.exit(1)
+}

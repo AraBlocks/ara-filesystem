@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
+const { promptForPassword, onfatal } = require('../lib/util')
+const { createProgram } = require('../lib/program')
+const { AID_PREFIX } = require('../constants')
+const { info } = require('ara-console')
+const afs = require('../')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs create: [-h] [--help] [options] [--] <owner>
+`
+})
+
+// Parse program arguments based on yargs spec
+const { argv } = program
+  .command('$0 <owner>', 'Create AFS with given identity', (_) => {
+    _
+      .positional('owner', {
+        type: 'string',
+        describe: "This AFS owner's ARA decentralized identity (did) URI"
+      })
+      .option('archiverNetwork', {
+        type: 'string',
+        alias: 'an',
+        describe: 'Network name of the key for the DID archiver in the keyring',
+      })
+      .option('resolverNetwork', {
+        type: 'string',
+        alias: 'rn',
+        describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+  }, oncreate)
+
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
+async function oncreate(argv) {
+  let { owner } = argv
+
+  if (0 != owner.indexOf(AID_PREFIX)) {
+    owner = `${AID_PREFIX}${owner}`
+  }
+
+  const {
+    secret, resolverNetwork, archiverNetwork, keyring
+  } = argv
+  const keyringOpts = {
+    archiver: {
+      secret,
+      network: archiverNetwork,
+      keyring
+    },
+    resolver: {
+      secret,
+      network: resolverNetwork,
+      keyring
+    }
+  }
+
+  const { password } = await promptForPassword()
+  let arafs
+  try {
+    arafs = await afs.create({ owner, password, keyringOpts })
+  } catch (err) { onfatal(err) }
+
+  info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
+  info('Please safely store the following 12 word mnemonic phrase for this AFS.' +
+    ' This phrase will be required to restore and delete this AFS.' +
+    ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
+
+  arafs.afs.close()
+}

@@ -1,0 +1,95 @@
+#!/usr/bin/env node
+
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
+const { promptForPassword, onfatal } = require('../lib/util')
+const { createProgram } = require('../lib/program')
+const { AID_PREFIX } = require('../constants')
+const { info } = require('ara-console')
+const cliWidth = require('cli-width')
+const table = require('table')
+const afs = require('../')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs history: [-h] [--help] [options]
+`
+})
+
+const { argv } = program
+  .command('$0 <did>', 'Retrieve the revision history of this AFS', (_) => {
+    _
+      .positional('did', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+  }, onhistory)
+
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
+async function onhistory(argv) {
+  let { did } = argv
+  if (null == did) {
+    onfatal(new Error("Missing AFS DID. See 'afs history --help'."))
+  }
+
+  if (0 != did.indexOf(AID_PREFIX)) {
+    did = `${AID_PREFIX}${did}`
+  }
+
+  const { password } = await promptForPassword()
+
+  const tableOpts = {
+    columnCount: 3,
+    border: table.getBorderCharacters('ramac'),
+    columnDefault: {
+      paddingLeft: 1,
+      paddingRight: 1,
+      width: parseInt(((cliWidth() || 30) - 10) / 3, 10),
+    },
+    columns: [
+      { width: 4 },
+      { width: 4 },
+      { width: 30 },
+    ]
+  }
+
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
+  try {
+    const arafs = await afs.create({
+      did,
+      password,
+      keyringOpts
+    })
+    const stream = table.createStream(tableOpts)
+
+    arafs.afs.history(arafs.afs.HOME)
+      .on('error', onfatal)
+      .on('end', () => process.exit(0))
+      .on('data', (log) => {
+        if (true != argv.border) {
+          info(
+            '%s\t%s\t%s',
+            log.version,
+            log.type.toUpperCase(),
+            log.name
+          )
+        } else {
+          stream.write([
+            log.version,
+            log.type.toUpperCase(),
+            log.name,
+          ])
+        }
+      })
+  } catch (err) {
+    onfatal(err)
+  }
+}

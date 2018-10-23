@@ -18,9 +18,9 @@ const rc = require('./rc')()
 const debug = require('debug')('ara-filesystem:create')
 
 const {
-  kKeyLength,
-  kAidPrefix,
-  kOwnerSuffix
+  KEY_LENGTH,
+  AID_PREFIX,
+  OWNER_SUFFIX
 } = require('./constants')
 
 const {
@@ -260,14 +260,14 @@ async function createIdentity({
     throw new TypeError('Expecting non-empty string.')
   }
 
-  if ((hasDIDMethod(owner) && kKeyLength !== owner.slice(kAidPrefix.length).length)
-    || (!hasDIDMethod(owner) && kKeyLength !== owner.length)) {
+  if ((hasDIDMethod(owner) && KEY_LENGTH !== owner.slice(AID_PREFIX.length).length)
+    || (!hasDIDMethod(owner) && KEY_LENGTH !== owner.length)) {
     throw new TypeError('Owner identifier must be 64 chars.')
   }
 
-  owner += kOwnerSuffix
+  owner += OWNER_SUFFIX
   if (!hasDIDMethod(owner)) {
-    owner = `${kAidPrefix}${owner}`
+    owner = `${AID_PREFIX}${owner}`
   }
 
   const publicKeys = metadataPublicKey
