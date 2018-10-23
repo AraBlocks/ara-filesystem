@@ -43,9 +43,9 @@ const { argv } = program
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onrevokerequest)
-  .command('approve <did> <newOwnerDid>', 'Approves an ownership transfer', (_) => {
+  .command('approve <contentDid> <newOwnerDid>', 'Approves an ownership transfer', (_) => {
     _
-      .positional('did', {
+      .positional('contentDid', {
         type: 'string',
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
@@ -118,7 +118,7 @@ async function onrevokerequest(argv) {
 
 async function onapprovetransfer(argv) {
   const {
-    did, newOwnerDid, secret, network, keyring
+    contentDid: did, newOwnerDid, secret, network, keyring
   } = argv
   const { password } = await promptForPassword()
   const { mnemonic } = await promptForMnemonic()

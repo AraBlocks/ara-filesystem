@@ -67,14 +67,14 @@ async function oncommit(argv) {
 
   if (result) {
     info('committing with identity: %s', did)
-    result = await afs.commit({
-      did, password, price, keyringOpts
-    })
-    if (result instanceof Error) {
-      onfatal(result)
-    } else {
-      info(`file(s) successfully committed using ${result.gasUsed} gas`)
+    try {
+      result = await afs.commit({
+        did, password, price, keyringOpts
+      })
+    } catch (err) {
+      onfatal(err)
     }
+    info(`file(s) successfully committed using ${result.gasUsed} gas`)
   } else {
     // exit
     onfatal()

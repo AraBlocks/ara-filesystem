@@ -8,6 +8,7 @@ const inquirer = require('inquirer')
 const afs = require('../')
 
 const {
+  promptCostConfirmation,
   promptForMnemonic,
   promptForPassword,
   onfatal
@@ -58,15 +59,21 @@ async function ondestroy(argv) {
   const keyringOpts = { secret, network, keyring }
   if (result) {
     try {
-      await afs.destroy({
-        did, mnemonic, password, keyringOpts
+      const cost = await afs.destroy({
+        did, password, mnemonic, keyringOpts, estimate: true
       })
+      const { answer } = await promptCostConfirmation(cost)
+      if (answer) {
+        await afs.destroy({
+          did, mnemonic, password, keyringOpts
+        })
+        info('destroyed AFS %s', did)
+      }
     } catch (err) {
       onfatal(err)
     }
-    info('destroyed AFS %s', did)
   } else {
-    onfatal(new Error(`AFS DID is not correct`))
+    onfatal(new Error('AFS DID is not correct'))
   }
 
   process.exit(1)
