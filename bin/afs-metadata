@@ -2,8 +2,8 @@
 
 /* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
 
+const { onfatal, promptForPassword } = require('../lib/util')
 const { createProgram } = require('../lib/program')
-const { onfatal } = require('../lib/util')
 const prettyjson = require('prettyjson')
 const { info } = require('ara-console')
 const afs = require('../')
@@ -57,6 +57,11 @@ const { argv } = program
         type: 'string',
         describe: 'The key to write'
       })
+      .option('print', {
+        alias: 'p',
+        type: 'boolean',
+        describe: 'Print full metadata after delete'
+      })
   }, onmetadatadeletekey)
   .command('clear <did>', 'Clears all metadata from an AFS', (_) => {
     _
@@ -92,12 +97,19 @@ async function onmetadatawritekey(argv) {
   } = argv
   info('writing key %s with value %s to AFS metadata', key, value)
 
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
+  const { password } = await promptForPassword()
+
   let result
   try {
     result = await afs.metadata.writeKey({
       did,
       key,
-      value
+      value,
+      password,
+      keyringOpts
     })
   } catch (err) {
     onfatal(err)
@@ -128,19 +140,31 @@ async function onmetadatareadkey(argv) {
 }
 
 async function onmetadatadeletekey(argv) {
-  const { did, key } = argv
+  const { did, key, print } = argv
   info('deleting %s from AFS metadata', key)
 
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
+  const { password } = await promptForPassword()
+
+  let result
   try {
-    await afs.metadata.delKey({
+    result = await afs.metadata.delKey({
       did,
-      key
+      key,
+      password,
+      keyringOpts
     })
   } catch (err) {
     onfatal(err)
   }
 
   info('deleted %s from AFS metadata', key)
+  if (print) {
+    // info swallows prettyjson output
+    console.log(prettyjson.render(result))
+  }
 }
 
 async function onmetadataclear(argv) {
@@ -166,11 +190,17 @@ async function onmetadatawritefile(argv) {
   const { did, filepath } = argv
   info('writing contents of %s to AFS metadata', filepath)
 
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
+  const { password } = await promptForPassword()
   let result
   try {
     result = await afs.metadata.writeFile({
       did,
-      filepath
+      filepath,
+      password,
+      keyringOpts
     })
   } catch (err) {
     onfatal(err)

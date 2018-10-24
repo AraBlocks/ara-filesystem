@@ -1,6 +1,7 @@
 const debug = require('debug')('ara-filesystem:debug')
 const { createAFSKeyPath } = require('./key-path')
 const { createCFS } = require('cfsnet/create')
+const { validate } = require('ara-util')
 const { resolve } = require('path')
 const pify = require('pify')
 const fs = require('fs')
@@ -19,11 +20,30 @@ async function writeFile(opts = {}) {
     throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
     throw new TypeError('DID URI must be a non-empty string.')
+  } else if (!opts.password || 'string' !== typeof opts.password) {
+    throw new TypeError('Password must be non-empty string.')
   } else if (!opts.filepath || 'string' !== typeof opts.filepath) {
     throw new TypeError('File path must be a non-empty string.')
   }
 
-  const { did, filepath } = opts
+  const {
+    keyringOpts = {},
+    password,
+    filepath,
+    did
+  } = opts
+
+  try {
+    await validate({
+      did,
+      password,
+      keyringOpts,
+      label: 'writeFile'
+    })
+  } catch (err) {
+    throw err
+  }
+
   try {
     await pify(fs.access)(filepath)
   } catch (err) {
@@ -55,13 +75,33 @@ async function writeKey(opts = {}) {
     throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
     throw new TypeError('DID URI must be a non-empty string.')
+  } else if (!opts.password || 'string' !== typeof opts.password) {
+    throw new TypeError('Password must be non-empty string.')
   } else if (!opts.key || 'string' !== typeof opts.key) {
     throw new TypeError('Key must be be a non-empty string.')
   } else if (!opts.value) {
     throw new TypeError('Must provide a value to store.')
   }
 
-  const { did, key, value } = opts
+  const {
+    did,
+    key,
+    value,
+    password,
+    keyringOpts = {}
+  } = opts
+
+  try {
+    await validate({
+      did,
+      password,
+      keyringOpts,
+      label: 'writeKey'
+    })
+  } catch (err) {
+    throw err
+  }
+
   if (!(await _metadataFileExists(did))) {
     await _createMetadataFile(did)
   }
@@ -111,11 +151,29 @@ async function delKey(opts) {
     throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
     throw new TypeError('DID URI must be a non-empty string.')
+  } else if (!opts.password || 'string' !== typeof opts.password) {
+    throw new TypeError('Password must be non-empty string.')
   } else if (!opts.key || 'string' !== typeof opts.key) {
     throw new TypeError('Key must be a non-empty string.')
   }
 
-  const { did, key } = opts
+  const {
+    did,
+    key,
+    password,
+    keyringOpts = {}
+  } = opts
+  try {
+    await validate({
+      did,
+      password,
+      keyringOpts,
+      label: 'delKey'
+    })
+  } catch (err) {
+    throw err
+  }
+
   const contents = await readFile({ did })
   if (!Object.prototype.hasOwnProperty.call(contents, key)) {
     throw new Error(`Metadata file does not contain key ${key}.`)
@@ -125,6 +183,7 @@ async function delKey(opts) {
   await _writeMetadataFile(did, contents)
 
   debug('%s removed from metadata', key)
+  return contents
 }
 
 /**
