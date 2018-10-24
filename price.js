@@ -19,18 +19,6 @@ const {
 } = require('ara-util')
 
 /**
- * Estimates the gas cost setting the price
- * @param {Object}   opts
- * @param {String}   opts.did
- * @param {String}   opts.password
- * @param {Number}   opts.price
- */
-async function estimateSetPriceGasCost(opts) {
-  opts = Object.assign(opts, { estimate: true })
-  return setPrice(opts)
-}
-
-/**
  * Sets the price of the given Ara identity
  * @param {Object}   opts
  * @param {String}   opts.did
@@ -139,7 +127,6 @@ async function getPrice(opts) {
 }
 
 module.exports = {
-  estimateSetPriceGasCost,
   setPrice,
   getPrice
 }
