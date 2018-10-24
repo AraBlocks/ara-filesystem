@@ -68,8 +68,9 @@ async function setPrice(opts) {
     throw err
   }
 
-  if (!(await proxyExists(did))) {
-    throw new Error('This content does not have a valid proxy contract')
+  const currentPrice = await getPrice({ did })
+  if (currentPrice == price) {
+    throw new Error(`AFS price is already ${price}`)
   }
 
   const proxy = await getProxyAddress(did)
