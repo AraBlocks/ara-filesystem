@@ -55,8 +55,12 @@ async function oncommit(argv) {
   let result = force
   if (!result) {
     try {
-      const cost = await afs.estimateCommitGasCost({
-        did, password, price, keyringOpts
+      const cost = await afs.commit({
+        estimate: true,
+        keyringOpts,
+        password,
+        price,
+        did
       })
       const { answer } = await promptCostConfirmation(cost)
       result = answer
@@ -69,7 +73,10 @@ async function oncommit(argv) {
     info('committing with identity: %s', did)
     try {
       result = await afs.commit({
-        did, password, price, keyringOpts
+        keyringOpts,
+        password,
+        price,
+        did
       })
     } catch (err) {
       onfatal(err)
