@@ -7,6 +7,7 @@ const hasDIDMethod = require('has-did-method')
 const { createCFS } = require('cfsnet/create')
 const multidrive = require('multidrive')
 const context = require('ara-context')()
+const crypto = require('ara-crypto')
 const { resolve } = require('path')
 const aid = require('ara-identity')
 const toilet = require('toiletdb')
@@ -270,9 +271,15 @@ async function createIdentity({
     owner = `${AID_PREFIX}${owner}`
   }
 
-  const publicKeys = metadataPublicKey
-    ? [ { id: 'metadata', value: metadataPublicKey } ]
-    : null
+  let publicKey
+  if (metadataPublicKey) {
+    publicKey = [{
+      id: 'metadata',
+      publicKeyHex: metadataPublicKey,
+      publicKeyBase64: crypto.base64.encode(Buffer.from(metadataPublicKey, 'hex')).toString(),
+      publicKeyBase58: crypto.base58.encode(Buffer.from(metadataPublicKey, 'hex')).toString()
+    }]
+  }
 
   let identity
   try {
@@ -281,7 +288,7 @@ async function createIdentity({
         type: kEd25519VerificationKey2018,
         publicKey: owner
       },
-      publicKeys
+      publicKey
     }
     identity = await aid.create({
       context,
