@@ -273,11 +273,12 @@ async function createIdentity({
 
   let publicKey
   if (metadataPublicKey) {
+    const buf = Buffer.from(metadataPublicKey, 'hex')
     publicKey = [{
       id: 'metadata',
       publicKeyHex: metadataPublicKey,
-      publicKeyBase64: crypto.base64.encode(Buffer.from(metadataPublicKey, 'hex')).toString(),
-      publicKeyBase58: crypto.base58.encode(Buffer.from(metadataPublicKey, 'hex')).toString()
+      publicKeyBase64: crypto.base64.encode(buf).toString(),
+      publicKeyBase58: crypto.base58.encode(buf).toString()
     }]
   }
 
