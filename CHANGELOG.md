@@ -1,3 +1,13 @@
+<a name="0.2.4"></a>
+## [0.2.4](https://github.com/AraBlocks/ara-filesystem/compare/0.2.3...0.2.4) (2018-10-25)
+
+
+### Bug Fixes
+
+* **price.js:** check current price before overwriting ([6da9882](https://github.com/AraBlocks/ara-filesystem/commit/6da9882))
+
+
+
 <a name="0.2.3"></a>
 ## [0.2.3](https://github.com/AraBlocks/ara-filesystem/compare/0.2.2...0.2.3) (2018-10-23)
 
