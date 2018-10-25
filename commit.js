@@ -190,19 +190,6 @@ function generateStagedPath(did) {
   return path
 }
 
-/**
- * Estimates the gas cost of sending the staged commit
- * @param {Object}   opts
- * @param {String}   opts.did
- * @param {String}   opts.password
- * @param {Number}   opts.price
- * @return {Object}
- */
-async function estimateCommitGasCost(opts) {
-  opts = Object.assign(opts, { estimate: true })
-  return commit(opts)
-}
-
 async function _write(opts, estimate = true, append = false) {
   const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
   const { offsets: msOffsets, buffer: msBuffer } = opts.msData
@@ -348,6 +335,5 @@ module.exports = {
   commit,
   writeToStaged,
   readFromStaged,
-  generateStagedPath,
-  estimateCommitGasCost
+  generateStagedPath
 }
