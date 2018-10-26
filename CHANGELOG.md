@@ -1,3 +1,13 @@
+<a name="0.2.7"></a>
+## [0.2.7](https://github.com/AraBlocks/ara-filesystem/compare/0.2.6...0.2.7) (2018-10-26)
+
+
+### Bug Fixes
+
+* **create.js:** remove duplicate buffer creation ([843c8b2](https://github.com/AraBlocks/ara-filesystem/commit/843c8b2))
+
+
+
 <a name="0.2.6"></a>
 ## [0.2.6](https://github.com/AraBlocks/ara-filesystem/compare/0.2.5...0.2.6) (2018-10-25)
 
