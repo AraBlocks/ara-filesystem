@@ -144,10 +144,8 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 * [async add(opts)](#add)
 * [async remove(opts)](#remove)
 * [async commit(opts)](#commit)
-* [async estimateCommitGasCost(opts)](#estimatecommit)
 * [async setPrice(opts)](#setprice)
 * [async getPrice(opts)](#getprice)
-* [async estimateSetPriceGasCost(opts)](#estimateprice)
 * [async unarchive(opts)](#unarchive)
 * [async metadata.writeFile(opts)](#writefile)
 * [async metadata.writeKey(opts)](#writekey)
@@ -280,26 +278,6 @@ const result = await commit({
 })
 ```
 
-<a name="estimatecommit"></a>
-### `async estimateCommitGasCost(opts)`
-
-> **Stability: 2** Stable
-
-Estimates the cost (in ETH) of committing an `AFS`.
-
-- `opts`
-  - `did` - The `DID` of the `AFS` to commit
-  - `password` - The password of the owner of this `AFS`
-  - `price` - optional The price in Ara tokens to set this `AFS`
-
-```js
-const cost = await estimateCommitGasCost({
-  did,
-  password,
-  price
-})
-```
-
 <a name="setprice"></a>
 ### `async setPrice(opts)`
 
@@ -334,22 +312,6 @@ Gets the price in Ara tokens of an `AFS`.
 
 ```js
 const price = await getPrice({ did })
-```
-
-<a name="estimateprice"></a>
-### `async estimateSetPriceGasCost(opts)`
-
-> **Stability: 2** Stable
-
-Estimates the cost (in ETH) of setting the price of an `AFS`.
-
-- `opts`
-  - `did` - The `DID` of the `AFS` to set the price of
-  - `password` - The password of the owner of this `AFS`
-  - `price` - The price in Ara tokens to set this `AFS`
-
-```js
-const cost = await estimateSetPriceGasCost({ did, password, price })
 ```
 
 <a name="unarchive"></a>
