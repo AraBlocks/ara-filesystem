@@ -74,7 +74,7 @@ async function create(opts) {
     storage
   } = opts
 
-  keyringOpts = extend(true, {
+  keyringOpts = extend(true, keyringOpts, {
     archiver: {
       network: (keyringOpts.archiver && keyringOpts.archiver.network) || keyringOpts.network,
       secret: (keyringOpts.archiver && keyringOpts.archiver.secret) || keyringOpts.secret,
@@ -85,7 +85,7 @@ async function create(opts) {
       secret: (keyringOpts.resolver && keyringOpts.resolver.secret) || keyringOpts.secret,
       keyring: (keyringOpts.resolver && keyringOpts.resolver.keyring) || keyringOpts.keyring
     }
-  }, keyringOpts)
+  })
 
   let afs
   let mnemonic
