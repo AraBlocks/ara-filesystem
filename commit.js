@@ -93,7 +93,7 @@ async function commit(opts) {
   }
 
   debug('proxy address', proxy)
-  
+
   const path = generateStagedPath(did)
   try {
     await pify(fs.access)(path)
