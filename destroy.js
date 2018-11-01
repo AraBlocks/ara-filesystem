@@ -72,7 +72,7 @@ async function destroy(opts) {
       throw err
     }
 
-    const { store } = rc.afs.archive
+    const { store } = rc.network.afs.archive
     path = resolvePath(store, basename(path))
 
     // delete AFS toilet db file

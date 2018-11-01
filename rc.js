@@ -1,24 +1,18 @@
 const rc = require('ara-runtime-configuration')
 const { resolve } = require('path')
 const extend = require('extend')
-const os = require('os')
 
-const kAraDir = '.ara'
-const kAfsDir = 'afs'
-const kIdentitiesDir = 'identities'
+const AFS_DIR = 'afs'
 
-const defaults = () => ({
-  afs: {
-    archive: {
-      root: resolve(os.homedir(), kAraDir, kAfsDir),
-      store: resolve(os.homedir(), kAraDir, kAfsDir, 'nodes')
-    }
-  },
-  araId: {
-    archive: {
-      root: resolve(os.homedir(), kAraDir, kIdentitiesDir)
+const defaults = base => ({
+  network: {
+    afs: {
+      archive: {
+        root: resolve(base.data.root, AFS_DIR),
+        store: resolve(base.data.root, AFS_DIR, 'nodes')
+      }
     }
   }
 })
 
-module.exports = conf => rc(extend(true, {}, defaults(), conf))
+module.exports = conf => rc(base => extend(true, defaults(base), conf))
