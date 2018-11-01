@@ -37,10 +37,7 @@ const {
   decryptJSON
 } = require('./util')
 
-const {
-  setPrice,
-  estimateSetPriceGasCost
-} = require('./price')
+const { setPrice } = require('./price')
 
 const {
   resolve,
@@ -96,7 +93,7 @@ async function commit(opts) {
   }
 
   debug('proxy address', proxy)
-
+  
   const path = generateStagedPath(did)
   try {
     await pify(fs.access)(path)
@@ -124,11 +121,12 @@ async function commit(opts) {
 
   if (estimate) {
     if (0 < price) {
-      const setPriceGasCost = await estimateSetPriceGasCost({
+      const setPriceGasCost = await setPrice({
         did,
         password,
         price,
-        keyringOpts
+        keyringOpts,
+        estimate: true
       })
       result = Number(result) + Number(setPriceGasCost)
     }
