@@ -5,7 +5,7 @@ const rc = require('./rc')()
 const fs = require('fs')
 
 function createAFSKeyPath(did) {
-  const { root } = rc.afs.archive
+  const { root } = rc.network.afs.archive
 
   if (null == did || 'string' !== typeof did) {
     throw new TypeError('Expecting non-empty string for id.')
@@ -22,7 +22,7 @@ function createAFSKeyPath(did) {
 }
 
 function createIdentityKeyPathFromPublicKey(publicKey) {
-  const { root } = rc.araId.archive
+  const { root } = rc.network.identity
   if (Array.isArray(publicKey) && 0 < publicKey.length) {
     const { publicKeyHex } = publicKey[0]
     publicKey = Buffer.from(publicKeyHex, 'hex')

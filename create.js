@@ -207,8 +207,8 @@ async function create(opts) {
     storage,
     proxy
   } = {}) {
-    await pify(mkdirp)(rc.afs.archive.store)
-    const nodes = resolve(rc.afs.archive.store, did)
+    await pify(mkdirp)(rc.network.afs.archive.store)
+    const nodes = resolve(rc.network.afs.archive.store, did)
     const store = toilet(nodes)
 
     const drives = await pify(multidrive)(
@@ -274,12 +274,12 @@ async function createIdentity({
   let publicKey
   if (metadataPublicKey) {
     const buf = Buffer.from(metadataPublicKey, 'hex')
-    publicKey = [{
+    publicKey = [ {
       id: 'metadata',
       publicKeyHex: metadataPublicKey,
       publicKeyBase64: crypto.base64.encode(buf).toString(),
       publicKeyBase58: crypto.base58.encode(buf).toString()
-    }]
+    } ]
   }
 
   let identity
