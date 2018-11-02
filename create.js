@@ -128,7 +128,7 @@ async function create(opts) {
   } else if (owner) {
     try {
       ({ owner: did } = await validate({
-        owner,
+        did: owner,
         password,
         label: 'create',
         ddo,
