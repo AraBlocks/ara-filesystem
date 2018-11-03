@@ -23,40 +23,40 @@ usage: afs ownership: [-h] [--help] [options] [--] <command>
 const { argv } = program
   .command('request <requesterDid> <contentDid>', 'Requests ownership of an AFS', (_) => {
     _
-      .positional('requesterDid', {
+      .positional('requester-did', {
         type: 'string',
         describe: 'DID of the requester'
       })
-      .positional('contentDid', {
+      .positional('content-did', {
         type: 'string',
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onrequestownership)
   .command('revoke <requesterDid> <contentDid>', 'Revokes a previous request for ownership of an AFS', (_) => {
     _
-      .positional('requesterDid', {
+      .positional('requester-did', {
         type: 'string',
         describe: 'DID of the requester'
       })
-      .positional('contentDid', {
+      .positional('content-did', {
         type: 'string',
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onrevokerequest)
   .command('approve <contentDid> <newOwnerDid>', 'Approves an ownership transfer', (_) => {
     _
-      .positional('contentDid', {
+      .positional('content-did', {
         type: 'string',
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
-      .positional('newOwnerDid', {
+      .positional('new-owner-did', {
         type: 'string',
         describe: 'DID to transfer ownership to'
       })
   }, onapprovetransfer)
   .command('claim <contentDid>', "Claim an AFS' identity", (_) => {
     _
-      .positional('contentDid', {
+      .positional('content-did', {
         type: 'string',
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
@@ -70,7 +70,7 @@ if (0 === argv._.length && argv.help) {
 
 async function onrequestownership(argv) {
   const {
-    requesterDid, contentDid, secret, network, keyring
+    "requester-did": requesterDid, "content-did": contentDid, secret, network, keyring
   } = argv
   const { password } = await promptForPassword()
   const keyringOpts = { secret, network, keyring }
@@ -94,7 +94,7 @@ async function onrequestownership(argv) {
 
 async function onrevokerequest(argv) {
   const {
-    requesterDid, contentDid, secret, network, keyring
+    "requester-did": requesterDid, "content-did": contentDid, secret, network, keyring
   } = argv
   const { password } = await promptForPassword()
   const keyringOpts = { secret, network, keyring }
@@ -118,7 +118,7 @@ async function onrevokerequest(argv) {
 
 async function onapprovetransfer(argv) {
   const {
-    contentDid: did, newOwnerDid, secret, network, keyring
+    "content-did": did, "new-owner-did": newOwnerDid, secret, network, keyring
   } = argv
   const { password } = await promptForPassword()
   const { mnemonic } = await promptForMnemonic()
@@ -145,7 +145,7 @@ async function onapprovetransfer(argv) {
 
 async function onclaimownership(argv) {
   const {
-    contentDid, secret, network, keyring
+    "content-did": contentDid, secret, network, keyring
   } = argv
   // get current password
   let prompt = `Please provide the random password generated for this AFS identity.
