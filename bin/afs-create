@@ -23,12 +23,12 @@ const { argv } = program
         type: 'string',
         describe: "This AFS owner's ARA decentralized identity (did) URI"
       })
-      .option('archiverNetwork', {
+      .option('archiver', {
         type: 'string',
         alias: 'an',
         describe: 'Network name of the key for the DID archiver in the keyring',
       })
-      .option('resolverNetwork', {
+      .option('resolver', {
         type: 'string',
         alias: 'rn',
         describe: 'Network name of the key for the DID resolver in the keyring',
@@ -49,17 +49,17 @@ async function oncreate(argv) {
   }
 
   const {
-    secret, resolverNetwork, archiverNetwork, keyring
+    secret, resolver, archiver, keyring
   } = argv
   const keyringOpts = {
     archiver: {
       secret,
-      network: archiverNetwork,
+      network: archiver,
       keyring
     },
     resolver: {
       secret,
-      network: resolverNetwork,
+      network: resolver,
       keyring
     }
   }
