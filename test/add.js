@@ -63,7 +63,7 @@ test('add() valid did, valid password, valid path (1)', async (t) => {
 test('add() valid did, valid password, valid path (3)', async (t) => {
   const afs = getAFS(t)
   const { did } = afs
-  const paths = [ './index.js', './add.js', './aid.js' ]
+  const paths = [ './index.js', './add.js', './commit.js' ]
 
   await add({
     did,
