@@ -6,8 +6,7 @@ const RandomAccessFile = require('random-access-file')
 const { createAFSKeyPath } = require('../key-path')
 
 const {
-  TEST_DID,
-  PASSWORD: password
+  TEST_DID
 } = require('./_constants')
 
 const {
@@ -30,7 +29,7 @@ test("resolveBufferIndex() valid params", (t) => {
 })
 
 test("defaultStorage() validate return values", (t) => {
-  const storage = defaultStorage(TEST_DID, password)
+  const storage = defaultStorage(TEST_DID, true)
   const path = createAFSKeyPath(TEST_DID)
 
   let result = storage('metadata/tree', null, `${path}/home`)
@@ -44,4 +43,10 @@ test("defaultStorage() validate return values", (t) => {
 
   result = storage('metadata/signatures', null, path)
   t.true(result.constructor === RandomAccessFile)
+})
+
+test("defaultStorage() invalid params", (t) => {
+  t.throws(() => defaultStorage(), TypeError)
+  t.throws(() => defaultStorage({}), TypeError)
+  t.throws(() => defaultStorage('1234', false), Error)
 })

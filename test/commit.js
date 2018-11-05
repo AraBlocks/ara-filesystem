@@ -149,7 +149,6 @@ test("writeToStaged()/readFromStaged()", async (t) => {
 
   writeToStaged({
     did,
-    password,
     data,
     fileIndex: 0,
     offset: 0
@@ -157,7 +156,6 @@ test("writeToStaged()/readFromStaged()", async (t) => {
 
   const buffer = readFromStaged({
     did,
-    password,
     fileIndex: 0
   })
 

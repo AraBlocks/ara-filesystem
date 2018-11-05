@@ -89,6 +89,7 @@ async function create(opts) {
 
   let afs
   let mnemonic
+  const writable = Boolean(password)
   if (did) {
     let proxy
     if (!ddo) {
@@ -113,7 +114,7 @@ async function create(opts) {
 
     const drives = await _createMultidrive({
       did: id,
-      password,
+      writable,
       storage,
       proxy
     })
@@ -156,7 +157,7 @@ async function create(opts) {
         key: publicKey,
         secretKey,
         path,
-        storage: defaultStorage(afsDid, password, storage)
+        storage: defaultStorage(afsDid, writable, storage)
       })
 
       const etcPath = resolve(path, 'etc')
@@ -203,7 +204,7 @@ async function create(opts) {
 
   async function _createMultidrive({
     did,
-    password,
+    writable,
     storage,
     proxy
   } = {}) {
@@ -225,7 +226,7 @@ async function create(opts) {
             id,
             key,
             path,
-            storage: proxy ? defaultStorage(id, password, storage, proxy) : defaultStorage(id, password, storage)
+            storage: defaultStorage(id, writable, storage, proxy)
           })
           return done(null, afs)
         } catch (err) {

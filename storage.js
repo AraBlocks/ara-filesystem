@@ -6,7 +6,8 @@ const unixify = require('unixify')
 
 const {
   writeToStaged,
-  readFromStaged
+  readFromStaged,
+  hasStaged
 } = require('./commit')
 
 const {
@@ -27,18 +28,22 @@ const {
   basename
 } = require('path')
 
-function defaultStorage(identity, password, storage = null, proxy = '') {
+function defaultStorage(identity, writable = false, storage = null, proxy = '') {
   if (storage && 'function' !== typeof storage) {
     throw new TypeError('ara-filesystem.storage: Expecting storage to be a function.')
+  } else if (!proxy && !writable && !hasStaged(identity)) {
+    throw new Error('Expecting either proxy or staged files')
   }
+
   return (filename, drive, path) => {
     filename = unixify(filename)
-    if ('home' === basename(path)
-      && (filename.includes(mTreeName) || filename.includes(mSigName))) {
-      return create({
+
+    if (_isProxyFile(path, filename)) {
+      return _create({
+        path,
         filename,
         identity,
-        password,
+        writable,
         proxy
       })
     }
@@ -47,56 +52,69 @@ function defaultStorage(identity, password, storage = null, proxy = '') {
   }
 }
 
-function create({
+function _isProxyFile(path, filename) {
+  return 'home' === basename(path) && (filename.includes(mTreeName) || filename.includes(mSigName))
+}
+
+function _create({
   filename,
   identity,
-  password,
+  writable,
   proxy
 } = {}) {
   const fileIndex = resolveBufferIndex(filename)
 
-  const writable = Boolean(password)
+  if (writable) return ras({ read, write: writeStaged })
+  return ras({ read, write: writeNull })
 
-  return ras({
-    async read(req) {
-      const { offset, size } = req
-      debug(filename, 'read at offset', offset, 'size', size)
-      let buffer = (writable) ? readFromStaged({
+  async function read(req) {
+    const { offset, size } = req
+    debug(filename, 'read at offset', offset, 'size', size)
+
+    let buffer
+
+    if (hasStaged(identity)) {
+      buffer = readFromStaged({
         did: identity,
         fileIndex,
-        offset,
-        password
-      }) : null
-      // data is not staged, must retrieve from bc
-      if (!buffer && proxy) {
-        buffer = await call({
-          abi,
-          address: proxy,
-          functionName: 'read',
-          arguments: [
-            fileIndex,
-            offset
-          ]
-        })
-      }
-      req.callback(null, _decode(buffer))
-    },
-
-    write(req) {
-      if (writable) {
-        const { data, offset, size } = req
-        debug(filename, 'staged write at offset', offset, 'size', size)
-        writeToStaged({
-          did: identity,
-          fileIndex,
-          data,
-          offset,
-          password
-        })
-      }
-      req.callback(null)
+        offset
+      })
     }
-  })
+
+    if (!buffer && proxy) {
+      buffer = await call({
+        abi,
+        address: proxy,
+        functionName: 'read',
+        arguments: [
+          fileIndex,
+          offset
+        ]
+      })
+    }
+
+    if (buffer) {
+      req.callback(null, _decode(buffer))
+    } else {
+      req.callback(new Error('Could not read'))
+    }
+  }
+
+  function writeStaged(req) {
+    const { data, offset, size } = req
+    debug(filename, 'staged write at offset', offset, 'size', size)
+    writeToStaged({
+      did: identity,
+      fileIndex,
+      data,
+      offset
+    })
+    req.callback(null)
+  }
+
+  function writeNull(req) {
+    req.callback(null)
+  }
 }
 
 function _decode(bytes) {
