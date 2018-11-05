@@ -32,11 +32,6 @@ const {
   }
 } = require('ara-util')
 
-const {
-  encryptJSON,
-  decryptJSON
-} = require('./util')
-
 const { setPrice } = require('./price')
 
 const {
@@ -101,7 +96,7 @@ async function commit(opts) {
     throw new Error('No staged commits ready to be pushed')
   }
 
-  const contents = _readStagedFile(path, password)
+  const contents = _readStagedFile(path)
 
   const exists = await _hasBeenCommitted(contents, proxy)
 
@@ -144,19 +139,27 @@ async function commit(opts) {
   return result
 }
 
+function hasStaged(did) {
+  const path = resolve(createAFSKeyPath(did), STAGED_FILE)
+  try {
+    fs.accessSync(path)
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
 function writeToStaged({
   did,
   fileIndex,
   offset,
-  data,
-  password = ''
+  data
 } = {}) {
   const path = generateStagedPath(did)
   _writeStagedFile({
     fileIndex,
     offset,
     data,
-    password,
     path
   })
 }
@@ -164,11 +167,10 @@ function writeToStaged({
 function readFromStaged({
   did,
   fileIndex,
-  offset = 0,
-  password = ''
+  offset = 0
 } = {}) {
   const path = generateStagedPath(did)
-  const contents = _readStagedFile(path, password)
+  const contents = _readStagedFile(path)
   fileIndex = _getFilenameByIndex(fileIndex)
 
   let result
@@ -251,22 +253,21 @@ function _hexToBytes(hex) {
   return hex / 2
 }
 
-function _readStagedFile(path, password) {
+function _readStagedFile(path) {
   const contents = fs.readFileSync(path, 'utf8')
-  return JSON.parse(decryptJSON(contents, password))
+  return JSON.parse(contents)
 }
 
 function _writeStagedFile({
   fileIndex,
   offset,
   data,
-  password,
   path
 } = {}) {
   let json = {}
   try {
     fs.accessSync(path)
-    json = _readStagedFile(path, password)
+    json = _readStagedFile(path)
   } catch (err) {
     fs.writeFileSync(path, '')
   }
@@ -277,8 +278,8 @@ function _writeStagedFile({
   if (filename) {
     if (!json[filename]) json[filename] = {}
     json[filename][offset] = hex
-    const encrypted = JSON.stringify(encryptJSON(json, password))
-    fs.writeFileSync(path, encrypted)
+    const jsonString = JSON.stringify(json)
+    fs.writeFileSync(path, jsonString)
   }
 }
 
@@ -331,6 +332,7 @@ function _getFilenameByIndex(index) {
 
 module.exports = {
   commit,
+  hasStaged,
   writeToStaged,
   readFromStaged,
   generateStagedPath

@@ -2,9 +2,9 @@
 
 /* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
 
-const { promptForPassword, onfatal } = require('../lib/util')
 const { createProgram } = require('../lib/program')
 const { AID_PREFIX } = require('../constants')
+const { onfatal } = require('../lib/util')
 const { info } = require('ara-console')
 const cliWidth = require('cli-width')
 const table = require('table')
@@ -42,8 +42,6 @@ async function onhistory(argv) {
     did = `${AID_PREFIX}${did}`
   }
 
-  const { password } = await promptForPassword()
-
   const tableOpts = {
     columnCount: 3,
     border: table.getBorderCharacters('ramac'),
@@ -65,7 +63,6 @@ async function onhistory(argv) {
   try {
     const arafs = await afs.create({
       did,
-      password,
       keyringOpts
     })
     const stream = table.createStream(tableOpts)
