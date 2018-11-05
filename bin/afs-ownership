@@ -70,7 +70,7 @@ if (0 === argv._.length && argv.help) {
 
 async function onrequestownership(argv) {
   const {
-    "requester-did": requesterDid, "content-did": contentDid, secret, network, keyring
+    'requester-did': requesterDid, 'content-did': contentDid, secret, network, keyring
   } = argv
   const { password } = await promptForPassword()
   const keyringOpts = { secret, network, keyring }
@@ -94,7 +94,7 @@ async function onrequestownership(argv) {
 
 async function onrevokerequest(argv) {
   const {
-    "requester-did": requesterDid, "content-did": contentDid, secret, network, keyring
+    'requester-did': requesterDid, 'content-did': contentDid, secret, network, keyring
   } = argv
   const { password } = await promptForPassword()
   const keyringOpts = { secret, network, keyring }
@@ -118,7 +118,7 @@ async function onrevokerequest(argv) {
 
 async function onapprovetransfer(argv) {
   const {
-    "content-did": did, "new-owner-did": newOwnerDid, secret, network, keyring
+    'content-did': did, 'new-owner-did': newOwnerDid, secret, network, keyring
   } = argv
   const { password } = await promptForPassword()
   const { mnemonic } = await promptForMnemonic()
@@ -145,7 +145,7 @@ async function onapprovetransfer(argv) {
 
 async function onclaimownership(argv) {
   const {
-    "content-did": contentDid, secret, network, keyring
+    'content-did': contentDid, secret, network, keyring
   } = argv
   // get current password
   let prompt = `Please provide the random password generated for this AFS identity.
