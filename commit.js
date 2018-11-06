@@ -27,8 +27,10 @@ const {
   web3: {
     tx,
     call,
-    account,
-    toHex
+    account
+  },
+  transform: {
+    toHexString
   }
 } = require('ara-util')
 
@@ -231,7 +233,7 @@ function _getWriteData(index, contents, append) {
       // inserts 0s to fill buffer based on offsets
       if (offsets[i + 1] && offsets[i + 1] !== _hexToBytes(buffer.length)) {
         const diff = offsets[i + 1] - _hexToBytes(buffer.length)
-        buffer += toHex(Buffer.alloc(diff))
+        buffer += toHexString(Buffer.alloc(diff))
       }
       return length
     })
