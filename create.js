@@ -30,7 +30,6 @@ const {
 } = require('ara-contracts/registry')
 
 const {
-  getDocumentKeyHex,
   validate,
   web3: { toHex }
 } = require('ara-util')
@@ -110,18 +109,30 @@ async function create(opts) {
       throw err
     }
 
-    const id = getDocumentKeyHex(ddo)
+    const etcKeyMatcher = key => 'metadata' === key.id.split('#')[1]
+    const [ { publicKeyHex: etcKey } ] = ddo.publicKey.filter(etcKeyMatcher)
 
     const drives = await _createMultidrive({
-      did: id,
+      did,
       writable,
       storage,
       proxy
     })
-    const path = createAFSKeyPath(id)
-    const key = Buffer.from(id, 'hex')
 
-    const opts = { id, key, path }
+    const path = createAFSKeyPath(did)
+    const key = Buffer.from(did, 'hex')
+
+    const opts = {
+      did,
+      key,
+      path,
+      partitions: {
+        etc: {
+          key: etcKey
+        }
+      }
+    }
+
     afs = await pify(drives.create)(opts)
 
     afs.did = did
@@ -213,19 +224,11 @@ async function create(opts) {
     const drives = await pify(multidrive)(
       store,
       async (opts, done) => {
-        const {
-          id,
-          key,
-          path
-        } = opts
+        opts.id = opts.did
+        opts.storage = defaultStorage(opts.did, writable, storage, proxy)
 
         try {
-          const afs = await createCFS({
-            id,
-            key,
-            path,
-            storage: defaultStorage(id, writable, storage, proxy)
-          })
+          const afs = await createCFS(opts)
           return done(null, afs)
         } catch (err) {
           done(err)
