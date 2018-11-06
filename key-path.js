@@ -1,4 +1,4 @@
-const { toHex } = require('ara-util/web3')
+const { toHexString } = require('ara-util/transform')
 const { blake2b } = require('ara-crypto')
 const { resolve } = require('path')
 const rc = require('./rc')()
@@ -18,7 +18,7 @@ function createAFSKeyPath(did) {
   }
 
   const hash = blake2b(Buffer.from(did, 'hex'))
-  return resolve(root, toHex(hash))
+  return resolve(root, toHexString(hash))
 }
 
 function createIdentityKeyPathFromPublicKey(publicKey) {
@@ -30,7 +30,7 @@ function createIdentityKeyPathFromPublicKey(publicKey) {
   if ('string' === typeof publicKey) {
     publicKey = Buffer.from(publicKey, 'hex')
   }
-  const hash = toHex(blake2b(publicKey))
+  const hash = toHexString(blake2b(publicKey))
   return resolve(root, hash)
 }
 
