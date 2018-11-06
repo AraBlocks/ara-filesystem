@@ -1,0 +1,855 @@
+#!/usr/bin/env node
+
+const { info, warn, error, log } = require('ara-console')
+const { basename, resolve } = require('path')
+const { stat, access } = require('fs')
+const ProgressStream = require('progress-stream')
+const descriptions = require('../config/cli-descriptions')
+const ProgressBar = require('progress')
+const prettyjson = require('prettyjson')
+const cliWidth = require('cli-width')
+const inquirer = require('inquirer')
+const program = require('yargs')
+const differ = require('ansi-diff-stream')
+const bytes = require('pretty-bytes')
+const debug = require('debug')('ara-filesystem')
+const table = require('table')
+const pify = require('pify')
+const afs = require('../')
+const fs = require('fs')
+const rc = require('../rc')()
+
+const isDirectory = require('is-directory')
+const isSymlink = require('is-symlink')
+const isFile = require('is-file')
+
+const { kAidPrefix } = require('../constants')
+const ignored = require('../lib/ignore')
+
+const toLower = (x) => String(x).toLowerCase()
+const $0 = basename(process.argv[1] || package.name)
+
+process.on('unhandledRejection', onfatal)
+process.on('uncaughtExeption', onfatal)
+
+const { argv } = program
+  .usage("usage: $0 [-hDV] [options] <command> [options]")
+  .option('debug', {
+    type: 'boolean',
+    alias: 'D',
+    describe: "Enable debug output"
+  })
+  .option('help', {
+    alias: 'h',
+    describe: "Show this help message"
+  })
+  .option('version', {
+    alias: 'V',
+    describe: "Show program version"
+  })
+  .option('force', {
+    alias: 'f',
+    type: 'boolean',
+    describe: 'Force operation',
+  })
+  .option('quiet', {
+    alias: 'q',
+    default: false,
+    describe: 'Only output errors and results'
+  })
+  .command('create <owner>', "Create AFS with given identity", (program) => {
+    program
+      .positional('owner', {
+        type: 'string',
+        required: true,
+        describe: descriptions.identity
+      })
+      .option('secret', {
+        alias: 's',
+        type: 'string',
+        describe: descriptions.secret
+      })
+      .option('archiverNetwork', {
+        type: 'string',
+        required: true,
+        default: rc.network.archiver,
+        describe: `${descriptions.network} (archiver)`
+      })
+      .option('resolverNetwork', {
+        type: 'string',
+        default: rc.network.resolver,
+        required: true,
+        describe: `${descriptions.network} (resolver)`
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        default: rc.network.identity.keyring + ".pub",
+        describe: descriptions.keyring
+      })
+      .option('password', {
+        describe: descriptions.password
+      })
+  }, oncreate)
+  .command('add <did> <pathspec...>', "Add files or directories to an AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        required: true,
+        describe: descriptions.did
+      })
+      .positional('pathspec', {
+        type: 'string',
+        describe: "The file(s) you wish to add to AFS"
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: descriptions.secret
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: descriptions.network
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring + ".pub",
+        describe: descriptions.keyring
+      })
+      .option('password', {
+        describe: descriptions.password
+      })
+  }, onadd)
+  .command('remove <did> <pathspec...>', "Remove files or directories from an AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        required: true,
+        describe: descriptions.did
+      })
+      .positional('pathspec', {
+        type: 'string',
+        required: true,
+        describe: "The file(s) you wish to remove from AFS"
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: descriptions.secret
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: descriptions.network
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring + ".pub",
+        describe: descriptions.keyring
+      })
+      .option('password', {
+        describe: descriptions.password
+      })
+  }, onremove)
+  .command('history <did>', "Retrieve the revision history of this AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        required: true,
+        describe: descriptions.did
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: descriptions.secret
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: descriptions.network
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring + ".pub",
+        describe: descriptions.keyring
+      })
+      .option('password', {
+        describe: descriptions.password
+      })
+  }, onhistory)
+  .command('commit <did>', "Push local staged AFS changes to the Ethereum blockchain and DCDN", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        required: true,
+        describe: descriptions.did
+      })
+      .option('price', {
+        alias: 'P',
+        type: 'number',
+        describe: descriptions.price
+      })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force commit operation'
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: descriptions.secret
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: descriptions.network
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring + ".pub",
+        describe: descriptions.keyring
+      })
+      .option('password', {
+        describe: descriptions.password
+      })
+      .option('yes', {
+        alias: [ 'y', 'assume-yes' ],
+        describe: descriptions.yes
+      })
+  }, oncommit)
+  .command('set-price <did> [price]', "Publish price for the given AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        required: true,
+        describe: descriptions.did
+      })
+      .positional('price', {
+        type: 'number',
+        describe: descriptions.price
+      })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force set price operation'
+      })
+      .option('password', {
+        describe: descriptions.password
+      })
+  }, onsetprice)
+  .command('get-price <did>', "Return the price for a given AFS", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        required: true,
+        describe: descriptions.did
+      })
+  }, ongetprice)
+  .command('destroy <did>', "Destroy AFS locally and remotely", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        required: true,
+        describe: descriptions.did
+      })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force destroy operation'
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: descriptions.secret
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: descriptions.network
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring + ".pub",
+        describe: descriptions.keyring
+      })
+      .option('password', {
+        describe: descriptions.password
+      })
+      .option('mnemonic', {
+        describe: 'Password of the identity'
+      })
+  }, ondestroy)
+  .command('unarchive <did> [pathspec]', "Unarchive an AFS to a directory", (program) => {
+    program
+      .positional('did', {
+        type: 'string',
+        required: true,
+        describe: descriptions.did
+      })
+      .positional('pathspec', {
+        type: 'string',
+        describe: "The path where the AFS should be extracted."
+      })
+      .option('secret', {
+        alias: 's',
+        required: true,
+        type: 'string',
+        describe: descriptions.secret
+      })
+      .option('network', {
+        alias: 'n',
+        type: 'string',
+        required: true,
+        default: rc.network.resolver,
+        describe: descriptions.network
+      })
+      .option('keyring', {
+        alias: 'k',
+        type: 'string',
+        required: true,
+        default: rc.network.identity.keyring + ".pub",
+        describe: descriptions.keyring
+      })
+  }, onunarchive)
+  // metadata commands
+  .command('metadata', "CRUD operation interface for an AFS' metadata", (program) => {
+    program
+      .command('write-key <did> <key> <value>', "Write a key-value pair to the AFS' metadata file", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            required: true,
+            describe: descriptions.did
+          })
+          .positional('key', {
+            type: 'string',
+            describe: "The key to write"
+          })
+          .positional('value', {
+            type: 'string',
+            describe: "The value to write"
+          })
+          .option('print', {
+            alias: 'p',
+            type: 'boolean',
+            describe: 'Print full metadata after write'
+          })
+        }, onmetadatawritekey)
+      .command('read-key <did> <key>', "Read a key's value from AFS metadata", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            required: true,
+            describe: descriptions.did
+          })
+          .positional('key', {
+            type: 'string',
+            describe: "The key to write"
+          })
+        }, onmetadatareadkey)
+      .command('delete-key <did> <key>', "Delete a key-value pair from the AFS' metadata file", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            required: true,
+            describe: descriptions.did
+          })
+          .positional('key', {
+            type: 'string',
+            describe: "The key to write"
+          })
+        }, onmetadatadeletekey)
+      .command('clear <did>', "Clears all metadata from an AFS", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            required: true,
+            describe: descriptions.did
+          })
+        }, onmetadataclear)
+      .command('print <did>', "Prints current metadata for an AFS", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            required: true,
+            describe: descriptions.did
+          })
+        }, onmetadataprint)
+      .command('write-file <did> <filepath>', "Writes contents of entire file to metadata", (program) => {
+        program
+          .positional('did', {
+            type: 'string',
+            required: true,
+            describe: descriptions.did
+          })
+          .option('print', {
+            alias: 'p',
+            type: 'boolean',
+            describe: 'Print full metadata after write'
+          })
+        }, onmetadatawritefile)
+  })
+
+void async function main() {
+  if (argv.debug) {
+    require('debug').enable('ara-filesystem*')
+  }
+}()
+
+async function oncreate({ archiverNetwork, keyring, owner, password, resolverNetwork, secret, quiet }) {
+  if (0 == owner.indexOf('did:') && 0 != owner.indexOf('did:ara:')) {
+    onfatal(new Error("Expecting a DID URI with an 'ara' method."))
+  }
+
+  if (0 != owner.indexOf('did:ara:')) {
+    owner = `${kAidPrefix}${owner}`
+  }
+
+  const keyringOpts = { secret, resolverNetwork, archiverNetwork, keyring }
+  if (!password) {
+    password = await promptForPassword()
+  }
+
+  let arafs
+  try {
+    arafs = await afs.create({ owner, password, keyringOpts })
+  } catch (err) { onfatal(err) }
+
+  if (!quiet) {
+    info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
+    info('Please safely store the following 12 word mnemonic phrase for this AFS.' +
+      ' This phrase will be required to restore and delete this AFS.'+
+      ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
+  } else {
+    process.stdout.write(`${arafs.afs.did}\n${arafs.mnemonic}\n`)
+  }
+
+  arafs.afs.close()
+
+  return process.exit(0)
+}
+
+async function onhistory({ did, keyring, network, password, secret }) {
+  if (0 == did.indexOf('did:') && 0 != did.indexOf('did:ara:')) {
+    onfatal(new Error("Expecting a DID URI with an 'ara' method."))
+  }
+
+  if (0 != did.indexOf('did:ara:')) {
+    did = 'did:ara:' + did
+  }
+
+  if (!password) {
+    password = await promptForPassword()
+  }
+
+  const tableOpts = {
+    columnCount: 3,
+    border: table.getBorderCharacters('ramac'),
+    columnDefault: {
+      paddingLeft: 1,
+      paddingRight: 1,
+      width: parseInt(((cliWidth() || 30) - 10)/3),
+    },
+    columns: [
+      { width: 4 },
+      { width: 4 },
+      { width: 30 },
+    ]
+  }
+
+  const keyringOpts = { secret, network, keyring }
+
+  try {
+    const arafs = await afs.create({
+      did,
+      password,
+      keyringOpts
+    })
+    const stream = table.createStream(tableOpts)
+
+    arafs.afs.history(argv.partition || arafs.afs.HOME)
+      .on('error', onfatal)
+      .on('end', () => process.exit(0))
+      .on('data', (log) => {
+        if (true != argv['border']) {
+          console.log('%s\t%s\t%s',
+            log.version,
+            log.type.toUpperCase(),
+            log.name
+          )
+        } else {
+          stream.write([
+            log.version,
+            log.type.toUpperCase(),
+            log.name,
+          ])
+        }
+      })
+
+    return process.exit(0)
+  } catch (err) {
+    onfatal(err)
+
+  }
+}
+
+async function onadd({ did, keyring, network, password, pathspec, quiet, secret }) {
+  let [ ...paths ] = pathspec
+
+  if (!quiet) {
+    info("id: %s", did)
+    info("paths: ", paths)
+  }
+
+  const keyringOpts = { secret, network, keyring }
+
+  if (!password) {
+    password = await promptForPassword()
+  }
+
+  let instance
+  try {
+    instance = await afs.add({
+      did,
+      paths,
+      password,
+      keyringOpts
+    })
+
+    !quiet && info("file(s) successfully added")
+
+    process.exit(0)
+  } catch (err) {
+    onfatal(err)
+  }
+  instance.close()
+}
+
+async function onremove({ did, keyring, network, password, pathspec, quiet, secret }) {
+  let [ ...paths ] = pathspec
+
+  const keyringOpts = { secret, network, keyring }
+
+  if (!quiet) {
+    info("id: %s", did)
+    info("paths: ", paths)
+  }
+
+  if (!password) {
+    password = await promptForPassword()
+  }
+
+  let instance
+  try {
+    instance = await afs.remove({
+      did,
+      paths,
+      password,
+      keyringOpts
+    })
+    !quiet && info("file(s) successfully removed")
+
+    instance.close()
+    process.exit(0)
+  } catch (err) {
+    instance.close()
+    onfatal(err)
+  }
+}
+
+async function oncommit({ did, force, keyring, network, password, price, quiet, secret, yes }) {
+  if (!password) {
+    password = await promptForPassword()
+  }
+
+  const keyringOpts = { secret, network, keyring }
+
+  if (!force) {
+    try {
+      const cost = await afs.estimateCommitGasCost({ did, password, price, keyringOpts })
+      if (!yes) {
+        const { answer } = await promptCostConfirmation(cost)
+        if (!answer) {
+          onfatal('Negative answer to cost confirmation')
+        }
+      } else {
+        !quiet && info(`Operation cost ${cost} ETH.`)
+      }
+    } catch (err) {
+      onfatal(err)
+    }
+  }
+
+  !quiet && info("committing with identity: %s", did)
+  const result = await afs.commit({ did, password, price, keyringOpts })
+  if (result instanceof Error) {
+    onfatal(result)
+  } else {
+    !quiet && info(`file(s) successfully committed using ${result.gasUsed} gas`)
+    process.exit(0)
+  }
+}
+
+async function onsetprice({ did, price = 0, quiet, yes }) {
+  !quiet && info("setting price of AFS identity %s to %d", did, price)
+  const { password } = await promptForPassword()
+
+  let result = argv.force
+  if (!result) {
+    try {
+      const cost = await afs.estimateSetPriceGasCost({ did, password, price })
+      if (!yes) {
+        const { answer } = await promptCostConfirmation(cost)
+        if (!answer) {
+          onfatal('Negative answer to cost confirmation')
+        }
+      } else {
+        !quiet && info(`Operation cost ${cost} ETH.`)
+      }
+    } catch (err) {
+      onfatal(err)
+    }
+  }
+
+  await afs.setPrice({ did, password, price })
+  info("price has been set to", price)
+  process.exit(0)
+}
+
+async function ongetprice({ did, quiet }) {
+  !quiet && info("getting price of AFS identity %s", did)
+
+  let price
+  try {
+    price = await afs.getPrice({ did })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  !quiet && info("price of", did, "is", price)
+  process.exit(0)
+}
+
+async function ondestroy({ did, force, mnemonic, password, quiet }) {
+  !quiet && info("attempting destroying AFS %s", did)
+
+  if (!password) {
+    password = await promptForPassword()
+  }
+  if (!mnemonic) {
+    mnemonic = await promptForMnemonic()
+  }
+
+  let result
+  if (!force) {
+    const { answer } = await displayConfirmationPrompt({
+      message: `Destroy will remove this AFS from the entire ARA network. Continue?`
+    })
+
+    if (!answer) {
+      onfatal('Stopping destroy due to negative confirmation')
+    }
+  }
+
+  const keyringOpts = { secret, network, keyring }
+  try {
+    await afs.destroy({ did, mnemonic, password, keyringOpts })
+  } catch (err) {
+    onfatal(err)
+  }
+  !quiet && info("destroyed AFS %s", did)
+  process.exit(0)
+}
+
+async function onunarchive({ did, keyring, network, pathspec: path, quiet, secret }) {
+  !quiet && info("unarchiving AFS with DID %s", did)
+
+  const keyringOpts = { secret, network, keyring }
+
+  try {
+    await afs.unarchive({
+      did,
+      path,
+      keyringOpts
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  !quiet && info("successfully unarchived AFS %s", did)
+  return process.exit(0)
+}
+
+
+async function onmetadatawritekey({ did, key, print, quiet, value }) {
+  !quiet && info("writing key %s with value %s to AFS metadata", key, value)
+
+  let result
+  try {
+    result = await afs.metadata.writeKey({
+      did,
+      key,
+      value
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  !quiet && info("successfully wrote %s", key)
+  if (print) {
+    // info swallows prettyjson output
+    console.log(prettyjson.render(result))
+  }
+
+  process.exit(0)
+}
+
+async function onmetadatareadkey({ did, key, quiet }) {
+  !quiet && info("reading %s from AFS metadata", key)
+
+  let result
+  try {
+    result = await afs.metadata.readKey({
+      did,
+      key
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  console.log(prettyjson.render(result))
+  process.exit(0)
+}
+
+async function onmetadatadeletekey({ did, key, quiet }) {
+  !quiet && info("deleting %s from AFS metadata", key)
+
+  try {
+    await afs.metadata.delKey({
+      did,
+      key
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  !quiet && info("deleted %s from AFS metadata", key)
+  process.exit(0)
+}
+
+async function onmetadataclear({ did, quiet }) {
+  !quiet && info("clearing AFS metadata")
+
+  try {
+    await afs.metadata.clear({ did })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  !quiet && info("metadata cleared successfully!")
+  process.exit(0)
+}
+
+async function onmetadataprint({ did }) {
+  const contents = await afs.metadata.readFile({ did })
+  console.log(prettyjson.render(contents))
+}
+
+async function onmetadatawritefile({ did, filepath, print, quiet }) {
+  !quiet && info("writing contents of %s to AFS metadata", filepath)
+
+  let result
+  try {
+    result = await afs.metadata.writeFile({
+      did,
+      filepath
+    })
+  } catch (err) {
+    onfatal(err)
+  }
+
+  if (result) {
+    console.log(prettyjson.render(result))
+  }
+
+  process.exit(0)
+}
+
+async function promptCostConfirmation(cost) {
+  return await inquirer.prompt({
+    type: 'confirm',
+    name: 'answer',
+    message: 
+    `This operation will cost ${cost} ETH. Are you sure you
+    want to proceed?`
+  })
+}
+
+async function promptForPassword() {
+  const { password } = await inquirer.prompt([{
+    type: 'password',
+    name: 'password',
+    message:
+    "Please provide the passphrase for your identity. This is needed to " +
+    "complete this action.\n" +
+    "Passphrase:"
+  }])
+
+  return password
+}
+
+async function promptForMnemonic() {
+  const { mnemonic } = await inquirer.prompt([{
+    name: 'mnemonic',
+    message: "Please provide the mnemonic associated with your AFS identity."
+  }])
+
+  return mnemonic
+}
+
+async function displayConfirmationPrompt({
+  name = 'answer',
+  message = 'Are you sure you want to continue?',
+  defaultAnswer = true
+} = {}) {
+  return await inquirer.prompt([{
+    name,
+    type: 'confirm',
+    message,
+    default: defaultAnswer
+  }])
+}
+
+function onfatal(err) {
+  if (err) {
+    debug(err)
+    error("fatal:", err.message)
+  }
+  process.exit(1)
+}
