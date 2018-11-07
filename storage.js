@@ -1,5 +1,5 @@
-const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:storage')
+const storage = require('ara-contracts/storage')
 const ras = require('random-access-storage')
 const raf = require('random-access-file')
 const unixify = require('unixify')
@@ -16,12 +16,6 @@ const {
   METADATA_TREE_NAME: mTreeName,
   METADATA_SIGNATURES_NAME: mSigName
 } = require('./constants')
-
-const {
-  web3: {
-    call
-  }
-} = require('ara-util')
 
 const {
   resolve,
@@ -82,23 +76,19 @@ function _create({
     }
 
     if (!buffer && proxy) {
-      buffer = await call({
-        abi,
+      buffer = await storage.read({
         address: proxy,
-        functionName: 'read',
-        arguments: [
-          fileIndex,
-          offset
-        ]
+        fileIndex,
+        offset
       })
     }
-
+      
     if (buffer) {
       req.callback(null, _decode(buffer))
     } else {
       req.callback(new Error('Could not read'))
     }
-  }
+  },
 
   function writeStaged(req) {
     const { data, offset, size } = req
