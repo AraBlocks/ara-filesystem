@@ -26,7 +26,6 @@ const {
   getDocumentOwner,
   validate,
   web3: {
-    tx,
     call,
     account,
     toHex

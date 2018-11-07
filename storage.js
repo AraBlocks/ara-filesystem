@@ -22,9 +22,9 @@ const {
   basename
 } = require('path')
 
-function defaultStorage(identity, writable = false, storage = null, proxy = '') {
-  if (storage && 'function' !== typeof storage) {
-    throw new TypeError('ara-filesystem.storage: Expecting storage to be a function.')
+function defaultStorage(identity, writable = false, storageFunc = null, proxy = '') {
+  if (storageFunc && 'function' !== typeof storageFunc) {
+    throw new TypeError('ara-filesystem.storage: Expecting storageFunc to be a function.')
   } else if (!proxy && !writable && !hasStaged(identity)) {
     throw new Error('Expecting either proxy or staged files')
   }
@@ -42,7 +42,7 @@ function defaultStorage(identity, writable = false, storage = null, proxy = '') 
       })
     }
     const file = resolve(path, filename)
-    return storage ? storage(file) : raf(file)
+    return storageFunc ? storageFunc(file) : raf(file)
   }
 }
 
@@ -82,13 +82,13 @@ function _create({
         offset
       })
     }
-      
+
     if (buffer) {
       req.callback(null, _decode(buffer))
     } else {
       req.callback(new Error('Could not read'))
     }
-  },
+  }
 
   function writeStaged(req) {
     const { data, offset, size } = req
