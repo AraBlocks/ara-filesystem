@@ -3,7 +3,7 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
-const { write } = require('./storage')
+const storage = require('ara-contracts/storage')
 const pify = require('pify')
 const fs = require('fs')
 
@@ -106,7 +106,7 @@ async function commit(opts) {
   let owner = getDocumentOwner(ddo, true)
   owner = `${AID_PREFIX}${owner}`
   const acct = await account.load({ did: owner, password })
-  let result = await write({
+  let result = await storage.write({
     mtData,
     msData,
     account: acct,
