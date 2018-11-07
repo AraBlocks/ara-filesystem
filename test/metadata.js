@@ -71,6 +71,27 @@ test.serial('writeKey(opts) valid key write', async (t) => {
   t.true(Object.prototype.hasOwnProperty.call(contents, 'my_key') && 1234 === contents.my_key)
 })
 
+test.serial('writeKeys(opts) valid key write', async (t) => {
+  const { did } = getAFS(t)
+  const keys = {
+    name: 'test_name',
+    number: 1234,
+    url: 'test_url.com'
+  }
+
+  let contents = await metadata.writeKeys({
+    did, password, keys
+  })
+  t.true(Object.prototype.hasOwnProperty.call(contents, 'name') && keys.name === contents.name)
+  t.true(Object.prototype.hasOwnProperty.call(contents, 'number') && keys.number === contents.number)
+  t.true(Object.prototype.hasOwnProperty.call(contents, 'url') && keys.url === contents.url)
+
+  contents = await metadata.readFile({ did })
+  t.true(Object.prototype.hasOwnProperty.call(contents, 'name') && keys.name === contents.name)
+  t.true(Object.prototype.hasOwnProperty.call(contents, 'number') && keys.number === contents.number)
+  t.true(Object.prototype.hasOwnProperty.call(contents, 'url') && keys.url === contents.url)
+})
+
 test.serial('readKey(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(metadata.writeKey(), TypeError)
