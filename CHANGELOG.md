@@ -1,4 +1,4 @@
-## [0.4.4](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.4.4) (2018-11-07)
+# [0.5.0](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.0) (2018-11-07)
 
 
 ### Bug Fixes
@@ -8,8 +8,9 @@
 
 ### Features
 
+* **metadata:** writeKeys to allow for multiple key writes ([3c049d4](https://github.com/AraBlocks/ara-filesystem/commit/3c049d4))
+* separate deploy from commit ([ea99d9e](https://github.com/AraBlocks/ara-filesystem/commit/ea99d9e))
 * use updated contracts storage ([77119a8](https://github.com/AraBlocks/ara-filesystem/commit/77119a8))
-* **metadata:** writeKeys to allow for multiple key writes ([385b1ac](https://github.com/AraBlocks/ara-filesystem/commit/385b1ac))
 
 
 
