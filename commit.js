@@ -3,6 +3,7 @@
 const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
+const { write } = require('./storage')
 const pify = require('pify')
 const fs = require('fs')
 
@@ -106,12 +107,11 @@ async function commit(opts) {
   let owner = getDocumentOwner(ddo, true)
   owner = `${AID_PREFIX}${owner}`
   const acct = await account.load({ did: owner, password })
-
-  let result = await _write({
+  let result = await write({
     mtData,
     msData,
     account: acct,
-    proxy
+    to: proxy
   }, estimate, exists)
 
   if (estimate) {
@@ -188,34 +188,6 @@ function generateStagedPath(did) {
     _makeStagedFile(path)
   }
   return path
-}
-
-async function _write(opts, estimate = true, append = false) {
-  const { offsets: mtOffsets, buffer: mtBuffer } = opts.mtData
-  const { offsets: msOffsets, buffer: msBuffer } = opts.msData
-
-  const { account: acct, proxy } = opts
-  const transaction = await tx.create({
-    account: acct,
-    to: proxy,
-    gasLimit: 4000000,
-    data: {
-      abi,
-      functionName: append ? 'append' : 'write',
-      values: [
-        mtOffsets,
-        msOffsets,
-        mtBuffer,
-        msBuffer
-      ]
-    }
-  })
-
-  if (estimate) {
-    return tx.estimateCost(transaction)
-  }
-
-  return tx.sendSignedTransaction(transaction)
 }
 
 function _getWriteData(index, contents, append) {
