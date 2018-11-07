@@ -1,4 +1,14 @@
-# [0.4.0](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.4.0) (2018-11-07)
+## [0.4.1](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.4.1) (2018-11-07)
+
+
+### Bug Fixes
+
+* use contracts storage for commit ([a89dfe9](https://github.com/AraBlocks/ara-filesystem/commit/a89dfe9))
+
+
+### Features
+
+* use updated contracts storage ([77119a8](https://github.com/AraBlocks/ara-filesystem/commit/77119a8))
 
 
 
