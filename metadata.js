@@ -4,7 +4,7 @@ const { create } = require('./create')
 const pify = require('pify')
 const fs = require('fs')
 
-const kMetadataFile = 'metadata.json'
+const METADATA_FILE = 'metadata.json'
 
 /**
  * Writes a metadata JSON file to the metadata partition of an AFS
@@ -222,8 +222,7 @@ async function readFile(opts) {
   }
 
   const partition = await _getEtcPartition(opts)
-  const file = await _readMetadataFile(partition)
-  return file
+  return _readMetadataFile(partition)
 }
 
 async function _readMetadataFile(partition) {
@@ -231,12 +230,12 @@ async function _readMetadataFile(partition) {
     throw new Error('Metadata file doesn\'t exist.')
   }
 
-  const file = await pify(partition.readFile)(kMetadataFile)
+  const file = await pify(partition.readFile)(METADATA_FILE)
   return JSON.parse(file.toString())
 }
 
 async function _writeMetadataFile(partition, contents) {
-  await pify(partition.writeFile)(kMetadataFile, Buffer.from(JSON.stringify(contents)))
+  await pify(partition.writeFile)(METADATA_FILE, Buffer.from(JSON.stringify(contents)))
 }
 
 async function _createMetadataFile(partition) {
@@ -245,7 +244,7 @@ async function _createMetadataFile(partition) {
 
 async function _metadataFileExists(partition) {
   try {
-    await pify(partition.access)(kMetadataFile)
+    await pify(partition.access)(METADATA_FILE)
     return true
   } catch (_) {
     return false
