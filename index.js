@@ -4,6 +4,7 @@ const { destroy } = require('./destroy')
 const { create } = require('./create')
 const { remove } = require('./remove')
 const metadata = require('./metadata')
+const { deploy } = require('./deploy')
 const { commit } = require('./commit')
 const { add } = require('./add')
 
@@ -16,6 +17,7 @@ module.exports = {
   getPrice,
   metadata,
   destroy,
+  deploy,
   create,
   remove,
   commit,
