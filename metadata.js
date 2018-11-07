@@ -1,6 +1,7 @@
 const debug = require('debug')('ara-filesystem:debug')
 const { validate } = require('ara-util')
 const { create } = require('./create')
+const extend = require('extend')
 const pify = require('pify')
 const fs = require('fs')
 
@@ -111,6 +112,55 @@ async function writeKey(opts = {}) {
 
   await _writeMetadataFile(partition, contents)
   debug('%s written to metadata', key)
+  return contents
+}
+
+/**
+ * Writes metadata key/value pairs to the metadata partition of an AFS
+ * @param {Object} opts
+ * @param {String} opts.did
+ * @param {Object} opts.keys
+ * @return {Object}
+ */
+async function writeKeys(opts = {}) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts to be an object.')
+  } else if (!opts.did || 'string' !== typeof opts.did) {
+    throw new TypeError('DID URI must be a non-empty string.')
+  } else if (!opts.password || 'string' !== typeof opts.password) {
+    throw new TypeError('Password must be non-empty string.')
+  } else if (!opts.keys || 'object' !== typeof opts.keys) {
+    throw new TypeError('Expected opts.pairs to be an object.')
+  }
+
+  const {
+    did,
+    keys,
+    password,
+    keyringOpts = {}
+  } = opts
+
+  const partition = await _getEtcPartition(opts)
+  try {
+    await validate({
+      did,
+      password,
+      keyringOpts,
+      label: 'writeKey'
+    })
+  } catch (err) {
+    throw err
+  }
+
+  if (!(await _metadataFileExists(partition))) {
+    await _createMetadataFile(partition)
+  }
+
+  const contents = await _readMetadataFile(partition)
+  extend(true, contents, keys)
+
+  await _writeMetadataFile(partition, contents)
+  debug('%s written to metadata', keys)
   return contents
 }
 
@@ -264,6 +314,7 @@ async function _getEtcPartition(opts) {
 
 module.exports = {
   writeFile,
+  writeKeys,
   writeKey,
   readFile,
   readKey,
