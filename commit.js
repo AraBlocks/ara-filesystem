@@ -8,7 +8,6 @@ const fs = require('fs')
 
 const {
   proxyExists,
-  deployProxy,
   getProxyAddress
 } = require('ara-contracts/registry')
 
@@ -78,12 +77,11 @@ async function commit(opts) {
     throw err
   }
 
-  let proxy
-  if (await proxyExists(did)) {
-    proxy = await getProxyAddress(did)
-  } else {
-    proxy = await deployProxy({ contentDid: did, password, keyringOpts })
+  if (!(await proxyExists(did))) {
+    throw new Error('Proxy doesn\'t exist, please deploy a proxy for this AFS first.')
   }
+
+  const proxy = await getProxyAddress(did)
 
   debug('proxy address', proxy)
 

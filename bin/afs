@@ -30,6 +30,7 @@ Below are some useful afs commands:
   afs unarchive  Unarchive an AFS to a directory
   afs metadata   CRUD operation interface for an AFS' metadata
   afs ownership  Ownership management of an AFS
+  afs deploy     Deploy an AFS proxy to the network
 `
 })
 

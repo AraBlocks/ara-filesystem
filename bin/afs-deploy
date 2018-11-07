@@ -1,0 +1,81 @@
+#!/usr/bin/env node
+
+/* eslint no-shadow: [ "error", { "allow": ["_", "program", "argv"] }] */
+
+const { createProgram } = require('../lib/program')
+const { info } = require('ara-console')
+const afs = require('../')
+
+const {
+  promptCostConfirmation,
+  promptForPassword,
+  onfatal
+} = require('../lib/util')
+
+// yargs program command line interface instance
+const program = createProgram({
+  usage: `
+usage: afs deploy: [-h] [--help] [options]
+`
+})
+
+const { argv } = program
+  .command('$0 <did>', 'Deploy proxy for the AFS', (_) => {
+    _
+      .positional('did', {
+        type: 'string',
+        describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+      .option('force', {
+        alias: 'f',
+        type: 'boolean',
+        describe: 'Force deploy operation',
+      })
+  }, ondeploy)
+
+// Emit program usage help
+if (0 === argv._.length && argv.help) {
+  program.showHelp()
+  process.exit(0)
+}
+
+async function ondeploy(argv) {
+  const {
+    did, secret, network, keyring, force
+  } = argv
+  const { password } = await promptForPassword()
+  const keyringOpts = { secret, network, keyring }
+
+  let result = force
+  if (!result) {
+    try {
+      const cost = await afs.deploy({
+        estimate: true,
+        keyringOpts,
+        password,
+        did
+      })
+      const { answer } = await promptCostConfirmation(cost)
+      result = answer
+    } catch (err) {
+      onfatal(err)
+    }
+  }
+
+  if (result) {
+    info('deploy proxy for: %s', did)
+    try {
+      result = await afs.deploy({
+        keyringOpts,
+        password,
+        did
+      })
+    } catch (err) {
+      onfatal(err)
+    }
+    info(`file(s) successfully deployed to ${result}`)
+  } else {
+    // exit
+    onfatal()
+  }
+}

@@ -14,7 +14,8 @@
     "afs-destroy": "./bin/afs-destroy",
     "afs-unarchive": "./bin/afs-unarchive",
     "afs-metadata": "./bin/afs-metadata",
-    "afs-ownership": "./bin/afs-ownership"
+    "afs-ownership": "./bin/afs-ownership",
+    "afs-deploy": "./bin/afs-deploy"
   },
   "scripts": {
     "test": "bash ./scripts/test",
