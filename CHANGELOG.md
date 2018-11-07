@@ -1,4 +1,4 @@
-# [0.3.0](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.3.0) (2018-11-05)
+# [0.4.0](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.4.0) (2018-11-07)
 
 
 

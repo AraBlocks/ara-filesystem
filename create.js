@@ -160,10 +160,8 @@ async function create(opts) {
         storage: defaultStorage(afsDid, writable, storage)
       })
 
-      const etcPath = resolve(path, 'etc')
       // metadata partition publicKey
-      const { key } = await createCFS({ path: etcPath })
-      const metadataPublicKey = toHex(key)
+      const metadataPublicKey = toHex(afs.partitions.etc.key)
 
       // recreate identity with additional publicKey
       const afsId = await createIdentity({

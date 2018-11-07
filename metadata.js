@@ -1,12 +1,10 @@
 const debug = require('debug')('ara-filesystem:debug')
-const { createAFSKeyPath } = require('./key-path')
-const { createCFS } = require('cfsnet/create')
 const { validate } = require('ara-util')
-const { resolve } = require('path')
+const { create } = require('./create')
 const pify = require('pify')
 const fs = require('fs')
 
-const kMetadataFile = 'metadata.json'
+const METADATA_FILE = 'metadata.json'
 
 /**
  * Writes a metadata JSON file to the metadata partition of an AFS
@@ -33,6 +31,7 @@ async function writeFile(opts = {}) {
     did
   } = opts
 
+  const partition = await _getEtcPartition(opts)
   try {
     await validate({
       did,
@@ -57,7 +56,7 @@ async function writeFile(opts = {}) {
     throw new Error('Contents of file is not valid JSON.')
   }
 
-  await _writeMetadataFile(did, contents)
+  await _writeMetadataFile(partition, contents)
 
   return contents
 }
@@ -91,6 +90,7 @@ async function writeKey(opts = {}) {
     keyringOpts = {}
   } = opts
 
+  const partition = await _getEtcPartition(opts)
   try {
     await validate({
       did,
@@ -102,14 +102,14 @@ async function writeKey(opts = {}) {
     throw err
   }
 
-  if (!(await _metadataFileExists(did))) {
-    await _createMetadataFile(did)
+  if (!(await _metadataFileExists(partition))) {
+    await _createMetadataFile(partition)
   }
 
-  const contents = await readFile({ did })
+  const contents = await _readMetadataFile(partition)
   contents[key] = value
 
-  await _writeMetadataFile(did, contents)
+  await _writeMetadataFile(partition, contents)
   debug('%s written to metadata', key)
   return contents
 }
@@ -129,9 +129,8 @@ async function readKey(opts = {}) {
   } else if (!opts.key || 'string' !== typeof opts.key) {
     throw new TypeError('Key must be a non-empty string.')
   }
-
-  const { did, key } = opts
-  const contents = await readFile({ did })
+  const { key } = opts
+  const contents = await readFile(opts)
   if (!Object.prototype.hasOwnProperty.call(contents, key)) {
     throw new Error(`Metadata file does not contain key ${key}.`)
   }
@@ -163,6 +162,8 @@ async function delKey(opts) {
     password,
     keyringOpts = {}
   } = opts
+
+  const partition = await _getEtcPartition(opts)
   try {
     await validate({
       did,
@@ -174,13 +175,13 @@ async function delKey(opts) {
     throw err
   }
 
-  const contents = await readFile({ did })
+  const contents = await _readMetadataFile(partition)
   if (!Object.prototype.hasOwnProperty.call(contents, key)) {
     throw new Error(`Metadata file does not contain key ${key}.`)
   }
 
   delete contents[key]
-  await _writeMetadataFile(did, contents)
+  await _writeMetadataFile(partition, contents)
 
   debug('%s removed from metadata', key)
   return contents
@@ -198,13 +199,13 @@ async function clear(opts) {
     throw new TypeError('DID URI must be a non-empty string.')
   }
 
-  const { did } = opts
-  if (!(await _metadataFileExists(did))) {
+  const partition = await _getEtcPartition(opts)
+  if (!(await _metadataFileExists(partition))) {
     throw new Error('No metadata to clear.')
   }
 
   // sets metadata contents to {}
-  await _createMetadataFile(did)
+  await _createMetadataFile(partition)
 }
 
 /**
@@ -219,43 +220,46 @@ async function readFile(opts) {
   } else if (!opts.did || 'string' !== typeof opts.did) {
     throw new TypeError('DID URI must be a non-empty string.')
   }
-  const { did } = opts
-  const cfs = await _getEtcCFS(did)
-  let file
-  try {
-    file = await cfs.readFile(kMetadataFile)
-  } catch (err) {
+
+  const partition = await _getEtcPartition(opts)
+  return _readMetadataFile(partition)
+}
+
+async function _readMetadataFile(partition) {
+  if (!(await _metadataFileExists(partition))) {
     throw new Error('Metadata file doesn\'t exist.')
   }
+
+  const file = await pify(partition.readFile)(METADATA_FILE)
   return JSON.parse(file.toString())
 }
 
-async function _writeMetadataFile(did, contents) {
-  const cfs = await _getEtcCFS(did)
-  await cfs.writeFile(kMetadataFile, Buffer.from(JSON.stringify(contents)))
+async function _writeMetadataFile(partition, contents) {
+  await pify(partition.writeFile)(METADATA_FILE, Buffer.from(JSON.stringify(contents)))
 }
 
-async function _createMetadataFile(did) {
-  await _writeMetadataFile(did, {})
+async function _createMetadataFile(partition) {
+  await _writeMetadataFile(partition, {})
 }
 
-async function _metadataFileExists(did) {
-  const cfs = await _getEtcCFS(did)
+async function _metadataFileExists(partition) {
   try {
-    await cfs.readFile(kMetadataFile)
-  } catch (err) {
+    await pify(partition.access)(METADATA_FILE)
+    return true
+  } catch (_) {
     return false
   }
-  return true
 }
 
-async function _getEtcCFS(did) {
-  const path = _getEtcPath(did)
-  return createCFS({ path })
-}
-
-function _getEtcPath(did) {
-  return resolve(createAFSKeyPath(did), 'etc')
+async function _getEtcPartition(opts) {
+  let partition
+  try {
+    const { afs } = await create(opts)
+    partition = afs.partitions.etc
+  } catch (err) {
+    throw err
+  }
+  return partition
 }
 
 module.exports = {

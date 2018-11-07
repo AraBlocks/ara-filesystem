@@ -171,8 +171,13 @@ async function onmetadataclear(argv) {
   const { did } = argv
   info('clearing AFS metadata')
 
+  const { secret, network, keyring } = argv
+  const keyringOpts = { secret, network, keyring }
+
+  const { password } = await promptForPassword()
+
   try {
-    await afs.metadata.clear({ did })
+    await afs.metadata.clear({ did, password, keyringOpts })
   } catch (err) {
     onfatal(err)
   }

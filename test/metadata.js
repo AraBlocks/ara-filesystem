@@ -1,3 +1,4 @@
+const { PASSWORD: password } = require('./_constants')
 const metadata = require('../metadata')
 const pify = require('pify')
 const test = require('ava')
@@ -23,7 +24,7 @@ test.after(async (t) => {
   await cleanup(t)
 })
 
-test('writeFile(opts) invalid opts', async (t) => {
+test.serial('writeFile(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(metadata.writeFile(), TypeError)
   await t.throwsAsync(metadata.writeFile({ }), TypeError)
@@ -33,25 +34,25 @@ test('writeFile(opts) invalid opts', async (t) => {
   await t.throwsAsync(metadata.writeFile({ did, filepath: '' }), TypeError)
 })
 
-test('writeFile(opts) file errors', async (t) => {
+test.serial('writeFile(opts) file errors', async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(metadata.writeFile({ did, filepath: 'invalid.json' }), Error)
+  await t.throwsAsync(metadata.writeFile({ did, password, filepath: 'invalid.json' }), Error)
 
   const invalidJSON = '{name:"ara"}'
   await pify(fs.writeFile)('invalid.json', invalidJSON)
-  await t.throwsAsync(metadata.writeFile({ did, filepath: 'invalid.json' }), Error)
+  await t.throwsAsync(metadata.writeFile({ did, password, filepath: 'invalid.json' }), Error)
 })
 
-test('writeFile(opts) valid write', async (t) => {
+test.serial('writeFile(opts) valid write', async (t) => {
   const { did } = getAFS(t)
 
   const validJSON = '{"name":"ara"}'
   await pify(fs.writeFile)('valid.json', validJSON)
-  const contents = await metadata.writeFile({ did, filepath: 'valid.json' })
+  const contents = await metadata.writeFile({ did, password, filepath: 'valid.json' })
   t.is(validJSON, JSON.stringify(contents))
 })
 
-test('writeKey(opts) invalid opts', async (t) => {
+test.serial('writeKey(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(metadata.writeKey(), TypeError)
   await t.throwsAsync(metadata.writeKey({ }), TypeError)
@@ -62,13 +63,15 @@ test('writeKey(opts) invalid opts', async (t) => {
   await t.throwsAsync(metadata.writeKey({ did, key: 'my_key' }), TypeError)
 })
 
-test('writeKey(opts) valid key write', async (t) => {
+test.serial('writeKey(opts) valid key write', async (t) => {
   const { did } = getAFS(t)
-  const contents = await metadata.writeKey({ did, key: 'my_key', value: 1234 })
+  const contents = await metadata.writeKey({
+    did, password, key: 'my_key', value: 1234
+  })
   t.true(Object.prototype.hasOwnProperty.call(contents, 'my_key') && 1234 === contents.my_key)
 })
 
-test('readKey(opts) invalid opts', async (t) => {
+test.serial('readKey(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(metadata.writeKey(), TypeError)
   await t.throwsAsync(metadata.writeKey({ }), TypeError)
@@ -78,15 +81,17 @@ test('readKey(opts) invalid opts', async (t) => {
   await t.throwsAsync(metadata.writeKey({ did, key: 1234 }))
 })
 
-test('readKey(opts) valid key read', async (t) => {
+test.serial('readKey(opts) valid key read', async (t) => {
   const { did } = getAFS(t)
-  await metadata.writeKey({ did, key: 'my_key', value: 1234 })
+  await metadata.writeKey({
+    did, password, key: 'my_key', value: 1234
+  })
 
   const value = await metadata.readKey({ did, key: 'my_key' })
   t.is(value, 1234)
 })
 
-test('delKey(opts) invalid opts', async (t) => {
+test.serial('delKey(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(metadata.writeKey(), TypeError)
   await t.throwsAsync(metadata.writeKey({ }), TypeError)
@@ -96,32 +101,36 @@ test('delKey(opts) invalid opts', async (t) => {
   await t.throwsAsync(metadata.writeKey({ did, key: 1234 }))
 })
 
-test('clear(opts) invalid opts', async (t) => {
+test.serial('clear(opts) invalid opts', async (t) => {
   await t.throwsAsync(metadata.clear(), TypeError)
   await t.throwsAsync(metadata.clear({ }), TypeError)
   await t.throwsAsync(metadata.clear({ did: 1234 }), TypeError)
 })
 
-test('clear(opts) valid clear', async (t) => {
+test.serial('clear(opts) valid clear', async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(metadata.clear({ did }), Error)
-
-  await metadata.writeKey({ did, key: 'key1', value: 1 })
-  await metadata.clear({ did })
+  await metadata.writeKey({
+    did, password, key: 'key1', value: 1
+  })
+  await metadata.clear({ did, password })
 
   const file = await metadata.readFile({ did })
   t.deepEqual(file, {})
 })
 
-test('readFile(did) invalid did', async (t) => {
+test.serial('readFile(did) invalid did', async (t) => {
   await t.throwsAsync(metadata.readFile(), TypeError)
   await t.throwsAsync(metadata.readFile({ did: 1234 }), TypeError)
 })
 
-test('readFile(did) valid file read', async (t) => {
+test.serial('readFile(did) valid file read', async (t) => {
   const { did } = getAFS(t)
+  await metadata.clear({ did, password })
+
   const expected = JSON.parse('{"key1":1}')
-  await metadata.writeKey({ did, key: 'key1', value: 1 })
+  await metadata.writeKey({
+    did, password, key: 'key1', value: 1
+  })
 
   const result = await metadata.readFile({ did })
   t.deepEqual(expected, result)
