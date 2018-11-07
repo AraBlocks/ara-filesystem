@@ -171,7 +171,7 @@ async function create(opts) {
       })
 
       // metadata partition publicKey
-      const metadataPublicKey = toHex(afs.partitions.etc.key)
+      const metadataPublicKey = toHexString(afs.partitions.etc.key)
       // recreate identity with additional publicKey
       const afsId = await createIdentity({
         password,
