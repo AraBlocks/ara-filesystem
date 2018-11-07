@@ -1,6 +1,5 @@
 /* eslint-disable no-await-in-loop */
 
-const { abi } = require('ara-contracts/build/contracts/AFS.json')
 const debug = require('debug')('ara-filesystem:commit')
 const { createAFSKeyPath } = require('./key-path')
 const storage = require('ara-contracts/storage')
@@ -26,7 +25,6 @@ const {
   getDocumentOwner,
   validate,
   web3: {
-    call,
     account,
     toHex
   }
@@ -273,16 +271,12 @@ async function _deleteStagedFile(path) {
 // checks to see if header written to staged has been pushed to blockchain
 // if it has, we know that AFS has been committed already
 async function _hasBeenCommitted(contents, proxy) {
-  const buf = `0x${_getBufferFromStaged(contents, 0, 0)}`
-  return call({
-    abi,
+  const buffer = `0x${_getBufferFromStaged(contents, 0, 0)}`
+  return storage.hasBuffer({
     address: proxy,
-    functionName: 'hasBuffer',
-    arguments: [
-      0,
-      0,
-      buf
-    ]
+    fileIndex: 0,
+    offset: 0,
+    buffer
   })
 }
 
