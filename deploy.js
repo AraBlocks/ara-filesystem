@@ -6,8 +6,13 @@ const {
 } = require('ara-contracts/registry')
 
 /**
- * Deploys AFS proxy to the network.
- * @return {[type]} [description]
+ * Deploys an AFS proxy to the network
+ * @param  {Object}  opts
+ * @param  {String}  opts.did
+ * @param  {String}  opts.password
+ * @param  {Boolean} opts.estimate
+ * @throws {TypeError|Error}
+ * @return {String|Object}
  */
 async function deploy(opts) {
   if (!opts || 'object' !== typeof opts) {
