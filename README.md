@@ -115,6 +115,14 @@ Example:
 $ afs remove df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my_video.mp4
 ```
 
+### Deploy an AFS proxy
+
+Before you can commit to an AFS, a proxy contract representing that AFS must be deployed to the network.
+
+```sh
+$ afs deploy df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
+```
+
 ### Commit file(s) to an AFS
 
 Every change in the AFS saved to a local file on disc, much like staged commits. Changes must be commited before they are discoverable and published to the Ara network.
@@ -143,11 +151,10 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 * [async destroy(opts)](#destroy)
 * [async add(opts)](#add)
 * [async remove(opts)](#remove)
+* [async deploy(opts)](#deploy)
 * [async commit(opts)](#commit)
-* [async estimateCommitGasCost(opts)](#estimatecommit)
 * [async setPrice(opts)](#setprice)
 * [async getPrice(opts)](#getprice)
-* [async estimateSetPriceGasCost(opts)](#estimateprice)
 * [async unarchive(opts)](#unarchive)
 * [async metadata.writeFile(opts)](#writefile)
 * [async metadata.writeKey(opts)](#writekey)
@@ -252,10 +259,36 @@ Removes one or more files from an `AFS`.
   - `paths` - The path(s) of the files to remove
 
 ```js
-const afs = remove({
+const afs = await remove({
   did,
   paths,
   password
+})
+```
+
+<a name="deploy"></a>
+### `async deploy(opts)`
+
+> **Stability: 2** Stable
+
+Deploys an AFS proxy to the network.
+
+- `opts`
+  - `did` - `DID` of the `AFS` to deploy
+  - `password` - Owner's password for this `AFS`
+  - `estimate` - optional Flag to check cost of `deploy`
+
+```js
+const address = await deploy({
+  password,
+  did
+})
+
+// estimate deploy
+const cost = await deploy({
+  estimate: true,
+  password,
+  did
 })
 ```
 
@@ -274,29 +307,17 @@ Commits any changes to an `AFS` to the blockchain.
 
 ```js
 const result = await commit({
-  did,
   password,
-  price
+  price,
+  did
 })
-```
 
-<a name="estimatecommit"></a>
-### `async estimateCommitGasCost(opts)`
-
-> **Stability: 2** Stable
-
-Estimates the cost (in ETH) of committing an `AFS`.
-
-- `opts`
-  - `did` - The `DID` of the `AFS` to commit
-  - `password` - The password of the owner of this `AFS`
-  - `price` - optional The price in Ara tokens to set this `AFS`
-
-```js
-const cost = await estimateCommitGasCost({
-  did,
+// estimate commit cost
+const cost = await commit({
+  estimate: true,
   password,
-  price
+  price,
+  did
 })
 ```
 
@@ -319,6 +340,14 @@ await setPrice({
   did,
   password,
   price
+})
+
+// estimate set price cost
+const cost = await setPrice({
+  estimate: true,
+  password,
+  price,
+  did
 })
 ```
 
