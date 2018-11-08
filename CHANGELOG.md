@@ -1,4 +1,4 @@
-## [0.5.1](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.1) (2018-11-08)
+## [0.5.2](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.2) (2018-11-08)
 
 
 ### Bug Fixes
@@ -11,7 +11,7 @@
 
 * separate deploy from commit ([ea99d9e](https://github.com/AraBlocks/ara-filesystem/commit/ea99d9e))
 * use updated contracts storage ([77119a8](https://github.com/AraBlocks/ara-filesystem/commit/77119a8))
-* **create:** Regenerate etc partition from key in DDO ([19e877f](https://github.com/AraBlocks/ara-filesystem/commit/19e877f))
+* **create:** Regenerate etc partition from key in DDO ([8c82cc3](https://github.com/AraBlocks/ara-filesystem/commit/8c82cc3))
 * **metadata:** writeKeys to allow for multiple key writes ([3c049d4](https://github.com/AraBlocks/ara-filesystem/commit/3c049d4))
 
 
