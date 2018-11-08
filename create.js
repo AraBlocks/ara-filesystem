@@ -6,7 +6,6 @@ const { defaultStorage } = require('./storage')
 const hasDIDMethod = require('has-did-method')
 const { createCFS } = require('cfsnet/create')
 const multidrive = require('multidrive')
-const context = require('ara-context')()
 const crypto = require('ara-crypto')
 const { resolve } = require('path')
 const aid = require('ara-identity')
@@ -291,10 +290,9 @@ async function createIdentity({
       publicKey
     }
     identity = await aid.create({
-      context,
+      mnemonic,
       password,
-      ddo,
-      mnemonic
+      ddo
     })
   } catch (err) { debug(err.stack || err) }
 
