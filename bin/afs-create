@@ -83,9 +83,9 @@ async function oncreate(argv) {
       ' This phrase will be required to restore and delete this AFS.' +
       ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
   } else {
-    // process.stdout.write(`${arafs.afs.did};;${arafs.mnemonic}`)
-    // process.stdout.write('\n')
+    process.stdout.write(`${arafs.afs.did};;${arafs.mnemonic}`)
+    process.stdout.write('\n')
   }
   // console.log(process._getActiveHandles())
-  // arafs.afs.close()
+  arafs.afs.close()
 }
