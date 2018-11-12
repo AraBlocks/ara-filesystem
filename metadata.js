@@ -32,7 +32,7 @@ async function writeFile(opts = {}) {
     did
   } = opts
 
-  const partition = await _getEtcPartition(opts)
+  const { afs, partition } = await _getEtcPartition(opts)
   try {
     await validate({
       did,
@@ -58,7 +58,7 @@ async function writeFile(opts = {}) {
   }
 
   await _writeMetadataFile(partition, contents)
-
+  await afs.close()
   return contents
 }
 
@@ -91,7 +91,7 @@ async function writeKey(opts = {}) {
     keyringOpts = {}
   } = opts
 
-  const partition = await _getEtcPartition(opts)
+  const { afs, partition } = await _getEtcPartition(opts)
   try {
     await validate({
       did,
@@ -112,6 +112,7 @@ async function writeKey(opts = {}) {
 
   await _writeMetadataFile(partition, contents)
   debug('%s written to metadata', key)
+  await afs.close()
   return contents
 }
 
@@ -140,7 +141,7 @@ async function writeKeys(opts = {}) {
     keyringOpts = {}
   } = opts
 
-  const partition = await _getEtcPartition(opts)
+  const { afs, partition } = await _getEtcPartition(opts)
   try {
     await validate({
       did,
@@ -161,6 +162,7 @@ async function writeKeys(opts = {}) {
 
   await _writeMetadataFile(partition, contents)
   debug('%s written to metadata', keys)
+  await afs.close()
   return contents
 }
 
@@ -213,7 +215,7 @@ async function delKey(opts) {
     keyringOpts = {}
   } = opts
 
-  const partition = await _getEtcPartition(opts)
+  const { afs, partition } = await _getEtcPartition(opts)
   try {
     await validate({
       did,
@@ -234,6 +236,7 @@ async function delKey(opts) {
   await _writeMetadataFile(partition, contents)
 
   debug('%s removed from metadata', key)
+  await afs.close()
   return contents
 }
 
@@ -249,13 +252,15 @@ async function clear(opts) {
     throw new TypeError('DID URI must be a non-empty string.')
   }
 
-  const partition = await _getEtcPartition(opts)
+  const { afs, partition } = await _getEtcPartition(opts)
   if (!(await _metadataFileExists(partition))) {
     throw new Error('No metadata to clear.')
   }
 
   // sets metadata contents to {}
   await _createMetadataFile(partition)
+  await afs.close()
+  debug('metadata contents cleared')
 }
 
 /**
@@ -271,8 +276,11 @@ async function readFile(opts) {
     throw new TypeError('DID URI must be a non-empty string.')
   }
 
-  const partition = await _getEtcPartition(opts)
-  return _readMetadataFile(partition)
+  const { afs, partition } = await _getEtcPartition(opts)
+  const results = await _readMetadataFile(partition)
+  await afs.close()
+
+  return results
 }
 
 async function _readMetadataFile(partition) {
@@ -303,13 +311,14 @@ async function _metadataFileExists(partition) {
 
 async function _getEtcPartition(opts) {
   let partition
+  let afs
   try {
-    const { afs } = await create(opts)
+    ({ afs } = await create(opts))
     partition = afs.partitions.etc
   } catch (err) {
     throw err
   }
-  return partition
+  return { afs, partition }
 }
 
 module.exports = {
