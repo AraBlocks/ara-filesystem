@@ -1,10 +1,10 @@
-## [0.5.3](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.3) (2018-11-12)
+## [0.5.4](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.4) (2018-11-13)
 
 
 ### Bug Fixes
 
 * use contracts storage for commit ([a89dfe9](https://github.com/AraBlocks/ara-filesystem/commit/a89dfe9))
-* **metadata:** close afs after metadata read/write ([b3b18dd](https://github.com/AraBlocks/ara-filesystem/commit/b3b18dd))
+* **metadata:** close afs after metadata read/write ([976af08](https://github.com/AraBlocks/ara-filesystem/commit/976af08))
 * **package.json:** Bump ara-context to 0.4.x ([685218d](https://github.com/AraBlocks/ara-filesystem/commit/685218d)), closes [AraBlocks/ara-context#9](https://github.com/AraBlocks/ara-context/issues/9)
 
 
