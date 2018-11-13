@@ -73,7 +73,7 @@ async function setPrice(opts) {
   price = token.expandTokenValue(price)
 
   try {
-    const transaction = await tx.create({
+    const { tx: transaction, ctx } = await tx.create({
       account: acct,
       to: proxy,
       data: {
@@ -86,10 +86,14 @@ async function setPrice(opts) {
     })
 
     if (estimate) {
-      return tx.estimateCost(transaction)
+      const cost = tx.estimateCost(transaction)
+      ctx.close()
+      return cost
     }
 
-    return tx.sendSignedTransaction(transaction)
+    const receipt = await tx.sendSignedTransaction(transaction)
+    ctx.close()
+    return receipt
   } catch (err) {
     throw new Error(`This AFS has not been committed to the network, 
       please commit before trying to set a price.`)
