@@ -73,7 +73,7 @@ async function ondeploy(argv) {
     } catch (err) {
       onfatal(err)
     }
-    info(`file(s) successfully deployed to ${result}`)
+    info(`proxy successfully deployed to ${result}`)
   } else {
     // exit
     onfatal()
