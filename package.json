@@ -1,6 +1,6 @@
 {
   "name": "ara-filesystem",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "The Ara FileSystem, isolated and secure file systems backed by Ara identities.",
   "main": "index.js",
   "bin": {
@@ -50,11 +50,11 @@
     "ara-console": "github:arablocks/ara-console#semver:0.2.x",
     "ara-contracts": "github:arablocks/ara-contracts#semver:0.4.x",
     "ara-crypto": "github:arablocks/ara-crypto#semver:0.7.x",
-    "ara-identity": "github:arablocks/ara-identity#semver:0.30.x",
+    "ara-identity": "github:arablocks/ara-identity#semver:0.31.x",
     "ara-network": "github:arablocks/ara-network#1.0.0-beta.3",
     "ara-runtime-configuration": "github:arablocks/ara-runtime-configuration#semver:1.1.x",
     "ara-secret-storage": "github:arablocks/ara-secret-storage#semver:0.1.x",
-    "ara-util": "github:arablocks/ara-util#semver:0.7.x",
+    "ara-util": "github:arablocks/ara-util#semver:0.8.x",
     "cfsnet": "github:arablocks/cfsnet#semver:0.12.x",
     "cli-width": "^2.2.0",
     "cross-spawn": "^6.0.5",
@@ -90,7 +90,7 @@
     "table": "^4.0.3",
     "toiletdb": "^1.4.1",
     "unixify": "^1.0.0",
-    "web3": "^1.0.0-beta.35",
+    "web3": "^1.0.0-beta.36",
     "which": "^1.3.1",
     "yargs": "^11.1.0"
   },

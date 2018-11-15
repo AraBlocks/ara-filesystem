@@ -6,7 +6,7 @@ const { promptForPassword, onfatal } = require('../lib/util')
 const { createProgram } = require('../lib/program')
 const { AID_PREFIX } = require('../constants')
 const { info } = require('ara-console')
-const afs = require('../')
+const { create } = require('../create')
 
 // yargs program command line interface instance
 const program = createProgram({
@@ -32,6 +32,11 @@ const { argv } = program
         type: 'string',
         alias: 'rn',
         describe: 'Network name of the key for the DID resolver in the keyring',
+      })
+      .option('quiet', {
+        alias: 'q',
+        default: false,
+        describe: 'Only output errors and results'
       })
   }, oncreate)
 
@@ -65,15 +70,21 @@ async function oncreate(argv) {
   }
 
   const { password } = await promptForPassword()
+  if (!argv.quiet) { process.stdout.write('\n') }
+
   let arafs
   try {
-    arafs = await afs.create({ owner, password, keyringOpts })
+    arafs = await create({ owner, password, keyringOpts })
   } catch (err) { onfatal(err) }
 
-  info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
-  info('Please safely store the following 12 word mnemonic phrase for this AFS.' +
-    ' This phrase will be required to restore and delete this AFS.' +
-    ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
-
+  if (!argv.quiet) {
+    info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
+    info('Please safely store the following 12 word mnemonic phrase for this AFS.' +
+      ' This phrase will be required to restore and delete this AFS.' +
+      ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
+  } else {
+    process.stdout.write(`${arafs.afs.did};;${arafs.mnemonic}`)
+    process.stdout.write('\n')
+  }
   arafs.afs.close()
 }

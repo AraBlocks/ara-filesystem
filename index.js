@@ -21,5 +21,5 @@ module.exports = {
   create,
   remove,
   commit,
-  add,
+  add
 }

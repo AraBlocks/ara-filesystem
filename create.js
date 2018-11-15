@@ -30,7 +30,7 @@ const {
 
 const {
   validate,
-  web3: { toHex }
+  transform: { toHexString }
 } = require('ara-util')
 
 /**
@@ -156,7 +156,7 @@ async function create(opts) {
     mnemonic = afsId.mnemonic
 
     const { publicKey, secretKey } = afsId
-    const afsDid = toHex(publicKey)
+    const afsDid = toHexString(publicKey)
 
     let afsDdo
     try {
@@ -171,7 +171,7 @@ async function create(opts) {
       })
 
       // metadata partition publicKey
-      const metadataPublicKey = toHex(afs.partitions.etc.key)
+      const metadataPublicKey = toHexString(afs.partitions.etc.key)
 
       // recreate identity with additional publicKey
       const afsId = await createIdentity({
@@ -185,7 +185,7 @@ async function create(opts) {
       if (!ddo) {
         await aid.archive(afsId, keyringOpts.archiver)
 
-        afsDdo = await aid.resolve(toHex(afsId.publicKey), keyringOpts.resolver)
+        afsDdo = await aid.resolve(toHexString(afsId.publicKey), keyringOpts.resolver)
 
         if (null == afsDdo || 'object' !== typeof afsDdo) {
           throw new TypeError('AFS identity not successfully resolved.')
