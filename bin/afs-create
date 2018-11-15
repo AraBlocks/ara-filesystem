@@ -86,6 +86,5 @@ async function oncreate(argv) {
     process.stdout.write(`${arafs.afs.did};;${arafs.mnemonic}`)
     process.stdout.write('\n')
   }
-  // console.log(process._getActiveHandles())
   arafs.afs.close()
 }
