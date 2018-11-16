@@ -23,17 +23,7 @@ sleep 20
 
 cd ../..
 
-ava test/create.js --verbose
-ava test/add.js --verbose
-ava test/remove.js --verbose
-ava test/unarchive.js --verbose
-ava test/key-path.js --verbose
-ava test/metadata.js --verbose
-ava test/util.js --verbose
-ava test/storage.js --verbose
-ava test/destroy.js --verbose
-ava test/commit.js --verbose
-ava test/price.js --verbose
+ava test --verbose
 
 # cleanup
 pkill -f ganache
