@@ -23,11 +23,11 @@ const {
   commit
 } = require('../commit')
 
-const runValidCommit = async (t, opts) => {
-  const { did } = getAFS(t)
-  await deploy({ opts })
-  const result = await commit({ opts })
-  return { did, result }
+const runValidCommit = async (opts) => {
+  // never estimate deploy in these instances
+  await deploy({ ...Object.assign({}, opts, { estimate: false }) })
+  const result = await commit({ ...opts })
+  return { result }
 }
 
 const getAFS = (t) => {
@@ -100,7 +100,8 @@ test('commit() incorrect password', async (t) => {
 })
 
 test.serial("commit() no changes to commit", async (t) => {
-  await runValidCommit(t, { did, password })
+  const { did } = getAFS(t)
+  await runValidCommit({ did, password })
   await t.throwsAsync(commit({ did, password }), Error)
 })
 
@@ -110,14 +111,15 @@ test.serial("commit() staged file successfully deleted", async (t) => {
   await add({ did, paths: [ file ], password })
 
   const path = generateStagedPath(did)
-  await runValidCommit(t, { did, password })
+  await runValidCommit({ did, password })
   t.throws(() => fs.accessSync(path))
 })
 
 test.serial("commit() commit with price", async (t) => {
   const { did } = getAFS(t)
+  console.log(did)
   const price = 100
-  const { result: receipt } = await runValidCommit(t, {
+  const { result: receipt } = await runValidCommit({
     password,
     price,
     did
@@ -129,7 +131,7 @@ test.serial("commit() commit with price", async (t) => {
 
 test.serial("commit() estimate gas cost without setPrice", async (t) => {
   const { did } = getAFS(t)
-  const { result } = await runValidCommit(t, {
+  const { result } = await runValidCommit({
     estimate: true,
     password,
     did
@@ -139,7 +141,7 @@ test.serial("commit() estimate gas cost without setPrice", async (t) => {
 
 test.serial("commit() estimate gas cost with setPrice", async (t) => {
   const { did } = getAFS(t)
-  const { result } = await runValidCommit(t, {
+  const { result } = await runValidCommit({
     estimate: true,
     price: 100,
     password,
