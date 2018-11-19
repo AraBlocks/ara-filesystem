@@ -444,7 +444,7 @@ module.exports = (async function main() {
     fs.mkdirSync(argv.output)
   }
 
-  parentCommand = files.sort((a, b) => a.length > b.length)[0]
+  parentCommand = files.sort((a, b) => a.length - b.length)[0]
 
   console.log(`Setting \`${parentCommand}\` as 'parent command'`)
 
