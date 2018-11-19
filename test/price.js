@@ -1,5 +1,6 @@
 /* eslint quotes: "off" */
 
+const { deploy } = require('../deploy')
 const { commit } = require('../commit')
 const test = require('ava')
 
@@ -72,6 +73,7 @@ test("setPrice(opts) no committed proxy", async (t) => {
 
 test.serial("setPrice(opts) estimate", async (t) => {
   const { did } = getAFS(t)
+  await deploy({ did, password })
   await commit({ did, password })
   const estimation = await setPrice({
     did,
@@ -95,6 +97,7 @@ test("getPrice(opts) invalid opts", async (t) => {
 
 test.serial("setPrice()/getPrice()", async (t) => {
   const { did } = getAFS(t)
+  await deploy({ did, password })
   await commit({ did, password })
 
   const price = 25
