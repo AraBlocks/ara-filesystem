@@ -34,12 +34,7 @@ const { argv } = program
         describe: 'Force destroy operation',
       })
   }, ondestroy)
-
-// Emit program usage help
-if (0 === argv._.length && argv.help) {
-  program.showHelp()
-  process.exit(0)
-}
+  .help('h')
 
 async function ondestroy(argv) {
   const {

@@ -36,6 +36,7 @@ const { argv } = program
         describe: 'Force set price operation',
       })
   }, onsetprice)
+  .help('h')
   .command('get <did>', 'Return the price for a given AFS', (_) => {
     _
       .positional('did', {
@@ -43,12 +44,7 @@ const { argv } = program
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, ongetprice)
-
-// Emit program usage help
-if (0 === argv._.length && argv.help) {
-  program.showHelp()
-  process.exit(0)
-}
+  .help('h')
 
 async function onsetprice(argv) {
   const { did } = argv

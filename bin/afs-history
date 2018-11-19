@@ -25,12 +25,7 @@ const { argv } = program
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onhistory)
-
-// Emit program usage help
-if (0 === argv._.length && argv.help) {
-  program.showHelp()
-  process.exit(0)
-}
+  .help('h')
 
 async function onhistory(argv) {
   let { did } = argv
