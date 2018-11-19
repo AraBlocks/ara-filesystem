@@ -1,20 +1,11 @@
-## [0.5.5](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.5) (2018-11-15)
+## [0.5.6](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.6) (2018-11-19)
 
 
 ### Bug Fixes
 
-* close context after estimate ([079787b](https://github.com/AraBlocks/ara-filesystem/commit/079787b))
-* close context after estimate ([0947a74](https://github.com/AraBlocks/ara-filesystem/commit/0947a74))
-* **metadata:** close afs after metadata read/write ([976af08](https://github.com/AraBlocks/ara-filesystem/commit/976af08))
-* info msg ([f6aae96](https://github.com/AraBlocks/ara-filesystem/commit/f6aae96))
-* **package.json:** Bump ara-context to 0.4.x ([685218d](https://github.com/AraBlocks/ara-filesystem/commit/685218d)), closes [AraBlocks/ara-context#9](https://github.com/AraBlocks/ara-context/issues/9)
-* more depr function updates ([128e333](https://github.com/AraBlocks/ara-filesystem/commit/128e333))
-* more depr function updates ([8d67980](https://github.com/AraBlocks/ara-filesystem/commit/8d67980))
-* more depr function updates ([10c172e](https://github.com/AraBlocks/ara-filesystem/commit/10c172e))
-* more depr function updates ([ad3fbae](https://github.com/AraBlocks/ara-filesystem/commit/ad3fbae))
-* more depr function updates ([9c276ea](https://github.com/AraBlocks/ara-filesystem/commit/9c276ea))
-* more depr function updates ([81f6ee7](https://github.com/AraBlocks/ara-filesystem/commit/81f6ee7))
 * use contracts storage for commit ([a89dfe9](https://github.com/AraBlocks/ara-filesystem/commit/a89dfe9))
+* **metadata:** close afs after metadata read/write ([976af08](https://github.com/AraBlocks/ara-filesystem/commit/976af08))
+* **package.json:** Bump ara-context to 0.4.x ([685218d](https://github.com/AraBlocks/ara-filesystem/commit/685218d)), closes [AraBlocks/ara-context#9](https://github.com/AraBlocks/ara-context/issues/9)
 
 
 ### Features
