@@ -3,6 +3,7 @@
 const { PASSWORD: password } = require('./_constants')
 const { randomBytes } = require('ara-crypto')
 const { getPrice } = require('../price')
+const { deploy } = require('../deploy')
 const { resolve } = require('path')
 const { add } = require('../add')
 const pify = require('pify')
@@ -24,6 +25,7 @@ const {
 
 const runValidCommit = async (t) => {
   const { did } = getAFS(t)
+  await deploy({ did, password })
   await commit({ did, password })
   return did
 }
