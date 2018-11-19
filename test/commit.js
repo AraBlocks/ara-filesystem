@@ -117,7 +117,6 @@ test.serial("commit() staged file successfully deleted", async (t) => {
 
 test.serial("commit() commit with price", async (t) => {
   const { did } = getAFS(t)
-  console.log(did)
   const price = 100
   const { result: receipt } = await runValidCommit({
     password,
