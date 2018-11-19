@@ -23,11 +23,11 @@ const {
   commit
 } = require('../commit')
 
-const runValidCommit = async (t) => {
+const runValidCommit = async (t, opts) => {
   const { did } = getAFS(t)
-  await deploy({ did, password })
-  await commit({ did, password })
-  return did
+  await deploy({ opts })
+  const result = await commit({ opts })
+  return { did, result }
 }
 
 const getAFS = (t) => {
@@ -100,7 +100,7 @@ test('commit() incorrect password', async (t) => {
 })
 
 test.serial("commit() no changes to commit", async (t) => {
-  const did = await runValidCommit(t)
+  await runValidCommit(t, { did, password })
   await t.throwsAsync(commit({ did, password }), Error)
 })
 
@@ -110,14 +110,18 @@ test.serial("commit() staged file successfully deleted", async (t) => {
   await add({ did, paths: [ file ], password })
 
   const path = generateStagedPath(did)
-  await runValidCommit(t)
+  await runValidCommit(t, { did, password })
   t.throws(() => fs.accessSync(path))
 })
 
 test.serial("commit() commit with price", async (t) => {
   const { did } = getAFS(t)
   const price = 100
-  const receipt = await commit({ did, password, price })
+  const { result: receipt } = await runValidCommit(t, {
+    password,
+    price,
+    did
+  })
   const queriedPrice = await getPrice({ did })
   t.is(price, Number(queriedPrice))
   t.true('object' === typeof receipt)
@@ -125,17 +129,21 @@ test.serial("commit() commit with price", async (t) => {
 
 test.serial("commit() estimate gas cost without setPrice", async (t) => {
   const { did } = getAFS(t)
-  const result = await commit({ did, password, estimate: true })
+  const { result } = await runValidCommit(t, {
+    estimate: true,
+    password,
+    did
+  })
   t.true(0 < Number(result))
 })
 
 test.serial("commit() estimate gas cost with setPrice", async (t) => {
   const { did } = getAFS(t)
-  const result = await commit({
-    did,
-    password,
+  const { result } = await runValidCommit(t, {
     estimate: true,
-    price: 100
+    price: 100,
+    password,
+    did
   })
   t.true(0 < Number(result))
 })
