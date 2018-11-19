@@ -26,12 +26,7 @@ const { argv } = program
         describe: 'The file(s) you wish to add to AFS'
       })
   }, onadd)
-
-// Emit program usage help
-if (0 === argv._.length && argv.help) {
-  program.showHelp()
-  process.exit(0)
-}
+  .help('h')
 
 async function onadd(argv) {
   const [ ...paths ] = argv.pathspec

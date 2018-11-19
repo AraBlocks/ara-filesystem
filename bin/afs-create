@@ -39,12 +39,7 @@ const { argv } = program
         describe: 'Only output errors and results'
       })
   }, oncreate)
-
-// Emit program usage help
-if (0 === argv._.length && argv.help) {
-  program.showHelp()
-  process.exit(0)
-}
+  .help('h')
 
 async function oncreate(argv) {
   let { owner } = argv

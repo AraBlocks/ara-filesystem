@@ -26,12 +26,7 @@ const { argv } = program
         describe: 'The path where the AFS should be extracted.'
       })
   }, onunarchive)
-
-// Emit program usage help
-if (0 === argv._.length && argv.help) {
-  program.showHelp()
-  process.exit(0)
-}
+  .help('h')
 
 async function onunarchive(argv) {
   const {
