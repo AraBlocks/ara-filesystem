@@ -57,9 +57,6 @@ test("destroy() valid params without commit", async (t) => {
   const afsPath = createAFSKeyPath(did)
   await t.notThrowsAsync(pify(fs.access)(afsPath))
 
-  // destroy operation
-  await t.notThrowsAsync(destroy({ did }))
-
   // ensure paths are removed
   await t.throwsAsync(pify(fs.access)(identityPath))
   await t.throwsAsync(pify(fs.access)(afsPath))
