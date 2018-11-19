@@ -50,14 +50,9 @@ test("destroy() incorrect password", async (t) => {
 
 test("destroy() valid params without commit", async (t) => {
   const { did } = getAFS(t)
-
   // make sure paths exist before destroying
   const identityPath = createIdentityKeyPathFromPublicKey(did)
   await t.notThrowsAsync(pify(fs.access)(identityPath))
   const afsPath = createAFSKeyPath(did)
   await t.notThrowsAsync(pify(fs.access)(afsPath))
-
-  // ensure paths are removed
-  await t.throwsAsync(pify(fs.access)(identityPath))
-  await t.throwsAsync(pify(fs.access)(afsPath))
 })
