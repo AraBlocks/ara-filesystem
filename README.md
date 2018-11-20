@@ -2,13 +2,13 @@
 ========
 [![Build Status](https://travis-ci.com/AraBlocks/ara-filesystem.svg?token=34qxpAeMHQ3yJvunfTbQ&branch=master)](https://travis-ci.com/AraBlocks/ara-filesystem)
 
-The Ara FileSystem, isolated and secure file systems backed by Ara identities.
+The Ara Filesystem, standalone and secure filesystems backed by Ara identities.
 
-## Status
+## Stability
 
-This project is still in alpha development.
+> [Stability][stability-index]: 2 - Stable. Stable. Compatibility with the npm ecosystem is a high priority.
 
-> **Important**: While this project is under active development, run `npm link` in `ara-filesystem` directory with `ara-identity`, `ara-util`, `ara-contracts`, `ara-network`, `ara-network-node-identity-archiver`, and `ara-network-node-identity-resolver` cloned locally.
+Although the API is stable, this project is still in alpha development and is not yet ready to be used in a production environment.
 
 ## Dependencies
 
@@ -18,65 +18,12 @@ This project is still in alpha development.
 ## Installation
 
 ```sh
-$ npm install --save ara-filesystem
+$ npm install ara-filesystem --save
 ```
 
 ## Usage
 
->**Important**: Each CLI command requires the password of the owner identity (the one created with `aid create`). Do not forget this password, as it's the only way to interact with the AFS.
-
-### Prerequisites
-
-- **Note:** There is an `install-afs` script in `/bin`, move it to the parent folder of this folder (`$ cd ..`) and run it. You shouldn't have to do any installation, linking or secret generation.
-- Clone the following repositories
-  - `ara-identity`
-  - `ara-contracts`
-  - `ara-util`
-  - `ara-network`
-  - `ara-network-node-identity-archiver`
-  - `ara-network-node-identity-resolver`
-- Be sure to `npm install` and `npm link` for each
-- Test the CLI by running the following commands,
-  - `$ aid --help`
-  - `$ ann --help`
-  - `$ ank --help`
-
-- Generate secrets for both the Archiver & Resolver nodes
-
-      $ ank -i <did> -s ara-archiver -n remote1 -o ~/.ara/keyrings/ara-archiver  // Generating secrets for the archiver node
-      $ ank -i <did> -s ara-resolver -n remote2 -o ~/.ara/keyrings/ara-resolver  // Generating secrets for the resolver node
-
-- Once the secrets are generated, the Archiver & Resolver Network nodes can be started.
-  - Be sure to have cloned the [archiver](https://github.com/AraBlocks/ara-network-node-identity-archiver) and [resolver](https://github.com/AraBlocks/ara-network-node-identity-resolver) repositories
-  - Ensure you have ran `npm install` in each of the repositories
-  - Open the repository folder in 2 separate windows and run the below command,
-      ```sh
-      $ ann -t . -s ara-archiver -n remote1 -k ~/.ara/keyrings/ara-archiver -i <did>  // in 'ara-network-node-identity-archiver'
-      $ ann -t . -s ara-resolver -n remote2 -k ~/.ara/keyrings/ara-resolver -i <did>  // in 'ara-network-node-identity-resolver'
-      ```
-- To communicate with the [Ara privatenet blockchain](https://github.com/AraBlocks/ara-privatenet) and deploy an AFS proxy, you must be running a local geth node.
-
-### Create an Ara Identity
-
-Run the create command found in [aid](https://github.com/AraBlocks/ara-identity).
-
-```sh
-$ aid create
-```
-
-> **Important**: Do not lose your password and mnemonic as your account cannot be recovered without them.
-
-Archive the identity.
-
-```sh
-$ aid archive <did> -s ara-archiver -n remote1 -k ~/.ara/keyrings/ara-archiver.pub
-```
-
-Once successfully archived, resolve the identity:
-
-```sh
-$ aid resolve <did> -s ara-resolver -n remote2 -k ~/.ara/keyrings/ara-resolver.pub --cache==false
-```
+>**Important**: Each CLI command that makes changes to the AFS requires the password of the owner identity (the one created with `aid create`). Do not forget this password, as it's the only way to update the AFS.
 
 ### Create an AFS
 
@@ -158,6 +105,7 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 * [async unarchive(opts)](#unarchive)
 * [async metadata.writeFile(opts)](#writefile)
 * [async metadata.writeKey(opts)](#writekey)
+* [async metadata.writeKeys(opts)](#writekeys)
 * [async metadata.readKey(opts)](#readkey)
 * [async metadata.delKey(opts)](#delkey)
 * [async metadata.clear(opts)](#clear)
@@ -173,23 +121,26 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 <a name="create"></a>
 ### `async create(opts)`
 
-> **Stability: 2** Stable
-
-Creates/obtains and returns a reference to an `AFS`.
+If `owner` is given, this function will create a new AFS with the owning identity `owner`. If `did` is given, it attempts to get a reference to a previously created AFS.
 
 - `opts`
   - `did` - The `DID` of an existing `AFS`
   - `owner` - `DID` of the owner of the `AFS` to be created
-  - `password` - The password of the `owner` of this `AFS`
+  - `password` - The password of the `owner` of this `AFS`, this is only required for writing to the AFS.
   - `storage` - optional Storage function to use for the `AFS`
   - `keyringOpts` - optional Keyring options
 
 To create a new `AFS`:
 
 ```js
+const aid = require('ara-identity')
+const { create } = require('ara-filesystem')
+
 const identity = await aid.create({ context, password })
 await writeIdentity(identity)
 const { publicKey: owner } = identity
+
+
 const { afs } = await create({ owner, password })
 ```
 
@@ -197,22 +148,24 @@ To obtain a reference to an existing `AFS`:
 
 ```js
 const did = did:ara:df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
-const { afs } = await create({ did, password })
+const { afs } = await create({ did })
 ```
+
+>**Note**: Either `did` or `owner` is required, but not both.
 
 <a name="destroy"></a>
 ### `async destroy(opts)`
 
-> **Stability: 2** Stable
-
-Destroys the local copy of an `AFS` and unlists it from the blockchain (if owner).
+Destroys the local copy of an `AFS` and unlists it from the blockchain (if owner), effectively removing it from the Ara network.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to be destroyed
   - `password` - The password of the owner of this `AFS`
   - `mnemonic` - The mnemonic for this `AFS`
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { create, destroy } = require('ara-filesystem')
 const { afs, mnemonic } = await create({ owner, password })
 const { did } = afs
 await destroy({
@@ -225,8 +178,6 @@ await destroy({
 <a name="add"></a>
 ### `async add(opts)`
 
-> **Stability: 2** Stable
-
 Adds one or more files to an existing `AFS`.
 
 - `opts`
@@ -234,9 +185,11 @@ Adds one or more files to an existing `AFS`.
   - `password` - The password of the owner of this `AFS`
   - `force` - Force add the path(s)
   - `paths` - The path(s) of the files to add
+  - `keyringOpts` - optional Keyring options
 
 ```js
-let { afs, mnemonic } = await create({ owner, password })
+const { create, add } = require('ara-filesystem')
+let { afs } = await create({ owner, password })
 const { did } = afs
 const paths = ['./index.js', './add.js', './picture.png']
 afs = await add({
@@ -249,16 +202,16 @@ afs = await add({
 <a name="remove"></a>
 ### `async remove(opts)`
 
-> **Stability: 2** Stable
-
 Removes one or more files from an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` where the files are located
   - `password` - The password of the owner of this `AFS`
   - `paths` - The path(s) of the files to remove
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { remove } = require('ara-filesystem')
 const afs = await remove({
   did,
   paths,
@@ -269,16 +222,16 @@ const afs = await remove({
 <a name="deploy"></a>
 ### `async deploy(opts)`
 
-> **Stability: 2** Stable
-
-Deploys an AFS proxy to the network.
+Deploys an AFS proxy to the network. Returns the Ethereum address of the deploy contract (if not an estimation).
 
 - `opts`
   - `did` - `DID` of the `AFS` to deploy
   - `password` - Owner's password for this `AFS`
   - `estimate` - optional Flag to check cost of `deploy`
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { deploy } = require('ara-filesystem')
 const address = await deploy({
   password,
   did
@@ -295,17 +248,17 @@ const cost = await deploy({
 <a name="commit"></a>
 ### `async commit(opts)`
 
-> **Stability: 2** Stable
-
-Commits any changes to an `AFS` to the blockchain.
+Commits any changes to an `AFS` to the blockchain. Calling `deploy` is required before any commits can occur.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to commit
   - `password` - The password of the owner of this `AFS`
   - `estimate` - optional Flag to check cost of `commit`
   - `price` - optional Price in Ara tokens to set this `AFS`
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { commit } = require('ara-filesystem')
 const result = await commit({
   password,
   price,
@@ -324,17 +277,17 @@ const cost = await commit({
 <a name="setprice"></a>
 ### `async setPrice(opts)`
 
-> **Stability: 2** Stable
-
 Sets the price in Ara tokens of an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to set the price of
   - `password` - The password of the owner of this `AFS`
-  - `price` - The price in Ara tokens to set this `AFS`
+  - `price` - The price (in Ara) to purchase this `AFS`
   - `estimate` - optional Flag to check cost of `setPrice`
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { setPrice } = require('ara-filesystem')
 const price = 10
 await setPrice({
   did,
@@ -354,31 +307,14 @@ const cost = await setPrice({
 <a name="getprice"></a>
 ### `async getPrice(opts)`
 
-> **Stability: 2** Stable
-
 Gets the price in Ara tokens of an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to get the price of
 
 ```js
+const { getPrice } = require('ara-filesystem')
 const price = await getPrice({ did })
-```
-
-<a name="estimateprice"></a>
-### `async estimateSetPriceGasCost(opts)`
-
-> **Stability: 2** Stable
-
-Estimates the cost (in ETH) of setting the price of an `AFS`.
-
-- `opts`
-  - `did` - The `DID` of the `AFS` to set the price of
-  - `password` - The password of the owner of this `AFS`
-  - `price` - The price in Ara tokens to set this `AFS`
-
-```js
-const cost = await estimateSetPriceGasCost({ did, password, price })
 ```
 
 <a name="unarchive"></a>
@@ -386,13 +322,15 @@ const cost = await estimateSetPriceGasCost({ did, password, price })
 
 > **Stability: 2** Stable
 
-Unarchives an `AFS`.
+Unarchives (unzips) an `AFS` to a specified location.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to unarchive
   - `path` - optional Path to the `AFS`
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { unarchive } = require('ara-filesystem')
 await unarchive({
   did,
   path
@@ -402,17 +340,20 @@ await unarchive({
 <a name="writefile"></a>
 ### `async metadata.writeFile(opts)`
 
-> **Stability: 2** Stable
-
 Writes a metadata JSON file to the metadata partition of an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to write to
+  - `password` - The password of the owner of this `AFS`
   - `filepath` - The path of the metadata JSON file to copy
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { metadata } = require('ara-filesystem')
+
 const result = await metadata.writeFile({
   did,
+  password,
   filepath
 })
 ```
@@ -420,29 +361,52 @@ const result = await metadata.writeFile({
 <a name="writekey"></a>
 ### `async metadata.writeKey(opts)`
 
-> **Stability: 2** Stable
-
 Writes a metadata key/value pair to the metadata partition of an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to write to
+  - `password` - The password of the owner of this `AFS`
   - `key` - The key to write
   - `value` - The value to write
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { metadata } = require('ara-filesystem')
+
 const key = 'foo'
 const value = 'bar'
 const result = await metadata.writeKey({
   did,
   key,
-  value
+  value,
+  password
+})
+```
+
+<a name="writekeys"></a>
+### `async metadata.writeKeys(opts)`
+
+Writes multiple key/value pairs to the metadata parition of an `AFS`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to write to
+  - `password` - The password of the owner of this `AFS`
+  - `keys` - Object containing the key/value pairs to write
+  - `keyringOpts` - optional Keyring options
+
+```js
+const { metadata } = require('ara-filesystem')
+
+const keys = { foo: 'bar', hello: 'world' }
+await metadata.writeKeys({
+  did,
+  keys,
+  password
 })
 ```
 
 <a name="readkey"></a>
 ### `async metadata.readKey(opts)`
-
-> **Stability: 2** Stable
 
 Reads a metadata key from the metadata partition of an `AFS`.
 
@@ -451,6 +415,8 @@ Reads a metadata key from the metadata partition of an `AFS`.
   - `key` - The key to write
 
 ```js
+const { metadata } = require('ara-filesystem')
+
 const result = await metadata.readKey({
   did,
   key
@@ -460,15 +426,17 @@ const result = await metadata.readKey({
 <a name="delkey"></a>
 ### `async metadata.delKey(opts)`
 
-> **Stability: 2** Stable
-
 Deletes a metadata key/value pair from the metadata partition of an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to delete from
+  - `password` - The password of the owner of this `AFS`
   - `key` - The key to write
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { metadata } = require('ara-filesystem')
+
 await metadata.delKey({
   did,
   key
@@ -478,21 +446,19 @@ await metadata.delKey({
 <a name="clear"></a>
 ### `async metadata.clear(opts)`
 
-> **Stability: 2** Stable
-
 Empties all metadata contents of an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` whose metadata is to be emptied
+  - `password` - The password of the owner of this `AFS`
 
 ```js
-await afs.metadata.clear({ did })
+const { metadata } = require('ara-filesystem')
+await metadata.clear({ did })
 ```
 
 <a name="readfile"></a>
 ### `async metadata.readFile(opts)`
-
-> **Stability: 2** Stable
 
 Reads all metadata from an `AFS`.
 
@@ -500,6 +466,7 @@ Reads all metadata from an `AFS`.
   - `did` - The `DID` of the `AFS` to read from
 
 ```js
+const { metadata } = require('ara-filesystem')
 const contents = await metadata.readFile({ did })
 ```
 
@@ -511,6 +478,7 @@ Gets the estimated gas cost of requesting ownership of an AFS.
 >**Note**: This function takes the same arguments as `ownership.request(opts)`
 
 ```js
+const { ownership } = require('ara-filesystem')
 const cost = await ownership.estimateRequestGasCost(opts) // 0.015 ETH
 ```
 
@@ -522,6 +490,7 @@ Gets the estimated gas cost of revoking a previous ownership request.
 >**Note**: This function takes the same arguments as `ownership.revokeRequest(opts)`
 
 ```js
+const { ownership } = require('ara-filesystem')
 const cost = await ownership.estimateRevokeGasCost(opts) // 0.015 ETH
 ```
 
@@ -533,6 +502,7 @@ Gets the estimated gas cost of approving an ownership request.
 >**Note**: This function takes the same arguments as `ownership.approveTransfer(opts)`
 
 ```js
+const { ownership } = require('ara-filesystem')
 const cost = await ownership.estimateApproveGasCost(opts) // 0.015 ETH
 ```
 
@@ -546,8 +516,10 @@ Requests the transfer of ownership of an AFS to `requesterDid`. Must be approved
   - `contentDid` - `DID` of the AFS to request ownership for
   - `password` - password of the requester
   - `estimate` - optional Flag to check cost of `request`
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { ownership } = require('ara-filesystem')
 const requesterDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
 const password = 'pass'
 const contentDid = 'did:ara:114045f3883a21735188bb02de024a4e1451cb96c5dcc80bdfa1b801ecf81b85'
@@ -564,8 +536,10 @@ Revokes a previous request for AFS ownership transfer. This transaction will rev
   - `contentDid` - `DID` of the AFS to revoke ownership reequest for
   - `password` - password of the requester
   - `estimate` - optional Flag to check cost of `revokeRequest`
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { ownership } = require('ara-filesystem')
 const requesterDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
 const password = 'pass'
 const contentDid = 'did:ara:114045f3883a21735188bb02de024a4e1451cb96c5dcc80bdfa1b801ecf81b85'
@@ -583,12 +557,15 @@ Approves a pending transfer request, this officially transfers ownership for the
   - `newOwnerDid` - `DID` of the owner to transfer ownership to
   - `mnemonic` - mnemonic associated with the AFS
   - `estimate` - optional Flag to check cost of `approveTransfer`
+  - `keyringOpts` - optional Keyring options
 
 ```js
+const { ownership } = require('ara-filesystem')
 const did = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
 const password = 'pass'
 const newOwnerDid = 'did:ara:7dc039cfb220029c371d0f4aabf4a956ed0062d66c447df7b4595d7e11187271'
-const result = await ownership.approveOwnershipTransfer({ did, password, newOwnerDid })
+const mnemonic = 'cargo diary bracket crumble stable chief grief grab frost seven wet repeat'
+const result = await ownership.approveOwnershipTransfer({ did, password, newOwnerDid, mnemonic })
 ```
 
 <a name="claim"></a>
@@ -601,6 +578,22 @@ Fully claims ownership of an AFS after it has been transferred by the previous o
   - `newPassword` - new password for this AFS identity
   - `contentDid` - `DID` of the content to claim ownership for
   - `mnemonic` - mnemonic associated with the AFS to claim
+  - `keyringOpts` - optional Keyring options
+
+```js
+const { ownership } = require('ara-filesystem')
+const contentDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
+const currentPassword = 'generatedPassword'
+const newPassword = 'secureNewPassword'
+const mnemonic = 'cargo diary bracket crumble stable chief grief grab frost seven wet repeat'
+
+await ownership.claim({
+  currentPassword,
+  newPassword,
+  contentDid,
+  mnemonic
+})
+```
 
 ## Contributing
 - [Commit message format](/.github/COMMIT_FORMAT.md)
