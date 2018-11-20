@@ -5,7 +5,7 @@ const { create } = require('./create')
 const {
   METADATA_SIGNATURES_INDEX,
   SIGNATURES_WRITE_LENGTH,
-  HEADER_LENGTH, 
+  HEADER_LENGTH,
 } = require('./constants')
 
 const {
@@ -38,7 +38,7 @@ async function isUpdateAvailable(opts) {
     const updateVersion = localVersion + 1
 
     // offset to read from bc to see if update is available
-    const offset = HEADER_LENGTH + updateVersion * SIGNATURES_WRITE_LENGTH
+    const offset = HEADER_LENGTH + (updateVersion * SIGNATURES_WRITE_LENGTH)
 
     if (!(await proxyExists(did))) {
       return false
@@ -54,9 +54,7 @@ async function isUpdateAvailable(opts) {
     throw err
   }
 
-  return null === buf
-    ? false
-    : true
+  return null !== buf
 }
 
 function generateKeypair(password) {
