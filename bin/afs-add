@@ -27,6 +27,8 @@ const { argv } = program
       })
   }, onadd)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function onadd(argv) {
   const [ ...paths ] = argv.pathspec

@@ -27,6 +27,8 @@ const { argv } = program
       })
   }, onunarchive)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function onunarchive(argv) {
   const {

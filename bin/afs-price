@@ -36,7 +36,6 @@ const { argv } = program
         describe: 'Force set price operation',
       })
   }, onsetprice)
-  .help('h')
   .command('get <did>', 'Return the price for a given AFS', (_) => {
     _
       .positional('did', {
@@ -45,6 +44,8 @@ const { argv } = program
       })
   }, ongetprice)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function onsetprice(argv) {
   const { did } = argv

@@ -36,7 +36,6 @@ const { argv } = program
         describe: 'Print full metadata after write'
       })
   }, onmetadatawritekey)
-  .help('h')
   .command('read-key <did> <key>', "Read a key's value from AFS metadata", (_) => {
     _
       .positional('did', {
@@ -48,7 +47,6 @@ const { argv } = program
         describe: 'The key to write'
       })
   }, onmetadatareadkey)
-  .help('h')
   .command('delete-key <did> <key>', "Delete a key-value pair from the AFS' metadata file", (_) => {
     _
       .positional('did', {
@@ -65,7 +63,6 @@ const { argv } = program
         describe: 'Print full metadata after delete'
       })
   }, onmetadatadeletekey)
-  .help('h')
   .command('clear <did>', 'Clears all metadata from an AFS', (_) => {
     _
       .positional('did', {
@@ -73,7 +70,6 @@ const { argv } = program
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onmetadataclear)
-  .help('h')
   .command('print <did>', 'Prints current metadata for an AFS', (_) => {
     _
       .positional('did', {
@@ -81,7 +77,6 @@ const { argv } = program
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onmetadataprint)
-  .help('h')
   .command('write-file <did> <filepath>', 'Writes contents of entire file to metadata', (_) => {
     _
       .positional('did', {
@@ -90,6 +85,8 @@ const { argv } = program
       })
   }, onmetadatawritefile)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function onmetadatawritekey(argv) {
   const {
