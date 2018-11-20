@@ -1,9 +1,10 @@
-## [0.5.8](https://github.com/AraBlocks/ara-filesystem/compare/0.5.7...0.5.8) (2018-11-20)
+# [0.6.0](https://github.com/AraBlocks/ara-filesystem/compare/0.5.7...0.6.0) (2018-11-20)
 
 
 ### Features
 
-* show help if command provided is not valid ([ed71d9d](https://github.com/AraBlocks/ara-filesystem/commit/ed71d9d))
+* checking afs update available wip ([9b9edf9](https://github.com/AraBlocks/ara-filesystem/commit/9b9edf9))
+* show help if command provided is not valid ([16bbba2](https://github.com/AraBlocks/ara-filesystem/commit/16bbba2))
 
 
 
