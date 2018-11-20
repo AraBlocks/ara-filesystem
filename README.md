@@ -130,6 +130,8 @@ If `owner` is given, this function will create a new AFS with the owning identit
   - `storage` - optional Storage function to use for the `AFS`
   - `keyringOpts` - optional Keyring options
 
+Returns the `AFS` `object`.
+
 To create a new `AFS`:
 
 ```js
@@ -164,6 +166,8 @@ Destroys the local copy of an `AFS` and unlists it from the blockchain (if owner
   - `mnemonic` - The mnemonic for this `AFS`
   - `keyringOpts` - optional Keyring options
 
+If an estimate, returns the `cost` (in ETH), otherwise returns the transaction receipt.
+
 ```js
 const { create, destroy } = require('ara-filesystem')
 const { afs, mnemonic } = await create({ owner, password })
@@ -186,6 +190,8 @@ Adds one or more files to an existing `AFS`.
   - `force` - Force add the path(s)
   - `paths` - The path(s) of the files to add
   - `keyringOpts` - optional Keyring options
+
+Returns the `AFS` `object`.
 
 ```js
 const { create, add } = require('ara-filesystem')
@@ -210,6 +216,8 @@ Removes one or more files from an `AFS`.
   - `paths` - The path(s) of the files to remove
   - `keyringOpts` - optional Keyring options
 
+Returns the `AFS` `object`.
+
 ```js
 const { remove } = require('ara-filesystem')
 const afs = await remove({
@@ -229,6 +237,8 @@ Deploys an AFS proxy to the network. Returns the Ethereum address of the deploy 
   - `password` - Owner's password for this `AFS`
   - `estimate` - optional Flag to check cost of `deploy`
   - `keyringOpts` - optional Keyring options
+
+If an estimate, returns the `cost` (in ETH), otherwise returns the Ethereum address where the contract was deployed.
 
 ```js
 const { deploy } = require('ara-filesystem')
@@ -256,6 +266,8 @@ Commits any changes to an `AFS` to the blockchain. Calling `deploy` is required 
   - `estimate` - optional Flag to check cost of `commit`
   - `price` - optional Price in Ara tokens to set this `AFS`
   - `keyringOpts` - optional Keyring options
+
+If an estimate, returns the `cost` (in ETH), otherwise returns the transaction receipt.
 
 ```js
 const { commit } = require('ara-filesystem')
@@ -286,6 +298,8 @@ Sets the price in Ara tokens of an `AFS`.
   - `estimate` - optional Flag to check cost of `setPrice`
   - `keyringOpts` - optional Keyring options
 
+If an estimate, returns the `cost` (in ETH), otherwise returns the transaction receipt.
+
 ```js
 const { setPrice } = require('ara-filesystem')
 const price = 10
@@ -311,6 +325,8 @@ Gets the price in Ara tokens of an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to get the price of
+
+If an estimate, returns the `cost` (in ETH) as a `string`.
 
 ```js
 const { getPrice } = require('ara-filesystem')
@@ -348,6 +364,8 @@ Writes a metadata JSON file to the metadata partition of an `AFS`.
   - `filepath` - The path of the metadata JSON file to copy
   - `keyringOpts` - optional Keyring options
 
+Returns the updated metadata `object`.
+
 ```js
 const { metadata } = require('ara-filesystem')
 
@@ -369,6 +387,8 @@ Writes a metadata key/value pair to the metadata partition of an `AFS`.
   - `key` - The key to write
   - `value` - The value to write
   - `keyringOpts` - optional Keyring options
+
+Returns the updated metadata `object`.
 
 ```js
 const { metadata } = require('ara-filesystem')
@@ -394,6 +414,8 @@ Writes multiple key/value pairs to the metadata parition of an `AFS`.
   - `keys` - Object containing the key/value pairs to write
   - `keyringOpts` - optional Keyring options
 
+Returns the updated metadata `object`.
+
 ```js
 const { metadata } = require('ara-filesystem')
 
@@ -414,6 +436,8 @@ Reads a metadata key from the metadata partition of an `AFS`.
   - `did` - The `DID` of the `AFS` to read from
   - `key` - The key to write
 
+Returns the `value` of the metadata `key`.
+
 ```js
 const { metadata } = require('ara-filesystem')
 
@@ -433,6 +457,8 @@ Deletes a metadata key/value pair from the metadata partition of an `AFS`.
   - `password` - The password of the owner of this `AFS`
   - `key` - The key to write
   - `keyringOpts` - optional Keyring options
+
+Returns the updated metadata `object`.
 
 ```js
 const { metadata } = require('ara-filesystem')
@@ -465,6 +491,8 @@ Reads all metadata from an `AFS`.
 - `opts`
   - `did` - The `DID` of the `AFS` to read from
 
+Returns the updated metadata `object`.
+
 ```js
 const { metadata } = require('ara-filesystem')
 const contents = await metadata.readFile({ did })
@@ -476,6 +504,8 @@ const contents = await metadata.readFile({ did })
 Gets the estimated gas cost of requesting ownership of an AFS.
 
 >**Note**: This function takes the same arguments as `ownership.request(opts)`
+
+Returns the `cost` (in ETH) as a `string`.
 
 ```js
 const { ownership } = require('ara-filesystem')
@@ -489,6 +519,8 @@ Gets the estimated gas cost of revoking a previous ownership request.
 
 >**Note**: This function takes the same arguments as `ownership.revokeRequest(opts)`
 
+Returns the `cost` (in ETH) as a `string`.
+
 ```js
 const { ownership } = require('ara-filesystem')
 const cost = await ownership.estimateRevokeGasCost(opts) // 0.015 ETH
@@ -500,6 +532,8 @@ const cost = await ownership.estimateRevokeGasCost(opts) // 0.015 ETH
 Gets the estimated gas cost of approving an ownership request.
 
 >**Note**: This function takes the same arguments as `ownership.approveTransfer(opts)`
+
+Returns the `cost` (in ETH) as a `string`.
 
 ```js
 const { ownership } = require('ara-filesystem')
@@ -517,6 +551,8 @@ Requests the transfer of ownership of an AFS to `requesterDid`. Must be approved
   - `password` - password of the requester
   - `estimate` - optional Flag to check cost of `request`
   - `keyringOpts` - optional Keyring options
+
+Returns the transaction receipt as an `object`.
 
 ```js
 const { ownership } = require('ara-filesystem')
@@ -538,6 +574,8 @@ Revokes a previous request for AFS ownership transfer. This transaction will rev
   - `estimate` - optional Flag to check cost of `revokeRequest`
   - `keyringOpts` - optional Keyring options
 
+Returns the transaction receipt as an `object`.
+
 ```js
 const { ownership } = require('ara-filesystem')
 const requesterDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
@@ -558,6 +596,10 @@ Approves a pending transfer request, this officially transfers ownership for the
   - `mnemonic` - mnemonic associated with the AFS
   - `estimate` - optional Flag to check cost of `approveTransfer`
   - `keyringOpts` - optional Keyring options
+
+Returns `object`:
+  - `receipt` - transaction receipt
+  - `password` - randomly generated password
 
 ```js
 const { ownership } = require('ara-filesystem')
