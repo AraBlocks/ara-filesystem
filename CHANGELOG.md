@@ -1,3 +1,12 @@
+## [0.5.8](https://github.com/AraBlocks/ara-filesystem/compare/0.5.7...0.5.8) (2018-11-20)
+
+
+### Features
+
+* show help if command provided is not valid ([ed71d9d](https://github.com/AraBlocks/ara-filesystem/commit/ed71d9d))
+
+
+
 ## [0.5.7](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.7) (2018-11-20)
 
 
