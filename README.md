@@ -103,6 +103,7 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 * [async setPrice(opts)](#setprice)
 * [async getPrice(opts)](#getprice)
 * [async unarchive(opts)](#unarchive)
+* [async isUpdateAvailable(opts)](#isupdateavailable)
 * [async metadata.writeFile(opts)](#writefile)
 * [async metadata.writeKey(opts)](#writekey)
 * [async metadata.writeKeys(opts)](#writekeys)
@@ -351,6 +352,22 @@ await unarchive({
   did,
   path
 })
+```
+
+<a name="isupdateavailable"></a>
+### `async isUpdateAvailable(opts)`
+
+Compares local `AFS` version to what has been published. Returns `true` if the published `AFS` version is greater than the local, otherwise `false`.
+
+- `opts`
+  - `did` - The `DID` of the `AFS` to check
+  - `keyringOpts` - optional Keyring options
+
+Returns a `boolean`.
+
+```js
+const { isUpdateAvailable } = require('ara-filesystem')
+const available = await isUpdateAvailable({ did: 'df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9' })
 ```
 
 <a name="writefile"></a>
