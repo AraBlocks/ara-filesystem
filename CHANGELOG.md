@@ -1,19 +1,25 @@
-## [0.5.6](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.6) (2018-11-19)
+## [0.5.7](https://github.com/AraBlocks/ara-filesystem/compare/0.2.13...0.5.7) (2018-11-20)
 
 
 ### Bug Fixes
 
-* use contracts storage for commit ([a89dfe9](https://github.com/AraBlocks/ara-filesystem/commit/a89dfe9))
 * **metadata:** close afs after metadata read/write ([976af08](https://github.com/AraBlocks/ara-filesystem/commit/976af08))
 * **package.json:** Bump ara-context to 0.4.x ([685218d](https://github.com/AraBlocks/ara-filesystem/commit/685218d)), closes [AraBlocks/ara-context#9](https://github.com/AraBlocks/ara-context/issues/9)
+* **scripts/test:** revert commented out ganache ([d6133ee](https://github.com/AraBlocks/ara-filesystem/commit/d6133ee))
+* fix commit tests ([ed1de7e](https://github.com/AraBlocks/ara-filesystem/commit/ed1de7e))
+* fix tests wip ([0a9ab40](https://github.com/AraBlocks/ara-filesystem/commit/0a9ab40))
+* use contracts storage for commit ([a89dfe9](https://github.com/AraBlocks/ara-filesystem/commit/a89dfe9))
+* **test/destroy.js:** remove old test ([6f7f0a0](https://github.com/AraBlocks/ara-filesystem/commit/6f7f0a0))
+* **test/destroy.js:** remove rest of old test ([684a965](https://github.com/AraBlocks/ara-filesystem/commit/684a965))
 
 
 ### Features
 
-* separate deploy from commit ([ea99d9e](https://github.com/AraBlocks/ara-filesystem/commit/ea99d9e))
-* use updated contracts storage ([77119a8](https://github.com/AraBlocks/ara-filesystem/commit/77119a8))
 * **create:** Regenerate etc partition from key in DDO ([8c82cc3](https://github.com/AraBlocks/ara-filesystem/commit/8c82cc3))
 * **metadata:** writeKeys to allow for multiple key writes ([3c049d4](https://github.com/AraBlocks/ara-filesystem/commit/3c049d4))
+* added shipright to version hook ([b27512b](https://github.com/AraBlocks/ara-filesystem/commit/b27512b))
+* separate deploy from commit ([ea99d9e](https://github.com/AraBlocks/ara-filesystem/commit/ea99d9e))
+* use updated contracts storage ([77119a8](https://github.com/AraBlocks/ara-filesystem/commit/77119a8))
 
 
 
