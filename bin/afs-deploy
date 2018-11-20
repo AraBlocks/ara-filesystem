@@ -33,6 +33,8 @@ const { argv } = program
       })
   }, ondeploy)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function ondeploy(argv) {
   const {

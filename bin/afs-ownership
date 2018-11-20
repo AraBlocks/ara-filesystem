@@ -32,7 +32,6 @@ const { argv } = program
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onrequestownership)
-  .help('h')
   .command('revoke <requesterDid> <contentDid>', 'Revokes a previous request for ownership of an AFS', (_) => {
     _
       .positional('requester-did', {
@@ -44,7 +43,6 @@ const { argv } = program
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
   }, onrevokerequest)
-  .help('h')
   .command('approve <contentDid> <newOwnerDid>', 'Approves an ownership transfer', (_) => {
     _
       .positional('content-did', {
@@ -56,7 +54,6 @@ const { argv } = program
         describe: 'DID to transfer ownership to'
       })
   }, onapprovetransfer)
-  .help('h')
   .command('claim <contentDid>', "Claim an AFS' identity", (_) => {
     _
       .positional('content-did', {
@@ -65,6 +62,8 @@ const { argv } = program
       })
   }, onclaimownership)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function onrequestownership(argv) {
   const {

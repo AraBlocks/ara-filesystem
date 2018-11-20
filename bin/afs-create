@@ -40,6 +40,8 @@ const { argv } = program
       })
   }, oncreate)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function oncreate(argv) {
   let { owner } = argv

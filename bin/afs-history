@@ -26,6 +26,8 @@ const { argv } = program
       })
   }, onhistory)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function onhistory(argv) {
   let { did } = argv

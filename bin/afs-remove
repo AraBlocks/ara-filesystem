@@ -27,6 +27,8 @@ const { argv } = program
       })
   }, onremove)
   .help('h')
+  .recommendCommands()
+  .strict()
 
 async function onremove(argv) {
   const [ ...paths ] = argv.pathspec
