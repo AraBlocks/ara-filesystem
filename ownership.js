@@ -99,8 +99,8 @@ async function approveTransfer(opts) {
   }
 
   const {
+    keyringOpts = {},
     newOwnerDid,
-    keyringOpts,
     mnemonic,
     password,
     estimate,
@@ -163,9 +163,9 @@ async function claim(opts) {
   }
 
   const {
+    keyringOpts = {},
     currentPassword,
     newPassword,
-    keyringOpts,
     contentDid,
     mnemonic
   } = opts

@@ -131,7 +131,7 @@ async function writeKeys(opts = {}) {
   } else if (!opts.password || 'string' !== typeof opts.password) {
     throw new TypeError('Password must be non-empty string.')
   } else if (!opts.keys || 'object' !== typeof opts.keys) {
-    throw new TypeError('Expected opts.pairs to be an object.')
+    throw new TypeError('Expected opts.keys to be an object.')
   }
 
   const {
@@ -250,6 +250,25 @@ async function clear(opts) {
     throw new TypeError('Expecting opts to be an object.')
   } else if (!opts.did || 'string' !== typeof opts.did) {
     throw new TypeError('DID URI must be a non-empty string.')
+  } else if (!opts.password || 'string' !== typeof opts.password) {
+    throw new TypeError('Password must be non-empty string.')
+  }
+
+  const {
+    did,
+    password,
+    keyringOpts = {}
+  } = opts
+
+  try {
+    await validate({
+      did,
+      password,
+      keyringOpts,
+      label: 'clear'
+    })
+  } catch (err) {
+    throw err
   }
 
   const { afs, partition } = await _getEtcPartition(opts)
