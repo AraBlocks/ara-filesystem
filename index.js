@@ -1,3 +1,4 @@
+const { isUpdateAvailable } = require('./util')
 const { unarchive } = require('./unarchive')
 const ownership = require('./ownership')
 const { destroy } = require('./destroy')
@@ -11,6 +12,7 @@ const { add } = require('./add')
 const { setPrice, getPrice } = require('./price')
 
 module.exports = {
+  isUpdateAvailable,
   unarchive,
   ownership,
   setPrice,

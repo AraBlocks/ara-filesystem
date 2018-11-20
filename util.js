@@ -1,10 +1,63 @@
+const storage = require('ara-contracts/storage')
 const ss = require('ara-secret-storage')
+const { create } = require('./create')
+
+const {
+  METADATA_SIGNATURES_INDEX,
+  SIGNATURES_WRITE_LENGTH,
+  HEADER_LENGTH, 
+} = require('./constants')
+
+const {
+  getProxyAddress,
+  proxyExists
+} = require('ara-contracts/registry')
 
 const {
   blake2b,
   keyPair,
   randomBytes: cryptoRandomBytes
 } = require('ara-crypto')
+
+async function isUpdateAvailable(opts) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object')
+  } else if (!opts.did || 'string' !== typeof opts.did) {
+    throw new TypeError('Expecting DID to be non-empty string')
+  }
+
+  const {
+    keyringOpts = {},
+    did
+  } = opts
+
+  let buf
+  try {
+    const { afs } = await create({ did, keyringOpts })
+    const localVersion = afs.partitions.home.version
+    const updateVersion = localVersion + 1
+
+    // offset to read from bc to see if update is available
+    const offset = HEADER_LENGTH + updateVersion * SIGNATURES_WRITE_LENGTH
+
+    if (!(await proxyExists(did))) {
+      return false
+    }
+
+    const address = await getProxyAddress(did)
+    buf = await storage.read({
+      fileIndex: METADATA_SIGNATURES_INDEX,
+      address,
+      offset
+    })
+  } catch (err) {
+    throw err
+  }
+
+  return null === buf
+    ? false
+    : true
+}
 
 function generateKeypair(password) {
   const passHash = blake2b(Buffer.from(password))
@@ -52,10 +105,11 @@ function decryptJSON(keystore, password) {
 }
 
 module.exports = {
+  isUpdateAvailable,
   generateKeypair,
-  encrypt,
-  decrypt,
   encryptJSON,
   decryptJSON,
-  randomBytes
+  randomBytes,
+  encrypt,
+  decrypt,
 }
