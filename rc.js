@@ -9,7 +9,7 @@ const defaults = base => ({
     afs: {
       archive: {
         root: resolve(base.data.root, AFS_DIR),
-        store: resolve(base.data.root, AFS_DIR, 'nodes')
+        store: resolve(base.data.root, AFS_DIR, 'nodes.json')
       }
     }
   }

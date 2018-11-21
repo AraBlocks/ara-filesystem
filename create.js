@@ -5,9 +5,7 @@ const { createAFSKeyPath } = require('./key-path')
 const { defaultStorage } = require('./storage')
 const hasDIDMethod = require('has-did-method')
 const { createCFS } = require('cfsnet/create')
-const multidrive = require('multidrive')
 const crypto = require('ara-crypto')
-const { resolve } = require('path')
 const aid = require('ara-identity')
 const toilet = require('toiletdb')
 const extend = require('extend')
@@ -111,28 +109,31 @@ async function create(opts) {
     const etcKeyMatcher = key => 'metadata' === key.id.split('#')[1]
     const [ { publicKeyHex: etcKey } ] = ddo.publicKey.filter(etcKeyMatcher)
 
-    const drives = await _createMultidrive({
-      did,
-      writable,
-      storage,
-      proxy
+    const cache = await _getCache()
+    let cachedOpts = await pify(cache.read)(did) || {}
+    cachedOpts = extend(true, cachedOpts, {
+      id: cachedOpts.id || did,
+      path: cachedOpts.path || createAFSKeyPath(did),
     })
+    await pify(cache.write)(did, cachedOpts)
 
-    const path = createAFSKeyPath(did)
-    const key = Buffer.from(did, 'hex')
-
-    const opts = {
+    opts = extend(true, cachedOpts, opts, {
       did,
-      key,
-      path,
+      storage: defaultStorage(did, writable, storage, proxy),
+      key: Buffer.from(did, 'hex'),
       partitions: {
         etc: {
           key: etcKey
         }
       }
-    }
+    })
 
-    afs = await pify(drives.create)(opts)
+    try {
+      afs = await createCFS(opts)
+    } catch (err) {
+      await pify(cache.delete)(did)
+      throw err
+    }
 
     afs.did = did
     afs.ddo = ddo
@@ -210,41 +211,11 @@ async function create(opts) {
     mnemonic
   }
 
-  async function _createMultidrive({
-    did,
-    writable,
-    storage,
-    proxy
-  } = {}) {
-    await pify(mkdirp)(rc.network.afs.archive.store)
-    const nodes = resolve(rc.network.afs.archive.store, did)
-    const store = toilet(nodes)
-
-    const drives = await pify(multidrive)(
-      store,
-      async (opts, done) => {
-        opts.id = opts.did
-        opts.storage = defaultStorage(opts.did, writable, storage, proxy)
-
-        try {
-          const afs = await createCFS(opts)
-          return done(null, afs)
-        } catch (err) {
-          done(err)
-        }
-        return null
-      },
-
-      async (afs, done) => {
-        try {
-          await afs.close()
-        } catch (err) {
-          return done(err)
-        }
-        return done(null)
-      }
-    )
-    return drives
+  async function _getCache() {
+    await pify(mkdirp)(rc.network.afs.archive.root)
+    const store = toilet(rc.network.afs.archive.store)
+    await pify(store.open)()
+    return store
   }
 }
 
