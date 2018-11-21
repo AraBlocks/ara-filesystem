@@ -76,7 +76,6 @@
     "mirror-folder": "^3.0.0",
     "mkdirp": "^0.5.1",
     "ms": "^2.1.1",
-    "multidrive": "^5.2.0",
     "openzeppelin-solidity": "1.10.0",
     "pify": "^3.0.0",
     "pretty-bytes": "^4.0.2",
