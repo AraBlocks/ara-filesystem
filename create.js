@@ -86,6 +86,8 @@ async function create(opts) {
   let afs
   let mnemonic
   const writable = Boolean(password)
+  const cache = await _getCache()
+
   if (did) {
     let proxy
     if (!ddo) {
@@ -109,13 +111,15 @@ async function create(opts) {
     const etcKeyMatcher = key => 'metadata' === key.id.split('#')[1]
     const [ { publicKeyHex: etcKey } ] = ddo.publicKey.filter(etcKeyMatcher)
 
-    const cache = await _getCache()
+    // retrieve local options from cache
     let cachedOpts = await pify(cache.read)(did) || {}
-    cachedOpts = extend(true, cachedOpts, {
-      id: cachedOpts.id || did,
-      path: cachedOpts.path || createAFSKeyPath(did),
-    })
-    await pify(cache.write)(did, cachedOpts)
+    if (!cachedOpts.id || !cachedOpts.path) {
+      cachedOpts = extend(true, cachedOpts, {
+        id: did,
+        path: createAFSKeyPath(did),
+      })
+      await pify(cache.write)(did, cachedOpts)
+    }
 
     opts = extend(true, cachedOpts, opts, {
       did,
@@ -170,6 +174,13 @@ async function create(opts) {
         path,
         storage: defaultStorage(afsDid, writable, storage)
       })
+
+      // add local options to cache
+      const cachedOpts = {
+        id: afsDid,
+        path,
+      }
+      await pify(cache.write)(afsDid, cachedOpts)
 
       // metadata partition publicKey
       const metadataPublicKey = toHexString(afs.partitions.etc.key)
