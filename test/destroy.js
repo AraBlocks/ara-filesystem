@@ -33,22 +33,22 @@ test.afterEach(async (t) => {
   await cleanup(t)
 })
 
-test("destroy() invalid did", async (t) => {
+test.serial("destroy() invalid did", async (t) => {
   await t.throwsAsync(destroy(), TypeError, "Expecting non-empty string for DID")
   await t.throwsAsync(destroy({ did: 1234 }), TypeError, "Expecting non-empty string for DID")
 })
 
-test("destroy() invalid password", async (t) => {
+test.serial("destroy() invalid password", async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(destroy({ did, password: 1234 }), TypeError, "Expecting non-empty string for password")
 })
 
-test("destroy() incorrect password", async (t) => {
+test.serial("destroy() incorrect password", async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(destroy({ did, password: 'wrongPass' }), Error, "Incorrect password")
 })
 
-test("destroy() valid params without commit", async (t) => {
+test.serial("destroy() valid params without commit", async (t) => {
   const { did } = getAFS(t)
   // make sure paths exist before destroying
   const identityPath = createIdentityKeyPathFromPublicKey(did)

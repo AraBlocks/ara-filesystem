@@ -34,7 +34,7 @@ test.beforeEach(async (t) => {
 
 test.afterEach(async t => cleanup(t))
 
-test("setPrice(opts) invalid opts", async (t) => {
+test.serial("setPrice(opts) invalid opts", async (t) => {
   const { did } = getAFS(t)
 
   // opts
@@ -61,12 +61,12 @@ test("setPrice(opts) invalid opts", async (t) => {
   await t.throwsAsync(setPrice({ did, password, price: -10 }), TypeError)
 })
 
-test("setPrice(opts) incorrect password", async (t) => {
+test.serial("setPrice(opts) incorrect password", async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(setPrice({ did, password: 'wrong_pass', price: 100 }))
 })
 
-test("setPrice(opts) no committed proxy", async (t) => {
+test.serial("setPrice(opts) no committed proxy", async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(setPrice({ did, password, price: 100 }), Error)
 })
@@ -84,7 +84,7 @@ test.serial("setPrice(opts) estimate", async (t) => {
   t.true(0 < Number(estimation))
 })
 
-test("getPrice(opts) invalid opts", async (t) => {
+test.serial("getPrice(opts) invalid opts", async (t) => {
   // opts
   await t.throwsAsync(getPrice(), TypeError)
   await t.throwsAsync(getPrice([]), TypeError)
