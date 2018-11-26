@@ -1,17 +1,14 @@
 /* eslint-disable no-shadow */
 
 const { kEd25519VerificationKey2018 } = require('ld-cryptosuite-registry')
-const { createAFSKeyPath } = require('./key-path')
+const { createAFSKeyPath, getCache } = require('./key-path')
 const { defaultStorage } = require('./storage')
 const hasDIDMethod = require('has-did-method')
 const { createCFS } = require('cfsnet/create')
 const crypto = require('ara-crypto')
 const aid = require('ara-identity')
-const toilet = require('toiletdb')
 const extend = require('extend')
-const mkdirp = require('mkdirp')
 const pify = require('pify')
-const rc = require('./rc')()
 
 const debug = require('debug')('ara-filesystem:create')
 
@@ -86,7 +83,7 @@ async function create(opts) {
   let afs
   let mnemonic
   const writable = Boolean(password)
-  const cache = await _getCache()
+  const cache = await getCache()
 
   if (did) {
     let proxy
@@ -220,13 +217,6 @@ async function create(opts) {
   return {
     afs,
     mnemonic
-  }
-
-  async function _getCache() {
-    await pify(mkdirp)(rc.network.afs.archive.root)
-    const store = toilet(rc.network.afs.archive.store)
-    await pify(store.open)()
-    return store
   }
 }
 
