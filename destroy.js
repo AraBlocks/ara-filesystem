@@ -5,7 +5,6 @@ const aid = require('ara-identity')
 const { access } = require('fs')
 const rimraf = require('rimraf')
 const pify = require('pify')
-const rc = require('./rc')()
 
 const {
   proxyExists,
@@ -13,6 +12,7 @@ const {
 } = require('ara-contracts/registry')
 
 const {
+  getCache,
   createAFSKeyPath,
   createIdentityKeyPathFromPublicKey
 } = require('./key-path')
@@ -26,11 +26,6 @@ const {
     account
   }
 } = require('ara-util')
-
-const {
-  basename,
-  resolve: resolvePath
-} = require('path')
 
 /**
  * Destroys the AFS with the given Ara identity
@@ -72,13 +67,10 @@ async function destroy(opts) {
       throw err
     }
 
-    const { store } = rc.network.afs.archive
-    path = resolvePath(store, basename(path))
-
-    // delete AFS toilet db file
+    // delete AFS toilet db cache
     try {
-      await pify(access)(path)
-      await pify(rimraf)(path)
+      const cache = await getCache()
+      await pify(cache.delete)(did)
     } catch (err) {
       debug('db file at %s does not exist', path)
     }

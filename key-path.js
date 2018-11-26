@@ -1,6 +1,9 @@
 const { toHexString } = require('ara-util/transform')
 const { blake2b } = require('ara-crypto')
 const { resolve } = require('path')
+const toilet = require('toiletdb')
+const mkdirp = require('mkdirp')
+const pify = require('pify')
 const rc = require('./rc')()
 const fs = require('fs')
 
@@ -34,7 +37,15 @@ function createIdentityKeyPathFromPublicKey(publicKey) {
   return resolve(root, hash)
 }
 
+async function getCache() {
+  await pify(mkdirp)(rc.network.afs.archive.root)
+  const store = toilet(rc.network.afs.archive.store)
+  await pify(store.open)()
+  return store
+}
+
 module.exports = {
+  getCache,
   createAFSKeyPath,
   createIdentityKeyPathFromPublicKey
 }
