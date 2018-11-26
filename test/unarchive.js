@@ -34,7 +34,7 @@ test.afterEach(async (t) => {
   await cleanup(t)
 })
 
-test('unarchive() invalid opts', async (t) => {
+test.serial('unarchive() invalid opts', async (t) => {
   const afs = getAFS(t)
   const { did } = afs
 
@@ -47,13 +47,13 @@ test('unarchive() invalid opts', async (t) => {
   await t.throwsAsync(unarchive({ did, path: 123 }), TypeError)
 })
 
-test('unarchive() empty AFS', async (t) => {
+test.serial('unarchive() empty AFS', async (t) => {
   const afs = getAFS(t)
   const { did } = afs
   await t.throwsAsync(unarchive({ did }), Error)
 })
 
-test('unarchive() valid unarchive', async (t) => {
+test.serial('unarchive() valid unarchive', async (t) => {
   const afs = getAFS(t)
   const { did } = afs
   // create test file and add to test AFS

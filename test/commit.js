@@ -45,13 +45,13 @@ test.beforeEach(async (t) => {
 
 test.afterEach(async t => cleanup(t))
 
-test("generateStagedPath() valid did", (t) => {
+test.serial("generateStagedPath() valid did", (t) => {
   const { did } = getAFS(t)
   const path = generateStagedPath(did)
   t.notThrows(() => fs.accessSync(path))
 })
 
-test('commit() invalid opts', async (t) => {
+test.serial('commit() invalid opts', async (t) => {
   const { did } = t.context
 
   // opts
@@ -94,7 +94,7 @@ test('commit() invalid opts', async (t) => {
   }))
 })
 
-test('commit() incorrect password', async (t) => {
+test.serial('commit() incorrect password', async (t) => {
   const { did } = t.context
   await t.throwsAsync(commit({ did, password: 'wrong_pass' }), Error)
 })
@@ -149,7 +149,7 @@ test.serial("commit() estimate gas cost with setPrice", async (t) => {
   t.true(0 < Number(result))
 })
 
-test("writeToStaged()/readFromStaged()", async (t) => {
+test.serial("writeToStaged()/readFromStaged()", async (t) => {
   const data = randomBytes(32).toString('hex')
   const path = resolve(__dirname, 'staged.json')
   console.log('path', path)

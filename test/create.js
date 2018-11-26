@@ -31,7 +31,7 @@ test.afterEach(async (t) => {
   await cleanup(t)
 })
 
-test('create() valid id', async (t) => {
+test.serial('create() valid id', async (t) => {
   const owner = getDid(t)
   const ddo = getDdo(t)
   // create AFS
@@ -48,7 +48,7 @@ test('create() valid id', async (t) => {
   t.context.afsPath = createAFSKeyPath(did)
 })
 
-test('create() valid id (readonly)', async (t) => {
+test.serial('create() valid id (readonly)', async (t) => {
   const owner = getDid(t)
   const ddo = getDdo(t)
   // create AFS
