@@ -1,3 +1,12 @@
+## [0.7.4](https://github.com/AraBlocks/ara-filesystem/compare/0.7.3...0.7.4) (2018-11-30)
+
+
+### Bug Fixes
+
+* tests ([e6a8c4a](https://github.com/AraBlocks/ara-filesystem/commit/e6a8c4a))
+
+
+
 ## [0.7.3](https://github.com/AraBlocks/ara-filesystem/compare/0.6.0...0.7.3) (2018-11-30)
 
 
