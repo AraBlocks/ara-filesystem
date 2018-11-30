@@ -55,7 +55,7 @@
     "ara-network": "github:arablocks/ara-network#1.0.0-beta.3",
     "ara-runtime-configuration": "github:arablocks/ara-runtime-configuration#semver:1.1.x",
     "ara-secret-storage": "github:arablocks/ara-secret-storage#semver:0.1.x",
-    "ara-util": "github:arablocks/ara-util#semver:0.9.x",
+    "ara-util": "github:arablocks/ara-util#semver:0.10.x",
     "cfsnet": "github:arablocks/cfsnet#semver:0.14.x",
     "cli-width": "^2.2.0",
     "cross-spawn": "^6.0.5",
