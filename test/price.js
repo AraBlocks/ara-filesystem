@@ -44,7 +44,7 @@ test.serial("setPrice(opts) invalid opts", async (t) => {
 
   // did
   await t.throwsAsync(setPrice({ did: 123 }), TypeError)
-  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), TypeError)
+  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), Error)
 
   // password
   await t.throwsAsync(setPrice({ did }), TypeError)
@@ -92,7 +92,7 @@ test.serial("getPrice(opts) invalid opts", async (t) => {
 
   // did
   await t.throwsAsync(setPrice({ did: 123 }), TypeError)
-  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), TypeError)
+  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), Error)
 })
 
 test.serial("setPrice()/getPrice()", async (t) => {

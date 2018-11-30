@@ -215,7 +215,7 @@ test.serial('add() invalid did, valid password, no paths', async (t) => {
   await t.throwsAsync(add({
     did: 'invaliddid',
     password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('add() invalid did, valid password, valid path (1)', async (t) => {
@@ -225,7 +225,7 @@ test.serial('add() invalid did, valid password, valid path (1)', async (t) => {
     did: 'invaliddid',
     paths,
     password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('add() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
@@ -235,14 +235,14 @@ test.serial('add() invalid did, valid password, valid path (1), invalid path (1)
     did: 'invaliddid',
     paths,
     password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('add() invalid did, invalid password, no paths', async (t) => {
   await t.throwsAsync(add({
     did: 'invaliddid',
     password: 'wrongpass'
-  }), TypeError, 'ara-filesystem.add: Expecting one or more filepaths to add')
+  }), Error, 'ara-filesystem.add: Expecting one or more filepaths to add')
 })
 
 test.serial('add() invalid did, invalid password, valid path (1)', async (t) => {
@@ -252,7 +252,7 @@ test.serial('add() invalid did, invalid password, valid path (1)', async (t) => 
     did: 'invaliddid',
     paths,
     password: 'wrongpass'
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('add() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
@@ -262,7 +262,7 @@ test.serial('add() invalid did, invalid password, valid path (1), invalid path(1
     did: 'invaliddid',
     paths,
     password: 'wrongpass'
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 async function directoriesAreEqual(afs, path) {

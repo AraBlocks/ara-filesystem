@@ -60,7 +60,7 @@ test.serial('commit() invalid opts', async (t) => {
   await t.throwsAsync(commit({ }), TypeError)
 
   // did
-  await t.throwsAsync(commit({ did: 'did:ara:1234' }), TypeError)
+  await t.throwsAsync(commit({ did: 'did:ara:1234' }), Error)
   await t.throwsAsync(commit({ did: 0x123 }), TypeError)
   await t.throwsAsync(commit({ did: 123 }), TypeError)
   await t.throwsAsync(commit({ did: null }), TypeError)
