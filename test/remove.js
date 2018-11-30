@@ -266,7 +266,7 @@ test.serial('remove() invalid did, valid password, no paths', async (t) => {
   await t.throwsAsync(remove({
     did: 'invaliddid',
     password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('remove() invalid did, valid password, valid path (1)', async (t) => {
@@ -276,14 +276,14 @@ test.serial('remove() invalid did, valid password, valid path (1)', async (t) =>
     did: 'invaliddid',
     paths,
     password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('remove() invalid did, invalid password, no paths', async (t) => {
   await t.throwsAsync(remove({
     did: 'invaliddid',
     password: 'wrongpass'
-  }), TypeError, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
+  }), Error, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
 })
 
 test.serial('remove() invalid did, invalid password, valid path (1)', async (t) => {
@@ -293,7 +293,7 @@ test.serial('remove() invalid did, invalid password, valid path (1)', async (t) 
     did: 'invaliddid',
     paths,
     password: 'wrongpass'
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('remove() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
@@ -303,7 +303,7 @@ test.serial('remove() invalid did, invalid password, valid path (1), invalid pat
     did: 'invaliddid',
     paths,
     password: 'wrongpass'
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('remove() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
@@ -313,7 +313,7 @@ test.serial('remove() invalid did, valid password, valid path (1), invalid path 
     did: 'invaliddid',
     paths,
     password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 async function allFilesUnlinked(afs, path) {

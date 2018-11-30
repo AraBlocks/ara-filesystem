@@ -72,13 +72,13 @@ test('create() invalid id (wrong method)', async (t) => {
     owner: idWrongMethod,
     password,
     ddo: getDdo(t)
-  }), TypeError, 'Expecting a DID URI with an "ara" method.')
+  }), Error, 'Expecting a DID URI with an "ara" method.')
 
   await t.throwsAsync(create({
     did: idWrongMethod,
     password,
     ddo: getDdo(t)
-  }), TypeError, 'Expecting a DID URI with an "ara" method.')
+  }), Error, 'Expecting a DID URI with an "ara" method.')
 })
 
 test('create() invalid id (correct method, invalid id)', async (t) => {
@@ -101,12 +101,12 @@ test('create() invalid id (no method, invalid id)', async (t) => {
   await t.throwsAsync(create({
     owner: idNoMethod,
     password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve owner DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve owner DID')
 
   await t.throwsAsync(create({
     did: idNoMethod,
     password
-  }), TypeError, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test('create() no id', async (t) => {
