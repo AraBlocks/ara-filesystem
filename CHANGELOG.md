@@ -1,9 +1,10 @@
-## [0.7.5](https://github.com/AraBlocks/ara-filesystem/compare/0.6.0...0.7.5) (2018-11-30)
+## [0.7.6](https://github.com/AraBlocks/ara-filesystem/compare/0.6.0...0.7.6) (2018-12-01)
 
 
 ### Bug Fixes
 
 * remove deploy from test script ([5a3b8a8](https://github.com/AraBlocks/ara-filesystem/commit/5a3b8a8))
+* remove test specifier ([3d44f23](https://github.com/AraBlocks/ara-filesystem/commit/3d44f23))
 * tests ([2d0b93b](https://github.com/AraBlocks/ara-filesystem/commit/2d0b93b))
 
 
