@@ -34,6 +34,7 @@ sleep 20
 
 cd ../..
 
+
 command="ava test/add.js --verbose"
 safeRunCommand "$command"
 
@@ -41,6 +42,9 @@ command="ava test/commit.js --verbose"
 safeRunCommand "$command"
 
 command="ava test/create.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/deploy.js --verbose"
 safeRunCommand "$command"
 
 command="ava test/destroy.js --verbose"
