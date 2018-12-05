@@ -1,0 +1,63 @@
+
+Hdid:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7 K^4éS”·ÂJÁð@pm|±Û‡d<”u‡`#4§×B
+@Ï½º–ÁqG_°O@Õ°þ›wjƒï¾°q³uVÿ?nHþY»†r|y¤Wü£gO‘ž&èóu»žÀG(¹'"ˆ
+ddo.jsonû{"@context":"https://w3id.org/did/v1","id":"did:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7","publicKey":[{"id":"did:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7#owner","type":"Ed25519VerificationKey2018","owner":"did:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7","publicKeyHex":"4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7","publicKeyBase58":"65Cmi9cERZNvyHzC8fYLU2hVxooJsBr4c1fWoUqM16U6","publicKeyBase64":"EteETTpU5S3HsJKwfBAcG18sduHDWQ8lHWHYCM0FqfX"},{"id":"did:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7#eth","type":"Secp256k1VerificationKey2018","owner":"did:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7","publicKeyHex":"f3c366bf062042cc7cb15c7235c5b5a2c70e6eb45cd5b18d5bece90ef475fe5aa12600605b79c21bf1ec43a098572e3a5f984a31acf4db4bb68479587d2a4880","publicKeyBase58":"5sfpaBczK3W2PEKTfVF5nYfg42juCoGdvA8ARWRSjHKEaFTo8nZ2TNiSCdj9AjwYkjG7QDKfnyoNEqYDDceu7YmV","publicKeyBase64":"Dzw2a/BiBCzHyxXHI1xbWixw5utFzVsY1b7OkO9HX+WqEmAGBbecIb8exDoJhXLjpfmEoxrPTbS7aEeVh9KkiA"}],"authentication":[{"publicKey":"did:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7#owner","type":"Ed25519SignatureAuthentication2018"},{"publicKey":"did:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7#eth","type":"Secp256k1SignatureAuthentication2018"}],"service":[],"created":"2018-12-04T20:08:46.717Z","updated":"2018-12-04T20:08:46.717Z","proof":{"type":"Ed25519VerificationKey2018","nonce":"073a3288c97ed77dfbc47734ff6ea7530424720bd3e271f13b68a63e253087c6","domain":"ara","created":"2018-12-04T20:08:46.722Z","creator":"did:ara:4b5e1134e95394b71ec24ac1f040706d7cb1db870d643c94758760233416a7d7#owner","signatureValue":"d02ebacad60b4cc46aedaffc8eba520a4c87735b7eb145036bc45d1654fe789d19ad8887919cd62d56638ad1c05e5fde11c3b63b36f2b060fcc3f4b9371ada03"}}"Ç
+keystore/eth¶{"id":"924401ab-ecd1-4b03-ac9c-9a4f4611690c","version":"0000000000000101","crypto":{"cipherparams":{"iv":"c37e5d3e50d0ac9a146eba95592c8996"},"ciphertext":"3652249ecb342360f5fdd39c2d902443f1f1ff9ef1196a351f78a37f540c316a8f9042fb566dea6eb43429f04e9bae478752746391c04a0d49a67ac8eb965ea02b680ec980b732aadd0106427a605e9313a8966fc4db48f0ec116e343d385ce51e84ddd1f0b353bbfa1fc888a1effc22ba48703f51f425a2f44012f2530c52a57a0564c24bf8ecde5e7bca978c4b11869199df7dc2b2e683d75347fe9307ac7621993e13ac477d7ea699f9686e448ea2c20d07e174c8ea4a105963fb03d9fbba895b296b9dc75d0ff73674bd00c27b71a6bc15d500708176cea199a25ef63548d77ac792a0be4e9ebda2a591066eb5469e80c3c374ef69184c51ba866faa23f87fc24e312e8fedf07f7d5de9ec3bc2a7a8421c1344a1b7911dcc2b1b2a02e20ae034c9f4ac84f6d3981a8064e1af3ce1d881402023be3cc07d258562389ced44f84a6b4045e408c0d020429d5fe8bd6152f2701c382c2f04591da08e53ae672a","cipher":"aes-128-ctr","digest":"sha1","mac":"11b5e3f53c84a078d3f52fe08d0c1561e8368fe8"}}"‡
+keystore/araö{"id":"e95e5ff8-a5ee-4835-b433-aa355f4c83aa","version":"0000000000000101","crypto":{"cipherparams":{"iv":"de28575d89320d8647914f7b8b01ab6c"},"ciphertext":"6a2e388d35f9fb31b11498c88b0be209925bbb1b5ef4a1854fb708d1e1cd0b37cac4e6ec57ea58d1ba4f8d0e9ff482e1008d34ed02c6473e716a7c46ebf5c092","cipher":"aes-128-ctr","digest":"sha1","mac":"529ef56a6e739b0ae598f48b131b0816ef9ffc51"}}"Š
+schema.protoùsyntax = "proto3";
+
+message KeyStore {
+  uint32 version = 1;
+  string address = 2;
+  string id = 3;
+  Crypto crypto = 4;
+
+  message Crypto {
+    string cipher = 1;
+    string ciphertext = 2;
+    CipherParams cipherparams = 3;
+    string mac = 4;
+    string kdf = 5;
+    KDFParams kdfparams = 6;
+
+    message CipherParams {
+      string iv = 1;
+    }
+
+    message KDFParams {
+      uint64 dklen = 1;
+      uint64 n = 2;
+      uint64 r = 3;
+      uint64 p = 4;
+      uint64 c = 5;
+      string prf = 6;
+      string salt = 7;
+    }
+  }
+}
+
+message Identity {
+  string did = 1;
+  bytes key = 2;
+  Proof proof = 3;
+  repeated File files = 4;
+
+  message Proof {
+    bytes signature = 1;
+  }
+
+  message File {
+    string path = 1;
+    bytes buffer = 2;
+  }
+}
+
+message Keys {
+  bytes signature = 1;
+  repeated KeyPair keys = 2;
+}
+
+message KeyPair {
+  bytes publicKey = 1;
+  bytes secretKey = 2;
+}

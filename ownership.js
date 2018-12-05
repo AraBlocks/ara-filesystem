@@ -84,13 +84,13 @@ async function revokeRequest(opts) {
  * @return {String|Object}
  */
 async function approveTransfer(opts) {
-  if (!opts.mnemonic || 'string' !== typeof opts.mnemonic) {
+  if (!opts || 'object' !== typeof opts) {
+    throw new TypeError('Expecting opts object')
+  } else if (!opts.mnemonic || 'string' !== typeof opts.mnemonic) {
     throw new TypeError('Mnemonic must be non-empty string')
   } else if (!opts.newOwnerDid || 'string' !== typeof opts.newOwnerDid) {
     throw new TypeError('New owner DID must be non-empty string')
-  } else if (!opts.mnemonic || 'string' !== typeof opts.mnemonic) {
-    throw new TypeError('Mnemonic must be non-empty string')
-  } else if (!opts.did || 'string' !== typeof opts.did) {
+  } else if (!opts.contentDid || 'string' !== typeof opts.contentDid) {
     throw new TypeError('AFS DID must be non-empty string')
   } else if (!opts.password || 'string' !== typeof opts.password) {
     throw new TypeError('Password must be non-empty string')
@@ -101,16 +101,16 @@ async function approveTransfer(opts) {
   const {
     keyringOpts = {},
     newOwnerDid,
+    contentDid,
     mnemonic,
     password,
     estimate,
-    did
   } = opts
 
   let result
   let randomPassword
   try {
-    const identity = await validate({ did, password, keyringOpts })
+    const identity = await validate({ did: contentDid, password, keyringOpts })
     const { ddo } = identity
     const metadataPublicKey = _getMetadataPublicKey(ddo)
 
@@ -118,6 +118,7 @@ async function approveTransfer(opts) {
     const newIdentity = await createIdentity({
       mnemonic, owner: newOwnerDid, password: randomPassword, metadataPublicKey
     })
+    console.log(newIdentity)
     const { publicKey } = newIdentity
     if (identity.did !== publicKey.toString('hex')) {
       throw new Error('Mnemonic is incorrect, please confirm it is the AFS owner\'s mnemonic.')
