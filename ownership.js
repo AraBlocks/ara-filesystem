@@ -118,7 +118,6 @@ async function approveTransfer(opts) {
     const newIdentity = await createIdentity({
       mnemonic, owner: newOwnerDid, password: randomPassword, metadataPublicKey
     })
-    console.log(newIdentity)
     const { publicKey } = newIdentity
     if (identity.did !== publicKey.toString('hex')) {
       throw new Error('Mnemonic is incorrect, please confirm it is the AFS owner\'s mnemonic.')

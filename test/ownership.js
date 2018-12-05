@@ -204,7 +204,7 @@ test.serial("claim(opts) valid claim", async (t) => {
   t.is(prevOwner, getDocumentOwner(prevOwnerDdo, true))
 
   const mnemonic = getAFSMnemonic(t)
-  const { password: generatedPassword } = await ownership.approveTransfer({
+  const { password: currentPassword } = await ownership.approveTransfer({
     newOwnerDid: requesterDid,
     contentDid,
     mnemonic,
@@ -212,7 +212,7 @@ test.serial("claim(opts) valid claim", async (t) => {
   })
 
   const newPassword = 'new_pass'
-  await claim({
+  await ownership.claim({
     currentPassword,
     newPassword,
     contentDid,
