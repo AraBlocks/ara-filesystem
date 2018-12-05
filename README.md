@@ -607,7 +607,7 @@ const receipt = await ownership.revokeRequest({ requesterDid, password, contentD
 Approves a pending transfer request, this officially transfers ownership for the given AFS. If not an estimate, this function will return an object containing a random password to be delivered to the identity claiming ownership, along with the transaction receipt.
 
 - `opts`
-  - `did` - `DID` of the content to change ownership for
+  - `contentDid` - `DID` of the content to change ownership for
   - `password` - Password of the staged owner
   - `newOwnerDid` - `DID` of the owner to transfer ownership to
   - `mnemonic` - mnemonic associated with the AFS
@@ -620,11 +620,11 @@ Returns `object`:
 
 ```js
 const { ownership } = require('ara-filesystem')
-const did = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
+const contentDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
 const password = 'pass'
 const newOwnerDid = 'did:ara:7dc039cfb220029c371d0f4aabf4a956ed0062d66c447df7b4595d7e11187271'
 const mnemonic = 'cargo diary bracket crumble stable chief grief grab frost seven wet repeat'
-const result = await ownership.approveOwnershipTransfer({ did, password, newOwnerDid, mnemonic })
+const result = await ownership.approveTransfer({ contentDid, password, newOwnerDid, mnemonic })
 ```
 
 <a name="claim"></a>

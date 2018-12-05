@@ -10,7 +10,8 @@ const pify = require('pify')
 
 const {
   TEST_OWNER_DID_NO_METHOD,
-  PASSWORD: password
+  PASSWORD: password,
+  TEST_IDENTITIES
 } = require('./_constants')
 
 const {
@@ -34,8 +35,8 @@ module.exports = {
     return context.account
   },
 
-  async mirrorIdentity() {
-    const publicKey = Buffer.from(TEST_OWNER_DID_NO_METHOD, 'hex')
+  async mirrorIdentity(did = TEST_OWNER_DID_NO_METHOD) {
+    const publicKey = Buffer.from(did, 'hex')
     const hash = crypto.blake2b(publicKey).toString('hex')
     const path = `${__dirname}/fixtures/identities`
     const ddoPath = resolve(path, hash, 'ddo.json')
@@ -44,19 +45,40 @@ module.exports = {
     const parsed = parse(identityPath)
     await pify(mkdirp)(parsed.dir)
     await pify(mirror)(resolve(path, hash), identityPath)
-    return { ddo, did: TEST_OWNER_DID_NO_METHOD }
+    return { ddo, did }
+  },
+
+  async mirrorIdentities() {
+    const identities = []
+    for (const identity of TEST_IDENTITIES) {
+      identities.push(await module.exports.mirrorIdentity(identity))
+    }
+    return identities
   },
 
   async createAFS({ context }) {
-    const { did, ddo } = context
+    let did
+    let ddo
+    const { identities } = context
+    if (Array.isArray(identities) && 0 < identities.length) {
+      ({ did, ddo } = identities[0])
+    } else {
+      ({ did, ddo } = context)
+    }
     let afs
+    let mnemonic
     try {
       // eslint-disable-next-line semi
-      ({ afs } = await create({ owner: did, password, ddo }))
+      ({ afs, mnemonic } = await create({ owner: did, password, ddo }))
     } catch (err) {
       console.log(err)
     }
-    return { afs, idPath: createIdentityKeyPath(afs.ddo), afsPath: createAFSKeyPath(afs.did) }
+    return {
+      idPath: createIdentityKeyPath(afs.ddo),
+      afsPath: createAFSKeyPath(afs.did),
+      mnemonic,
+      afs
+    }
   },
 
   async cleanup({ context }) {

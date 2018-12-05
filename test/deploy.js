@@ -24,7 +24,7 @@ test.beforeEach(async (t) => {
   t.context = await createAFS(t)
 })
 
-test.afterEach(async (t) => cleanup(t))
+test.afterEach(async t => cleanup(t))
 
 test("deploy() invalid opts", async (t) => {
   const { did } = t.context
@@ -59,7 +59,7 @@ test.serial("deploy() cost estimate", async (t) => {
 
 test.serial("deploy() valid deploy", async (t) => {
   const { did } = getAFS(t)
-  const result = await deploy({did, password })
+  const result = await deploy({ did, password })
   t.true(isAddress(result))
 })
 
@@ -68,5 +68,3 @@ test.serial("deploy() prevent duplicate deploys", async (t) => {
   await deploy({ did, password })
   await t.throwsAsync(deploy({ did, password }))
 })
-
-
