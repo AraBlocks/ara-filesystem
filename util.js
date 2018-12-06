@@ -36,6 +36,7 @@ async function isUpdateAvailable(opts) {
     const { afs } = await create({ did, keyringOpts })
     const localVersion = afs.partitions.home.version
     const updateVersion = localVersion + 1
+    await afs.close()
 
     // offset to read from bc to see if update is available
     const offset = HEADER_LENGTH + (updateVersion * SIGNATURES_WRITE_LENGTH)
