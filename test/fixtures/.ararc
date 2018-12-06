@@ -2,5 +2,18 @@
 [web3]
 provider = ws://127.0.0.1:8545 ;; ganache ws
 
-;; Identity network configuration
-[network.identity]
+[network.dns]
+server = identity-node.ara.one
+
+[network.dht]
+bootstrap = identity-node.ara.one:6881
+
+[network.identity.resolver]
+secret = test-node
+keyring = http://keyrings.ara.one/1.0/did:ara:c04562dbf5c3ef3f091633e0482fb1308b8d4496d515b6f0bc73f1a7f95bc0d7/aws-test
+network = resolver
+
+[network.identity.archiver]
+secret = test-node
+keyring = http://keyrings.ara.one/1.0/did:ara:c04562dbf5c3ef3f091633e0482fb1308b8d4496d515b6f0bc73f1a7f95bc0d7/aws-test
+network = archiver
