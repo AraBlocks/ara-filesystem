@@ -304,11 +304,15 @@ async function readFile(opts) {
 
 async function _readMetadataFile(partition) {
   if (!(await _metadataFileExists(partition))) {
-    throw new Error('Metadata file doesn\'t exist.')
+    return {}
   }
 
-  const file = await pify(partition.readFile)(METADATA_FILE)
-  return JSON.parse(file.toString())
+  try {
+    const file = await pify(partition.readFile)(METADATA_FILE)
+    return JSON.parse(file.toString())
+  } catch (err) {
+    return {}
+  }
 }
 
 async function _writeMetadataFile(partition, contents) {

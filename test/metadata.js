@@ -157,6 +157,14 @@ test.serial('readFile(did) valid file read', async (t) => {
   t.deepEqual(expected, result)
 })
 
+test.serial('readFile(did) empty file', async (t) => {
+  const { did } = getAFS(t)
+  await metadata.clear({ did, password })
+
+  const result = await metadata.readFile({ did })
+  t.deepEqual({}, result)
+})
+
 test.after(() => {
   fs.unlinkSync('invalid.json')
   fs.unlinkSync('valid.json')
