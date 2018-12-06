@@ -55,6 +55,9 @@ safeRunCommand "$command"
 command="ava test/metadata.js --verbose"
 safeRunCommand "$command"
 
+command="ava test/ownership.js --verbose"
+safeRunCommand "$command"
+
 command="ava test/price.js --verbose"
 safeRunCommand "$command"
 
