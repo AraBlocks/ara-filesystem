@@ -221,7 +221,7 @@ test.serial("claim(opts) valid claim", async (t) => {
   })
 
   // prove this doesn't throw error
-  const { ddo: newOwnerDdo } = await t.validate({ did: contentDid, password: newPassword })
+  const { ddo: newOwnerDdo } = await validate({ did: contentDid, password: newPassword })
   t.is(requesterDid, getDocumentOwner(newOwnerDdo, true))
 })
 
@@ -253,7 +253,6 @@ test.serial(`estimateRequestGasCost(opts) estimateRevokeGasCost()
   const promises = []
   for (const func of funcs) {
     promises.push(new Promise(async (resolve) => {
-      console.log('IN HERE')
       const cost = await func({
         contentDid: did,
         requesterDid,
@@ -301,7 +300,6 @@ test.serial("request(opts) revokeRequest(opts) invalid opts", async (t) => {
   const promises = []
   for (const func of funcs) {
     promises.push(new Promise(async (resolve) => {
-      console.log('IN HERE2')
       // opts
       await t.throwsAsync(func(), TypeError)
       await t.throwsAsync(func('opts'), TypeError)
