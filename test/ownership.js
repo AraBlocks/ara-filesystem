@@ -6,8 +6,7 @@ const test = require('ava')
 
 const {
   REQUEST_OWNER_ADDRESS,
-  TEST_OWNER_ADDRESS,
-  PASSWORD: password,
+  PASSWORD: password
 } = require('./_constants')
 
 const {
@@ -48,7 +47,7 @@ test.before(async (t) => {
   const accounts = await web3.eth.getAccounts()
 
   // fund ownership requesting account
-  await web3.eth.sendTransaction({ 
+  await web3.eth.sendTransaction({
     to: REQUEST_OWNER_ADDRESS,
     value: web3.utils.toWei('1'),
     from: accounts[0],
@@ -60,7 +59,7 @@ test.beforeEach(async (t) => {
   t.context.afs = await createAFS(t)
 })
 
-test.afterEach(async (t) => cleanup(t))
+test.afterEach(async t => cleanup(t))
 
 test.serial('request(opts) valid request', async (t) => {
   const { did } = getAFS(t)
@@ -117,17 +116,19 @@ test.serial('revokeRequest(opts) valid revocation', async (t) => {
 
 test.serial(`request(opts) revokeRequest(opts)
   proxy not deployed`, async (t) => {
-    const funcs = [ ownership.request, ownership.revokeRequest ]
-    const { did: contentDid } = getAFS(t)
-    const { did: requesterDid } = getIdentity(t)
+  const funcs = [ ownership.request, ownership.revokeRequest ]
+  const { did: contentDid } = getAFS(t)
+  const { did: requesterDid } = getIdentity(t)
 
-    for (let func of funcs) {
-      await t.throwsAsync(func({
-        requesterDid,
-        contentDid,
-        password
-      }))
-    }
+  const promises = []
+  for (const func of funcs) {
+    promises.push(t.throwsAsync(func({
+      requesterDid,
+      contentDid,
+      password
+    })))
+  }
+  await Promise.all(promises)
 })
 
 test.serial("approveTransfer(opts) proxy not deployed", async (t) => {
@@ -226,34 +227,45 @@ test.serial("claim(opts) valid claim", async (t) => {
 
 test.serial(`estimateRequestGasCost(opts) estimateRevokeGasCost() 
   proxy not deployed`, async (t) => {
-    const funcs = [ ownership.estimateRequestGasCost, ownership.estimateRevokeGasCost ]
-    const { did: contentDid } = getAFS(t)
-    const { did: requesterDid } = getIdentity(t)
-    for (let func of funcs) {
-      await t.throwsAsync(ownership.estimateRequestGasCost({
-        requesterDid,
-        contentDid,
-        password
-      }), Error)
-    }
+  const funcs = [ ownership.estimateRequestGasCost, ownership.estimateRevokeGasCost ]
+  const { did: contentDid } = getAFS(t)
+  const { did: requesterDid } = getIdentity(t)
+
+  const promises = []
+  for (const func of funcs) {
+    promises.push(t.throwsAsync(func({
+      requesterDid,
+      contentDid,
+      password
+    }), Error))
+  }
+
+  await Promise.all(promises)
 })
 
 test.serial(`estimateRequestGasCost(opts) estimateRevokeGasCost() 
   valid request`, async (t) => {
-    const funcs = [ ownership.estimateRequestGasCost, ownership.estimateRevokeGasCost ]
-    const { did } = getAFS(t)
-    const { did: requesterDid } = getIdentity(t)    
-    await deploy({ did, password })
+  const funcs = [ ownership.estimateRequestGasCost, ownership.estimateRevokeGasCost ]
+  const { did } = getAFS(t)
+  const { did: requesterDid } = getIdentity(t)
+  await deploy({ did, password })
 
-    for (let func of funcs) {
-      const cost = await ownership.estimateRequestGasCost({
+  const promises = []
+  for (const func of funcs) {
+    promises.push(new Promise(async (resolve) => {
+      console.log('IN HERE')
+      const cost = await func({
         contentDid: did,
         requesterDid,
         password
       })
       t.true('string' === typeof cost)
       t.true(0 < Number(cost))
-    }
+      resolve()
+    }))
+  }
+
+  await Promise.all(promises)
 })
 
 test.serial("estimateApproveGasCost(opts) proxy not deployed", async (t) => {
@@ -270,7 +282,7 @@ test.serial("estimateApproveGasCost(opts) proxy not deployed", async (t) => {
 
 test.serial("estimateApproveGasCost(opts) valid request", async (t) => {
   const { did } = getAFS(t)
-  const { did: requesterDid } = getIdentity(t)    
+  const { did: requesterDid } = getIdentity(t)
 
   await deploy({ did, password })
   const cost = await ownership.estimateRequestGasCost({
@@ -285,34 +297,45 @@ test.serial("estimateApproveGasCost(opts) valid request", async (t) => {
 test.serial("request(opts) revokeRequest(opts) invalid opts", async (t) => {
   const { did: contentDid } = getAFS(t)
   const funcs = [ ownership.request, ownership.revokeRequest ]
-  for (let func of funcs) {
-    // opts
-    await t.throwsAsync(func(), TypeError)
-    await t.throwsAsync(func('opts'), TypeError)
-    await t.throwsAsync(func({ }), TypeError)
 
-    // contentDid
-    await t.throwsAsync(func({ contentDid: 'did:ara:1234' }), Error)
-    await t.throwsAsync(func({ contentDid: 0x123 }), TypeError)
-    await t.throwsAsync(func({ contentDid: 123 }), TypeError)
-    await t.throwsAsync(func({ contentDid: null }), TypeError)
+  const promises = []
+  for (const func of funcs) {
+    promises.push(new Promise(async (resolve) => {
+      console.log('IN HERE2')
+      // opts
+      await t.throwsAsync(func(), TypeError)
+      await t.throwsAsync(func('opts'), TypeError)
+      await t.throwsAsync(func({ }), TypeError)
 
-    // requesterDid
-    await t.throwsAsync(func({ contentDid, requesterDid: 'did:ara:1234 '}), Error)
-    await t.throwsAsync(func({ contentDid, requesterDid: 0x123 }), TypeError)
-    await t.throwsAsync(func({ contentDid, requesterDid: 123 }), TypeError)
-    await t.throwsAsync(func({ contentDid, requesterDid: null }), TypeError)
+      // contentDid
+      await t.throwsAsync(func({ contentDid: 'did:ara:1234' }), Error)
+      await t.throwsAsync(func({ contentDid: 0x123 }), TypeError)
+      await t.throwsAsync(func({ contentDid: 123 }), TypeError)
+      await t.throwsAsync(func({ contentDid: null }), TypeError)
 
-    const requesterDid = getIdentity(t)
+      // requesterDid
+      await t.throwsAsync(func({ contentDid, requesterDid: 'did:ara:1234 ' }), Error)
+      await t.throwsAsync(func({ contentDid, requesterDid: 0x123 }), TypeError)
+      await t.throwsAsync(func({ contentDid, requesterDid: 123 }), TypeError)
+      await t.throwsAsync(func({ contentDid, requesterDid: null }), TypeError)
 
-    // password
-    await t.throwsAsync(func({ contentDid, requesterDid }), TypeError)
-    await t.throwsAsync(func({ contentDid, requesterDid, password: '' }), TypeError)
-    await t.throwsAsync(func({ contentDid, requesterDid, password: 123 }), TypeError)
+      const requesterDid = getIdentity(t)
 
-    // estimate
-    await t.throwsAsync(func({ contentDid, requesterDid, password, estimate: 'false' }))
+      // password
+      await t.throwsAsync(func({ contentDid, requesterDid }), TypeError)
+      await t.throwsAsync(func({ contentDid, requesterDid, password: '' }), TypeError)
+      await t.throwsAsync(func({ contentDid, requesterDid, password: 123 }), TypeError)
+
+      // estimate
+      await t.throwsAsync(func({
+        contentDid, requesterDid, password, estimate: 'false'
+      }))
+
+      resolve()
+    }))
   }
+
+  await Promise.all(promises)
 })
 
 test.serial("approveTransfer(opts) invalid opts", async (t) => {
@@ -346,11 +369,17 @@ test.serial("approveTransfer(opts) invalid opts", async (t) => {
 
   // password
   await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did, password: '' }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did, password: 123 }), TypeError)
+  await t.throwsAsync(ownership.approveTransfer({
+    mnemonic, newOwnerDid, did, password: ''
+  }), TypeError)
+  await t.throwsAsync(ownership.approveTransfer({
+    mnemonic, newOwnerDid, did, password: 123
+  }), TypeError)
 
   // estimate
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did, password, estimate: 'false' }))
+  await t.throwsAsync(ownership.approveTransfer({
+    mnemonic, newOwnerDid, did, password, estimate: 'false'
+  }))
 })
 
 test.serial("claim(opts) invalid opts", async (t) => {

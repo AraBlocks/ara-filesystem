@@ -51,6 +51,7 @@ module.exports = {
   async mirrorIdentities() {
     const identities = []
     for (const identity of TEST_IDENTITIES) {
+      // eslint-disable-next-line no-await-in-loop
       identities.push(await module.exports.mirrorIdentity(identity))
     }
     return identities
@@ -61,7 +62,8 @@ module.exports = {
     let ddo
     const { identities } = context
     if (Array.isArray(identities) && 0 < identities.length) {
-      ({ did, ddo } = identities[0])
+      const index = 0;
+      ({ did, ddo } = identities[index])
     } else {
       ({ did, ddo } = context)
     }
