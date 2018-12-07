@@ -1,1 +1,6 @@
-/.ararc
+.github/
+scripts/
+docs/
+test/
+lib/
+bin/
