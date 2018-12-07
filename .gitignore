@@ -68,6 +68,3 @@ build/
 
 package-lock.json
 .DS_Store
-
-# root ararc files
-/.ararc
