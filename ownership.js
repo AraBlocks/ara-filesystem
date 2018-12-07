@@ -13,7 +13,7 @@ const {
   approveOwnershipTransfer,
   revokeOwnershipRequest,
   requestOwnership,
-} = require('ara-contracts/commerce')
+} = require('ara-contracts/ownership')
 
 const PASSWORD_LENGTH = 12
 
