@@ -1,4 +1,4 @@
-# [0.11.0](https://github.com/AraBlocks/ara-filesystem/compare/0.6.0...0.11.0) (2018-12-07)
+## [0.11.1](https://github.com/AraBlocks/ara-filesystem/compare/0.6.0...0.11.1) (2018-12-08)
 
 
 ### Bug Fixes
@@ -7,6 +7,7 @@
 * remove test specifier ([0849734](https://github.com/AraBlocks/ara-filesystem/commit/0849734))
 * tests ([2d0b93b](https://github.com/AraBlocks/ara-filesystem/commit/2d0b93b))
 * **metadata:** return empty object when no metadata ([46d4f2d](https://github.com/AraBlocks/ara-filesystem/commit/46d4f2d))
+* **npmignore:** re-add bin and lib ([d6c7f2e](https://github.com/AraBlocks/ara-filesystem/commit/d6c7f2e))
 * **util:** close afs after check update ([1a9a383](https://github.com/AraBlocks/ara-filesystem/commit/1a9a383))
 
 
