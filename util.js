@@ -106,6 +106,7 @@ function decryptJSON(keystore, password) {
 module.exports = {
   isUpdateAvailable,
   generateKeypair,
+  proxyExists,
   encryptJSON,
   decryptJSON,
   randomBytes,
