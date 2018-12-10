@@ -34,7 +34,37 @@ sleep 20
 
 cd ../..
 
-command="ava test --verbose"
+command="ava test/add.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/commit.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/create.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/destroy.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/key-path.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/metadata.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/price.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/remove.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/storage.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/unarchive.js --verbose"
+safeRunCommand "$command"
+
+command="ava test/util.js --verbose"
 safeRunCommand "$command"
 
 # cleanup
