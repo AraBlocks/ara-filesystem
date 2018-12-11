@@ -1,5 +1,6 @@
 const { createIdentityKeyPath } = require('ara-identity')
 const { createAFSKeyPath } = require('../key-path')
+const { getIdentifier } = require('ara-util')
 const { create } = require('../create')
 const mirror = require('mirror-folder')
 const crypto = require('ara-crypto')
@@ -36,6 +37,7 @@ module.exports = {
   },
 
   async mirrorIdentity(did = TEST_OWNER_DID_NO_METHOD) {
+    did = getIdentifier(did)
     const publicKey = Buffer.from(did, 'hex')
     const hash = crypto.blake2b(publicKey).toString('hex')
     const path = `${__dirname}/fixtures/identities`
