@@ -43,7 +43,8 @@ test.serial('create() valid id', async (t) => {
   const { afs: resolvedAfs } = await create({ did, password, ddo: afs.ddo })
   t.true('object' === typeof resolvedAfs)
 
-  t.true(afs === resolvedAfs)
+  //t.true(afs === resolvedAfs)
+  t.true(0 === Buffer.compare(afs.key, resolvedAfs.key))
   t.context.idPath = createIdentityKeyPath(afs.ddo)
   t.context.afsPath = createAFSKeyPath(did)
 })
@@ -60,7 +61,8 @@ test.serial('create() valid id (readonly)', async (t) => {
   const { afs: resolvedAfs } = await create({ did, ddo: afs.ddo })
   t.true('object' === typeof resolvedAfs)
 
-  t.true(afs === resolvedAfs)
+  //t.true(afs === resolvedAfs)
+  t.true(0 === Buffer.compare(afs.key, resolvedAfs.key))
   t.context.idPath = createIdentityKeyPath(afs.ddo)
   t.context.afsPath = createAFSKeyPath(did)
 })
