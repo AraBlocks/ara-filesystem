@@ -1,8 +1,13 @@
 /* eslint quotes: "off" */
 
-const { validate, getDocumentOwner } = require('ara-util')
 const { getContext } = require('ara-util/web3')
 const test = require('ava')
+
+const {
+  getAddressFromDID,
+  getDocumentOwner,
+  validate
+} = require('ara-util')
 
 const {
   REQUEST_OWNER_ADDRESS,
@@ -79,6 +84,12 @@ test.serial('request(opts) valid request', async (t) => {
     requesterDid,
     password
   }))
+
+  const requested = await ownership.hasRequested({
+    contentDid: did,
+    requesterDid
+  })
+  t.is(true, requested)
 })
 
 test.serial('revokeRequest(opts) valid revocation', async (t) => {
@@ -112,6 +123,12 @@ test.serial('revokeRequest(opts) valid revocation', async (t) => {
     requesterDid,
     password
   }))
+
+  const requested = await ownership.hasRequested({
+    contentDid: did,
+    requesterDid
+  })
+  t.is(false, requested)
 })
 
 test.serial(`request(opts) revokeRequest(opts)
@@ -166,6 +183,10 @@ test.serial("approveTransfer(opts) valid approve", async (t) => {
 
   await deploy({ did: contentDid, password })
 
+  const prevOwner = await ownership.getOwner(contentDid)
+  const requesterAddr = await getAddressFromDID(requesterDid)
+  t.true(prevOwner.toLowerCase() !== requesterAddr)
+
   // send ownership request
   await ownership.request({
     requesterDid,
@@ -183,8 +204,8 @@ test.serial("approveTransfer(opts) valid approve", async (t) => {
   t.true(receipt && 'object' === typeof receipt)
   t.true(generatedPassword && 'string' === typeof generatedPassword)
 
-  // TODO(cckelly): would be nice to have test compare prev owner to new owner
-  // getOwner helper function
+  const newOwner = await ownership.getOwner(contentDid)
+  t.true(newOwner.toLowerCase() === requesterAddr)
 })
 
 test.serial("claim(opts) valid claim", async (t) => {
