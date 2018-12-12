@@ -1,13 +1,13 @@
-## [0.13.1](https://github.com/AraBlocks/ara-filesystem/compare/0.12.0...0.13.1) (2018-12-12)
+# [0.14.0](https://github.com/AraBlocks/ara-filesystem/compare/0.12.0...0.14.0) (2018-12-12)
 
 
 ### Bug Fixes
 
-* add network.identity ararc config ([aab8eb9](https://github.com/AraBlocks/ara-filesystem/commit/aab8eb9))
-* fix typo in test, revert to all tests ([4fbe355](https://github.com/AraBlocks/ara-filesystem/commit/4fbe355))
-* test cleanup and fix typo ([72ffaed](https://github.com/AraBlocks/ara-filesystem/commit/72ffaed))
-* **scripts/test:** add back in all tests ([07f5b4e](https://github.com/AraBlocks/ara-filesystem/commit/07f5b4e))
-* **test/_util.js:** add getIdentifier check to mirrorIdentity ([e62efe2](https://github.com/AraBlocks/ara-filesystem/commit/e62efe2))
+* add network.identity ararc config ([c16dc86](https://github.com/AraBlocks/ara-filesystem/commit/c16dc86))
+* fix typo in test, revert to all tests ([7600d7b](https://github.com/AraBlocks/ara-filesystem/commit/7600d7b))
+* test cleanup and fix typo ([da0db13](https://github.com/AraBlocks/ara-filesystem/commit/da0db13))
+* **scripts/test:** add back in all tests ([c0a3831](https://github.com/AraBlocks/ara-filesystem/commit/c0a3831))
+* **test/_util.js:** add getIdentifier check to mirrorIdentity ([e01ea6d](https://github.com/AraBlocks/ara-filesystem/commit/e01ea6d))
 
 
 
