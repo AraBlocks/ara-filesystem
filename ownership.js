@@ -13,6 +13,8 @@ const {
   approveOwnershipTransfer,
   revokeOwnershipRequest,
   requestOwnership,
+  hasRequested,
+  getOwner
 } = require('ara-contracts/ownership')
 
 const PASSWORD_LENGTH = 12
@@ -205,6 +207,8 @@ module.exports = {
   estimateRevokeGasCost,
   approveTransfer,
   revokeRequest,
+  hasRequested,
+  getOwner,
   request,
   claim
 }
