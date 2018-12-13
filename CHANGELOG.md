@@ -1,9 +1,11 @@
-## [0.15.1](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.15.1) (2018-12-13)
+## [0.15.2](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.15.2) (2018-12-13)
 
 
 ### Bug Fixes
 
-* **scripts/test:** enable ganache quiet ([d440dce](https://github.com/AraBlocks/ara-filesystem/commit/d440dce))
+* **scripts/test:** enable ganache quiet ([525a470](https://github.com/AraBlocks/ara-filesystem/commit/525a470))
+* add help(false) back to fix shipright ([cdda956](https://github.com/AraBlocks/ara-filesystem/commit/cdda956))
+* cli global options ([39af782](https://github.com/AraBlocks/ara-filesystem/commit/39af782))
 
 
 
