@@ -35,25 +35,6 @@ Below are some useful afs commands:
 })
 
 const { argv } = program
-  .option('debug', {
-    alias: 'D',
-    describe: 'Enable debug output (Sets \'DEBUG=ara-filesystem:*\')'
-  })
-  .option('secret', {
-    alias: 's',
-    type: 'string',
-    describe: 'Shared secret for the keyring'
-  })
-  .option('network', {
-    alias: 'n',
-    type: 'string',
-    describe: 'Network name of the key for the DID resolver in the keyring'
-  })
-  .option('keyring', {
-    alias: 'k',
-    type: 'string',
-    describe: 'Path to the keyring'
-  })
 
 // Emit program version
 if (0 == argv._.length && argv.version) {
