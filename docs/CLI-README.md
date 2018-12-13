@@ -15,11 +15,10 @@ usage: afs: [-hDV] [--help] [--version]
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show this message||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
 |-filesystem, -D, --debug||:*')|
 |-s, --secret|Shared secret for the keyring||
 |-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 
@@ -40,10 +39,12 @@ afs-create <owner>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
-|--an, --archiver|Network name of the key for the DID archiver in the keyring [string]||
-|-q, --quiet|Only output errors and results [string]||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
+|--an, --archiver|Network name of the key for the DID archiver in the keyring||
+|--rn, --resolver|Network name of the key for the DID resolver in the keyring [string]||
 
 
 #### Positionals
@@ -71,8 +72,10 @@ afs-add <did> <pathspec...>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -101,8 +104,10 @@ afs-remove <did> <pathspec...>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -131,8 +136,10 @@ afs-commit <did>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 |-P, --price|Price (in ARA) to set the cost of the AFS||
 |-f, --force|Force commit operation||
 
@@ -162,8 +169,10 @@ afs-history <did>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -191,8 +200,10 @@ usage: afs price: [-h] [--help] [options] [--] <command>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Subcommands
@@ -218,8 +229,10 @@ afs-price set <did> [price]
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 |-f, --force|Force set price operation||
 
 
@@ -248,8 +261,10 @@ afs-price get <did>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -277,8 +292,10 @@ afs-destroy <did>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 |-f, --force|Force destroy operation||
 
 
@@ -307,8 +324,10 @@ afs-unarchive <did> [pathspec]
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -337,8 +356,10 @@ usage: afs metadata: [-h] [--help] [options] [--] <command>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Subcommands
@@ -368,8 +389,10 @@ afs-metadata write-key <did> <key> <value>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 |-p, --print|Print full metadata after write||
 
 
@@ -399,8 +422,10 @@ afs-metadata read-key <did> <key>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -428,8 +453,10 @@ afs-metadata delete-key <did> <key>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 |-p, --print|Print full metadata after delete||
 
 
@@ -458,8 +485,10 @@ afs-metadata clear <did>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -486,8 +515,10 @@ afs-metadata print <did>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -514,8 +545,10 @@ afs-metadata write-file <did> <filepath>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -543,8 +576,10 @@ usage: afs ownership: [-h] [--help] [options] [--] <command>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Subcommands
@@ -572,8 +607,10 @@ afs-ownership request <requesterDid> <contentDid>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -601,8 +638,10 @@ afs-ownership revoke <requesterDid> <contentDid>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -630,8 +669,10 @@ afs-ownership approve <contentDid> <newOwnerDid>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -659,8 +700,10 @@ afs-ownership claim <contentDid>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 
 
 #### Positionals
@@ -688,8 +731,10 @@ afs-deploy <did>
 | Flag(s) | Description | Type |
 |--|--|--|
 |-h, --help|Show help||
-|-V, --version|Show AFS CLI version||
-|-v, --verbose|Show verbose output||
+|-filesystem, -D, --debug||:*')|
+|-s, --secret|Shared secret for the keyring||
+|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-v, --version, -V|Show version number||
 |-f, --force|Force deploy operation||
 
 
