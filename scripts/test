@@ -15,7 +15,7 @@ safeRunCommand() {
 }
 
 # run local truffle node
-ganache-cli -l 0x7A1200 &
+ganache-cli -l 0x7A1200 -q &
 sleep 5
 
 # ara node_modules/.bin to PATH
