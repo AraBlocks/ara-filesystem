@@ -70,13 +70,13 @@ async function create(opts) {
   keyringOpts = extend(true, {
     archiver: {
       network: (keyringOpts.archiver && keyringOpts.archiver.network) || keyringOpts.network,
-      secret: (keyringOpts.archiver && keyringOpts.archiver.secret) || keyringOpts.secret,
-      keyring: (keyringOpts.archiver && keyringOpts.archiver.keyring) || keyringOpts.keyring
+      secret: (keyringOpts.archiver && keyringOpts.archiver.secret) || rc.network.identity.secret || keyringOpts.secret,
+      keyring: (keyringOpts.archiver && keyringOpts.archiver.keyring) || rc.network.identity.keyring || keyringOpts.keyring
     },
     resolver: {
       network: (keyringOpts.resolver && keyringOpts.resolver.network) || keyringOpts.network,
-      secret: (keyringOpts.resolver && keyringOpts.resolver.secret) || keyringOpts.secret,
-      keyring: (keyringOpts.resolver && keyringOpts.resolver.keyring) || keyringOpts.keyring
+      secret: (keyringOpts.resolver && keyringOpts.resolver.secret) || rc.network.identity.secret || keyringOpts.secret,
+      keyring: (keyringOpts.resolver && keyringOpts.resolver.keyring) || rc.network.identity.keyring || keyringOpts.keyring
     }
   }, keyringOpts)
 
