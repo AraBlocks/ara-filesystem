@@ -50,14 +50,16 @@ async function writeFile(opts = {}) {
     throw new Error(`Filepath ${filepath} doesn't exist.`)
   }
 
-  let contents = await pify(fs.readFile)(filepath, 'utf8')
+  let fileContents = await pify(fs.readFile)(filepath, 'utf8')
   try {
-    contents = JSON.parse(contents)
+    fileContents = JSON.parse(fileContents)
   } catch (err) {
     throw new Error('Contents of file is not valid JSON.')
   }
 
+  const contents = Object.assign({}, await _readMetadataFile(partition), fileContents)
   await _writeMetadataFile(partition, contents)
+
   await afs.close()
   return contents
 }
