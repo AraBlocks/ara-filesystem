@@ -195,7 +195,7 @@ function _getWriteData(index, contents, append) {
 
   let result
   if (!append) {
-    const sizes = buffers.map((v, i) => {
+    buffers.map((v, i) => {
       buffer += v
       const length = _hexToBytes(v.length)
 
@@ -207,7 +207,7 @@ function _getWriteData(index, contents, append) {
       return length
     })
     buffer = `0x${buffer}`
-    result = { buffer, offsets, sizes }
+    result = { buffer, offsets }
   } else {
     offsets.shift()
     buffers.shift()
