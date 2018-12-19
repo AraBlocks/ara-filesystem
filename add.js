@@ -36,8 +36,17 @@ async function add(opts) {
   }
 
   const {
-    did, paths, password, force, keyringOpts
+    keyringOpts,
+    password,
+    force,
+    did
   } = opts
+
+  let { paths } = opts
+
+  if ('string' === typeof opts.paths) {
+    paths = [ opts.paths ]
+  }
 
   let afs
   try {
