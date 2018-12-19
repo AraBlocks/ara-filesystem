@@ -1,13 +1,14 @@
-## [0.17.1](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.17.1) (2018-12-18)
+# [0.18.0](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.18.0) (2018-12-19)
 
 
 ### Bug Fixes
 
 * add help(false) back to fix shipright ([49fa8f3](https://github.com/AraBlocks/ara-filesystem/commit/49fa8f3))
 * cli global options ([8f0fd16](https://github.com/AraBlocks/ara-filesystem/commit/8f0fd16))
-* **commit.js:** remove sizes from buffer data ([9fb80be](https://github.com/AraBlocks/ara-filesystem/commit/9fb80be))
+* **commit.js:** remove sizes from buffer data ([8e81d46](https://github.com/AraBlocks/ara-filesystem/commit/8e81d46))
 * **metadata.js:** fix writeFile overwriting existing keys ([7ffe03e](https://github.com/AraBlocks/ara-filesystem/commit/7ffe03e))
 * **scripts/test:** enable ganache quiet ([525a470](https://github.com/AraBlocks/ara-filesystem/commit/525a470))
+* **scripts/travis-install:** downgrade truffle install version ([e08b2aa](https://github.com/AraBlocks/ara-filesystem/commit/e08b2aa))
 
 
 
