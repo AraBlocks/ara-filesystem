@@ -35,6 +35,7 @@ const {
  * @param {String}   opts.owner
  * @param {?Object}  opts.ddo
  * @param {String}   opts.password
+ * @param {String}   opts.afsPassword
  * @param {Function} opts.storage
  * @param {Object}   [opts.keyringOpts]
  * @param {Object}   [opts.keyringOpts.archiver]
@@ -51,6 +52,8 @@ async function create(opts) {
     throw new TypeError('Expecting opts.ddo to be an object.')
   } else if (opts.password && 'string' !== typeof opts.password) {
     throw TypeError('Expecting non-empty password.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if (opts.storage && 'function' !== typeof opts.storage) {
     throw new TypeError('Expecting storage to be a function.')
   }
@@ -58,7 +61,8 @@ async function create(opts) {
   let {
     did,
     ddo,
-    keyringOpts = {}
+    keyringOpts = {},
+    afsPassword
   } = opts
 
   const {
@@ -80,9 +84,11 @@ async function create(opts) {
     }
   }, keyringOpts)
 
+  afsPassword = afsPassword || password
+
   let afs
   let mnemonic
-  const writable = Boolean(password)
+  const writable = Boolean(afsPassword)
   const cache = await getCache()
 
   if (did) {
@@ -96,7 +102,7 @@ async function create(opts) {
     try {
       ({ did, ddo } = await validate({
         did,
-        password,
+        password: afsPassword,
         label: 'create',
         ddo,
         keyringOpts: keyringOpts.resolver
@@ -150,8 +156,8 @@ async function create(opts) {
     } catch (err) {
       throw err
     }
-
-    const afsId = await createIdentity({ password, owner })
+    console.log('afs password', afsPassword)
+    const afsId = await createIdentity({ password: afsPassword, owner })
 
     // Note: Do not change this to `({ mnemonic } = afsId)`, it causes a weird scoping issue.
     // eslint-disable-next-line prefer-destructuring

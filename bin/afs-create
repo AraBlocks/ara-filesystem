@@ -67,11 +67,17 @@ async function oncreate(argv) {
   }
 
   const { password } = await promptForPassword()
+  const { password: afsPassword } = await promptForPassword('Please provide a passphrase to use for this AFS.\nPassphrase:')
   if (!argv.quiet) { process.stdout.write('\n') }
 
   let arafs
   try {
-    arafs = await create({ owner, password, keyringOpts })
+    arafs = await create({
+      owner,
+      password,
+      keyringOpts,
+      afsPassword
+    })
   } catch (err) {
     onfatal(err)
   }
