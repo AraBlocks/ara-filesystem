@@ -1,0 +1,1 @@
+{"id":"8f7a335e-fe1f-4835-916d-8674af91d4da","version":"0000000000000101","crypto":{"cipherparams":{"iv":"bac3178b78e54e9f77fee28ffe757c76"},"ciphertext":"83f429b5f1257418ee2a31e67c357ac5c2f81047e538e9453159e309ff9ff5e48e2516ff2e1ab35a48db7696ad6d266a0d58c434d738434077153c74f8400a12","cipher":"aes-128-ctr","digest":"sha1","mac":"102af91e48ffd8978ecbe0d0ab233304c9b4d9f3"}}
