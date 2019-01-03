@@ -72,7 +72,9 @@ async function oncreate(argv) {
   let arafs
   try {
     arafs = await create({ owner, password, keyringOpts })
-  } catch (err) { onfatal(err) }
+  } catch (err) {
+    onfatal(err)
+  }
 
   if (!argv.quiet) {
     info('New AFS created with DID: \n\n\t\t\t< %s >\n', arafs.afs.did)
