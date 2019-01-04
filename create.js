@@ -156,7 +156,7 @@ async function create(opts) {
     } catch (err) {
       throw err
     }
-    console.log('afs password', afsPassword)
+
     const afsId = await createIdentity({ password: afsPassword, owner })
 
     // Note: Do not change this to `({ mnemonic } = afsId)`, it causes a weird scoping issue.
@@ -190,7 +190,7 @@ async function create(opts) {
 
       // recreate identity with additional publicKey
       const afsId = await createIdentity({
-        password,
+        password: afsPassword,
         mnemonic,
         owner,
         metadataPublicKey
