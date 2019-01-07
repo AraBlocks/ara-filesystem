@@ -36,7 +36,9 @@ test.serial('create() valid id', async (t) => {
   const owner = getDid(t)
   const ddo = getDdo(t)
   // create AFS
-  const { afs } = await create({ owner, password, ddo, afsPassword })
+  const { afs } = await create({
+    owner, password, ddo, afsPassword
+  })
   t.true('object' === typeof afs)
   const { did } = afs
 
@@ -53,7 +55,9 @@ test.serial('create() invalid afsPassword', async (t) => {
   const owner = getDid(t)
   const ddo = getDdo(t)
   // create AFS
-  const { afs } = await create({ owner, password, ddo, afsPassword })
+  const { afs } = await create({
+    owner, password, ddo, afsPassword
+  })
   t.true('object' === typeof afs)
   const { did } = afs
 
