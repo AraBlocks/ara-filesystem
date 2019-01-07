@@ -5,7 +5,8 @@ const test = require('ava')
 
 const {
   TEST_OWNER_DID,
-  PASSWORD: password
+  PASSWORD: password,
+  AFS_PASSWORD: afsPassword
 } = require('./_constants')
 
 const {
@@ -35,17 +36,39 @@ test.serial('create() valid id', async (t) => {
   const owner = getDid(t)
   const ddo = getDdo(t)
   // create AFS
-  const { afs } = await create({ owner, password, ddo })
+  const { afs } = await create({ owner, password, ddo, afsPassword })
   t.true('object' === typeof afs)
   const { did } = afs
 
   // resolve AFS
-  const { afs: resolvedAfs } = await create({ did, password, ddo: afs.ddo })
+  const { afs: resolvedAfs } = await create({ did, ddo: afs.ddo, afsPassword })
   t.true('object' === typeof resolvedAfs)
 
   t.true(0 === Buffer.compare(afs.key, resolvedAfs.key))
   t.context.idPath = createIdentityKeyPath(afs.ddo)
   t.context.afsPath = createAFSKeyPath(did)
+})
+
+test.serial('create() invalid afsPassword', async (t) => {
+  const owner = getDid(t)
+  const ddo = getDdo(t)
+  // create AFS
+  const { afs } = await create({ owner, password, ddo, afsPassword })
+  t.true('object' === typeof afs)
+  const { did } = afs
+
+  await t.throwsAsync(create({
+    did, ddo: afs.ddo, afsPassword: 'wrongpassword'
+  }), Error)
+})
+
+test.serial('create() afsPassword cannot be same as password', async (t) => {
+  const owner = getDid(t)
+  const ddo = getDdo(t)
+
+  await t.throwsAsync(create({
+    owner, password, ddo, afsPassword: password
+  }), Error)
 })
 
 test.serial('create() valid id (readonly)', async (t) => {

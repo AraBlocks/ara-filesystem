@@ -71,6 +71,10 @@ async function create(opts) {
     storage
   } = opts
 
+  if (password && afsPassword && password === afsPassword) {
+    throw new Error('Expecting opts.afsPassword to be different from opts.password.')
+  }
+
   keyringOpts = extend(true, {
     archiver: {
       network: (keyringOpts.archiver && keyringOpts.archiver.network) || keyringOpts.network,
