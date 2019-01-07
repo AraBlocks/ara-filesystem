@@ -1,18 +1,26 @@
-# [0.19.0](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.19.0) (2019-01-07)
+# [0.20.0](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.20.0) (2019-01-07)
 
 
 ### Bug Fixes
 
-* add help(false) back to fix shipright ([49fa8f3](https://github.com/AraBlocks/ara-filesystem/commit/49fa8f3))
 * **add.js:** fix paths as string causing unncessary add ([ff69080](https://github.com/AraBlocks/ara-filesystem/commit/ff69080))
 * **commit.js:** remove sizes from buffer data ([8e81d46](https://github.com/AraBlocks/ara-filesystem/commit/8e81d46))
 * **metadata.js:** fix writeFile overwriting existing keys ([7ffe03e](https://github.com/AraBlocks/ara-filesystem/commit/7ffe03e))
 * **scripts/test:** enable ganache quiet ([525a470](https://github.com/AraBlocks/ara-filesystem/commit/525a470))
 * **scripts/travis-install:** downgrade truffle install version ([e08b2aa](https://github.com/AraBlocks/ara-filesystem/commit/e08b2aa))
-* add id to test fixtures ([aa78fcf](https://github.com/AraBlocks/ara-filesystem/commit/aa78fcf))
+* accidentally pushed files ([09db2f1](https://github.com/AraBlocks/ara-filesystem/commit/09db2f1))
+* add help(false) back to fix shipright ([49fa8f3](https://github.com/AraBlocks/ara-filesystem/commit/49fa8f3))
+* add id to test fixtures ([7e5b90e](https://github.com/AraBlocks/ara-filesystem/commit/7e5b90e))
 * cli global options ([8f0fd16](https://github.com/AraBlocks/ara-filesystem/commit/8f0fd16))
-* lint ([943f9f9](https://github.com/AraBlocks/ara-filesystem/commit/943f9f9))
-* update test constants ([5817b31](https://github.com/AraBlocks/ara-filesystem/commit/5817b31))
+* lint ([aa12db9](https://github.com/AraBlocks/ara-filesystem/commit/aa12db9))
+* lint ([1ae4075](https://github.com/AraBlocks/ara-filesystem/commit/1ae4075))
+* update test constants ([4d7654a](https://github.com/AraBlocks/ara-filesystem/commit/4d7654a))
+
+
+### Features
+
+* afs passwords work ([cc38751](https://github.com/AraBlocks/ara-filesystem/commit/cc38751))
+* wip ([8b0ca5a](https://github.com/AraBlocks/ara-filesystem/commit/8b0ca5a))
 
 
 
