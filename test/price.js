@@ -103,7 +103,9 @@ test.serial("setPrice()/getPrice()", async (t) => {
   await commit({ did, password, afsPassword })
 
   const price = 25
-  await setPrice({ did, password, price, afsPassword })
+  await setPrice({
+    did, password, price, afsPassword
+  })
 
   const retrievedPrice = await getPrice({ did })
   t.is(price, Number(retrievedPrice))
