@@ -64,7 +64,7 @@ $ afs remove df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my
 
 ### .afsignore
 
-At the root level of this repository, a `.afsignore` file can be used to specify any files or directories to ignore when adding to an AFS.
+A `.afsignore` file can be used to specify any files or directories to ignore when adding to an AFS. Only a `.afsignore` file located at the directory where the `afs` command is run will be honored.
 
 Each line in `afsignore` specifies a pattern, similar to [`.npmignore`](https://docs.npmjs.com/misc/developers#keeping-files-out-of-your-package) and [`.gitignore`](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository#Ignoring-Files) files:
 
@@ -73,7 +73,7 @@ Each line in `afsignore` specifies a pattern, similar to [`.npmignore`](https://
 * You can end patterns with a forward slash / to specify a directory.
 * You can negate a pattern by starting it with an exclamation point !.
 
-By default, `.afs/` is ignored.
+By default, `.afs/` and `.afsignore` are ignored.
 
 An example `.afsignore` file (taken from the `.gitignore` link above):
 
