@@ -53,6 +53,8 @@ async function onsetprice(argv) {
   price = price || 0
 
   const { password } = await promptForPassword()
+  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
+
   info('setting price of AFS identity %s to %d', did, price)
 
   let result = argv.force
@@ -60,6 +62,7 @@ async function onsetprice(argv) {
     try {
       const cost = await afs.setPrice({
         estimate: true,
+        afsPassword,
         password,
         price,
         did
@@ -73,7 +76,7 @@ async function onsetprice(argv) {
 
   if (result) {
     try {
-      await afs.setPrice({ did, password, price })
+      await afs.setPrice({ did, password, afsPassword, price })
     } catch (err) {
       onfatal(err)
     }

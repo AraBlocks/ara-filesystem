@@ -41,6 +41,7 @@ async function ondeploy(argv) {
     did, secret, network, keyring, force
   } = argv
   const { password } = await promptForPassword()
+  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
   const keyringOpts = { secret, network, keyring }
 
   let result = force
@@ -49,6 +50,7 @@ async function ondeploy(argv) {
       const cost = await afs.deploy({
         estimate: true,
         keyringOpts,
+        afsPassword,
         password,
         did
       })
@@ -64,6 +66,7 @@ async function ondeploy(argv) {
     try {
       result = await afs.deploy({
         keyringOpts,
+        afsPassword,
         password,
         did
       })

@@ -40,7 +40,7 @@ async function onadd(argv) {
   const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
 
-  const { password } = await promptForPassword()
+  const { password } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
 
   let instance
   try {

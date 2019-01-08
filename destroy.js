@@ -32,6 +32,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {String}   opts.afsPassword
  * @param {Object}   [opts.keyringOpts]
  */
 async function destroy(opts) {
@@ -41,13 +42,15 @@ async function destroy(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if (opts.password && 'string' !== typeof opts.password) {
     throw new TypeError('Expecting non-empty password.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting estimate to be a boolean.')
   }
 
   const estimate = Boolean(opts.estimate)
   const { keyringOpts } = opts
-  let { did } = opts
+  let { did, afsPassword } = opts
   did = normalize(did)
 
   let path
@@ -78,10 +81,12 @@ async function destroy(opts) {
 
   const { password } = opts
 
+  afsPassword = afsPassword || password
+
   try {
     ({ did } = await validate({
       did,
-      password,
+      password: afsPassword,
       label: 'destroy',
       keyringOpts
     }))

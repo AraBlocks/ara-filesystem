@@ -11,6 +11,8 @@ const METADATA_FILE = 'metadata.json'
  * Writes a metadata JSON file to the metadata partition of an AFS
  * @param {Object}   opts
  * @param {String}   opts.did
+ * @param {String}   opts.password
+ * @param {String}   opts.afsPassword
  * @param {String}   opts.filepath
  * @return {Object}
  */
@@ -21,6 +23,8 @@ async function writeFile(opts = {}) {
     throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.password || 'string' !== typeof opts.password) {
     throw new TypeError('Password must be non-empty string.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if (!opts.filepath || 'string' !== typeof opts.filepath) {
     throw new TypeError('File path must be a non-empty string.')
   }
@@ -32,11 +36,15 @@ async function writeFile(opts = {}) {
     did
   } = opts
 
+  let { afsPassword } = opts
+
+  afsPassword = afsPassword || password
+
   const { afs, partition } = await _getEtcPartition(opts)
   try {
     await validate({
       did,
-      password,
+      password: afsPassword,
       keyringOpts,
       label: 'writeFile'
     })
@@ -66,10 +74,12 @@ async function writeFile(opts = {}) {
 
 /**
  * Writes a metadata key/value pair to the metadata partition of an AFS
- * @param {Object}                             opts
- * @param {String}                             opts.did
- * @param {String}                             opts.key
- * @param {Mixed} opts.value
+ * @param {Object} opts
+ * @param {String} opts.did
+ * @param {String} opts.password
+ * @param {String} opts.afsPassword
+ * @param {String} opts.key
+ * @param {Mixed}  opts.value
  * @return {Object}
  */
 async function writeKey(opts = {}) {
@@ -79,6 +89,8 @@ async function writeKey(opts = {}) {
     throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.password || 'string' !== typeof opts.password) {
     throw new TypeError('Password must be non-empty string.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if (!opts.key || 'string' !== typeof opts.key) {
     throw new TypeError('Key must be be a non-empty string.')
   } else if (!opts.value) {
@@ -93,11 +105,15 @@ async function writeKey(opts = {}) {
     keyringOpts = {}
   } = opts
 
+  let { afsPassword } = opts
+
+  afsPassword = afsPassword || password
+
   const { afs, partition } = await _getEtcPartition(opts)
   try {
     await validate({
       did,
-      password,
+      password: afsPassword,
       keyringOpts,
       label: 'writeKey'
     })
@@ -122,6 +138,8 @@ async function writeKey(opts = {}) {
  * Writes metadata key/value pairs to the metadata partition of an AFS
  * @param {Object} opts
  * @param {String} opts.did
+ * @param {String} opts.password
+ * @param {String} opts.afsPassword
  * @param {Object} opts.keys
  * @return {Object}
  */
@@ -132,6 +150,8 @@ async function writeKeys(opts = {}) {
     throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.password || 'string' !== typeof opts.password) {
     throw new TypeError('Password must be non-empty string.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if (!opts.keys || 'object' !== typeof opts.keys) {
     throw new TypeError('Expected opts.keys to be an object.')
   }
@@ -143,11 +163,15 @@ async function writeKeys(opts = {}) {
     keyringOpts = {}
   } = opts
 
+  let { afsPassword } = opts
+
+  afsPassword = afsPassword || password
+
   const { afs, partition } = await _getEtcPartition(opts)
   try {
     await validate({
       did,
-      password,
+      password: afsPassword,
       keyringOpts,
       label: 'writeKey'
     })
@@ -197,6 +221,8 @@ async function readKey(opts = {}) {
  * Deletes a metadata key/value pair from the metadata partition of an AFS
  * @param {Object} opts
  * @param {String} opts.did
+ * @param {String} opts.password
+ * @param {String} opts.afsPassword
  * @param {String} opts.key
  */
 async function delKey(opts) {
@@ -206,6 +232,8 @@ async function delKey(opts) {
     throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.password || 'string' !== typeof opts.password) {
     throw new TypeError('Password must be non-empty string.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if (!opts.key || 'string' !== typeof opts.key) {
     throw new TypeError('Key must be a non-empty string.')
   }
@@ -217,11 +245,15 @@ async function delKey(opts) {
     keyringOpts = {}
   } = opts
 
+  let { afsPassword } = opts
+
+  afsPassword = afsPassword || password
+
   const { afs, partition } = await _getEtcPartition(opts)
   try {
     await validate({
       did,
-      password,
+      password: afsPassword,
       keyringOpts,
       label: 'delKey'
     })
@@ -246,6 +278,8 @@ async function delKey(opts) {
  * Empties all metadata contents of an AFS
  * @param {Object} opts
  * @param {String} opts.did
+ * @param {String} opts.password
+ * @param {String} opts.afsPassword
  */
 async function clear(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -254,6 +288,8 @@ async function clear(opts) {
     throw new TypeError('DID URI must be a non-empty string.')
   } else if (!opts.password || 'string' !== typeof opts.password) {
     throw new TypeError('Password must be non-empty string.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   }
 
   const {
@@ -262,10 +298,14 @@ async function clear(opts) {
     keyringOpts = {}
   } = opts
 
+  let { afsPassword } = opts
+
+  afsPassword = afsPassword || password
+
   try {
     await validate({
       did,
-      password,
+      password: afsPassword,
       keyringOpts,
       label: 'clear'
     })

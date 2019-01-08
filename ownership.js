@@ -81,6 +81,7 @@ async function revokeRequest(opts) {
  * @param  {String} opts.mnemonic
  * @param  {String} opts.did
  * @param  {String} opts.password
+ * @param  {String} opts.afsPassword
  * @param  {Boolean} [opts.estimate]
  * @throws {Error|TypeError}
  * @return {String|Object}
@@ -96,6 +97,8 @@ async function approveTransfer(opts) {
     throw new TypeError('AFS DID must be non-empty string')
   } else if (!opts.password || 'string' !== typeof opts.password) {
     throw new TypeError('Password must be non-empty string')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Estimate must be of type boolean')
   }
@@ -109,10 +112,14 @@ async function approveTransfer(opts) {
     estimate,
   } = opts
 
+  let { afsPassword } = opts
+
+  afsPassword = afsPassword || password
+
   let result
   let randomPassword
   try {
-    const identity = await validate({ did: contentDid, password, keyringOpts })
+    const identity = await validate({ did: contentDid, password: afsPassword, keyringOpts })
     const { ddo } = identity
     const metadataPublicKey = _getMetadataPublicKey(ddo)
 
