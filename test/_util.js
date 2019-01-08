@@ -74,7 +74,9 @@ module.exports = {
     let mnemonic
     try {
       // eslint-disable-next-line semi
-      ({ afs, mnemonic } = await create({ owner: did, password, ddo, afsPassword }))
+      ({ afs, mnemonic } = await create({
+        owner: did, password, ddo, afsPassword
+      }))
     } catch (err) {
       console.log(err)
     }

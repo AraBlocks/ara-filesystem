@@ -36,11 +36,15 @@ test.serial('writeFile(opts) invalid opts', async (t) => {
 
 test.serial('writeFile(opts) file errors', async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(metadata.writeFile({ did, password, filepath: 'invalid.json', afsPassword }), Error)
+  await t.throwsAsync(metadata.writeFile({
+    did, password, filepath: 'invalid.json', afsPassword
+  }), Error)
 
   const invalidJSON = '{name:"ara"}'
   await pify(fs.writeFile)('invalid.json', invalidJSON)
-  await t.throwsAsync(metadata.writeFile({ did, password, filepath: 'invalid.json', afsPassword }), Error)
+  await t.throwsAsync(metadata.writeFile({
+    did, password, filepath: 'invalid.json', afsPassword
+  }), Error)
 })
 
 test.serial('writeFile(opts) valid write', async (t) => {
@@ -48,7 +52,9 @@ test.serial('writeFile(opts) valid write', async (t) => {
 
   const validJSON = '{"name":"ara"}'
   await pify(fs.writeFile)('valid.json', validJSON)
-  const contents = await metadata.writeFile({ did, password, filepath: 'valid.json', afsPassword })
+  const contents = await metadata.writeFile({
+    did, password, filepath: 'valid.json', afsPassword
+  })
   t.is(validJSON, JSON.stringify(contents))
 })
 

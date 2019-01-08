@@ -51,8 +51,12 @@ test("deploy() invalid opts", async (t) => {
 
 test.serial("deploy() cost estimate", async (t) => {
   const { did } = getAFS(t)
-  await t.notThrowsAsync(deploy({ did, password, estimate: true, afsPassword }))
-  const cost = await deploy({ did, password, estimate: true, afsPassword })
+  await t.notThrowsAsync(deploy({
+    did, password, estimate: true, afsPassword
+  }))
+  const cost = await deploy({
+    did, password, estimate: true, afsPassword
+  })
   t.true('string' === typeof cost)
   t.true(0 < Number(cost))
 })
