@@ -77,7 +77,7 @@ async function add(opts) {
     debug(`copy start: ${path}`)
     const name = join(afs.HOME, basename(path))
     // Check if file
-    if (!(await pify(isFile)(path))) {
+    if (!(await pify(isFile)(path)) && !ignore(path)) {
       await pify(mkdirp)(name, { fs: afs })
     }
     // Mirror and log
