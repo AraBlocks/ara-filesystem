@@ -12,7 +12,8 @@ const pify = require('pify')
 const {
   join,
   basename,
-  resolve
+  resolve,
+  relative
 } = require('path')
 
 /**
@@ -106,6 +107,7 @@ async function add(opts) {
   }
 
   function ignore(path) {
+    path = relative('/', path)
     if (ignored.ignores(path)) {
       if (force) {
         debug(`forcing add path ${path}`)
