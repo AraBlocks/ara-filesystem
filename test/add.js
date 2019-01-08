@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 
-const { PASSWORD: password } = require('./_constants')
+const { AFS_PASSWORD: password } = require('./_constants')
 const { add, create } = require('../')
 const isDirectory = require('is-directory')
 const pify = require('pify')

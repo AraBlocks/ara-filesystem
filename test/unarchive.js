@@ -1,4 +1,4 @@
-const { PASSWORD: password } = require('./_constants')
+const { AFS_PASSWORD: password } = require('./_constants')
 const { resolve } = require('path')
 const pify = require('pify')
 const test = require('ava')

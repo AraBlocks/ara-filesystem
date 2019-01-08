@@ -1,4 +1,4 @@
-const { PASSWORD: password } = require('./_constants')
+const { PASSWORD: password, AFS_PASSWORD: afsPassword } = require('./_constants')
 const metadata = require('../metadata')
 const pify = require('pify')
 const test = require('ava')
@@ -36,11 +36,11 @@ test.serial('writeFile(opts) invalid opts', async (t) => {
 
 test.serial('writeFile(opts) file errors', async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(metadata.writeFile({ did, password, filepath: 'invalid.json' }), Error)
+  await t.throwsAsync(metadata.writeFile({ did, password, filepath: 'invalid.json', afsPassword }), Error)
 
   const invalidJSON = '{name:"ara"}'
   await pify(fs.writeFile)('invalid.json', invalidJSON)
-  await t.throwsAsync(metadata.writeFile({ did, password, filepath: 'invalid.json' }), Error)
+  await t.throwsAsync(metadata.writeFile({ did, password, filepath: 'invalid.json', afsPassword }), Error)
 })
 
 test.serial('writeFile(opts) valid write', async (t) => {
@@ -48,7 +48,7 @@ test.serial('writeFile(opts) valid write', async (t) => {
 
   const validJSON = '{"name":"ara"}'
   await pify(fs.writeFile)('valid.json', validJSON)
-  const contents = await metadata.writeFile({ did, password, filepath: 'valid.json' })
+  const contents = await metadata.writeFile({ did, password, filepath: 'valid.json', afsPassword })
   t.is(validJSON, JSON.stringify(contents))
 })
 
@@ -66,7 +66,7 @@ test.serial('writeKey(opts) invalid opts', async (t) => {
 test.serial('writeKey(opts) valid key write', async (t) => {
   const { did } = getAFS(t)
   const contents = await metadata.writeKey({
-    did, password, key: 'my_key', value: 1234
+    did, password, key: 'my_key', value: 1234, afsPassword
   })
   t.true(Object.prototype.hasOwnProperty.call(contents, 'my_key') && 1234 === contents.my_key)
 })
@@ -80,7 +80,7 @@ test.serial('writeKeys(opts) valid key write', async (t) => {
   }
 
   let contents = await metadata.writeKeys({
-    did, password, keys
+    did, password, keys, afsPassword
   })
   t.true(Object.prototype.hasOwnProperty.call(contents, 'name') && keys.name === contents.name)
   t.true(Object.prototype.hasOwnProperty.call(contents, 'number') && keys.number === contents.number)
@@ -105,7 +105,7 @@ test.serial('readKey(opts) invalid opts', async (t) => {
 test.serial('readKey(opts) valid key read', async (t) => {
   const { did } = getAFS(t)
   await metadata.writeKey({
-    did, password, key: 'my_key', value: 1234
+    did, password, key: 'my_key', value: 1234, afsPassword
   })
 
   const value = await metadata.readKey({ did, key: 'my_key' })
@@ -131,9 +131,9 @@ test.serial('clear(opts) invalid opts', async (t) => {
 test.serial('clear(opts) valid clear', async (t) => {
   const { did } = getAFS(t)
   await metadata.writeKey({
-    did, password, key: 'key1', value: 1
+    did, password, key: 'key1', value: 1, afsPassword
   })
-  await metadata.clear({ did, password })
+  await metadata.clear({ did, password, afsPassword })
 
   const file = await metadata.readFile({ did })
   t.deepEqual(file, {})
@@ -146,11 +146,11 @@ test.serial('readFile(did) invalid did', async (t) => {
 
 test.serial('readFile(did) valid file read', async (t) => {
   const { did } = getAFS(t)
-  await metadata.clear({ did, password })
+  await metadata.clear({ did, password, afsPassword })
 
   const expected = JSON.parse('{"key1":1}')
   await metadata.writeKey({
-    did, password, key: 'key1', value: 1
+    did, password, key: 'key1', value: 1, afsPassword
   })
 
   const result = await metadata.readFile({ did })
@@ -159,7 +159,7 @@ test.serial('readFile(did) valid file read', async (t) => {
 
 test.serial('readFile(did) empty file', async (t) => {
   const { did } = getAFS(t)
-  await metadata.clear({ did, password })
+  await metadata.clear({ did, password, afsPassword })
 
   const result = await metadata.readFile({ did })
   t.deepEqual({}, result)

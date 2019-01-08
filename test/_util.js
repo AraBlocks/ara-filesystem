@@ -11,6 +11,7 @@ const pify = require('pify')
 
 const {
   TEST_OWNER_DID_NO_METHOD,
+  AFS_PASSWORD: afsPassword,
   PASSWORD: password,
   TEST_IDENTITIES
 } = require('./_constants')
@@ -73,7 +74,7 @@ module.exports = {
     let mnemonic
     try {
       // eslint-disable-next-line semi
-      ({ afs, mnemonic } = await create({ owner: did, password, ddo }))
+      ({ afs, mnemonic } = await create({ owner: did, password, ddo, afsPassword }))
     } catch (err) {
       console.log(err)
     }

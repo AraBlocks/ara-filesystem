@@ -1,6 +1,6 @@
 /* eslint quotes: "off" */
 
-const { PASSWORD: password } = require('./_constants')
+const { PASSWORD: password, AFS_PASSWORD: afsPassword } = require('./_constants')
 const { isAddress } = require('ara-util/web3')
 const { deploy } = require('../deploy')
 const test = require('ava')
@@ -51,20 +51,20 @@ test("deploy() invalid opts", async (t) => {
 
 test.serial("deploy() cost estimate", async (t) => {
   const { did } = getAFS(t)
-  await t.notThrowsAsync(deploy({ did, password, estimate: true }))
-  const cost = await deploy({ did, password, estimate: true })
+  await t.notThrowsAsync(deploy({ did, password, estimate: true, afsPassword }))
+  const cost = await deploy({ did, password, estimate: true, afsPassword })
   t.true('string' === typeof cost)
   t.true(0 < Number(cost))
 })
 
 test.serial("deploy() valid deploy", async (t) => {
   const { did } = getAFS(t)
-  const result = await deploy({ did, password })
+  const result = await deploy({ did, password, afsPassword })
   t.true(isAddress(result))
 })
 
 test.serial("deploy() prevent duplicate deploys", async (t) => {
   const { did } = getAFS(t)
-  await deploy({ did, password })
-  await t.throwsAsync(deploy({ did, password }))
+  await deploy({ did, password, afsPassword })
+  await t.throwsAsync(deploy({ did, password, afsPassword }))
 })

@@ -11,7 +11,8 @@ const {
 
 const {
   REQUEST_OWNER_ADDRESS,
-  PASSWORD: password
+  PASSWORD: password,
+  AFS_PASSWORD: afsPassword
 } = require('./_constants')
 
 const {
@@ -69,7 +70,7 @@ test.afterEach(async t => cleanup(t))
 test.serial('request(opts) valid request', async (t) => {
   const { did } = getAFS(t)
   const { did: requesterDid } = getIdentity(t)
-  await deploy({ did, password })
+  await deploy({ did, password, afsPassword })
 
   const receipt = await ownership.request({
     contentDid: did,
@@ -95,7 +96,7 @@ test.serial('request(opts) valid request', async (t) => {
 test.serial('revokeRequest(opts) valid revocation', async (t) => {
   const { did } = getAFS(t)
   const { did: requesterDid } = getIdentity(t)
-  await deploy({ did, password })
+  await deploy({ did, password, afsPassword })
 
   // try to revoke non-existent request
   await t.throwsAsync(ownership.revokeRequest({
@@ -154,6 +155,7 @@ test.serial("approveTransfer(opts) proxy not deployed", async (t) => {
 
   const mnemonic = getAFSMnemonic(t)
   await t.throwsAsync(ownership.approveTransfer({
+    afsPassword,
     newOwnerDid,
     contentDid,
     mnemonic,
@@ -167,9 +169,10 @@ test.serial("approveTransfer(opts) has not requested", async (t) => {
 
   const mnemonic = getAFSMnemonic(t)
 
-  await deploy({ did: contentDid, password })
+  await deploy({ did: contentDid, password, afsPassword })
 
   await t.throwsAsync(ownership.approveTransfer({
+    afsPassword,
     newOwnerDid,
     contentDid,
     mnemonic,
@@ -181,7 +184,7 @@ test.serial("approveTransfer(opts) valid approve", async (t) => {
   const { did: contentDid } = getAFS(t)
   const { did: requesterDid } = getIdentity(t)
 
-  await deploy({ did: contentDid, password })
+  await deploy({ did: contentDid, password, afsPassword })
 
   const prevOwner = await ownership.getOwner(contentDid)
   const requesterAddr = await getAddressFromDID(requesterDid)
@@ -197,6 +200,7 @@ test.serial("approveTransfer(opts) valid approve", async (t) => {
   const mnemonic = getAFSMnemonic(t)
   const { receipt, password: generatedPassword } = await ownership.approveTransfer({
     newOwnerDid: requesterDid,
+    afsPassword,
     contentDid,
     mnemonic,
     password
@@ -212,7 +216,7 @@ test.serial("claim(opts) valid claim", async (t) => {
   const { did: contentDid } = getAFS(t)
   const { did: requesterDid } = getIdentity(t)
 
-  await deploy({ did: contentDid, password })
+  await deploy({ did: contentDid, password, afsPassword })
 
   // send ownership request
   await ownership.request({
@@ -221,13 +225,14 @@ test.serial("claim(opts) valid claim", async (t) => {
     password
   })
 
-  const { ddo: prevOwnerDdo } = await validate({ did: contentDid, password })
+  const { ddo: prevOwnerDdo } = await validate({ did: contentDid, password: afsPassword })
   const { did: prevOwner } = getIdentity(t, 0)
   t.is(prevOwner, getDocumentOwner(prevOwnerDdo, true))
 
   const mnemonic = getAFSMnemonic(t)
   const { password: currentPassword } = await ownership.approveTransfer({
     newOwnerDid: requesterDid,
+    afsPassword,
     contentDid,
     mnemonic,
     password
@@ -269,7 +274,7 @@ test.serial(`estimateRequestGasCost(opts) estimateRevokeGasCost()
   const funcs = [ ownership.estimateRequestGasCost, ownership.estimateRevokeGasCost ]
   const { did } = getAFS(t)
   const { did: requesterDid } = getIdentity(t)
-  await deploy({ did, password })
+  await deploy({ did, password, afsPassword })
 
   const promises = []
   for (const func of funcs) {
@@ -294,6 +299,7 @@ test.serial("estimateApproveGasCost(opts) proxy not deployed", async (t) => {
 
   await t.throwsAsync(ownership.estimateApproveGasCost({
     mnemonic: REQUESTER_MNEMONIC,
+    afsPassword,
     newOwnerDid,
     password,
     did
@@ -304,7 +310,7 @@ test.serial("estimateApproveGasCost(opts) valid request", async (t) => {
   const { did } = getAFS(t)
   const { did: requesterDid } = getIdentity(t)
 
-  await deploy({ did, password })
+  await deploy({ did, password, afsPassword })
   const cost = await ownership.estimateRequestGasCost({
     contentDid: did,
     requesterDid,

@@ -16,7 +16,8 @@ const {
 } = require('../price')
 
 const {
-  PASSWORD: password
+  PASSWORD: password,
+  AFS_PASSWORD: afsPassword
 } = require('./_constants')
 
 const getAFS = (t) => {
@@ -73,11 +74,12 @@ test.serial("setPrice(opts) no committed proxy", async (t) => {
 
 test.serial("setPrice(opts) estimate", async (t) => {
   const { did } = getAFS(t)
-  await deploy({ did, password })
-  await commit({ did, password })
+  await deploy({ did, password, afsPassword })
+  await commit({ did, password, afsPassword })
   const estimation = await setPrice({
     did,
     password,
+    afsPassword,
     estimate: true,
     price: 100
   })
@@ -97,13 +99,13 @@ test.serial("getPrice(opts) invalid opts", async (t) => {
 
 test.serial("setPrice()/getPrice()", async (t) => {
   const { did } = getAFS(t)
-  await deploy({ did, password })
-  await commit({ did, password })
+  await deploy({ did, password, afsPassword })
+  await commit({ did, password, afsPassword })
 
   const price = 25
-  await setPrice({ did, password, price })
+  await setPrice({ did, password, price, afsPassword })
 
-  const retrievedPrice = await getPrice({ did, password })
+  const retrievedPrice = await getPrice({ did })
   t.is(price, Number(retrievedPrice))
 })
 

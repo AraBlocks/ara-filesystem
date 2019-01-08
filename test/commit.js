@@ -1,6 +1,6 @@
 /* eslint quotes: "off" */
 
-const { PASSWORD: password } = require('./_constants')
+const { PASSWORD: password, AFS_PASSWORD: afsPassword } = require('./_constants')
 const { randomBytes } = require('ara-crypto')
 const { getPrice } = require('../price')
 const { deploy } = require('../deploy')
@@ -101,17 +101,17 @@ test.serial('commit() incorrect password', async (t) => {
 
 test.serial("commit() no changes to commit", async (t) => {
   const { did } = getAFS(t)
-  await runValidCommit({ did, password })
+  await runValidCommit({ did, password, afsPassword })
   await t.throwsAsync(commit({ did, password }), Error)
 })
 
 test.serial("commit() staged file successfully deleted", async (t) => {
   const { did } = getAFS(t)
   const file = resolve(__dirname, 'commit.js')
-  await add({ did, paths: [ file ], password })
+  await add({ did, paths: [ file ], password: afsPassword })
 
   const path = generateStagedPath(did)
-  await runValidCommit({ did, password })
+  await runValidCommit({ did, password, afsPassword })
   t.throws(() => fs.accessSync(path))
 })
 
@@ -119,6 +119,7 @@ test.serial("commit() commit with price", async (t) => {
   const { did } = getAFS(t)
   const price = 100
   const { result: receipt } = await runValidCommit({
+    afsPassword,
     password,
     price,
     did
@@ -131,6 +132,7 @@ test.serial("commit() commit with price", async (t) => {
 test.serial("commit() estimate gas cost without setPrice", async (t) => {
   const { did } = getAFS(t)
   const { result } = await runValidCommit({
+    afsPassword,
     estimate: true,
     password,
     did
@@ -141,6 +143,7 @@ test.serial("commit() estimate gas cost without setPrice", async (t) => {
 test.serial("commit() estimate gas cost with setPrice", async (t) => {
   const { did } = getAFS(t)
   const { result } = await runValidCommit({
+    afsPassword,
     estimate: true,
     price: 100,
     password,
