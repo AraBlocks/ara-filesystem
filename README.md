@@ -75,6 +75,28 @@ Each line in `afsignore` specifies a pattern, similar to [`.npmignore`](https://
 
 By default, `.afs/` is ignored.
 
+An example `.afsignore` file (taken from the `.gitignore` link above):
+
+```
+# ignore all .a files
+*.a
+
+# but do track lib.a, even though you're ignoring .a files above
+!lib.a
+
+# only ignore the TODO file in the current directory, not subdir/TODO
+/TODO
+
+# ignore all files in any directory named build
+build/
+
+# ignore doc/notes.txt, but not doc/server/arch.txt
+doc/*.txt
+
+# ignore all .pdf files in the doc/ directory and any of its subdirectories
+doc/**/*.pdf
+```
+
 ### Deploy an AFS proxy
 
 Before you can commit to an AFS, a proxy contract representing that AFS must be deployed to the network.
