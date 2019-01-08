@@ -1,4 +1,4 @@
-# [0.20.0](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.20.0) (2019-01-07)
+# [0.21.0](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.21.0) (2019-01-08)
 
 
 ### Bug Fixes
@@ -6,21 +6,24 @@
 * **add.js:** fix paths as string causing unncessary add ([ff69080](https://github.com/AraBlocks/ara-filesystem/commit/ff69080))
 * **commit.js:** remove sizes from buffer data ([8e81d46](https://github.com/AraBlocks/ara-filesystem/commit/8e81d46))
 * **metadata.js:** fix writeFile overwriting existing keys ([7ffe03e](https://github.com/AraBlocks/ara-filesystem/commit/7ffe03e))
+* lint ([aa12db9](https://github.com/AraBlocks/ara-filesystem/commit/aa12db9))
 * **scripts/test:** enable ganache quiet ([525a470](https://github.com/AraBlocks/ara-filesystem/commit/525a470))
 * **scripts/travis-install:** downgrade truffle install version ([e08b2aa](https://github.com/AraBlocks/ara-filesystem/commit/e08b2aa))
-* accidentally pushed files ([09db2f1](https://github.com/AraBlocks/ara-filesystem/commit/09db2f1))
+* accidentally pushed files ([9a33a84](https://github.com/AraBlocks/ara-filesystem/commit/9a33a84))
 * add help(false) back to fix shipright ([49fa8f3](https://github.com/AraBlocks/ara-filesystem/commit/49fa8f3))
 * add id to test fixtures ([7e5b90e](https://github.com/AraBlocks/ara-filesystem/commit/7e5b90e))
 * cli global options ([8f0fd16](https://github.com/AraBlocks/ara-filesystem/commit/8f0fd16))
-* lint ([aa12db9](https://github.com/AraBlocks/ara-filesystem/commit/aa12db9))
-* lint ([1ae4075](https://github.com/AraBlocks/ara-filesystem/commit/1ae4075))
+* dont mkdirp ignored path ([aaff3ae](https://github.com/AraBlocks/ara-filesystem/commit/aaff3ae))
+* lint ([2f85d51](https://github.com/AraBlocks/ara-filesystem/commit/2f85d51))
 * update test constants ([4d7654a](https://github.com/AraBlocks/ara-filesystem/commit/4d7654a))
+* upgrade ignore dep and make relevant changes ([2568f5c](https://github.com/AraBlocks/ara-filesystem/commit/2568f5c))
+* wording ([5236b12](https://github.com/AraBlocks/ara-filesystem/commit/5236b12))
 
 
 ### Features
 
-* afs passwords work ([cc38751](https://github.com/AraBlocks/ara-filesystem/commit/cc38751))
-* wip ([8b0ca5a](https://github.com/AraBlocks/ara-filesystem/commit/8b0ca5a))
+* afs passwords work ([1e3cbea](https://github.com/AraBlocks/ara-filesystem/commit/1e3cbea))
+* wip ([84ad8f3](https://github.com/AraBlocks/ara-filesystem/commit/84ad8f3))
 
 
 
