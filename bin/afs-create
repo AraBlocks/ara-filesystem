@@ -41,10 +41,9 @@ const { argv } = program
   }, oncreate)
   .help('h')
   .recommendCommands()
-  .strict()
 
 async function oncreate(argv) {
-  let { owner } = argv
+  let { owner, password, afsPassword } = argv
 
   if (0 != owner.indexOf(AID_PREFIX)) {
     owner = `${AID_PREFIX}${owner}`
@@ -66,8 +65,13 @@ async function oncreate(argv) {
     }
   }
 
-  const { password } = await promptForPassword()
-  const { password: afsPassword } = await promptForPassword('Please provide a passphrase to use for this AFS.\nPassphrase:')
+  if (!password) {
+    ({ password } = await promptForPassword())
+  }
+  if (!afsPassword) {
+    const message = 'Please provide a passphrase to use for this AFS.\nPassphrase:'
+    ({ password: afsPassword } = await promptForPassword(message))
+  }
   if (!argv.quiet) { process.stdout.write('\n') }
 
   let arafs
@@ -88,7 +92,9 @@ async function oncreate(argv) {
       ' This phrase will be required to restore and delete this AFS.' +
       ' It will never be shown again: \n\n\t\t\t< %s >\n', arafs.mnemonic)
   } else {
-    process.stdout.write(`${arafs.afs.did};;${arafs.mnemonic}`)
+    process.stdout.write(`${arafs.afs.did}`)
+    process.stdout.write('\n')
+    process.stdout.write(`${arafs.mnemonic}`)
     process.stdout.write('\n')
   }
   arafs.afs.close()
