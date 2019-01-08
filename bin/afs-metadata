@@ -98,6 +98,7 @@ async function onmetadatawritekey(argv) {
   const keyringOpts = { secret, network, keyring }
 
   const { password } = await promptForPassword()
+  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
 
   let result
   try {
@@ -106,6 +107,7 @@ async function onmetadatawritekey(argv) {
       key,
       value,
       password,
+      afsPassword,
       keyringOpts
     })
   } catch (err) {
@@ -144,6 +146,7 @@ async function onmetadatadeletekey(argv) {
   const keyringOpts = { secret, network, keyring }
 
   const { password } = await promptForPassword()
+  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
 
   let result
   try {
@@ -151,6 +154,7 @@ async function onmetadatadeletekey(argv) {
       did,
       key,
       password,
+      afsPassword,
       keyringOpts
     })
   } catch (err) {
@@ -172,9 +176,10 @@ async function onmetadataclear(argv) {
   const keyringOpts = { secret, network, keyring }
 
   const { password } = await promptForPassword()
+  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
 
   try {
-    await afs.metadata.clear({ did, password, keyringOpts })
+    await afs.metadata.clear({ did, password, afsPassword, keyringOpts })
   } catch (err) {
     onfatal(err)
   }
@@ -196,12 +201,15 @@ async function onmetadatawritefile(argv) {
   const keyringOpts = { secret, network, keyring }
 
   const { password } = await promptForPassword()
+  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
+
   let result
   try {
     result = await afs.metadata.writeFile({
       did,
       filepath,
       password,
+      afsPassword,
       keyringOpts
     })
   } catch (err) {

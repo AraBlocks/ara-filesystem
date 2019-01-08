@@ -23,6 +23,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {String}   opts.afsPassword
  * @param {Object}   [opts.keyringOpts]
  * @param {Number}   opts.price
  * @param {Boolean}  opts.estimate
@@ -34,6 +35,8 @@ async function setPrice(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if ('string' !== typeof opts.password || !opts.password) {
     throw TypeError('Expecting non-empty password.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if ('number' !== typeof opts.price || 0 >= opts.price) {
     throw new TypeError('Expecting whole number price.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
@@ -41,16 +44,18 @@ async function setPrice(opts) {
   }
 
   let {
-    did, estimate, price
+    did, estimate, price, afsPassword
   } = opts
   const { password, keyringOpts } = opts
+
+  afsPassword = afsPassword || password
 
   estimate = estimate || false
 
   let ddo
   try {
     ({ did, ddo } = await validate({
-      did, password, label: 'price', keyringOpts
+      did, password: afsPassword, label: 'price', keyringOpts
     }))
   } catch (err) {
     throw err

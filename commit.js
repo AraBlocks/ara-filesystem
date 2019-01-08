@@ -43,6 +43,7 @@ const {
  * @param {Object}   opts
  * @param {String}   opts.did
  * @param {String}   opts.password
+ * @param {String}   opts.afsPassword
  * @param {Object}   [opts.keyringOpts]
  * @param {Boolean}  opts.estimate
  * @param {Number}   opts.price
@@ -55,25 +56,28 @@ async function commit(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if ('string' !== typeof opts.password || !opts.password) {
     throw TypeError('Expecting non-empty password.')
+  } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
+    throw TypeError('Expecting non-empty password.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  let { did, estimate } = opts
+  let { did, estimate, afsPassword } = opts
   const {
     password,
     price,
     keyringOpts
   } = opts
 
+  afsPassword = afsPassword || password
   estimate = estimate || false
 
   let ddo
   try {
     ({ did, ddo } = await validate({
-      did, password, label: 'commit', keyringOpts
+      did, password: afsPassword, label: 'commit', keyringOpts
     }))
   } catch (err) {
     throw err
@@ -116,6 +120,7 @@ async function commit(opts) {
       const setPriceGasCost = await setPrice({
         did,
         password,
+        afsPassword,
         price,
         keyringOpts,
         estimate: true
@@ -129,7 +134,7 @@ async function commit(opts) {
 
   if (0 < price) {
     await setPrice({
-      did, password, price, keyringOpts
+      did, password, price, keyringOpts, afsPassword
     })
   }
 

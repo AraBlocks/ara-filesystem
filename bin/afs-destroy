@@ -45,6 +45,7 @@ async function ondestroy(argv) {
   info('attempting destroying AFS %s', did)
 
   const { password } = await promptForPassword()
+  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
   const { mnemonic } = await promptForMnemonic()
 
   let result = force
@@ -62,7 +63,7 @@ async function ondestroy(argv) {
       const { answer } = await promptCostConfirmation(cost)
       if (answer) {
         await afs.destroy({
-          did, mnemonic, password, keyringOpts
+          did, mnemonic, password, afsPassword, keyringOpts
         })
         info('destroyed AFS %s', did)
       }

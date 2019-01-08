@@ -45,7 +45,7 @@ async function onremove(argv) {
   const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
 
-  const { password } = await promptForPassword()
+  const { password } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
   let instance
   try {
     instance = await afs.remove({
