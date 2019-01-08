@@ -64,7 +64,7 @@ $ afs remove df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my
 
 ### .afsignore
 
-At the root level of this repo, an `.afsignore` file can specify any files or directories to ignore in `afs add`.
+At the root level of this repository, a `.afsignore` file can be used to specify any files or directories to ignore when adding to an AFS.
 
 Each line in `afsignore` specifies a pattern, similar to `.npmignore` and `.gitignore` files:
 
