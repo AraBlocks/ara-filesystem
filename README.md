@@ -62,6 +62,19 @@ Example:
 $ afs remove df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9 my_video.mp4
 ```
 
+### .afsignore
+
+At the root level of this repo, an `.afsignore` file can specify any files or directories to ignore in `afs add`.
+
+Each line in `afsignore` specifies a pattern, similar to `.npmignore` and `.gitignore` files:
+
+* Blank lines or lines starting with # are ignored.
+* Standard glob patterns work.
+* You can end patterns with a forward slash / to specify a directory.
+* You can negate a pattern by starting it with an exclamation point !.
+
+By default, `.afs/` is ignored.
+
 ### Deploy an AFS proxy
 
 Before you can commit to an AFS, a proxy contract representing that AFS must be deployed to the network.
