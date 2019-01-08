@@ -76,7 +76,9 @@ async function onsetprice(argv) {
 
   if (result) {
     try {
-      await afs.setPrice({ did, password, afsPassword, price })
+      await afs.setPrice({
+        did, password, afsPassword, price
+      })
     } catch (err) {
       onfatal(err)
     }

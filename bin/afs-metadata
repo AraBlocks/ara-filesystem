@@ -179,7 +179,9 @@ async function onmetadataclear(argv) {
   const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
 
   try {
-    await afs.metadata.clear({ did, password, afsPassword, keyringOpts })
+    await afs.metadata.clear({
+      did, password, afsPassword, keyringOpts
+    })
   } catch (err) {
     onfatal(err)
   }
