@@ -93,19 +93,24 @@ async function onmetadatawritekey(argv) {
   } = argv
   info('writing key %s with value %s to AFS metadata', key, value)
 
-  const { secret,
+  const {
+    secret,
     network,
-    keyring,
+    keyring
+  } = argv
+
+  let {
     password,
     afsPassword
   } = argv
+
   const keyringOpts = { secret, network, keyring }
 
   if (!password) {
     ({ password } = await promptForPassword())
   }
   if (!afsPassword) {
-    const message = 'Please provide the passphrase for this AFS.\nPassphrase:'
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:';
     ({ password: afsPassword } = await promptForPassword(message))
   }
 

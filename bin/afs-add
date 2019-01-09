@@ -31,7 +31,8 @@ const { argv } = program
 
 async function onadd(argv) {
   const [ ...paths ] = argv.pathspec
-  const { did, password } = argv
+  const { did } = argv
+  let { password } = argv
 
   info('id: %s', did)
   info('paths: ', paths)
@@ -40,7 +41,7 @@ async function onadd(argv) {
   const keyringOpts = { secret, network, keyring }
 
   if (!password) {
-    const message = 'Please provide the passphrase for this AFS.\nPassphrase:'
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:';
     ({ password } = await promptForPassword(message))
   }
 

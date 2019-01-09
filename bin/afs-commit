@@ -47,7 +47,10 @@ async function oncommit(argv) {
     force,
     secret,
     network,
-    keyring,
+    keyring
+  } = argv
+
+  let {
     password,
     afsPassword
   } = argv
@@ -56,7 +59,7 @@ async function oncommit(argv) {
     ({ password } = await promptForPassword())
   }
   if (!afsPassword) {
-    const message = 'Please provide the passphrase for this AFS.\nPassphrase:'
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:';
     ({ password: afsPassword } = await promptForPassword(message))
   }
 
