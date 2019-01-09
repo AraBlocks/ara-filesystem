@@ -69,7 +69,7 @@ async function oncreate(argv) {
     ({ password } = await promptForPassword())
   }
   if (!afsPassword) {
-    const message = 'Please provide a passphrase to use for this AFS.\nPassphrase:'
+    const message = 'Please provide a passphrase to use for this AFS.\nPassphrase:';
     ({ password: afsPassword } = await promptForPassword(message))
   }
   if (!argv.quiet) { process.stdout.write('\n') }

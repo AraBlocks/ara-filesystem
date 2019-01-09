@@ -41,7 +41,10 @@ async function ondeploy(argv) {
     force,
     secret,
     network,
-    keyring,
+    keyring
+  } = argv
+
+  let {
     password,
     afsPassword
   } = argv
@@ -50,7 +53,7 @@ async function ondeploy(argv) {
     ({ password } = await promptForPassword())
   }
   if (!afsPassword) {
-    const message = 'Please provide the passphrase for this AFS.\nPassphrase:'
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:';
     ({ password: afsPassword } = await promptForPassword(message))
   }
   const keyringOpts = { secret, network, keyring }

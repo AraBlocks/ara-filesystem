@@ -43,18 +43,22 @@ async function ondestroy(argv) {
     force,
     secret,
     network,
-    keyring,
+    keyring
+  } = argv
+
+  let {
     password,
     mnemonic,
     afsPassword
   } = argv
+
   info('attempting destroying AFS %s', did)
 
   if (!password) {
     ({ password } = await promptForPassword())
   }
   if (!afsPassword) {
-    const message = 'Please provide the passphrase for this AFS.\nPassphrase:'
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:';
     ({ password: afsPassword } = await promptForPassword(message))
   }
   if (!mnemonic) {
