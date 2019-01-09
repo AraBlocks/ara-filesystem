@@ -86,7 +86,6 @@ const { argv } = program
   }, onmetadatawritefile)
   .help('h')
   .recommendCommands()
-  .strict()
 
 async function onmetadatawritekey(argv) {
   const {

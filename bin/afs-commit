@@ -39,7 +39,6 @@ const { argv } = program
   }, oncommit)
   .help('h')
   .recommendCommands()
-  .strict()
 
 async function oncommit(argv) {
   const {
