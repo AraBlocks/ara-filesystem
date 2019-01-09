@@ -162,7 +162,8 @@ If `owner` is given, this function will create a new AFS with the owning identit
 - `opts`
   - `did` - The `DID` of an existing `AFS`
   - `owner` - `DID` of the owner of the `AFS` to be created
-  - `password` - The password of the `owner` of this `AFS`, this is only required for writing to the AFS.
+  - `password` - The password of the `owner` of this `AFS`; this is only required for writing to the `AFS`.
+  - `afsPassword` - The password of the `AFS`; this is only required for writing to the `AFS`.
   - `storage` - optional Storage function to use for the `AFS`
   - `keyringOpts` - optional Keyring options
 
@@ -179,7 +180,7 @@ await writeIdentity(identity)
 const { publicKey: owner } = identity
 
 
-const { afs } = await create({ owner, password })
+const { afs } = await create({ owner, password, afsPassword })
 ```
 
 To obtain a reference to an existing `AFS`:
@@ -199,6 +200,7 @@ Destroys the local copy of an `AFS` and unlists it from the blockchain (if owner
 - `opts`
   - `did` - The `DID` of the `AFS` to be destroyed
   - `password` - The password of the owner of this `AFS`
+  - `afsPassword` - The password of the `AFS`
   - `mnemonic` - The mnemonic for this `AFS`
   - `keyringOpts` - optional Keyring options
 
@@ -206,12 +208,13 @@ If an estimate, returns the `cost` (in ETH), otherwise returns the transaction r
 
 ```js
 const { create, destroy } = require('ara-filesystem')
-const { afs, mnemonic } = await create({ owner, password })
+const { afs, mnemonic } = await create({ owner, password, afsPassword })
 const { did } = afs
 await destroy({
   did,
   mnemonic,
-  password
+  password,
+  afsPassword
 })
 ```
 
@@ -222,7 +225,7 @@ Adds one or more files to an existing `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to add files to
-  - `password` - The password of the owner of this `AFS`
+  - `password` - The password of the `AFS`
   - `force` - Force add the path(s)
   - `paths` - The path(s) of the files to add
   - `keyringOpts` - optional Keyring options
@@ -248,7 +251,7 @@ Removes one or more files from an `AFS`.
 
 - `opts`
   - `did` - The `DID` of the `AFS` where the files are located
-  - `password` - The password of the owner of this `AFS`
+  - `password` - The password of the `AFS`
   - `paths` - The path(s) of the files to remove
   - `keyringOpts` - optional Keyring options
 
@@ -271,6 +274,7 @@ Deploys an AFS proxy to the network. Returns the Ethereum address of the deploy 
 - `opts`
   - `did` - `DID` of the `AFS` to deploy
   - `password` - Owner's password for this `AFS`
+  - `afsPassword` - The password of the `AFS`
   - `estimate` - optional Flag to check cost of `deploy`
   - `keyringOpts` - optional Keyring options
 
@@ -279,6 +283,7 @@ If an estimate, returns the `cost` (in ETH), otherwise returns the Ethereum addr
 ```js
 const { deploy } = require('ara-filesystem')
 const address = await deploy({
+  afsPassword,
   password,
   did
 })
@@ -286,6 +291,7 @@ const address = await deploy({
 // estimate deploy
 const cost = await deploy({
   estimate: true,
+  afsPassword,
   password,
   did
 })
@@ -299,6 +305,7 @@ Commits any changes to an `AFS` to the blockchain. Calling `deploy` is required 
 - `opts`
   - `did` - The `DID` of the `AFS` to commit
   - `password` - The password of the owner of this `AFS`
+  - `afsPassword` - The password of the `AFS`
   - `estimate` - optional Flag to check cost of `commit`
   - `price` - optional Price in Ara tokens to set this `AFS`
   - `keyringOpts` - optional Keyring options
@@ -308,6 +315,7 @@ If an estimate, returns the `cost` (in ETH), otherwise returns the transaction r
 ```js
 const { commit } = require('ara-filesystem')
 const result = await commit({
+  afsPassword,
   password,
   price,
   did
@@ -316,6 +324,7 @@ const result = await commit({
 // estimate commit cost
 const cost = await commit({
   estimate: true,
+  afsPassword,
   password,
   price,
   did
@@ -330,6 +339,7 @@ Sets the price in Ara tokens of an `AFS`.
 - `opts`
   - `did` - The `DID` of the `AFS` to set the price of
   - `password` - The password of the owner of this `AFS`
+  - `afsPassword` - The password of the `AFS`
   - `price` - The price (in Ara) to purchase this `AFS`
   - `estimate` - optional Flag to check cost of `setPrice`
   - `keyringOpts` - optional Keyring options
@@ -340,14 +350,16 @@ If an estimate, returns the `cost` (in ETH), otherwise returns the transaction r
 const { setPrice } = require('ara-filesystem')
 const price = 10
 await setPrice({
-  did,
+  afsPassword,
   password,
-  price
+  price,
+  did
 })
 
 // estimate set price cost
 const cost = await setPrice({
   estimate: true,
+  afsPassword
   password,
   price,
   did
@@ -413,6 +425,7 @@ Writes a metadata JSON file to the metadata partition of an `AFS`.
 - `opts`
   - `did` - The `DID` of the `AFS` to write to
   - `password` - The password of the owner of this `AFS`
+  - `afsPassword` - The password of the `AFS`
   - `filepath` - The path of the metadata JSON file to copy
   - `keyringOpts` - optional Keyring options
 
@@ -424,7 +437,8 @@ const { metadata } = require('ara-filesystem')
 const result = await metadata.writeFile({
   did,
   password,
-  filepath
+  filepath,
+  afsPassword
 })
 ```
 
@@ -436,6 +450,7 @@ Writes a metadata key/value pair to the metadata partition of an `AFS`.
 - `opts`
   - `did` - The `DID` of the `AFS` to write to
   - `password` - The password of the owner of this `AFS`
+  - `afsPassword` - The password of the `AFS`
   - `key` - The key to write
   - `value` - The value to write
   - `keyringOpts` - optional Keyring options
@@ -451,7 +466,8 @@ const result = await metadata.writeKey({
   did,
   key,
   value,
-  password
+  password,
+  afsPassword
 })
 ```
 
@@ -463,6 +479,7 @@ Writes multiple key/value pairs to the metadata parition of an `AFS`.
 - `opts`
   - `did` - The `DID` of the `AFS` to write to
   - `password` - The password of the owner of this `AFS`
+  - `afsPassword` - The password of the `AFS`
   - `keys` - Object containing the key/value pairs to write
   - `keyringOpts` - optional Keyring options
 
@@ -475,7 +492,8 @@ const keys = { foo: 'bar', hello: 'world' }
 await metadata.writeKeys({
   did,
   keys,
-  password
+  password,
+  afsPassword
 })
 ```
 
@@ -507,6 +525,7 @@ Deletes a metadata key/value pair from the metadata partition of an `AFS`.
 - `opts`
   - `did` - The `DID` of the `AFS` to delete from
   - `password` - The password of the owner of this `AFS`
+  - `afsPassword` - The password of the `AFS`
   - `key` - The key to write
   - `keyringOpts` - optional Keyring options
 
@@ -517,7 +536,9 @@ const { metadata } = require('ara-filesystem')
 
 await metadata.delKey({
   did,
-  key
+  key,
+  password,
+  afsPassword
 })
 ```
 
@@ -529,10 +550,11 @@ Empties all metadata contents of an `AFS`.
 - `opts`
   - `did` - The `DID` of the `AFS` whose metadata is to be emptied
   - `password` - The password of the owner of this `AFS`
+  - `afsPassword` - The password of the `AFS`
 
 ```js
 const { metadata } = require('ara-filesystem')
-await metadata.clear({ did })
+await metadata.clear({ did, password, afsPassword })
 ```
 
 <a name="readfile"></a>
@@ -644,6 +666,7 @@ Approves a pending transfer request, this officially transfers ownership for the
 - `opts`
   - `contentDid` - `DID` of the content to change ownership for
   - `password` - Password of the staged owner
+  - `afsPassword` - The password of the `AFS`
   - `newOwnerDid` - `DID` of the owner to transfer ownership to
   - `mnemonic` - mnemonic associated with the AFS
   - `estimate` - optional Flag to check cost of `approveTransfer`
@@ -657,9 +680,10 @@ Returns `object`:
 const { ownership } = require('ara-filesystem')
 const contentDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
 const password = 'pass'
+const afsPAssword = 'password'
 const newOwnerDid = 'did:ara:7dc039cfb220029c371d0f4aabf4a956ed0062d66c447df7b4595d7e11187271'
 const mnemonic = 'cargo diary bracket crumble stable chief grief grab frost seven wet repeat'
-const result = await ownership.approveTransfer({ contentDid, password, newOwnerDid, mnemonic })
+const result = await ownership.approveTransfer({ contentDid, password, afsPassword, newOwnerDid, mnemonic })
 ```
 
 <a name="claim"></a>
