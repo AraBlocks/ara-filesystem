@@ -36,7 +36,6 @@ const { argv } = program
   }, ondestroy)
   .help('h')
   .recommendCommands()
-  .strict()
 
 async function ondestroy(argv) {
   const {
