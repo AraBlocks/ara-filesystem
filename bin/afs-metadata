@@ -94,11 +94,21 @@ async function onmetadatawritekey(argv) {
   } = argv
   info('writing key %s with value %s to AFS metadata', key, value)
 
-  const { secret, network, keyring } = argv
+  const { secret,
+    network,
+    keyring,
+    password,
+    afsPassword
+  } = argv
   const keyringOpts = { secret, network, keyring }
 
-  const { password } = await promptForPassword()
-  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
+  if (!password) {
+    ({ password } = await promptForPassword())
+  }
+  if (!afsPassword) {
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:'
+    ({ password: afsPassword } = await promptForPassword(message))
+  }
 
   let result
   try {
@@ -145,8 +155,13 @@ async function onmetadatadeletekey(argv) {
   const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
 
-  const { password } = await promptForPassword()
-  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
+  if (!password) {
+    ({ password } = await promptForPassword())
+  }
+  if (!afsPassword) {
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:';
+    ({ password: afsPassword } = await promptForPassword(message))
+  }
 
   let result
   try {
@@ -175,8 +190,13 @@ async function onmetadataclear(argv) {
   const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
 
-  const { password } = await promptForPassword()
-  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
+  if (!password) {
+    ({ password } = await promptForPassword())
+  }
+  if (!afsPassword) {
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:';
+    ({ password: afsPassword } = await promptForPassword(message))
+  }
 
   try {
     await afs.metadata.clear({
@@ -202,8 +222,13 @@ async function onmetadatawritefile(argv) {
   const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
 
-  const { password } = await promptForPassword()
-  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
+  if (!password) {
+    ({ password } = await promptForPassword())
+  }
+  if (!afsPassword) {
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:';
+    ({ password: afsPassword } = await promptForPassword(message))
+  }
 
   let result
   try {

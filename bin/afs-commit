@@ -43,10 +43,23 @@ const { argv } = program
 
 async function oncommit(argv) {
   const {
-    did, price, secret, network, keyring, force
+    did,
+    price,
+    force,
+    secret,
+    network,
+    keyring,
+    password,
+    afsPassword
   } = argv
-  const { password } = await promptForPassword()
-  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
+
+  if (!password) {
+    ({ password } = await promptForPassword())
+  }
+  if (!afsPassword) {
+    const message = 'Please provide the passphrase for this AFS.\nPassphrase:'
+    ({ password: afsPassword } = await promptForPassword(message))
+  }
 
   const keyringOpts = { secret, network, keyring }
 
