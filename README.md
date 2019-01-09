@@ -680,7 +680,7 @@ Returns `object`:
 const { ownership } = require('ara-filesystem')
 const contentDid = 'did:ara:a51aa651c5a28a7c0a8de007843a00dcd24f3cc893522d3fb093c2bb7a323785'
 const password = 'pass'
-const afsPAssword = 'password'
+const afsPassword = 'password'
 const newOwnerDid = 'did:ara:7dc039cfb220029c371d0f4aabf4a956ed0062d66c447df7b4595d7e11187271'
 const mnemonic = 'cargo diary bracket crumble stable chief grief grab frost seven wet repeat'
 const result = await ownership.approveTransfer({ contentDid, password, afsPassword, newOwnerDid, mnemonic })
