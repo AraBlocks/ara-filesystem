@@ -118,11 +118,10 @@ async function onapprovetransfer(argv) {
     'content-did': did, 'new-owner-did': newOwnerDid, secret, network, keyring
   } = argv
   const { password } = await promptForPassword()
-  const { password: afsPassword } = await promptForPassword('Please provide the passphrase for this AFS.\nPassphrase:')
   const { mnemonic } = await promptForMnemonic()
   const keyringOpts = { secret, network, keyring }
   const opts = {
-    did, newOwnerDid, password, afsPassword, mnemonic, keyringOpts
+    did, newOwnerDid, password, mnemonic, keyringOpts
   }
 
   try {
