@@ -1,4 +1,4 @@
-# [0.21.0](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.21.0) (2019-01-08)
+# [0.22.0](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.22.0) (2019-01-09)
 
 
 ### Bug Fixes
@@ -6,18 +6,22 @@
 * **add.js:** fix paths as string causing unncessary add ([ff69080](https://github.com/AraBlocks/ara-filesystem/commit/ff69080))
 * **commit.js:** remove sizes from buffer data ([8e81d46](https://github.com/AraBlocks/ara-filesystem/commit/8e81d46))
 * **metadata.js:** fix writeFile overwriting existing keys ([7ffe03e](https://github.com/AraBlocks/ara-filesystem/commit/7ffe03e))
-* lint ([aa12db9](https://github.com/AraBlocks/ara-filesystem/commit/aa12db9))
+* update test constants ([4d7654a](https://github.com/AraBlocks/ara-filesystem/commit/4d7654a))
 * **scripts/test:** enable ganache quiet ([525a470](https://github.com/AraBlocks/ara-filesystem/commit/525a470))
-* **scripts/travis-install:** downgrade truffle install version ([e08b2aa](https://github.com/AraBlocks/ara-filesystem/commit/e08b2aa))
 * accidentally pushed files ([9a33a84](https://github.com/AraBlocks/ara-filesystem/commit/9a33a84))
 * add help(false) back to fix shipright ([49fa8f3](https://github.com/AraBlocks/ara-filesystem/commit/49fa8f3))
 * add id to test fixtures ([7e5b90e](https://github.com/AraBlocks/ara-filesystem/commit/7e5b90e))
 * cli global options ([8f0fd16](https://github.com/AraBlocks/ara-filesystem/commit/8f0fd16))
-* dont mkdirp ignored path ([aaff3ae](https://github.com/AraBlocks/ara-filesystem/commit/aaff3ae))
+* dont mkdirp ignored path ([e276702](https://github.com/AraBlocks/ara-filesystem/commit/e276702))
 * lint ([2f85d51](https://github.com/AraBlocks/ara-filesystem/commit/2f85d51))
-* update test constants ([4d7654a](https://github.com/AraBlocks/ara-filesystem/commit/4d7654a))
-* upgrade ignore dep and make relevant changes ([2568f5c](https://github.com/AraBlocks/ara-filesystem/commit/2568f5c))
-* wording ([5236b12](https://github.com/AraBlocks/ara-filesystem/commit/5236b12))
+* lint ([2b357eb](https://github.com/AraBlocks/ara-filesystem/commit/2b357eb))
+* lint ([aa12db9](https://github.com/AraBlocks/ara-filesystem/commit/aa12db9))
+* lint ([14d7962](https://github.com/AraBlocks/ara-filesystem/commit/14d7962))
+* pass in afsPassword ([c158673](https://github.com/AraBlocks/ara-filesystem/commit/c158673))
+* typo ([501979d](https://github.com/AraBlocks/ara-filesystem/commit/501979d))
+* upgrade ignore dep and make relevant changes ([1c79c33](https://github.com/AraBlocks/ara-filesystem/commit/1c79c33))
+* wording ([33c8afd](https://github.com/AraBlocks/ara-filesystem/commit/33c8afd))
+* **scripts/travis-install:** downgrade truffle install version ([e08b2aa](https://github.com/AraBlocks/ara-filesystem/commit/e08b2aa))
 
 
 ### Features
