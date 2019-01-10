@@ -170,6 +170,11 @@ async function onmetadatadeletekey(argv) {
   const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
 
+  let {
+    password,
+    afsPassword
+  } = argv
+
   if (!password) {
     ({ password } = await promptForPassword())
   }
@@ -205,6 +210,11 @@ async function onmetadataclear(argv) {
   const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
 
+  let {
+    password,
+    afsPassword
+  } = argv
+
   if (!password) {
     ({ password } = await promptForPassword())
   }
@@ -236,6 +246,11 @@ async function onmetadatawritefile(argv) {
 
   const { secret, network, keyring } = argv
   const keyringOpts = { secret, network, keyring }
+
+  let {
+    password,
+    afsPassword
+  } = argv
 
   if (!password) {
     ({ password } = await promptForPassword())
