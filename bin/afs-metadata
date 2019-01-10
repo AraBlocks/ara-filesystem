@@ -35,6 +35,8 @@ const { argv } = program
         type: 'boolean',
         describe: 'Print full metadata after write'
       })
+      .option('password')
+      .option('afsPassword')
   }, onmetadatawritekey)
   .command('read-key <did> <key>', "Read a key's value from AFS metadata", (_) => {
     _
@@ -62,6 +64,8 @@ const { argv } = program
         type: 'boolean',
         describe: 'Print full metadata after delete'
       })
+      .option('password')
+      .option('afsPassword')
   }, onmetadatadeletekey)
   .command('clear <did>', 'Clears all metadata from an AFS', (_) => {
     _
@@ -69,6 +73,8 @@ const { argv } = program
         type: 'string',
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
+      .option('password')
+      .option('afsPassword')
   }, onmetadataclear)
   .command('print <did>', 'Prints current metadata for an AFS', (_) => {
     _
@@ -83,9 +89,14 @@ const { argv } = program
         type: 'string',
         describe: 'An AFS ARA decentralized identity (did) URI'
       })
+      .option('password')
+      .option('afsPassword')
   }, onmetadatawritefile)
   .help('h')
   .recommendCommands()
+  .strict()
+  .hide('password')
+  .hide('afsPassword')
 
 async function onmetadatawritekey(argv) {
   const {

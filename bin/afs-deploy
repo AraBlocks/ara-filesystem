@@ -31,9 +31,14 @@ const { argv } = program
         type: 'boolean',
         describe: 'Force deploy operation',
       })
+      .option('password')
+      .option('afsPassword')
   }, ondeploy)
   .help('h')
   .recommendCommands()
+  .strict()
+  .hide('password')
+  .hide('afsPassword')
 
 async function ondeploy(argv) {
   const {

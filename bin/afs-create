@@ -38,9 +38,14 @@ const { argv } = program
         default: false,
         describe: 'Only output errors and results'
       })
+      .option('password')
+      .option('afsPassword')
   }, oncreate)
   .help('h')
   .recommendCommands()
+  .strict()
+  .hide('password')
+  .hide('afsPassword')
 
 async function oncreate(argv) {
   let { owner, password, afsPassword } = argv
