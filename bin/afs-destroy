@@ -33,9 +33,16 @@ const { argv } = program
         type: 'boolean',
         describe: 'Force destroy operation',
       })
+      .option('password')
+      .option('afsPassword')
+      .option('mnemonic')
   }, ondestroy)
   .help('h')
   .recommendCommands()
+  .strict()
+  .hide('password')
+  .hide('afsPassword')
+  .hide('mnemonic')
 
 async function ondestroy(argv) {
   const {

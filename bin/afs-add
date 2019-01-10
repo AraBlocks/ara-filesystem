@@ -25,9 +25,12 @@ const { argv } = program
         type: 'string',
         describe: 'The file(s) you wish to add to AFS'
       })
+      .option('password')
   }, onadd)
   .help('h')
   .recommendCommands()
+  .strict()
+  .hide('password')
 
 async function onadd(argv) {
   const [ ...paths ] = argv.pathspec

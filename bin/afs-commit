@@ -36,9 +36,14 @@ const { argv } = program
         type: 'boolean',
         describe: 'Force commit operation',
       })
+      .option('password')
+      .option('afsPassword')
   }, oncommit)
   .help('h')
   .recommendCommands()
+  .strict()
+  .hide('password')
+  .hide('afsPassword')
 
 async function oncommit(argv) {
   const {
