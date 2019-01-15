@@ -37,18 +37,18 @@ Below are some useful afs commands:
 const { argv } = program
 
 // Emit program version
-if (0 == argv._.length && argv.version) {
+if (0 === argv._.length && argv.version) {
   process.exit(0)
 }
 
 // Emit program usage help
-if ((0 == argv._.length && argv.help) || 0 == ORIGINAL_PROGRAM_ARGS.length) {
+if ((0 === argv._.length && argv.help) || 0 === ORIGINAL_PROGRAM_ARGS.length) {
   program.showHelp()
   process.exit(0)
 }
 
 // if debug given, but nothing else show help and bail
-if (true == argv.debug && 0 == argv._.length) {
+if (true === argv.debug && 0 === argv._.length) {
   program.showHelp()
   process.exit(1)
 }
@@ -58,8 +58,8 @@ void (async function main() {
   // arguments following after
   const shortCommandName = (argv._[0] || argv.debug).split(' ')
 
-  if (null == shortCommandName) {
-    if ('-' == ORIGINAL_PROGRAM_ARGS[0][0]) {
+  if (null === shortCommandName) {
+    if ('-' === ORIGINAL_PROGRAM_ARGS[0][0]) {
       console.error('Unknown option: %s', ORIGINAL_PROGRAM_ARGS[0])
     }
 
