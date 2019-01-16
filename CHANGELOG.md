@@ -1,3 +1,12 @@
+# [0.23.0](https://github.com/AraBlocks/ara-filesystem/compare/0.22.1...0.23.0) (2019-01-16)
+
+
+### Bug Fixes
+
+* silence lint ([fa9d5b2](https://github.com/AraBlocks/ara-filesystem/commit/fa9d5b2))
+
+
+
 ## [0.22.1](https://github.com/AraBlocks/ara-filesystem/compare/0.14.0...0.22.1) (2019-01-10)
 
 
