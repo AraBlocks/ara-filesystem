@@ -37,7 +37,7 @@ async function setPrice(opts) {
     throw TypeError('Expecting non-empty password.')
   } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
     throw TypeError('Expecting non-empty password.')
-  } else if ('number' !== typeof opts.price || 0 >= opts.price) {
+  } else if ('number' !== typeof opts.price || opts.price < 0) {
     throw new TypeError('Expecting whole number price.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')

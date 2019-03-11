@@ -58,7 +58,6 @@ test.serial("setPrice(opts) invalid opts", async (t) => {
   // price
   await t.throwsAsync(setPrice({ did, password }), TypeError)
   await t.throwsAsync(setPrice({ did, password, price: '100' }), TypeError)
-  await t.throwsAsync(setPrice({ did, password, price: 0 }), TypeError)
   await t.throwsAsync(setPrice({ did, password, price: -10 }), TypeError)
 })
 
