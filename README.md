@@ -307,6 +307,7 @@ Commits any changes to an `AFS` to the blockchain. Calling `deploy` is required 
   - `password` - The password of the owner of this `AFS`
   - `afsPassword` - The password of the `AFS`
   - `estimate` - optional Flag to check cost of `commit`
+  - `estimateDid` - optional `DID` of a proxy which points to an estimate version of an AFS Standard (used for estimating cost without `deploy` first)
   - `price` - optional Price in Ara tokens to set this `AFS`
   - `keyringOpts` - optional Keyring options
 
@@ -342,6 +343,7 @@ Sets the price in Ara tokens of an `AFS`.
   - `afsPassword` - The password of the `AFS`
   - `price` - The price (in Ara) to purchase this `AFS`
   - `estimate` - optional Flag to check cost of `setPrice`
+  - `estimateDid` - optional `DID` of a proxy which points to an estimate version of an AFS Standard (used for estimating cost without `deploy` first)
   - `keyringOpts` - optional Keyring options
 
 If an estimate, returns the `cost` (in ETH), otherwise returns the transaction receipt.
