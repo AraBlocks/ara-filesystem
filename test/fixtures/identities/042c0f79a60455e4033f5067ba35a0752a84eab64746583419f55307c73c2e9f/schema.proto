@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+message KeyStore {
+  uint32 version = 1;
+  string address = 2;
+  string id = 3;
+  Crypto crypto = 4;
+
+  message Crypto {
+    string cipher = 1;
+    string ciphertext = 2;
+    CipherParams cipherparams = 3;
+    string mac = 4;
+    string kdf = 5;
+    KDFParams kdfparams = 6;
+    string digest = 7;
+
+    message CipherParams {
+      string iv = 1;
+    }
+
+    message KDFParams {
+      uint64 dklen = 1;
+      uint64 n = 2;
+      uint64 r = 3;
+      uint64 p = 4;
+      uint64 c = 5;
+      string prf = 6;
+      string salt = 7;
+    }
+  }
+}
+
+message Identity {
+  string did = 1;
+  bytes key = 2;
+  Proof proof = 3;
+  repeated File files = 4;
+
+  message Proof {
+    bytes signature = 1;
+  }
+
+  message File {
+    string path = 1;
+    bytes buffer = 2;
+  }
+}
+
+message Keys {
+  bytes signature = 1;
+  repeated KeyPair keys = 2;
+}
+
+message KeyPair {
+  bytes publicKey = 1;
+  bytes secretKey = 2;
+}

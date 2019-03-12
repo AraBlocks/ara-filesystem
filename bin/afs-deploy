@@ -20,11 +20,16 @@ usage: afs deploy: [-h] [--help] [options]
 })
 
 const { argv } = program
-  .command('$0 <did>', 'Deploy proxy for the AFS', (_) => {
+  .command('$0 <did> [options]', 'Deploy proxy for the AFS', (_) => {
     _
       .positional('did', {
         type: 'string',
         describe: 'An AFS ARA decentralized identity (did) URI'
+      })
+      .option('version-name', {
+        alias: 'n',
+        type: 'string',
+        describe: 'Name of AFS Standard version to use for this AFS'
       })
       .option('force', {
         alias: 'f',
@@ -46,7 +51,8 @@ async function ondeploy(argv) {
     force,
     secret,
     network,
-    keyring
+    keyring,
+    versionName
   } = argv
 
   let {
@@ -67,6 +73,7 @@ async function ondeploy(argv) {
   if (!result) {
     try {
       const cost = await afs.deploy({
+        version: versionName,
         estimate: true,
         keyringOpts,
         afsPassword,
@@ -84,6 +91,7 @@ async function ondeploy(argv) {
     info('deploy proxy for: %s', did)
     try {
       result = await afs.deploy({
+        version: versionName,
         keyringOpts,
         afsPassword,
         password,

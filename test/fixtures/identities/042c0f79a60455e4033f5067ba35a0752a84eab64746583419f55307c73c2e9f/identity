@@ -1,0 +1,64 @@
+
+Hdid:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501 _Zıj-nØ^¹Öj“n9¤LGÒ ¡äüÅiÍÏs…B
+@ó·ÍÂÙíÒ„<¯¯˜ŸNZA’Ö£»sÂDøÊÀ¥•œÔöTŒß¥ÏCmC"Ï§·bÎyp.ßÃÁRÇí"¼
+ddo.json¯{"@context":"https://w3id.org/did/v1","id":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501","publicKey":[{"id":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501#owner","type":"Ed25519VerificationKey2018","owner":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501","controller":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501","publicKeyHex":"5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501","publicKeyPem":"-----BEGIN PUBLIC KEY-----\nF9a/QJqLW4e2F651ghqk245pExH0iCh5PzFac3Pc4UB\n-----END PUBLIC KEY-----","publicKeyBase58":"7REChuwNgS6jpG9k7sWKFTE8oyz2HKYetwSizM8fTBrp","publicKeyBase64":"F9a/QJqLW4e2F651ghqk245pExH0iCh5PzFac3Pc4UB"},{"id":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501#eth","type":"Secp256k1VerificationKey2018","owner":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501","controller":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501","publicKeyHex":"81431874791d25de22815195d7837119b37c0c9f815f38b64908b4b2baa3707aeba462611e8a6e07266969b0296ca5b44452f9e3101bd5bdfa18d296af323dfb","publicKeyPem":"-----BEGIN PUBLIC KEY-----\nCBQxh0eR0l3iKBUZXXg3EZs3wMn4FfOLZJCLSyuqNweuukYmEeim4HJmlpsClspbREUvnjEBvVvfoY0pavMj37\n-----END PUBLIC KEY-----","publicKeyBase58":"3atoHFJX1gj2C9Vigh59TrTRfoQB4Qb9KRavo2T1ozdn5vFgJ7JGm9iQ8Rsqq3pxLhMhqhD6VCUV75up5A1k3fsG","publicKeyBase64":"CBQxh0eR0l3iKBUZXXg3EZs3wMn4FfOLZJCLSyuqNweuukYmEeim4HJmlpsClspbREUvnjEBvVvfoY0pavMj37"},{"id":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501#metadata","type":"Ed25519VerificationKey2018","owner":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501","controller":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501","publicKeyHex":"45407a8ed31c997cbf144472fbc9534be18147435416d8d0c5bfba3b8a0a322e","publicKeyPem":"-----BEGIN PUBLIC KEY-----\nEVAeo7THJl8vxREcvvJU0vhgUdDVBbY0MW/ujuKCjIu\n-----END PUBLIC KEY-----","publicKeyBase58":"5fLA5NW1vEpAz8N6bhHvWmSgb6WwAmNQhmABRci9SAKF","publicKeyBase64":"EVAeo7THJl8vxREcvvJU0vhgUdDVBbY0MW/ujuKCjIu"}],"authentication":[{"publicKey":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501#owner","type":"Ed25519SignatureAuthentication2018"},{"publicKey":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501#eth","type":"Secp256k1SignatureAuthentication2018"},{"publicKey":"did:ara:9f26296a16e3260b77a165db15646b8a85f2cd590577ea2872c6bbbffed911a2#owner","type":"Ed25519VerificationKey2018"}],"service":[],"created":"2019-03-12T20:31:40.581Z","updated":"2019-03-12T20:31:40.581Z","proof":{"type":"Ed25519VerificationKey2018","nonce":"a8ad5b64e92bbd0614f3e68b01822dfbbcd5066900583888bab638e33e413051","domain":"ara","created":"2019-03-12T20:31:40.583Z","creator":"did:ara:5f5afd026a2d6e1ed85eb9d6086a936e39a44c47d220a1e4fcc569cdcf738501#owner","signatureValue":"2372e4f48edd343b4692d685afb6605778e6b243cad9aac30ba14c772755e157be88b5d6434fc4544f4173826f4cdac7403fb18dfbf00b958f59fc6d3fc3c403"}}"Ç
+keystore/eth¶{"id":"2dfd495b-e492-4ad9-a91a-5e65b47a9f1a","version":"0000000000000101","crypto":{"cipherparams":{"iv":"607af4f8954e0c8ac8b7d23fb3f7bb84"},"ciphertext":"385d8198f21c576f566f336c8dd8e6d04884ad582c2e469a47e995f4e9748e76e121dc237ed6073abb567d1cd6e0f5b005e8421e56617d09ebfa688845ef5b83f00dcfa1515a3bbc15cab71d4ab018848711e1b8bcfbdff3d9cd674e006c04fc48d2857816a25e77da4ab0266fb2dcd6e344f49b96fb9596c758826a962665f6126210629e4a4eb2c7b4d2a933529a8a6d98acbaaec557f5961a6b83b5ce0a15b994e6ae4dc7484ba8677fbc8c67eb95a290c85f80278f04eb32246289f0a47ef92e6d5d274bcd8308e8ffe5623cac2926d776aafb07213504bf116e81e420f48d011afd37274aa5728e6c17b1dbc6ad82119a05a52f206211798c3ca360f3742be3d0cb4ea1421b1786b930a84f3595a06184e4783fa5dfb143803abb76d423f4ec249c7f040deed299eef24b594055ffc674a605836fcc5cf764342c5b0934ad854fb6374b6d7317a0c64da11d92626896039d3790caff2fe3ba8f7ebea930","cipher":"aes-128-ctr","digest":"sha1","mac":"cf32093511ee73db0a7bf903099fede9ddc35167"}}"‡
+keystore/araö{"id":"06e51c5b-946b-4909-a3c0-584c2b5b3c23","version":"0000000000000101","crypto":{"cipherparams":{"iv":"1daaced5e2e350ad6a42fed4a60aab36"},"ciphertext":"246c4e488a9a5a4a339b2891ef4c5227aaada36b40bcdc0a16df76ed63ac63c0460a84919bd702ba13f9b6dc34518e166e357469a341e96dd7472a773b4eccc6","cipher":"aes-128-ctr","digest":"sha1","mac":"b5d3224ad63293b61fbbb5c98813a78bc14a177c"}}"¡
+schema.protosyntax = "proto3";
+
+message KeyStore {
+  uint32 version = 1;
+  string address = 2;
+  string id = 3;
+  Crypto crypto = 4;
+
+  message Crypto {
+    string cipher = 1;
+    string ciphertext = 2;
+    CipherParams cipherparams = 3;
+    string mac = 4;
+    string kdf = 5;
+    KDFParams kdfparams = 6;
+    string digest = 7;
+
+    message CipherParams {
+      string iv = 1;
+    }
+
+    message KDFParams {
+      uint64 dklen = 1;
+      uint64 n = 2;
+      uint64 r = 3;
+      uint64 p = 4;
+      uint64 c = 5;
+      string prf = 6;
+      string salt = 7;
+    }
+  }
+}
+
+message Identity {
+  string did = 1;
+  bytes key = 2;
+  Proof proof = 3;
+  repeated File files = 4;
+
+  message Proof {
+    bytes signature = 1;
+  }
+
+  message File {
+    string path = 1;
+    bytes buffer = 2;
+  }
+}
+
+message Keys {
+  bytes signature = 1;
+  repeated KeyPair keys = 2;
+}
+
+message KeyPair {
+  bytes publicKey = 1;
+  bytes secretKey = 2;
+}
