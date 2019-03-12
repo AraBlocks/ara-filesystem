@@ -12,6 +12,7 @@ const {
  * @param  {String}  opts.password
  * @param  {String}  opts.afsPassword
  * @param  {Boolean} opts.estimate
+ * @param  {String}  [opts.version]
  * @throws {TypeError|Error}
  * @return {String|Object}
  */
@@ -29,7 +30,7 @@ async function deploy(opts) {
   }
 
   let { did, estimate, afsPassword } = opts
-  const { password, keyringOpts } = opts
+  const { password, keyringOpts, version = '' } = opts
 
   afsPassword = afsPassword || password
   estimate = estimate || false
@@ -53,7 +54,8 @@ async function deploy(opts) {
       keyringOpts,
       afsPassword,
       password,
-      estimate
+      estimate,
+      version
     })
     if (estimate) {
       return result.toString()
