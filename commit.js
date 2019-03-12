@@ -46,6 +46,7 @@ const {
  * @param {String}   opts.afsPassword
  * @param {Object}   [opts.keyringOpts]
  * @param {Boolean}  opts.estimate
+ * @param {String}   opts.estimateDid
  * @param {Number}   opts.price
  * @return {Object}
  */
@@ -55,16 +56,20 @@ async function commit(opts) {
   } else if ('string' !== typeof opts.did || !opts.did) {
     throw new TypeError('Expecting non-empty string.')
   } else if ('string' !== typeof opts.password || !opts.password) {
-    throw TypeError('Expecting non-empty password.')
+    throw new TypeError('Expecting non-empty password.')
   } else if (opts.afsPassword && 'string' !== typeof opts.afsPassword) {
-    throw TypeError('Expecting non-empty password.')
+    throw new TypeError('Expecting non-empty password.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
+  } else if (opts.estimateDid && 'string' !== typeof opts.estimateDid) {
+    throw new TypeError('Expecting non-empty string.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
   }
 
-  let { did, estimate, afsPassword } = opts
+  let {
+    did, estimate, afsPassword, estimateDid
+  } = opts
   const {
     password,
     price,
@@ -73,6 +78,10 @@ async function commit(opts) {
 
   afsPassword = afsPassword || password
   estimate = estimate || false
+
+  if (estimateDid && !estimate) {
+    estimateDid = null
+  }
 
   let ddo
   try {
@@ -83,11 +92,11 @@ async function commit(opts) {
     throw err
   }
 
-  if (!(await proxyExists(did))) {
+  if (!(await proxyExists(estimateDid || did))) {
     throw new Error('Proxy doesn\'t exist, please deploy a proxy for this AFS first.')
   }
 
-  const proxy = await getProxyAddress(did)
+  const proxy = await getProxyAddress(estimateDid || did)
 
   debug('proxy address', proxy)
 
@@ -123,7 +132,8 @@ async function commit(opts) {
         afsPassword,
         price,
         keyringOpts,
-        estimate: true
+        estimate: true,
+        estimateDid
       })
       result = Number(result) + Number(setPriceGasCost)
     }

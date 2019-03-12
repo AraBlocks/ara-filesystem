@@ -27,6 +27,7 @@ const {
  * @param {Object}   [opts.keyringOpts]
  * @param {Number}   opts.price
  * @param {Boolean}  opts.estimate
+ * @param {String}   opts.estimateDid
  */
 async function setPrice(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -41,16 +42,22 @@ async function setPrice(opts) {
     throw new TypeError('Expecting whole number price.')
   } else if (opts.estimate && 'boolean' !== typeof opts.estimate) {
     throw new TypeError('Expecting boolean.')
+  } else if (opts.estimateDid && 'string' !== typeof opts.estimateDid) {
+    throw new TypeError('Expecting non-empty string.')
   }
 
   let {
-    did, estimate, price, afsPassword
+    did, estimate, price, afsPassword, estimateDid
   } = opts
   const { password, keyringOpts } = opts
 
   afsPassword = afsPassword || password
 
   estimate = estimate || false
+
+  if (estimateDid && !estimate) {
+    estimateDid = null
+  }
 
   let ddo
   try {
@@ -66,7 +73,11 @@ async function setPrice(opts) {
     throw new Error(`AFS price is already ${price}`)
   }
 
-  const proxy = await getProxyAddress(did)
+  if (!(await proxyExists(estimateDid || did))) {
+    throw new Error('Proxy doesn\'t exist, please deploy a proxy for this AFS first.')
+  }
+
+  const proxy = await getProxyAddress(estimateDid || did)
   let owner = getDocumentOwner(ddo, true)
   owner = `${AID_PREFIX}${owner}`
   const acct = await account.load({ did: owner, password })
