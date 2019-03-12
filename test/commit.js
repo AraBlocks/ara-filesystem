@@ -1,6 +1,5 @@
 /* eslint quotes: "off" */
 
-const { PASSWORD: password, AFS_PASSWORD: afsPassword } = require('./_constants')
 const { randomBytes } = require('ara-crypto')
 const { getPrice } = require('../price')
 const { deploy } = require('../deploy')
@@ -9,6 +8,13 @@ const { add } = require('../add')
 const pify = require('pify')
 const test = require('ava')
 const fs = require('fs')
+
+const {
+  STANDARD_ESTIMATE_PROXY_DID: estimateDid,
+  ESTIMATE_PASSWORD: estimatePassword,
+  AFS_PASSWORD: afsPassword,
+  PASSWORD: password
+} = require('./_constants')
 
 const {
   mirrorIdentity,
@@ -99,6 +105,35 @@ test.serial('commit() incorrect password', async (t) => {
   await t.throwsAsync(commit({ did, password: 'wrong_pass' }), Error)
 })
 
+test.serial('commit() estimate no deploy', async (t) => {
+  const { did } = getAFS(t)
+  await t.throwsAsync(commit({
+    afsPassword,
+    estimate: true,
+    password,
+    did,
+  }))
+})
+
+test.serial('commit() estimate with proxy, no deploy', async (t) => {
+  // deploy estimate proxy
+  await deploy({
+    afsPassword: estimatePassword,
+    version: '1_estimate',
+    did: estimateDid,
+    password
+  })
+  const { did } = getAFS(t)
+  const result = await commit({
+    afsPassword,
+    estimateDid,
+    estimate: true,
+    password,
+    did,
+  })
+  t.true(0 < Number(result))
+})
+
 test.serial("commit() no changes to commit", async (t) => {
   const { did } = getAFS(t)
   await runValidCommit({ did, password, afsPassword })
@@ -155,7 +190,6 @@ test.serial("commit() estimate gas cost with setPrice", async (t) => {
 test.serial("writeToStaged()/readFromStaged()", async (t) => {
   const data = randomBytes(32).toString('hex')
   const path = resolve(__dirname, 'staged.json')
-  console.log('path', path)
   const { did } = getAFS(t)
 
   // ensure does not exist
