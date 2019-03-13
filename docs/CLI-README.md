@@ -724,7 +724,7 @@ Deploy an AFS proxy to the network
 #### Usage
 
 ```sh
-afs-deploy <did>
+afs-deploy <did> [options]
 ```
 
 #### Options
@@ -733,8 +733,9 @@ afs-deploy <did>
 |-h, --help|Show help||
 |-filesystem, -D, --debug||:*')|
 |-s, --secret|Shared secret for the keyring||
-|-n, --network|Network name of the key for the DID resolver in the keyring [string]||
+|-n, --network|Network name of the key for the DID resolver in the keyring||
 |-v, --version, -V|Show version number||
+|-n, -name, --version|Name of AFS Standard version to use for this AFS||
 |-f, --force|Force deploy operation||
 
 
