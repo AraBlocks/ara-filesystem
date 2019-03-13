@@ -1,9 +1,14 @@
-## [0.25.1](https://github.com/AraBlocks/ara-filesystem/compare/0.22.1...0.25.1) (2019-03-11)
+# [0.26.0](https://github.com/AraBlocks/ara-filesystem/compare/0.22.1...0.26.0) (2019-03-13)
 
 
 ### Bug Fixes
 
 * silence lint ([062432d](https://github.com/AraBlocks/ara-filesystem/commit/062432d))
+
+
+### Features
+
+* allow pass in estimateDid ([92ddcd7](https://github.com/AraBlocks/ara-filesystem/commit/92ddcd7))
 
 
 
