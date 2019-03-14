@@ -80,7 +80,8 @@ test.serial("setPrice(opts) estimate, no proxy", async (t) => {
     afsPassword,
     estimate: true,
     price: 100,
-    estimateDid // deployed in commit.js test
+    // deployed in commit.js test
+    estimateDid
   })
   t.true(0 < Number(estimation))
 })
@@ -93,7 +94,8 @@ test.serial("setPrice(opts) estimate is false, no proxy", async (t) => {
     afsPassword,
     estimate: false,
     price: 100,
-    estimateDid // deployed in commit.js test
+    // deployed in commit.js test
+    estimateDid
   }))
 })
 
