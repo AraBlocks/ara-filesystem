@@ -134,6 +134,17 @@ test.serial('commit() estimate with proxy, no deploy', async (t) => {
   t.true(0 < Number(result))
 })
 
+test.serial('commit() with proxy, estimate is false', async (t) => {
+  const { did } = getAFS(t)
+  await t.throwsAsync(commit({
+    afsPassword,
+    estimateDid,
+    estimate: false,
+    password,
+    did,
+  }))
+})
+
 test.serial("commit() no changes to commit", async (t) => {
   const { did } = getAFS(t)
   await runValidCommit({ did, password, afsPassword })

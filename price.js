@@ -55,10 +55,6 @@ async function setPrice(opts) {
 
   estimate = estimate || false
 
-  if (estimateDid && !estimate) {
-    estimateDid = null
-  }
-
   let ddo
   try {
     ({ did, ddo } = await validate({
@@ -68,16 +64,20 @@ async function setPrice(opts) {
     throw err
   }
 
+  if (estimateDid) {
+    did = estimate ? estimateDid : did
+  }
+
   const currentPrice = await getPrice({ did })
   if (currentPrice == price) {
     throw new Error(`AFS price is already ${price}`)
   }
 
-  if (!(await proxyExists(estimateDid || did))) {
+  if (!(await proxyExists(did))) {
     throw new Error('Proxy doesn\'t exist, please deploy a proxy for this AFS first.')
   }
 
-  const proxy = await getProxyAddress(estimateDid || did)
+  const proxy = await getProxyAddress(did)
   let owner = getDocumentOwner(ddo, true)
   owner = `${AID_PREFIX}${owner}`
   const acct = await account.load({ did: owner, password })

@@ -17,7 +17,8 @@ const {
 
 const {
   PASSWORD: password,
-  AFS_PASSWORD: afsPassword
+  AFS_PASSWORD: afsPassword,
+  STANDARD_ESTIMATE_PROXY_DID: estimateDid
 } = require('./_constants')
 
 const getAFS = (t) => {
@@ -69,6 +70,31 @@ test.serial("setPrice(opts) incorrect password", async (t) => {
 test.serial("setPrice(opts) no committed proxy", async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(setPrice({ did, password, price: 100 }), Error)
+})
+
+test.serial("setPrice(opts) estimate, no proxy", async (t) => {
+  const { did } = getAFS(t)
+  const estimation = await setPrice({
+    did,
+    password,
+    afsPassword,
+    estimate: true,
+    price: 100,
+    estimateDid // deployed in commit.js test
+  })
+  t.true(0 < Number(estimation))
+})
+
+test.serial("setPrice(opts) estimate is false, no proxy", async (t) => {
+  const { did } = getAFS(t)
+  await t.throwsAsync(setPrice({
+    did,
+    password,
+    afsPassword,
+    estimate: false,
+    price: 100,
+    estimateDid // deployed in commit.js test
+  }))
 })
 
 test.serial("setPrice(opts) estimate", async (t) => {
