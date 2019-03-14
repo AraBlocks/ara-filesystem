@@ -47,9 +47,9 @@ async function setPrice(opts) {
   }
 
   let {
-    did, estimate, price, afsPassword, estimateDid
+    did, estimate, price, afsPassword
   } = opts
-  const { password, keyringOpts } = opts
+  const { password, keyringOpts, estimateDid } = opts
 
   afsPassword = afsPassword || password
 
