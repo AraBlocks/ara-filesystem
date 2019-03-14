@@ -69,7 +69,7 @@ async function setPrice(opts) {
   }
 
   const currentPrice = await getPrice({ did })
-  if (currentPrice == price) {
+  if (currentPrice == price && !estimate) {
     throw new Error(`AFS price is already ${price}`)
   }
 
