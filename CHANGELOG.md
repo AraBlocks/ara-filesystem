@@ -1,10 +1,11 @@
-## [0.26.1](https://github.com/AraBlocks/ara-filesystem/compare/0.22.1...0.26.1) (2019-03-15)
+## [0.26.2](https://github.com/AraBlocks/ara-filesystem/compare/0.22.1...0.26.2) (2019-04-22)
 
 
 ### Bug Fixes
 
-* only check price is same if not estimate ([26a25d6](https://github.com/AraBlocks/ara-filesystem/commit/26a25d6))
-* price estimateDid would always throw without deployed did ([95c0949](https://github.com/AraBlocks/ara-filesystem/commit/95c0949))
+* ararc ([1a4fdf0](https://github.com/AraBlocks/ara-filesystem/commit/1a4fdf0))
+* only check price is same if not estimate ([7dd63fa](https://github.com/AraBlocks/ara-filesystem/commit/7dd63fa))
+* price estimateDid would always throw without deployed did ([44997df](https://github.com/AraBlocks/ara-filesystem/commit/44997df))
 * silence lint ([062432d](https://github.com/AraBlocks/ara-filesystem/commit/062432d))
 
 
