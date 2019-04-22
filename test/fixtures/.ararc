@@ -4,6 +4,11 @@ network_id=local
 [web3.local]
 provider[]=ws://127.0.0.1:8545
 
+;; Identity network
+[network.identity]
+keyring = 'http://keyrings.ara.one/1.0/did:ara:c04562dbf5c3ef3f091633e0482fb1308b8d4496d515b6f0bc73f1a7f95bc0d7/ara-production-public'
+secret = 'ara-production'
+
 [network.identity.resolver]
 network = resolver1
 servers[] = "http://identity1.cafe.network"
