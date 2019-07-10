@@ -49,7 +49,7 @@
   "dependencies": {
     "ansi-diff-stream": "^1.2.0",
     "ara-console": "0.2.x",
-    "ara-contracts": "0.24.x",
+    "ara-contracts": "0.25.x",
     "ara-crypto": "0.8.x",
     "ara-identity": "0.61.x",
     "ara-network": "1.x.x",
