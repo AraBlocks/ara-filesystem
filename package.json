@@ -49,9 +49,9 @@
   "dependencies": {
     "ansi-diff-stream": "^1.2.0",
     "ara-console": "0.2.x",
-    "ara-contracts": "0.25.x",
+    "ara-contracts": "github:arablocks/ara-contracts#ej_aid_dep",
     "ara-crypto": "0.8.x",
-    "ara-identity": "0.61.x",
+    "ara-identity": "github:arablocks/ara-identity#pr-fix",
     "ara-network": "1.x.x",
     "ara-runtime-configuration": "1.x.x",
     "ara-secret-storage": "0.1.x",
