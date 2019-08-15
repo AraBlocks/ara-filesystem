@@ -119,7 +119,7 @@ test.serial('commit() estimate with proxy, no deploy', async (t) => {
   // deploy estimate proxy
   await deploy({
     afsPassword: estimatePassword,
-    version: '4_estimate',
+    version: '6_estimate',
     did: estimateDid,
     password
   })
