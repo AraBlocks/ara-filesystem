@@ -20,14 +20,20 @@ const {
 
 /**
  * Sets the price of the given Ara identity
- * @param {Object}   opts
- * @param {String}   opts.did
- * @param {String}   opts.password
- * @param {String}   opts.afsPassword
- * @param {Object}   [opts.keyringOpts]
- * @param {Number}   opts.price
- * @param {Boolean}  opts.estimate
- * @param {String}   opts.estimateDid
+ * @param {Object}    opts
+ * @param {String}    opts.did
+ * @param {String}    opts.password
+ * @param {String}    opts.afsPassword
+ * @param {Number}    opts.price
+ * @param {Boolean}   opts.estimate
+ * @param {String}    opts.estimateDid
+ * @param {Object}    [opts.keyringOpts]
+ * @param  {Number}   [opts.gasPrice]
+ * @param  {Function} [opts.onhash]
+ * @param  {Function} [opts.onreceipt]
+ * @param  {Function} [opts.onconfirmation]
+ * @param  {Function} [opts.onerror]
+ * @param  {Function} [opts.onmined]
  */
 async function setPrice(opts) {
   if (!opts || 'object' !== typeof opts) {
@@ -44,12 +50,24 @@ async function setPrice(opts) {
     throw new TypeError('Expecting boolean.')
   } else if (opts.estimateDid && 'string' !== typeof opts.estimateDid) {
     throw new TypeError('Expecting non-empty string.')
+  } else if (opts.gasPrice && ('number' !== typeof opts.gasPrice || opts.gasPrice < 0)) {
+    throw new TypeError(`Expected 'opts.gasPrice' to be a positive number. Got ${opts.gasPrice}.`)
   }
 
   let {
     did, estimate, price, afsPassword
   } = opts
-  const { password, keyringOpts, estimateDid } = opts
+  const {
+    password,
+    keyringOpts,
+    estimateDid,
+    gasPrice = 0,
+    onhash,
+    onreceipt,
+    onconfirmation,
+    onerror,
+    onmined
+  } = opts
 
   afsPassword = afsPassword || password
 
@@ -107,7 +125,13 @@ async function setPrice(opts) {
       return cost
     }
 
-    const receipt = await tx.sendSignedTransaction(transaction)
+    const receipt = await tx.sendSignedTransaction(transaction, {
+      onhash,
+      onreceipt,
+      onconfirmation,
+      onerror,
+      onmined
+    })
     ctx.close()
     return receipt
   } catch (err) {
