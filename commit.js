@@ -40,14 +40,20 @@ const {
 
 /**
  * Commits the AFS with the given Ara identity
- * @param {Object}   opts
- * @param {String}   opts.did
- * @param {String}   opts.password
- * @param {String}   opts.afsPassword
- * @param {Object}   [opts.keyringOpts]
- * @param {Boolean}  opts.estimate
- * @param {String}   opts.estimateDid
- * @param {Number}   opts.price
+ * @param {Object}    opts
+ * @param {String}    opts.did
+ * @param {String}    opts.password
+ * @param {String}    opts.afsPassword
+ * @param {Boolean}   opts.estimate
+ * @param {String}    opts.estimateDid
+ * @param {Number}    opts.price
+ * @param {Object}    [opts.keyringOpts]
+ * @param  {Number}   [opts.gasPrice]
+ * @param  {Function} [opts.onhash]
+ * @param  {Function} [opts.onreceipt]
+ * @param  {Function} [opts.onconfirmation]
+ * @param  {Function} [opts.onerror]
+ * @param  {Function} [opts.onmined]
  * @return {Object}
  */
 async function commit(opts) {
@@ -65,6 +71,8 @@ async function commit(opts) {
     throw new TypeError('Expecting non-empty string.')
   } else if (opts.price && ('number' !== typeof opts.price || opts.price < 0)) {
     throw new TypeError('Expecting whole number price.')
+  } else if (opts.gasPrice && ('number' !== typeof opts.gasPrice || opts.gasPrice < 0)) {
+    throw new TypeError(`Expected 'opts.gasPrice' to be a positive number. Got ${opts.gasPrice}.`)
   }
 
   let {
@@ -73,7 +81,13 @@ async function commit(opts) {
   const {
     password,
     price,
-    keyringOpts
+    keyringOpts,
+    gasPrice = 0,
+    onhash,
+    onreceipt,
+    onconfirmation,
+    onerror,
+    onmined
   } = opts
 
   afsPassword = afsPassword || password
@@ -121,7 +135,13 @@ async function commit(opts) {
     mtData,
     msData,
     account: acct,
-    to: proxy
+    to: proxy,
+    gasPrice,
+    onhash,
+    onreceipt,
+    onconfirmation,
+    onerror,
+    onmined
   }, estimate, exists)
 
   if (estimate) {
@@ -144,7 +164,17 @@ async function commit(opts) {
 
   if (0 < price) {
     await setPrice({
-      did, password, price, keyringOpts, afsPassword
+      did,
+      password,
+      price,
+      keyringOpts,
+      afsPassword,
+      gasPrice,
+      onhash,
+      onreceipt,
+      onconfirmation,
+      onerror,
+      onmined
     })
   }
 
