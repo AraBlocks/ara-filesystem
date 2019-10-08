@@ -110,6 +110,7 @@ async function setPrice(opts) {
     const { tx: transaction, ctx } = await tx.create({
       account: acct,
       to: proxy,
+      gasPrice,
       data: {
         abi,
         functionName: 'setPrice',
