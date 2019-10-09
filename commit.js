@@ -92,14 +92,14 @@ async function commit(opts) {
     price,
     keyringOpts,
     gasPrice = 0,
-    write: {
+    writeCallbacks: {
       onhash: writeonhash,
       onreceipt: writeonreceipt,
       onconfirmation: writeonconfirmation,
       onerror: writeonerror,
       onmined: writeonmined
     } = {},
-    price: {
+    priceCallbacks: {
       onhash: priceonhash,
       onreceipt: priceonreceipt,
       onconfirmation: priceonconfirmation,
