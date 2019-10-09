@@ -49,11 +49,16 @@ const {
  * @param {Number}    opts.price
  * @param {Object}    [opts.keyringOpts]
  * @param  {Number}   [opts.gasPrice]
- * @param  {Function} [opts.onhash]
- * @param  {Function} [opts.onreceipt]
- * @param  {Function} [opts.onconfirmation]
- * @param  {Function} [opts.onerror]
- * @param  {Function} [opts.onmined]
+ * @param  {Function} [opts.write.onhash]
+ * @param  {Function} [opts.write.onreceipt]
+ * @param  {Function} [opts.write.onconfirmation]
+ * @param  {Function} [opts.write.onerror]
+ * @param  {Function} [opts.write.onmined]
+ * @param  {Function} [opts.price.onhash]
+ * @param  {Function} [opts.price.onreceipt]
+ * @param  {Function} [opts.price.onconfirmation]
+ * @param  {Function} [opts.price.onerror]
+ * @param  {Function} [opts.price.onmined]
  * @return {Object}
  */
 async function commit(opts) {
@@ -76,18 +81,31 @@ async function commit(opts) {
   }
 
   let {
-    did, estimate, afsPassword, estimateDid
+    did,
+    estimate,
+    afsPassword,
+    estimateDid
   } = opts
+
   const {
     password,
     price,
     keyringOpts,
     gasPrice = 0,
-    onhash,
-    onreceipt,
-    onconfirmation,
-    onerror,
-    onmined
+    write: {
+      onhash: writeonhash,
+      onreceipt: writeonreceipt,
+      onconfirmation: writeonconfirmation,
+      onerror: writeonerror,
+      onmined: writeonmined
+    } = {},
+    price: {
+      onhash: priceonhash,
+      onreceipt: priceonreceipt,
+      onconfirmation: priceonconfirmation,
+      onerror: priceonerror,
+      onmined: priceonmined
+    } = {},
   } = opts
 
   afsPassword = afsPassword || password
@@ -137,11 +155,11 @@ async function commit(opts) {
     account: acct,
     to: proxy,
     gasPrice,
-    onhash,
-    onreceipt,
-    onconfirmation,
-    onerror,
-    onmined
+    onhash: writeonhash,
+    onreceipt: writeonreceipt,
+    onconfirmation: writeonconfirmation,
+    onerror: writeonerror,
+    onmined: writeonmined
   }, estimate, exists)
 
   if (estimate) {
@@ -170,11 +188,11 @@ async function commit(opts) {
       keyringOpts,
       afsPassword,
       gasPrice,
-      onhash,
-      onreceipt,
-      onconfirmation,
-      onerror,
-      onmined
+      onhash: priceonhash,
+      onreceipt: priceonreceipt,
+      onconfirmation: priceonconfirmation,
+      onerror: priceonerror,
+      onmined: priceonmined
     })
   }
 
