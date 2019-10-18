@@ -169,6 +169,7 @@ async function commit(opts) {
         password,
         afsPassword,
         price,
+        gasPrice,
         keyringOpts,
         estimate: true,
         estimateDid
