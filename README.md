@@ -129,6 +129,8 @@ $ afs get-price df45010fee8baf67f91f5102b9562b14d5b49c972a007cd460b1aa77fd90eaf9
 
 ## API
 
+> All transaction callbacks (`onhash`, `onreceipt`, `onconfirmation`, `onerror`, and `onmined`) are optional. For more information, see [`ara-util`](https://github.com/AraBlocks/ara-util#sendSignedTransaction) and [`ara-contracts`](https://github.com/AraBlocks/ara-contracts).
+
 * [async create(opts)](#create)
 * [async destroy(opts)](#destroy)
 * [async add(opts)](#add)
@@ -164,8 +166,8 @@ If `owner` is given, this function will create a new AFS with the owning identit
   - `owner` - `DID` of the owner of the `AFS` to be created
   - `password` - The password of the `owner` of this `AFS`; this is only required for writing to the `AFS`.
   - `afsPassword` - The password of the `AFS`; this is only required for writing to the `AFS`.
-  - `storage` - optional Storage function to use for the `AFS`
-  - `keyringOpts` - optional Keyring options
+  - `storage` - Optional storage function to use for the `AFS`
+  - `keyringOpts` - Optional keyring options
 
 Returns the `AFS` `object`.
 
@@ -202,7 +204,7 @@ Destroys the local copy of an `AFS` and unlists it from the blockchain (if owner
   - `password` - The password of the owner of this `AFS`
   - `afsPassword` - The password of the `AFS`
   - `mnemonic` - The mnemonic for this `AFS`
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 If an estimate, returns the `cost` (in ETH), otherwise returns the transaction receipt.
 
@@ -228,7 +230,7 @@ Adds one or more files to an existing `AFS`.
   - `password` - The password of the `AFS`
   - `force` - Force add the path(s)
   - `paths` - The path(s) of the files to add
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 Returns the `AFS` `object`.
 
@@ -253,7 +255,7 @@ Removes one or more files from an `AFS`.
   - `did` - The `DID` of the `AFS` where the files are located
   - `password` - The password of the `AFS`
   - `paths` - The path(s) of the files to remove
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 Returns the `AFS` `object`.
 
@@ -275,8 +277,14 @@ Deploys an AFS proxy to the network. Returns the Ethereum address of the deploy 
   - `did` - `DID` of the `AFS` to deploy
   - `password` - Owner's password for this `AFS`
   - `afsPassword` - The password of the `AFS`
-  - `estimate` - optional Flag to check cost of `deploy`
-  - `keyringOpts` - optional Keyring options
+  - `estimate` - Optional flag to check cost of `deploy`
+  - `gasPrice` - Optional gas price in GWei
+  - `keyringOpts` - Optional keyring options
+  - `onhash`
+  - `onreceipt`
+  - `onconfirmation`
+  - `onerror`
+  - `onmined`
 
 If an estimate, returns the `cost` (in ETH), otherwise returns the Ethereum address where the contract was deployed.
 
@@ -306,10 +314,23 @@ Commits any changes to an `AFS` to the blockchain. Calling `deploy` is required 
   - `did` - The `DID` of the `AFS` to commit
   - `password` - The password of the owner of this `AFS`
   - `afsPassword` - The password of the `AFS`
-  - `estimate` - optional Flag to check cost of `commit`
-  - `estimateDid` - optional `DID` of a proxy which points to an estimate version of an AFS Standard (used for estimating cost without `deploy` first)
-  - `price` - optional Price in Ara tokens to set this `AFS`
-  - `keyringOpts` - optional Keyring options
+  - `estimate` - Optional flag to check cost of `commit`
+  - `estimateDid` - Optional `DID` of a proxy which points to an estimate version of an AFS Standard (used for estimating cost without `deploy` first)
+  - `price` - Optional price in Ara tokens to set this `AFS`
+  - `gasPrice` - Optional gas price in GWei
+  - `keyringOpts` - Optional keyring options
+  - `writeCallbacks` - Optional callbacks for the Write transaction
+    - `onhash`
+    - `onreceipt`
+    - `onconfirmation`
+    - `onerror`
+    - `onmined`
+  - `priceCallbacks` - Optional callbacks for the Price transaction
+    - `onhash`
+    - `onreceipt`
+    - `onconfirmation`
+    - `onerror`
+    - `onmined`
 
 If an estimate, returns the `cost` (in ETH), otherwise returns the transaction receipt.
 
@@ -342,9 +363,15 @@ Sets the price in Ara tokens of an `AFS`.
   - `password` - The password of the owner of this `AFS`
   - `afsPassword` - The password of the `AFS`
   - `price` - The price (in Ara) to purchase this `AFS`
-  - `estimate` - optional Flag to check cost of `setPrice`
-  - `estimateDid` - optional `DID` of a proxy which points to an estimate version of an AFS Standard (used for estimating cost without `deploy` first)
-  - `keyringOpts` - optional Keyring options
+  - `estimate` - Optional flag to check cost of `setPrice`
+  - `estimateDid` - Optional `DID` of a proxy which points to an estimate version of an AFS Standard (used for estimating cost without `deploy` first)
+  - `gasPrice` - Optional gas price in GWei
+  - `keyringOpts` - Optional keyring options
+  - `onhash`
+  - `onreceipt`
+  - `onconfirmation`
+  - `onerror`
+  - `onmined`
 
 If an estimate, returns the `cost` (in ETH), otherwise returns the transaction receipt.
 
@@ -392,8 +419,8 @@ Unarchives (unzips) an `AFS` to a specified location.
 
 - `opts`
   - `did` - The `DID` of the `AFS` to unarchive
-  - `path` - optional Path to the `AFS`
-  - `keyringOpts` - optional Keyring options
+  - `path` - Optional path to the `AFS`
+  - `keyringOpts` - Optional keyring options
 
 ```js
 const { unarchive } = require('ara-filesystem')
@@ -410,7 +437,7 @@ Compares local `AFS` version to what has been published. Returns `true` if the p
 
 - `opts`
   - `did` - The `DID` of the `AFS` to check
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 Returns a `boolean`.
 
@@ -429,7 +456,7 @@ Writes a metadata JSON file to the metadata partition of an `AFS`.
   - `password` - The password of the owner of this `AFS`
   - `afsPassword` - The password of the `AFS`
   - `filepath` - The path of the metadata JSON file to copy
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 Returns the updated metadata `object`.
 
@@ -455,7 +482,7 @@ Writes a metadata key/value pair to the metadata partition of an `AFS`.
   - `afsPassword` - The password of the `AFS`
   - `key` - The key to write
   - `value` - The value to write
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 Returns the updated metadata `object`.
 
@@ -483,7 +510,7 @@ Writes multiple key/value pairs to the metadata parition of an `AFS`.
   - `password` - The password of the owner of this `AFS`
   - `afsPassword` - The password of the `AFS`
   - `keys` - Object containing the key/value pairs to write
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 Returns the updated metadata `object`.
 
@@ -529,7 +556,7 @@ Deletes a metadata key/value pair from the metadata partition of an `AFS`.
   - `password` - The password of the owner of this `AFS`
   - `afsPassword` - The password of the `AFS`
   - `key` - The key to write
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 Returns the updated metadata `object`.
 
@@ -625,8 +652,14 @@ Requests the transfer of ownership of an AFS to `requesterDid`. Must be approved
   - `requesterDid` - `DID` of the requester
   - `contentDid` - `DID` of the AFS to request ownership for
   - `password` - password of the requester
-  - `estimate` - optional Flag to check cost of `request`
-  - `keyringOpts` - optional Keyring options
+  - `estimate` - Optional flag to check cost of `request`
+  - `gasPrice` - Optional gas price in GWei
+  - `keyringOpts` - Optional keyring options
+  - `onhash`
+  - `onreceipt`
+  - `onconfirmation`
+  - `onerror`
+  - `onmined`
 
 Returns the transaction receipt as an `object`.
 
@@ -647,8 +680,14 @@ Revokes a previous request for AFS ownership transfer. This transaction will rev
   - `requesterDid` - `DID` of the requester
   - `contentDid` - `DID` of the AFS to revoke ownership reequest for
   - `password` - password of the requester
-  - `estimate` - optional Flag to check cost of `revokeRequest`
-  - `keyringOpts` - optional Keyring options
+  - `estimate` - Optional flag to check cost of `revokeRequest`
+  - `gasPrice` - Optional gas price in GWei
+  - `keyringOpts` - Optional keyring options
+  - `onhash`
+  - `onreceipt`
+  - `onconfirmation`
+  - `onerror`
+  - `onmined`
 
 Returns the transaction receipt as an `object`.
 
@@ -671,8 +710,14 @@ Approves a pending transfer request, this officially transfers ownership for the
   - `afsPassword` - The password of the `AFS`
   - `newOwnerDid` - `DID` of the owner to transfer ownership to
   - `mnemonic` - mnemonic associated with the AFS
-  - `estimate` - optional Flag to check cost of `approveTransfer`
-  - `keyringOpts` - optional Keyring options
+  - `estimate` - Optional flag to check cost of `approveTransfer`
+  - `gasPrice` - Optional gas price in GWei
+  - `keyringOpts` - Optional keyring options
+  - `onhash`
+  - `onreceipt`
+  - `onconfirmation`
+  - `onerror`
+  - `onmined`
 
 Returns `object`:
   - `receipt` - transaction receipt
@@ -698,7 +743,7 @@ Fully claims ownership of an AFS after it has been transferred by the previous o
   - `newPassword` - new password for this AFS identity
   - `contentDid` - `DID` of the content to claim ownership for
   - `mnemonic` - mnemonic associated with the AFS to claim
-  - `keyringOpts` - optional Keyring options
+  - `keyringOpts` - Optional keyring options
 
 ```js
 const { ownership } = require('ara-filesystem')
