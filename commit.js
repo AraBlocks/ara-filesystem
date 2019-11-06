@@ -49,16 +49,16 @@ const {
  * @param {Number}    opts.price
  * @param {Object}    [opts.keyringOpts]
  * @param  {Number}   [opts.gasPrice]
- * @param  {Function} [opts.write.onhash]
- * @param  {Function} [opts.write.onreceipt]
- * @param  {Function} [opts.write.onconfirmation]
- * @param  {Function} [opts.write.onerror]
- * @param  {Function} [opts.write.onmined]
- * @param  {Function} [opts.price.onhash]
- * @param  {Function} [opts.price.onreceipt]
- * @param  {Function} [opts.price.onconfirmation]
- * @param  {Function} [opts.price.onerror]
- * @param  {Function} [opts.price.onmined]
+ * @param  {Function} [opts.writeCallbacks.onhash]
+ * @param  {Function} [opts.writeCallbacks.onreceipt]
+ * @param  {Function} [opts.writeCallbacks.onconfirmation]
+ * @param  {Function} [opts.writeCallbacks.onerror]
+ * @param  {Function} [opts.writeCallbacks.onmined]
+ * @param  {Function} [opts.priceCallbacks.onhash]
+ * @param  {Function} [opts.priceCallbacks.onreceipt]
+ * @param  {Function} [opts.priceCallbacks.onconfirmation]
+ * @param  {Function} [opts.priceCallbacks.onerror]
+ * @param  {Function} [opts.priceCallbacks.onmined]
  * @return {Object}
  */
 async function commit(opts) {
