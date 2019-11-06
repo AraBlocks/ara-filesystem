@@ -48,11 +48,18 @@ async function estimateApproveGasCost(opts) {
 
 /**
  * Requests ownership of an AFS.
- * @param  {Object} opts
- * @param  {String} opts.requesterDid
- * @param  {String} opts.contentDid
- * @param  {String} opts.password
- * @param  {String} [opts.estimate]
+ * @param  {Object}   opts
+ * @param  {String}   opts.requesterDid
+ * @param  {String}   opts.contentDid
+ * @param  {String}   opts.password
+ * @param  {String}   [opts.estimate]
+ * @param  {Object}   [opts.keyringOpts]
+ * @param  {Number}   [opts.gasPrice]
+ * @param  {Function} [opts.onhash]
+ * @param  {Function} [opts.onreceipt]
+ * @param  {Function} [opts.onconfirmation]
+ * @param  {Function} [opts.onerror]
+ * @param  {Function} [opts.onmined]
  * @throws {Error|TypeError}
  * @return {Object}
  */
@@ -62,11 +69,18 @@ async function request(opts) {
 
 /**
  * Revokes a previous ownership request of an AFS.
- * @param  {Object} opts
- * @param  {String} opts.requesterDid
- * @param  {String} opts.contentDid
- * @param  {String} opts.password
- * @param  {String} [opts.estimate]
+ * @param  {Object}   opts
+ * @param  {String}   opts.requesterDid
+ * @param  {String}   opts.contentDid
+ * @param  {String}   opts.password
+ * @param  {String}   [opts.estimate]
+ * @param  {Object}   [opts.keyringOpts]
+ * @param  {Number}   [opts.gasPrice]
+ * @param  {Function} [opts.onhash]
+ * @param  {Function} [opts.onreceipt]
+ * @param  {Function} [opts.onconfirmation]
+ * @param  {Function} [opts.onerror]
+ * @param  {Function} [opts.onmined]
  * @throws {Error|TypeError}
  * @return {Object}
  */
@@ -76,13 +90,20 @@ async function revokeRequest(opts) {
 
 /**
  * Approves and transfers an ownership request.
- * @param  {Object} opts
- * @param  {String} opts.newOwnerDid
- * @param  {String} opts.mnemonic
- * @param  {String} opts.did
- * @param  {String} opts.password
- * @param  {String} opts.afsPassword
- * @param  {Boolean} [opts.estimate]
+ * @param  {Object}   opts
+ * @param  {String}   opts.newOwnerDid
+ * @param  {String}   opts.mnemonic
+ * @param  {String}   opts.did
+ * @param  {String}   opts.password
+ * @param  {String}   opts.afsPassword
+ * @param  {Boolean}  [opts.estimate]
+ * @param  {Object}   [opts.keyringOpts]
+ * @param  {Number}   [opts.gasPrice]
+ * @param  {Function} [opts.onhash]
+ * @param  {Function} [opts.onreceipt]
+ * @param  {Function} [opts.onconfirmation]
+ * @param  {Function} [opts.onerror]
+ * @param  {Function} [opts.onmined]
  * @throws {Error|TypeError}
  * @return {String|Object}
  */
@@ -109,7 +130,7 @@ async function approveTransfer(opts) {
     contentDid,
     mnemonic,
     password,
-    estimate,
+    estimate
   } = opts
 
   let { afsPassword } = opts
