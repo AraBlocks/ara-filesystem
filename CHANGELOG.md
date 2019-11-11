@@ -1,4 +1,4 @@
-## [0.27.2](https://github.com/AraBlocks/ara-filesystem/compare/0.22.1...0.27.2) (2019-08-15)
+## [0.27.3](https://github.com/AraBlocks/ara-filesystem/compare/0.22.1...0.27.3) (2019-11-11)
 
 
 ### Bug Fixes
@@ -13,6 +13,8 @@
 ### Features
 
 * allow pass in estimateDid ([6798f83](https://github.com/AraBlocks/ara-filesystem/commit/6798f83))
+* support event callbacks ([0020439](https://github.com/AraBlocks/ara-filesystem/commit/0020439))
+* support separate callbacks in commit ([c89b673](https://github.com/AraBlocks/ara-filesystem/commit/c89b673))
 
 
 
