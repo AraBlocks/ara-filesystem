@@ -51,7 +51,7 @@
     "ara-console": "0.2.x",
     "ara-contracts": "arablocks/ara-contracts#chore/bap-node-updates",
     "ara-crypto": "arablocks/ara-crypto#chore/bap-node-updates",
-    "ara-identity": "arablocks/ara-identity#chore/bap-node-updates",
+    "ara-identity": "^0.63.1",
     "ara-network": "arablocks/ara-network#chore/bap-node-updates",
     "ara-runtime-configuration": "1.x.x",
     "ara-secret-storage": "arablocks/ara-secret-storage#chore/bap-node-updates",
