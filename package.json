@@ -50,7 +50,7 @@
     "ansi-diff-stream": "^1.2.0",
     "ara-console": "0.2.x",
     "ara-contracts": "arablocks/ara-contracts#chore/bap-node-updates",
-    "ara-crypto": "arablocks/ara-crypto#chore/bap-node-updates",
+    "ara-crypto": "^0.9.0",
     "ara-identity": "^0.63.1",
     "ara-network": "arablocks/ara-network#chore/bap-node-updates",
     "ara-runtime-configuration": "1.x.x",
