@@ -43,43 +43,43 @@ sleep 20
 
 cd ../..
 
-command="ava test/add.js --verbose"
+command="ava test/add.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/commit.js --verbose"
+command="ava test/commit.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/create.js --verbose"
+command="ava test/create.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/deploy.js --verbose"
+command="ava test/deploy.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/destroy.js --verbose"
+command="ava test/destroy.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/key-path.js --verbose"
+command="ava test/key-path.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/metadata.js --verbose"
+command="ava test/metadata.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/ownership.js --verbose"
+command="ava test/ownership.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/price.js --verbose"
+command="ava test/price.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/remove.js --verbose"
+command="ava test/remove.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/storage.js --verbose"
+command="ava test/storage.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/unarchive.js --verbose"
+command="ava test/unarchive.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
-command="ava test/util.js --verbose"
+command="ava test/util.js --verbose --timeout=20s"
 safeRunCommand "$command"
 
 # kill ganache

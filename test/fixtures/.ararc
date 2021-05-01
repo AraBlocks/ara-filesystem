@@ -2,9 +2,9 @@
 ;; Ethereum
 [web3]
 provider=ws://127.0.0.1:8545 ;; ganache ws
-network_id=privatenet
+network_id=local
 
-[web3.privatenet]
+[web3.local]
 provider[]=ws://127.0.0.1:8545
 
 ;; Identity network

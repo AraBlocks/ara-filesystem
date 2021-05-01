@@ -20,7 +20,9 @@ jobs:
     - name: npm install, build, and test
       run: |
         npm i
+        bash ./scripts/setup-rc
         npm test
+        bash ./scripts/remove-rc
         npm run lint
       env:
         CI: true
