@@ -4,8 +4,8 @@ const test = require('ava')
 const util = require('../util')
 
 test("generateKeypair() invalid password", (t) => {
-  t.throws(() => util.generateKeypair(), TypeError, "empty password")
-  t.throws(() => util.generateKeypair(1234), TypeError, "invalid type for password")
+  t.throws(() => util.generateKeypair(), { instanceOf: TypeError }, "empty password")
+  t.throws(() => util.generateKeypair(1234), { instanceOf: TypeError }, "invalid type for password")
 })
 
 test("generateKeypair() validate keypair", (t) => {
@@ -15,8 +15,8 @@ test("generateKeypair() validate keypair", (t) => {
 })
 
 test("encrypt() invalid params", (t) => {
-  t.throws(() => util.encrypt(), TypeError, "invalid params")
-  t.throws(() => util.encrypt('password'), TypeError, "need opts object")
+  t.throws(() => util.encrypt(), { instanceOf: TypeError }, "invalid params")
+  t.throws(() => util.encrypt('password'), { instanceOf: TypeError }, "need opts object")
 })
 
 test("encrypt() validate encryption", (t) => {
@@ -33,7 +33,7 @@ test("encrypt() validate encryption", (t) => {
 })
 
 test("decrypt() invalid params", (t) => {
-  t.throws(() => util.decrypt(), TypeError, "invalid params")
+  t.throws(() => util.decrypt(), { instanceOf: TypeError }, "invalid params")
 })
 
 test("decrypt() validate decryption", (t) => {

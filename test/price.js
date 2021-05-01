@@ -40,36 +40,36 @@ test.serial("setPrice(opts) invalid opts", async (t) => {
   const { did } = getAFS(t)
 
   // opts
-  await t.throwsAsync(setPrice(), TypeError)
-  await t.throwsAsync(setPrice([]), TypeError)
-  await t.throwsAsync(setPrice(123), TypeError)
+  await t.throwsAsync(setPrice(), { instanceOf: TypeError })
+  await t.throwsAsync(setPrice([]), { instanceOf: TypeError })
+  await t.throwsAsync(setPrice(123), { instanceOf: TypeError })
 
   // did
-  await t.throwsAsync(setPrice({ did: 123 }), TypeError)
-  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), Error)
+  await t.throwsAsync(setPrice({ did: 123 }), { instanceOf: TypeError })
+  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), { instanceOf: Error })
 
   // password
-  await t.throwsAsync(setPrice({ did }), TypeError)
-  await t.throwsAsync(setPrice({ did, password: 111 }), TypeError)
-  await t.throwsAsync(setPrice({ did, password: null }), TypeError)
+  await t.throwsAsync(setPrice({ did }), { instanceOf: TypeError })
+  await t.throwsAsync(setPrice({ did, password: 111 }), { instanceOf: TypeError })
+  await t.throwsAsync(setPrice({ did, password: null }), { instanceOf: TypeError })
 
   // estimate
-  await t.throwsAsync(setPrice({ did, password, estimate: 'true' }), TypeError)
+  await t.throwsAsync(setPrice({ did, password, estimate: 'true' }), { instanceOf: TypeError })
 
   // price
-  await t.throwsAsync(setPrice({ did, password }), TypeError)
-  await t.throwsAsync(setPrice({ did, password, price: '100' }), TypeError)
-  await t.throwsAsync(setPrice({ did, password, price: -10 }), TypeError)
+  await t.throwsAsync(setPrice({ did, password }), { instanceOf: TypeError })
+  await t.throwsAsync(setPrice({ did, password, price: '100' }), { instanceOf: TypeError })
+  await t.throwsAsync(setPrice({ did, password, price: -10 }), { instanceOf: TypeError })
 })
 
 test.serial("setPrice(opts) incorrect password", async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(setPrice({ did, password: 'wrong_pass', price: 100 }))
+  await t.throwsAsync(setPrice({ did, password: 'wrong_pass', price: 100 }), { instanceOf: Error })
 })
 
 test.serial("setPrice(opts) no committed proxy", async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(setPrice({ did, password, price: 100 }), Error)
+  await t.throwsAsync(setPrice({ did, password, price: 100 }), { instanceOf: Error })
 })
 
 test.serial("setPrice(opts) estimate, no proxy", async (t) => {
@@ -96,7 +96,7 @@ test.serial("setPrice(opts) estimate is false, no proxy", async (t) => {
     price: 100,
     // deployed in commit.js test
     estimateDid
-  }))
+  }), { instanceOf: Error })
 })
 
 test.serial("setPrice(opts) estimate", async (t) => {
@@ -115,13 +115,13 @@ test.serial("setPrice(opts) estimate", async (t) => {
 
 test.serial("getPrice(opts) invalid opts", async (t) => {
   // opts
-  await t.throwsAsync(getPrice(), TypeError)
-  await t.throwsAsync(getPrice([]), TypeError)
-  await t.throwsAsync(getPrice(123), TypeError)
+  await t.throwsAsync(getPrice(), { instanceOf: TypeError })
+  await t.throwsAsync(getPrice([]), { instanceOf: TypeError })
+  await t.throwsAsync(getPrice(123), { instanceOf: TypeError })
 
   // did
-  await t.throwsAsync(setPrice({ did: 123 }), TypeError)
-  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), Error)
+  await t.throwsAsync(setPrice({ did: 123 }), { instanceOf: TypeError })
+  await t.throwsAsync(setPrice({ did: 'did:ara:1234' }), { instanceOf: Error })
 })
 
 test.serial("setPrice()/getPrice()", async (t) => {

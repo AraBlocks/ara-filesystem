@@ -15,9 +15,9 @@ const {
 } = require('../storage')
 
 test("resolveBufferIndex() invalid path", (t) => {
-  t.throws(() => resolveBufferIndex(), TypeError, `Path must be non-empty string`)
-  t.throws(() => resolveBufferIndex(111), TypeError, "Path must be non-empty string")
-  t.throws(() => resolveBufferIndex('metadataTree'), Error, "Path is not formatted properly")
+  t.throws(() => resolveBufferIndex(), { instanceOf: TypeError }, `Path must be non-empty string`)
+  t.throws(() => resolveBufferIndex(111), { instanceOf: TypeError }, "Path must be non-empty string")
+  t.throws(() => resolveBufferIndex('metadataTree'), { instanceOf: Error }, "Path is not formatted properly")
 })
 
 test("resolveBufferIndex() valid params", (t) => {
@@ -46,7 +46,7 @@ test("defaultStorage() validate return values", (t) => {
 })
 
 test("defaultStorage() invalid params", (t) => {
-  t.throws(() => defaultStorage(), TypeError)
-  t.throws(() => defaultStorage({}), TypeError)
-  t.throws(() => defaultStorage('1234', false), Error)
+  t.throws(() => defaultStorage(), { instanceOf: TypeError })
+  t.throws(() => defaultStorage({}), { instanceOf: TypeError })
+  t.throws(() => defaultStorage('1234', false), { instanceOf: Error })
 })

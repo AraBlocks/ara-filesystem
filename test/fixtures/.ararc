@@ -1,9 +1,10 @@
 ;; Ara AWS Config (2019 updated)
 ;; Ethereum
 [web3]
-network_id=local
+provider=ws://127.0.0.1:8545 ;; ganache ws
+network_id=privatenet
 
-[web3.local]
+[web3.privatenet]
 provider[]=ws://127.0.0.1:8545
 
 ;; Identity network

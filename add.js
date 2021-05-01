@@ -79,7 +79,7 @@ async function add(opts) {
     const name = join(afs.HOME, basename(path))
     // Check if file
     if (!(await pify(isFile)(path)) && !ignore(path)) {
-      await pify(mkdirp)(name, { fs: afs })
+      await mkdirp(name, { fs: afs })
     }
     // Mirror and log
     const progress = mirror({ name: path }, { name, fs: afs }, { keepExisting: true, ignore })

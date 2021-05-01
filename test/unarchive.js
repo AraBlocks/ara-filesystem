@@ -39,18 +39,18 @@ test.serial('unarchive() invalid opts', async (t) => {
   const { did } = afs
 
   // validate DID
-  await t.throwsAsync(unarchive(), TypeError)
-  await t.throwsAsync(unarchive({ }), TypeError)
-  await t.throwsAsync(unarchive({ did: 1234 }), TypeError)
+  await t.throwsAsync(unarchive(), { instanceOf: TypeError })
+  await t.throwsAsync(unarchive({ }), { instanceOf: TypeError })
+  await t.throwsAsync(unarchive({ did: 1234 }), { instanceOf: TypeError })
 
   // validate path
-  await t.throwsAsync(unarchive({ did, path: 123 }), TypeError)
+  await t.throwsAsync(unarchive({ did, path: 123 }), { instanceOf: TypeError })
 })
 
 test.serial('unarchive() empty AFS', async (t) => {
   const afs = getAFS(t)
   const { did } = afs
-  await t.throwsAsync(unarchive({ did }), Error)
+  await t.throwsAsync(unarchive({ did }), { instanceOf: Error })
 })
 
 test.serial('unarchive() valid unarchive', async (t) => {

@@ -63,7 +63,7 @@ test.serial('create() invalid afsPassword', async (t) => {
 
   await t.throwsAsync(create({
     did, ddo: afs.ddo, afsPassword: 'wrongpassword'
-  }), Error)
+  }), { instanceOf: Error })
 })
 
 test.serial('create() afsPassword cannot be same as password', async (t) => {
@@ -72,7 +72,7 @@ test.serial('create() afsPassword cannot be same as password', async (t) => {
 
   await t.throwsAsync(create({
     owner, password, ddo, afsPassword: password
-  }), Error)
+  }), { instanceOf: Error })
 })
 
 test.serial('create() valid id (readonly)', async (t) => {
@@ -99,13 +99,13 @@ test('create() invalid id (wrong method)', async (t) => {
     owner: idWrongMethod,
     password,
     ddo: getDdo(t)
-  }), Error, 'Expecting a DID URI with an "ara" method.')
+  }), { instanceOf: Error }, 'Expecting a DID URI with an "ara" method.')
 
   await t.throwsAsync(create({
     did: idWrongMethod,
     password,
     ddo: getDdo(t)
-  }), Error, 'Expecting a DID URI with an "ara" method.')
+  }), { instanceOf: Error }, 'Expecting a DID URI with an "ara" method.')
 })
 
 test('create() invalid id (correct method, invalid id)', async (t) => {
@@ -114,12 +114,12 @@ test('create() invalid id (correct method, invalid id)', async (t) => {
   await t.throwsAsync(create({
     owner: idCorrectMethod,
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve owner DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve owner DID')
 
   await t.throwsAsync(create({
     did: idCorrectMethod,
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test('create() invalid id (no method, invalid id)', async (t) => {
@@ -128,40 +128,40 @@ test('create() invalid id (no method, invalid id)', async (t) => {
   await t.throwsAsync(create({
     owner: idNoMethod,
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve owner DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve owner DID')
 
   await t.throwsAsync(create({
     did: idNoMethod,
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test('create() no id', async (t) => {
   await t.throwsAsync(create({
     owner: '',
     password
-  }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+  }), { instanceOf: TypeError }, 'ara-filesystem.create: Expecting non-empty string.')
 
   await t.throwsAsync(create({
     did: '',
     password
-  }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+  }), { instanceOf: TypeError }, 'ara-filesystem.create: Expecting non-empty string.')
 })
 
 test('create() null id', async (t) => {
   await t.throwsAsync(create({
     owner: null,
     password
-  }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+  }), { instanceOf: TypeError }, 'ara-filesystem.create: Expecting non-empty string.')
 
   await t.throwsAsync(create({
     did: null,
     password
-  }), TypeError, 'ara-filesystem.create: Expecting non-empty string.')
+  }), { instanceOf: TypeError }, 'ara-filesystem.create: Expecting non-empty string.')
 })
 
 test('create() no password', async (t) => {
-  await t.throwsAsync(create({ owner: TEST_OWNER_DID }), TypeError, 'ara-filesystem.create: Expecting non-empty password.')
+  await t.throwsAsync(create({ owner: TEST_OWNER_DID }), { instanceOf: TypeError }, 'ara-filesystem.create: Expecting non-empty password.')
 })
 
 test('create() incorrect password', async (t) => {
@@ -169,10 +169,10 @@ test('create() incorrect password', async (t) => {
   await t.throwsAsync(create({
     owner: TEST_OWNER_DID,
     password: wrongPass
-  }), Error, 'ara-filesystem.create: incorrect password.')
+  }), { instanceOf: Error }, 'ara-filesystem.create: incorrect password.')
 
   await t.throwsAsync(create({
     did: TEST_OWNER_DID,
     password: wrongPass
-  }), Error, 'ara-filesystem.create: incorrect password.')
+  }), { instanceOf: Error }, 'ara-filesystem.create: incorrect password.')
 })

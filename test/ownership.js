@@ -84,7 +84,7 @@ test.serial('request(opts) valid request', async (t) => {
     contentDid: did,
     requesterDid,
     password
-  }))
+  }), { instanceOf: Error })
 
   const requested = await ownership.hasRequested({
     contentDid: did,
@@ -103,7 +103,7 @@ test.serial('revokeRequest(opts) valid revocation', async (t) => {
     contentDid: did,
     requesterDid,
     password
-  }))
+  }), { instanceOf: Error })
 
   await ownership.request({
     contentDid: did,
@@ -123,7 +123,7 @@ test.serial('revokeRequest(opts) valid revocation', async (t) => {
     contentDid: did,
     requesterDid,
     password
-  }))
+  }), { instanceOf: Error })
 
   const requested = await ownership.hasRequested({
     contentDid: did,
@@ -160,7 +160,7 @@ test.serial("approveTransfer(opts) proxy not deployed", async (t) => {
     contentDid,
     mnemonic,
     password
-  }))
+  }), { instanceOf: Error })
 })
 
 test.serial("approveTransfer(opts) has not requested", async (t) => {
@@ -177,7 +177,7 @@ test.serial("approveTransfer(opts) has not requested", async (t) => {
     contentDid,
     mnemonic,
     password
-  }))
+  }), { instanceOf: Error })
 })
 
 test.serial("approveTransfer(opts) valid approve", async (t) => {
@@ -263,7 +263,7 @@ test.serial(`estimateRequestGasCost(opts) estimateRevokeGasCost()
       requesterDid,
       contentDid,
       password
-    }), Error))
+    }), { instanceOf: Error }))
   }
 
   await Promise.all(promises)
@@ -303,7 +303,7 @@ test.serial("estimateApproveGasCost(opts) proxy not deployed", async (t) => {
     newOwnerDid,
     password,
     did
-  }), Error)
+  }), { instanceOf: Error })
 })
 
 test.serial("estimateApproveGasCost(opts) valid request", async (t) => {
@@ -328,33 +328,33 @@ test.serial("request(opts) revokeRequest(opts) invalid opts", async (t) => {
   for (const func of funcs) {
     promises.push(new Promise(async (resolve) => {
       // opts
-      await t.throwsAsync(func(), TypeError)
-      await t.throwsAsync(func('opts'), TypeError)
-      await t.throwsAsync(func({ }), TypeError)
+      await t.throwsAsync(func(), { instanceOf: TypeError })
+      await t.throwsAsync(func('opts'), { instanceOf: TypeError })
+      await t.throwsAsync(func({ }), { instanceOf: TypeError })
 
       // contentDid
-      await t.throwsAsync(func({ contentDid: 'did:ara:1234' }), Error)
-      await t.throwsAsync(func({ contentDid: 0x123 }), TypeError)
-      await t.throwsAsync(func({ contentDid: 123 }), TypeError)
-      await t.throwsAsync(func({ contentDid: null }), TypeError)
+      await t.throwsAsync(func({ contentDid: 'did:ara:1234' }), { instanceOf: Error })
+      await t.throwsAsync(func({ contentDid: 0x123 }), { instanceOf: TypeError })
+      await t.throwsAsync(func({ contentDid: 123 }), { instanceOf: TypeError })
+      await t.throwsAsync(func({ contentDid: null }), { instanceOf: TypeError })
 
       // requesterDid
-      await t.throwsAsync(func({ contentDid, requesterDid: 'did:ara:1234 ' }), Error)
-      await t.throwsAsync(func({ contentDid, requesterDid: 0x123 }), TypeError)
-      await t.throwsAsync(func({ contentDid, requesterDid: 123 }), TypeError)
-      await t.throwsAsync(func({ contentDid, requesterDid: null }), TypeError)
+      await t.throwsAsync(func({ contentDid, requesterDid: 'did:ara:1234 ' }), { instanceOf: Error })
+      await t.throwsAsync(func({ contentDid, requesterDid: 0x123 }), { instanceOf: TypeError })
+      await t.throwsAsync(func({ contentDid, requesterDid: 123 }), { instanceOf: TypeError })
+      await t.throwsAsync(func({ contentDid, requesterDid: null }), { instanceOf: TypeError })
 
       const requesterDid = getIdentity(t)
 
       // password
-      await t.throwsAsync(func({ contentDid, requesterDid }), TypeError)
-      await t.throwsAsync(func({ contentDid, requesterDid, password: '' }), TypeError)
-      await t.throwsAsync(func({ contentDid, requesterDid, password: 123 }), TypeError)
+      await t.throwsAsync(func({ contentDid, requesterDid }), { instanceOf: TypeError })
+      await t.throwsAsync(func({ contentDid, requesterDid, password: '' }), { instanceOf: TypeError })
+      await t.throwsAsync(func({ contentDid, requesterDid, password: 123 }), { instanceOf: TypeError })
 
       // estimate
       await t.throwsAsync(func({
         contentDid, requesterDid, password, estimate: 'false'
-      }))
+      }), { instanceOf: Error })
 
       resolve()
     }))
@@ -369,62 +369,62 @@ test.serial("approveTransfer(opts) invalid opts", async (t) => {
   const newOwnerDid = getIdentity(t)
 
   // opts
-  await t.throwsAsync(ownership.approveTransfer(), TypeError)
-  await t.throwsAsync(ownership.approveTransfer('opts'), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ }), TypeError)
+  await t.throwsAsync(ownership.approveTransfer(), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer('opts'), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ }), { instanceOf: TypeError })
 
   // mnemonic
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic: '' }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic: null }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic: 123 }), TypeError)
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic: '' }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic: null }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic: 123 }), { instanceOf: TypeError })
 
   // newOwnerDid
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid: 'did:ara:1234' }), Error)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid: 0x123 }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid: 123 }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid: null }), TypeError)
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid: 'did:ara:1234' }), { instanceOf: Error })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid: 0x123 }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid: 123 }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid: null }), { instanceOf: TypeError })
 
   // did
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did: 'did:ara:1234' }), Error)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did: 0x123 }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did: 123 }), TypeError)
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did: null }), TypeError)
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did: 'did:ara:1234' }), { instanceOf: Error })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did: 0x123 }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did: 123 }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did: null }), { instanceOf: TypeError })
 
   // password
-  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did }), TypeError)
+  await t.throwsAsync(ownership.approveTransfer({ mnemonic, newOwnerDid, did }), { instanceOf: TypeError })
   await t.throwsAsync(ownership.approveTransfer({
     mnemonic, newOwnerDid, did, password: ''
-  }), TypeError)
+  }), { instanceOf: TypeError })
   await t.throwsAsync(ownership.approveTransfer({
     mnemonic, newOwnerDid, did, password: 123
-  }), TypeError)
+  }), { instanceOf: TypeError })
 
   // estimate
   await t.throwsAsync(ownership.approveTransfer({
     mnemonic, newOwnerDid, did, password, estimate: 'false'
-  }))
+  }), { instanceOf: Error })
 })
 
 test.serial("claim(opts) invalid opts", async (t) => {
   // opts
-  await t.throwsAsync(ownership.claim(), TypeError)
-  await t.throwsAsync(ownership.claim('opts'), TypeError)
-  await t.throwsAsync(ownership.claim({ }), TypeError)
+  await t.throwsAsync(ownership.claim(), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.claim('opts'), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.claim({ }), { instanceOf: TypeError })
 
   // currentPassword
-  await t.throwsAsync(ownership.claim({ currentPassword: '' }), TypeError)
-  await t.throwsAsync(ownership.claim({ currentPassword: 123 }), TypeError)
+  await t.throwsAsync(ownership.claim({ currentPassword: '' }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.claim({ currentPassword: 123 }), { instanceOf: TypeError })
 
   const currentPassword = 'current_pass'
   // newPassword
-  await t.throwsAsync(ownership.claim({ currentPassword, newPassword: '' }), TypeError)
-  await t.throwsAsync(ownership.claim({ currentPassword, newPassword: 123 }), TypeError)
+  await t.throwsAsync(ownership.claim({ currentPassword, newPassword: '' }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.claim({ currentPassword, newPassword: 123 }), { instanceOf: TypeError })
 
   const newPassword = 'new_pass'
   // mnemonic
-  await t.throwsAsync(ownership.claim({ currentPassword, newPassword, mnemonic: '' }), TypeError)
-  await t.throwsAsync(ownership.claim({ currentPassword, newPassword, mnemonic: null }), TypeError)
-  await t.throwsAsync(ownership.claim({ currentPassword, newPassword, mnemonic: 123 }), TypeError)
+  await t.throwsAsync(ownership.claim({ currentPassword, newPassword, mnemonic: '' }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.claim({ currentPassword, newPassword, mnemonic: null }), { instanceOf: TypeError })
+  await t.throwsAsync(ownership.claim({ currentPassword, newPassword, mnemonic: 123 }), { instanceOf: TypeError })
 })

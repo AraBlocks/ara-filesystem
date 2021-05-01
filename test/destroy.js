@@ -34,18 +34,18 @@ test.afterEach(async (t) => {
 })
 
 test.serial("destroy() invalid did", async (t) => {
-  await t.throwsAsync(destroy(), TypeError, "Expecting non-empty string for DID")
-  await t.throwsAsync(destroy({ did: 1234 }), TypeError, "Expecting non-empty string for DID")
+  await t.throwsAsync(destroy(), { instanceOf: TypeError }, "Expecting non-empty string for DID")
+  await t.throwsAsync(destroy({ did: 1234 }), { instanceOf: TypeError }, "Expecting non-empty string for DID")
 })
 
 test.serial("destroy() invalid password", async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(destroy({ did, password: 1234 }), TypeError, "Expecting non-empty string for password")
+  await t.throwsAsync(destroy({ did, password: 1234 }), { instanceOf: TypeError }, "Expecting non-empty string for password")
 })
 
 test.serial("destroy() incorrect password", async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(destroy({ did, password: 'wrongPass' }), Error, "Incorrect password")
+  await t.throwsAsync(destroy({ did, password: 'wrongPass' }), { instanceOf: Error }, "Incorrect password")
 })
 
 test.serial("destroy() valid params without commit", async (t) => {

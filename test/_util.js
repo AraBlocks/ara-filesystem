@@ -46,7 +46,7 @@ module.exports = {
     const ddo = JSON.parse(await pify(readFile)(ddoPath, 'utf8'))
     const identityPath = createIdentityKeyPath(ddo)
     const parsed = parse(identityPath)
-    await pify(mkdirp)(parsed.dir)
+    await mkdirp(parsed.dir)
     await pify(mirror)(resolve(path, hash), identityPath)
     return { ddo, did }
   },

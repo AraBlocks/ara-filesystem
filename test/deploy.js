@@ -30,23 +30,23 @@ test("deploy() invalid opts", async (t) => {
   const { did } = t.context
 
   // opts
-  await t.throwsAsync(deploy(), TypeError)
-  await t.throwsAsync(deploy('opts'), TypeError)
-  await t.throwsAsync(deploy({ }), TypeError)
+  await t.throwsAsync(deploy(), { instanceOf: TypeError })
+  await t.throwsAsync(deploy('opts'), { instanceOf: TypeError })
+  await t.throwsAsync(deploy({ }), { instanceOf: TypeError })
 
   // did
-  await t.throwsAsync(deploy({ did: 'did:ara:1234' }), Error)
-  await t.throwsAsync(deploy({ did: 0x123 }), TypeError)
-  await t.throwsAsync(deploy({ did: 123 }), TypeError)
-  await t.throwsAsync(deploy({ did: null }), TypeError)
+  await t.throwsAsync(deploy({ did: 'did:ara:1234' }), { instanceOf: Error })
+  await t.throwsAsync(deploy({ did: 0x123 }), { instanceOf: TypeError })
+  await t.throwsAsync(deploy({ did: 123 }), { instanceOf: TypeError })
+  await t.throwsAsync(deploy({ did: null }), { instanceOf: TypeError })
 
   // password
-  await t.throwsAsync(deploy({ did }), TypeError)
-  await t.throwsAsync(deploy({ did, password: '' }))
-  await t.throwsAsync(deploy({ did, password: 123 }))
+  await t.throwsAsync(deploy({ did }), { instanceOf: TypeError })
+  await t.throwsAsync(deploy({ did, password: '' }), { instanceOf: Error })
+  await t.throwsAsync(deploy({ did, password: 123 }), { instanceOf: Error })
 
   // estimate
-  await t.throwsAsync(deploy({ did, password, estimate: 'false' }))
+  await t.throwsAsync(deploy({ did, password, estimate: 'false' }), { instanceOf: Error })
 })
 
 test.serial("deploy() cost estimate", async (t) => {
@@ -70,5 +70,5 @@ test.serial("deploy() valid deploy", async (t) => {
 test.serial("deploy() prevent duplicate deploys", async (t) => {
   const { did } = getAFS(t)
   await deploy({ did, password, afsPassword })
-  await t.throwsAsync(deploy({ did, password, afsPassword }))
+  await t.throwsAsync(deploy({ did, password, afsPassword }), { instanceOf: Error })
 })

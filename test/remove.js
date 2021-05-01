@@ -43,7 +43,7 @@ test.serial('remove() valid did, valid password, no paths', async (t) => {
   await t.throwsAsync(remove({
     did,
     password
-  }), TypeError, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
+  }), { instanceOf: TypeError }, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
 })
 
 test.serial('remove() valid did, valid password, valid path (1)', async (t) => {
@@ -64,7 +64,7 @@ test.serial('remove() valid did, valid password, valid path (1)', async (t) => {
     password
   })
 
-  await t.throwsAsync(afs.access(paths[0]), Error, '')
+  await t.throwsAsync(afs.access(paths[0]), { instanceOf: Error }, '')
 })
 
 test.serial('remove() valid did, valid password, valid path (3)', async (t) => {
@@ -86,7 +86,7 @@ test.serial('remove() valid did, valid password, valid path (3)', async (t) => {
   })
 
   for (const path of paths) {
-    await t.throwsAsync(afs.access(path), Error, '')
+    await t.throwsAsync(afs.access(path), { instanceOf: Error }, '')
   }
 })
 
@@ -200,7 +200,7 @@ test.serial('remove() valid did, valid password, invalid path (1)', async (t) =>
     password
   }))
 
-  await t.throwsAsync(afs.access(paths[0]), Error, '')
+  await t.throwsAsync(afs.access(paths[0]), { instanceOf: Error }, '')
 })
 
 test.serial('remove() valid did, valid password, invalid path (1), valid path (1)', async (t) => {
@@ -222,7 +222,7 @@ test.serial('remove() valid did, valid password, invalid path (1), valid path (1
   }))
 
   for (const path of paths) {
-    await t.throwsAsync(afs.access(path), Error, '')
+    await t.throwsAsync(afs.access(path), { instanceOf: Error }, '')
   }
 })
 
@@ -233,7 +233,7 @@ test.serial('remove() valid did, invalid password, no paths', async (t) => {
   await t.throwsAsync(remove({
     did,
     password: 'wrongpass'
-  }), TypeError, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
+  }), { instanceOf: TypeError }, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
 })
 
 test.serial('remove() valid did, invalid password, valid path (1)', async (t) => {
@@ -246,7 +246,7 @@ test.serial('remove() valid did, invalid password, valid path (1)', async (t) =>
     did,
     paths,
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.create: incorrect password')
+  }), { instanceOf: Error }, 'ara-filesystem.create: incorrect password')
 })
 
 test.serial('remove() valid did, invalid password, valid path (2)', async (t) => {
@@ -259,14 +259,14 @@ test.serial('remove() valid did, invalid password, valid path (2)', async (t) =>
     did,
     paths,
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.create: incorrect password')
+  }), { instanceOf: Error }, 'ara-filesystem.create: incorrect password')
 })
 
 test.serial('remove() invalid did, valid password, no paths', async (t) => {
   await t.throwsAsync(remove({
     did: 'invaliddid',
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('remove() invalid did, valid password, valid path (1)', async (t) => {
@@ -276,14 +276,14 @@ test.serial('remove() invalid did, valid password, valid path (1)', async (t) =>
     did: 'invaliddid',
     paths,
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('remove() invalid did, invalid password, no paths', async (t) => {
   await t.throwsAsync(remove({
     did: 'invaliddid',
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
+  }), { instanceOf: Error }, 'ara-filesystem.remove: Expecting one or more filepaths to remove')
 })
 
 test.serial('remove() invalid did, invalid password, valid path (1)', async (t) => {
@@ -293,7 +293,7 @@ test.serial('remove() invalid did, invalid password, valid path (1)', async (t) 
     did: 'invaliddid',
     paths,
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('remove() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
@@ -303,7 +303,7 @@ test.serial('remove() invalid did, invalid password, valid path (1), invalid pat
     did: 'invaliddid',
     paths,
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('remove() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
@@ -313,7 +313,7 @@ test.serial('remove() invalid did, valid password, valid path (1), invalid path 
     did: 'invaliddid',
     paths,
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 async function allFilesUnlinked(afs, path) {

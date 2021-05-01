@@ -61,23 +61,23 @@ test.serial('commit() invalid opts', async (t) => {
   const { did } = t.context
 
   // opts
-  await t.throwsAsync(commit(), TypeError)
-  await t.throwsAsync(commit('opts'), TypeError)
-  await t.throwsAsync(commit({ }), TypeError)
+  await t.throwsAsync(commit(), { instanceOf: TypeError })
+  await t.throwsAsync(commit('opts'), { instanceOf: TypeError })
+  await t.throwsAsync(commit({ }), { instanceOf: TypeError })
 
   // did
-  await t.throwsAsync(commit({ did: 'did:ara:1234' }), Error)
-  await t.throwsAsync(commit({ did: 0x123 }), TypeError)
-  await t.throwsAsync(commit({ did: 123 }), TypeError)
-  await t.throwsAsync(commit({ did: null }), TypeError)
+  await t.throwsAsync(commit({ did: 'did:ara:1234' }), { instanceOf: Error })
+  await t.throwsAsync(commit({ did: 0x123 }), { instanceOf: TypeError })
+  await t.throwsAsync(commit({ did: 123 }), { instanceOf: TypeError })
+  await t.throwsAsync(commit({ did: null }), { instanceOf: TypeError })
 
   // password
-  await t.throwsAsync(commit({ did }), TypeError)
-  await t.throwsAsync(commit({ did, password: '' }))
-  await t.throwsAsync(commit({ did, password: 123 }))
+  await t.throwsAsync(commit({ did }), { instanceOf: TypeError })
+  await t.throwsAsync(commit({ did, password: '' }), { instanceOf: Error })
+  await t.throwsAsync(commit({ did, password: 123 }), { instanceOf: Error })
 
   // estimate
-  await t.throwsAsync(commit({ did, password, estimate: 'false' }))
+  await t.throwsAsync(commit({ did, password, estimate: 'false' }), { instanceOf: Error })
 
   // price
   await t.throwsAsync(commit({
@@ -85,24 +85,24 @@ test.serial('commit() invalid opts', async (t) => {
     password,
     estimate: false,
     price: '100'
-  }))
+  }), { instanceOf: Error })
   await t.throwsAsync(commit({
     did,
     password,
     estimate: false,
     price: 0
-  }))
+  }), { instanceOf: Error })
   await t.throwsAsync(commit({
     did,
     password,
     estimate: false,
     price: -10
-  }))
+  }), { instanceOf: Error })
 })
 
 test.serial('commit() incorrect password', async (t) => {
   const { did } = t.context
-  await t.throwsAsync(commit({ did, password: 'wrong_pass' }), Error)
+  await t.throwsAsync(commit({ did, password: 'wrong_pass' }), { instanceOf: Error })
 })
 
 test.serial('commit() estimate no deploy', async (t) => {
@@ -112,7 +112,7 @@ test.serial('commit() estimate no deploy', async (t) => {
     estimate: true,
     password,
     did,
-  }))
+  }), { instanceOf: Error })
 })
 
 test.serial('commit() estimate with proxy, no deploy', async (t) => {
@@ -142,13 +142,13 @@ test.serial('commit() with proxy, estimate is false', async (t) => {
     estimate: false,
     password,
     did,
-  }))
+  }), { instanceOf: Error })
 })
 
 test.serial("commit() no changes to commit", async (t) => {
   const { did } = getAFS(t)
   await runValidCommit({ did, password, afsPassword })
-  await t.throwsAsync(commit({ did, password }), Error)
+  await t.throwsAsync(commit({ did, password }), { instanceOf: Error })
 })
 
 test.serial("commit() staged file successfully deleted", async (t) => {
@@ -204,7 +204,7 @@ test.serial("writeToStaged()/readFromStaged()", async (t) => {
   const { did } = getAFS(t)
 
   // ensure does not exist
-  await t.throwsAsync(pify(fs.access)(path), Error)
+  await t.throwsAsync(pify(fs.access)(path), { instanceOf: Error })
 
   writeToStaged({
     did,

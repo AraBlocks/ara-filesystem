@@ -14,12 +14,21 @@ safeRunCommand() {
   fi
 }
 
+# installation
+if ! command -v ganache-cli &> /dev/null; then
+  npm install -g ganache-cli
+fi
+
+if ! command -v truffle &> /dev/null; then
+  npm install -g truffle@5.3.1
+fi
+
 # run local truffle node
 ganache-cli -l 0x7A1200 -q &
 sleep 5
 
 # ara node_modules/.bin to PATH
-PATH=$(npm bin):$PATH
+#PATH=$(npm bin):$PATH
 
 # move deploy identity to home dir
 mkdir -p ~/.ara/identities/
@@ -73,5 +82,13 @@ safeRunCommand "$command"
 command="ava test/util.js --verbose"
 safeRunCommand "$command"
 
-# cleanup
-pkill -f ganache
+# kill ganache
+if command -v pkill &> /dev/null
+then
+  pkill -f ganache
+elif command -v Taskkill &> /dev/null
+then
+  Taskkill /PID $pid -F
+else
+  echo "pkill and Taskkill could not be found"
+fi

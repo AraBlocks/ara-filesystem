@@ -26,25 +26,25 @@ test.after(async (t) => {
 
 test.serial('writeFile(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(metadata.writeFile(), TypeError)
-  await t.throwsAsync(metadata.writeFile({ }), TypeError)
-  await t.throwsAsync(metadata.writeFile({ did: null }), TypeError)
-  await t.throwsAsync(metadata.writeFile({ did: 1234 }), TypeError)
-  await t.throwsAsync(metadata.writeFile({ did }), TypeError)
-  await t.throwsAsync(metadata.writeFile({ did, filepath: '' }), TypeError)
+  await t.throwsAsync(metadata.writeFile(), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeFile({ }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeFile({ did: null }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeFile({ did: 1234 }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeFile({ did }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeFile({ did, filepath: '' }), { instanceOf: TypeError })
 })
 
 test.serial('writeFile(opts) file errors', async (t) => {
   const { did } = getAFS(t)
   await t.throwsAsync(metadata.writeFile({
     did, password, filepath: 'invalid.json', afsPassword
-  }), Error)
+  }), { instanceOf: Error })
 
   const invalidJSON = '{name:"ara"}'
   await pify(fs.writeFile)('invalid.json', invalidJSON)
   await t.throwsAsync(metadata.writeFile({
     did, password, filepath: 'invalid.json', afsPassword
-  }), Error)
+  }), { instanceOf: Error })
 })
 
 test.serial('writeFile(opts) valid write', async (t) => {
@@ -60,13 +60,13 @@ test.serial('writeFile(opts) valid write', async (t) => {
 
 test.serial('writeKey(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(metadata.writeKey(), TypeError)
-  await t.throwsAsync(metadata.writeKey({ }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did: null }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did: 1234 }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did, key: 1234 }))
-  await t.throwsAsync(metadata.writeKey({ did, key: 'my_key' }), TypeError)
+  await t.throwsAsync(metadata.writeKey(), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did: null }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did: 1234 }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did, key: 1234 }), { instanceOf: Error })
+  await t.throwsAsync(metadata.writeKey({ did, key: 'my_key' }), { instanceOf: TypeError })
 })
 
 test.serial('writeKey(opts) valid key write', async (t) => {
@@ -100,12 +100,12 @@ test.serial('writeKeys(opts) valid key write', async (t) => {
 
 test.serial('readKey(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(metadata.writeKey(), TypeError)
-  await t.throwsAsync(metadata.writeKey({ }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did: null }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did: 1234 }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did, key: 1234 }))
+  await t.throwsAsync(metadata.writeKey(), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did: null }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did: 1234 }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did, key: 1234 }), { instanceOf: Error })
 })
 
 test.serial('readKey(opts) valid key read', async (t) => {
@@ -120,18 +120,18 @@ test.serial('readKey(opts) valid key read', async (t) => {
 
 test.serial('delKey(opts) invalid opts', async (t) => {
   const { did } = getAFS(t)
-  await t.throwsAsync(metadata.writeKey(), TypeError)
-  await t.throwsAsync(metadata.writeKey({ }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did: null }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did: 1234 }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did }), TypeError)
-  await t.throwsAsync(metadata.writeKey({ did, key: 1234 }))
+  await t.throwsAsync(metadata.writeKey(), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did: null }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did: 1234 }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.writeKey({ did, key: 1234 }), { instanceOf: Error })
 })
 
 test.serial('clear(opts) invalid opts', async (t) => {
-  await t.throwsAsync(metadata.clear(), TypeError)
-  await t.throwsAsync(metadata.clear({ }), TypeError)
-  await t.throwsAsync(metadata.clear({ did: 1234 }), TypeError)
+  await t.throwsAsync(metadata.clear(), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.clear({ }), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.clear({ did: 1234 }), { instanceOf: TypeError })
 })
 
 test.serial('clear(opts) valid clear', async (t) => {
@@ -146,8 +146,8 @@ test.serial('clear(opts) valid clear', async (t) => {
 })
 
 test.serial('readFile(did) invalid did', async (t) => {
-  await t.throwsAsync(metadata.readFile(), TypeError)
-  await t.throwsAsync(metadata.readFile({ did: 1234 }), TypeError)
+  await t.throwsAsync(metadata.readFile(), { instanceOf: TypeError })
+  await t.throwsAsync(metadata.readFile({ did: 1234 }), { instanceOf: TypeError })
 })
 
 test.serial('readFile(did) valid file read', async (t) => {

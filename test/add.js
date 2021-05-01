@@ -42,7 +42,7 @@ test.serial('add() valid did, valid password, no paths', async (t) => {
   await t.throwsAsync(add({
     did,
     password
-  }), TypeError, 'ara-filesystem.add: Expecting one or more filepaths to add')
+  }), { instanceOf: TypeError }, 'ara-filesystem.add: Expecting one or more filepaths to add')
 })
 
 test.serial('add() valid did, valid password, valid path (1)', async (t) => {
@@ -130,7 +130,7 @@ test.serial('add() valid did, valid password, invalid directory (1)', async (t) 
   })
 
   const { afs } = await create({ did })
-  await t.throwsAsync(afs.readdir(paths[0]), Error, '')
+  await t.throwsAsync(afs.readdir(paths[0]), { instanceOf: Error }, '')
 })
 
 test.serial('add() valid did, valid password, invalid directory (1), valid directory (1)', async (t) => {
@@ -144,7 +144,7 @@ test.serial('add() valid did, valid password, invalid directory (1), valid direc
   })
 
   const { afs } = await create({ did })
-  await t.throwsAsync(afs.readdir(paths[0]), Error, '')
+  await t.throwsAsync(afs.readdir(paths[0]), { instanceOf: Error }, '')
   t.true(await directoriesAreEqual(afs, paths[1]))
 })
 
@@ -159,7 +159,7 @@ test.serial('add() valid did, valid password, invalid path (1)', async (t) => {
   })
 
   const { afs } = await create({ did })
-  await t.throwsAsync(afs.readFile(paths[0]), Error, '')
+  await t.throwsAsync(afs.readFile(paths[0]), { instanceOf: Error }, '')
 })
 
 test.serial('add() valid did, valid password, invalid path (1), valid path (1)', async (t) => {
@@ -174,7 +174,7 @@ test.serial('add() valid did, valid password, invalid path (1), valid path (1)',
 
   const { afs } = await create({ did })
 
-  await t.throwsAsync(afs.readFile(paths[0]), Error, '')
+  await t.throwsAsync(afs.readFile(paths[0]), { instanceOf: Error }, '')
   const buf = await afs.readFile(paths[1])
   t.is(Buffer.compare(buf, fs.readFileSync(paths[1])), 0)
 })
@@ -185,7 +185,7 @@ test.serial('add() valid did, invalid password, no paths', async (t) => {
   await t.throwsAsync(add({
     did,
     password: 'wrongpass'
-  }), TypeError, 'ara-filesystem.add: Expecting one or more filepaths to add')
+  }), { instanceOf: TypeError }, 'ara-filesystem.add: Expecting one or more filepaths to add')
 })
 
 test.serial('add() valid did, invalid password, valid path (1)', async (t) => {
@@ -197,7 +197,7 @@ test.serial('add() valid did, invalid password, valid path (1)', async (t) => {
     did,
     paths,
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.create: incorrect password')
+  }), { instanceOf: Error }, 'ara-filesystem.create: incorrect password')
 })
 
 test.serial('add() valid did, invalid password, valid path (2)', async (t) => {
@@ -209,14 +209,14 @@ test.serial('add() valid did, invalid password, valid path (2)', async (t) => {
     did,
     paths,
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.create: incorrect password')
+  }), { instanceOf: Error }, 'ara-filesystem.create: incorrect password')
 })
 
 test.serial('add() invalid did, valid password, no paths', async (t) => {
   await t.throwsAsync(add({
     did: 'invaliddid',
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('add() invalid did, valid password, valid path (1)', async (t) => {
@@ -226,7 +226,7 @@ test.serial('add() invalid did, valid password, valid path (1)', async (t) => {
     did: 'invaliddid',
     paths,
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('add() invalid did, valid password, valid path (1), invalid path (1)', async (t) => {
@@ -236,14 +236,14 @@ test.serial('add() invalid did, valid password, valid path (1), invalid path (1)
     did: 'invaliddid',
     paths,
     password
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('add() invalid did, invalid password, no paths', async (t) => {
   await t.throwsAsync(add({
     did: 'invaliddid',
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.add: Expecting one or more filepaths to add')
+  }), { instanceOf: Error }, 'ara-filesystem.add: Expecting one or more filepaths to add')
 })
 
 test.serial('add() invalid did, invalid password, valid path (1)', async (t) => {
@@ -253,7 +253,7 @@ test.serial('add() invalid did, invalid password, valid path (1)', async (t) => 
     did: 'invaliddid',
     paths,
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 test.serial('add() invalid did, invalid password, valid path (1), invalid path(1)', async (t) => {
@@ -263,7 +263,7 @@ test.serial('add() invalid did, invalid password, valid path (1), invalid path(1
     did: 'invaliddid',
     paths,
     password: 'wrongpass'
-  }), Error, 'ara-filesystem.create: Unable to resolve AFS DID')
+  }), { instanceOf: Error }, 'ara-filesystem.create: Unable to resolve AFS DID')
 })
 
 async function directoriesAreEqual(afs, path) {

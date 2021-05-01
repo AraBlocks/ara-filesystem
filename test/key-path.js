@@ -16,8 +16,8 @@ test.before(async () => {
 })
 
 test("createAFSKeyPath() invalid id", (t) => {
-  t.throws(() => createAFSKeyPath(), TypeError, "Expecting non-empty string")
-  t.throws(() => createAFSKeyPath(111), TypeError, "Expecting non-empty string")
+  t.throws(() => createAFSKeyPath(), { instanceOf: TypeError }, "Expecting non-empty string")
+  t.throws(() => createAFSKeyPath(111), { instanceOf: TypeError }, "Expecting non-empty string")
 })
 
 test("createAFSKeyPath() valid id", async (t) => {

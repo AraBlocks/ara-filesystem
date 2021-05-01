@@ -38,7 +38,7 @@ function createIdentityKeyPathFromPublicKey(publicKey) {
 }
 
 async function getCache() {
-  await pify(mkdirp)(rc.network.afs.archive.root)
+  await mkdirp(rc.network.afs.archive.root)
   const store = toilet(rc.network.afs.archive.store)
   await pify(store.open)()
   return store
