@@ -78,8 +78,8 @@ async function add(opts) {
     debug(`copy start: ${path}`)
     const name = join(afs.HOME, basename(path))
     // Check if file
-    if (!(await pify(isFile)(path)) && !ignore(path)) {
-      await mkdirp(name, { fs: afs })
+    if (!(await pify(isFile)(path)) && !(await pify(ignore)(path))) {
+      mkdirp.sync(name, { fs: afs })
     }
     // Mirror and log
     const progress = mirror({ name: path }, { name, fs: afs }, { keepExisting: true, ignore })
@@ -106,16 +106,16 @@ async function add(opts) {
     }
   }
 
-  function ignore(path) {
+  function ignore(path, _, cb) {
     path = relative('/', path)
     if (ignored.ignores(path)) {
       if (force) {
         debug(`forcing add path ${path}`)
-        return false
+        return process.nextTick(cb, null, false)
       }
-      return true
+      return process.nextTick(cb, null, true)
     }
-    return false
+    return process.nextTick(cb, null, false)
   }
 }
 
